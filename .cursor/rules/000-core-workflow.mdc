@@ -1,0 +1,95 @@
+---
+description: Core vibe coding workflow and phase-based development rules
+alwaysApply: true
+---
+
+# Core Vibe Coding Workflow
+
+## Purpose
+This rule defines the fundamental workflow for phase-based development with test-driven implementation. Always apply these principles regardless of the specific task.
+
+## Workflow Phases
+
+All feature development follows this structure:
+
+1. **Architect Phase**: Design OpenAPI specification
+2. **Phase 0 (Skeleton)**: Create all endpoints with mock responses
+3. **Phase 1+ (Implementation)**: Implement each endpoint following TDD
+4. **Phase Transition**: Generate summary and document learnings
+
+## Golden Rules
+
+### Always Read Vibe Guides First
+Before starting any phase, read the relevant guide from the vibe/ folder:
+- vibe_phase_workflow.md - Phase-based development patterns
+- vibe_fastapi_boilerplate.md - Project structure and patterns
+- vibe_database.md - Database models and repository patterns
+- vibe_development_lifecycle.md - Git workflow and deployment
+
+### Test-Driven Development (TDD)
+- E2E tests MUST be written before implementation
+- Tests MUST fail initially (proves they test something)
+- Implementation MUST make tests pass
+- Tests MUST pass before phase transition
+
+### Code Style Guidelines
+Follow Python Google Style Guide:
+- Use type hints for all function signatures
+- Write docstrings for all public functions and classes
+- Maximum line length: 88 characters (Black formatter)
+- Use snake_case for variables and functions
+- Use PascalCase for classes
+- Keep functions focused and single-purpose
+
+### Phase Transition Checklist
+Before transitioning to next phase:
+- [ ] All E2E tests passing
+- [ ] Code formatted with Black
+- [ ] Type hints added to all functions
+- [ ] Docstrings added to public APIs
+- [ ] Phase summary generated
+- [ ] Shared libraries documented
+
+## Directory Structure Enforcement
+
+When creating files, follow this structure:
+```
+app/
+├── core/           # Database, config, dependencies
+├── api/            # API endpoints (Experience APIs)
+│   └── tools/      # Agent Tools APIs
+├── modules/        # Business modules
+│   └── {module}/
+│       ├── models/
+│       ├── repository/
+│       └── services/
+└── tests/
+    ├── api/
+    └── modules/
+```
+
+## Error Handling
+
+When encountering unknown issues:
+1. Document the problem clearly
+2. List what has been tried
+3. Collect relevant code snippets
+4. Generate research-export.md for external review
+5. Wait for human input before major refactoring
+
+## Secrets Management
+
+NEVER commit secrets to repository:
+- Use .env files for local development
+- Reference .env.example for required variables
+- Use environment variables in docker-compose.yml
+- Validate all required secrets at startup
+
+## Response Format
+
+When generating phase summaries or documentation:
+- Use clear, professional language
+- Include concrete examples
+- Reference specific files and line numbers
+- List dependencies for next phases
+- Note any gotchas or learnings

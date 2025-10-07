@@ -1,0 +1,306 @@
+---
+description: Implementation rules for Phase 1+ endpoint development
+globs: ["app/modules/**", "app/api/**", "tests/**"]
+alwaysApply: false
+---
+
+# Phase 1+ Endpoint Implementation
+
+## Purpose
+Implement one endpoint per phase following strict test-driven development. Each phase transforms one mock endpoint into a fully functional implementation with database integration and passing E2E tests.
+
+## Phase Selection
+
+Choose next endpoint based on:
+1. Dependencies (must have data to read before implementing read endpoints)
+2. Complexity (simple before complex)
+3. Shared infrastructure (group endpoints using same services)
+
+Example order for blog API:
+- Phase 1: POST /posts (create posts)
+- Phase 2: GET /posts/{id} (read single post)
+- Phase 3: GET /posts (list posts)
+- Phase 4: POST /posts/{id}/comments (create comments)
+- Phase 5: GET /posts/{id}/comments (read comments)
+
+## Implementation Steps
+
+### 1. Phase Initialization
+Document the phase:
+```
+Phase N: [HTTP Method] [Endpoint Path]
+Goal: [One sentence description]
+Dependencies: [List previous phases required]
+Estimated time: [Your estimate]
+```
+
+### 2. E2E Test First (MUST BE FIRST)
+Reference 400-testing-first.mdc for detailed testing rules.
+
+Write test using skeleton's mock data as expected output:
+```python
+def test_create_post():
+    """Phase 1: POST /posts implementation"""
+    response = client.post("/api/posts", json={
+        "title": "Test Post",
+        "content": "Test content",
+        "authorId": "test-author"
+    }, headers={"Authorization": f"Bearer {token}"})
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "Test Post"
+    assert "postId" in data
+    assert "createdAt" in data
+```
+
+Run test - it MUST fail with mock data.
+
+### 3. Database Migration
+Reference vibe_database.md for migration patterns.
+
+Create migration following naming convention:
+```
+database/develop/supabase/migrations/
+└── 20240101000000_create_posts_table.sql
+```
+
+Migration must include:
+- Table creation with proper columns
+- Primary key (UUID with default)
+- Foreign keys (if applicable)
+- Timestamps (created_at, updated_at)
+- Indexes for common queries
+- NOT NULL constraints where appropriate
+
+Apply migration locally:
+```bash
+cd database/develop
+supabase db reset
+```
+
+### 4. Domain Models
+Reference vibe_database.md for layered model architecture.
+
+Create in app/modules/{module}/models/domain_models.py:
+
+**Base Model (business fields only):**
+```python
+class PostBase(BaseModel):
+    """Base Post model with business fields only"""
+    title: str = Field(..., description="Post title")
+    content: str = Field(..., description="Post content")
+    author_id: str = Field(..., description="Author identifier")
+    
+    class Config:
+        from_attributes = True
+```
+
+**Full Model (includes database metadata):**
+```python
+class Post(PostBase):
+    """Full Post model with all database fields"""
+    id: str = Field(..., description="Unique post identifier")
+    created_at: datetime = Field(..., description="Creation timestamp")
+    updated_at: datetime = Field(..., description="Last update timestamp")
+    
+    class Config:
+        from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
+```
+
+**Operation Models:**
+```python
+class PostCreate(PostBase):
+    """Post creation model"""
+    pass
+
+class PostUpdate(BaseModel):
+    """Post update model (only updatable fields)"""
+    title: Optional[str] = None
+    content: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+```
+
+### 5. Repository Implementation
+Reference vibe_database.md for repository patterns.
+
+Create in app/modules/{module}/repository/repository.py:
+
+**Type-safe mappers:**
+```python
+class PostRepository:
+    def __init__(self):
+        self.table_name = "posts"
+    
+    def _supabase_to_model(self, row: Dict[str, Any]) -> Post:
+        """Convert Supabase row to Post model"""
+        return Post(
+            id=str(row["id"]),
+            title=row["title"],
+            content=row["content"],
+            author_id=row["author_id"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"]
+        )
+    
+    def _modelcreate_to_supabase(self, post: PostCreate) -> Dict[str, Any]:
+        """Convert PostCreate to Supabase format"""
+        return {
+            "title": post.title,
+            "content": post.content,
+            "author_id": post.author_id
+        }
+```
+
+**CRUD methods:**
+Implement only methods needed for current endpoint:
+- create() for POST endpoints
+- get_by_id() for GET /{id} endpoints
+- get_all() for GET list endpoints
+- update() for PUT/PATCH endpoints
+- delete() for DELETE endpoints
+
+### 6. Service Layer
+Create in app/modules/{module}/services/{module}_service.py:
+
+```python
+class PostService:
+    """Service for Post operations"""
+    
+    def __init__(self):
+        self.post_repo = PostRepository()
+    
+    async def create_post(self, post_data: PostCreate) -> Post:
+        """Create a new post
+        
+        Args:
+            post_data: Post creation data
+            
+        Returns:
+            Created post with all fields
+            
+        Raises:
+            Exception: If creation fails
+        """
+        try:
+            return await self.post_repo.create(post_data)
+        except Exception as e:
+            logger.error(f"Error creating post: {e}")
+            raise
+```
+
+### 7. Processor Replacement
+Reference 500-implementation.mdc for replacement patterns.
+
+Replace mock implementation in API endpoint:
+```python
+# Before (Phase 0 mock)
+@router.post("/posts", response_model=PostResponse)
+async def create_post(request: CreatePostRequest):
+    return PostResponse(postId="mock-123", ...)
+
+# After (Phase 1 real)
+@router.post("/posts", response_model=PostResponse)
+async def create_post(
+    request: CreatePostRequest,
+    current_user: dict = Depends(require_auth)
+):
+    """Create a new blog post"""
+    # Convert API model to domain model
+    post_data = PostCreate(
+        title=request.title,
+        content=request.content,
+        author_id=current_user["user_id"]
+    )
+    
+    # Use service layer
+    service = PostService()
+    created_post = await service.create_post(post_data)
+    
+    # Convert domain model to API response
+    return PostResponse(
+        postId=str(created_post.id),
+        title=created_post.title,
+        content=created_post.content,
+        authorId=created_post.author_id,
+        createdAt=created_post.created_at.isoformat()
+    )
+```
+
+### 8. Test Validation
+Run E2E tests - they MUST pass now:
+```bash
+pytest tests/api/test_posts.py::test_create_post -v
+```
+
+If tests fail:
+- Check database connection
+- Verify migration applied
+- Check data transformation logic
+- Review error logs
+
+### 9. Code Quality
+Before phase completion:
+```bash
+# Format code
+black app/ tests/
+
+# Check types
+mypy app/modules/posts/
+
+# Run all tests
+pytest tests/
+```
+
+## Phase Completion Checklist
+
+- [ ] E2E test written and initially failed
+- [ ] Database migration created and applied
+- [ ] Domain models implemented (layered architecture)
+- [ ] Repository with type-safe mappers implemented
+- [ ] Service layer created
+- [ ] API endpoint updated with real implementation
+- [ ] E2E tests passing
+- [ ] Code formatted with Black
+- [ ] Type hints added
+- [ ] Docstrings added
+- [ ] Error handling implemented
+- [ ] Logging added
+
+## Shared Libraries
+
+Document any shared code created:
+- New repositories available for other endpoints
+- New services that can be reused
+- New models that represent core entities
+- New utilities or helpers
+
+## Phase Transition
+
+Reference 600-phase-transition.mdc for transition process.
+
+Generate phases/phase-N-summary.md including:
+- What was implemented
+- Tests that now pass
+- Shared libraries created
+- Dependencies for next phase
+- Known limitations
+- Performance considerations
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Skip E2E test writing
+- Implement without failing test first
+- Use single model for all operations
+- Put business logic in API endpoints
+- Access repository directly from API
+- Skip error handling
+- Forget to document shared libraries
+- Move to next phase with failing tests
+- Implement more than one endpoint per phase

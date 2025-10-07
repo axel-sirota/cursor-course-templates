@@ -1,0 +1,144 @@
+---
+description: API design using OpenAPI specification before any implementation
+globs: ["openapi.yaml", "docs/api-design/**", "*.yaml"]
+alwaysApply: false
+---
+
+# Architect Phase: API Design First
+
+## Purpose
+Design the complete API surface using OpenAPI 3.0 specification before writing any code. This establishes contracts, validates requirements, and enables phase planning.
+
+## When to Apply
+- Starting a new feature or service
+- Adding new API endpoints
+- Refactoring existing APIs
+- Planning implementation phases
+
+## Design Process
+
+### 1. Requirements Analysis
+Before opening the OpenAPI spec:
+- List all user stories or requirements
+- Identify core entities (e.g., Post, Comment, User)
+- Define relationships between entities
+- Identify CRUD operations needed
+
+### 2. OpenAPI Specification
+Use templates/openapi-template.yaml as starting point.
+
+Define for each endpoint:
+- HTTP method and path
+- Request body schema (if applicable)
+- Response schemas (success and error cases)
+- Authentication requirements
+- Request/response examples
+
+### 3. Schema Design Principles
+Follow these patterns from vibe_fastapi_boilerplate.md:
+
+**API Models (camelCase for JSON):**
+```yaml
+CreatePostRequest:
+  type: object
+  properties:
+    title:
+      type: string
+    content:
+      type: string
+    authorId:
+      type: string
+```
+
+**Response Models:**
+```yaml
+PostResponse:
+  type: object
+  properties:
+    postId:
+      type: string
+    title:
+      type: string
+    content:
+      type: string
+    authorId:
+      type: string
+    createdAt:
+      type: string
+      format: date-time
+```
+
+### 4. Phase Planning
+After completing OpenAPI spec, plan implementation phases:
+
+**Phase 0**: All endpoints return mock data matching OpenAPI schemas
+
+**Phase 1+**: One endpoint per phase, prioritized by:
+- Dependencies (create before read)
+- Complexity (simple before complex)
+- User value (high-value features first)
+
+Generate a phase plan document listing:
+- Phase number
+- Endpoint (method + path)
+- Dependencies on previous phases
+- Estimated complexity
+
+## Validation Checklist
+
+Before moving to Phase 0:
+- [ ] All endpoints documented in OpenAPI
+- [ ] Request/response schemas defined
+- [ ] Authentication specified
+- [ ] Examples provided for all schemas
+- [ ] Error responses defined (400, 401, 404, 500)
+- [ ] Phase plan generated
+- [ ] OpenAPI spec validates (use online validator)
+
+## Documentation Requirements
+
+Create supporting documents:
+- docs/api-design/overview.md - High-level design decisions
+- docs/api-design/entities.md - Entity relationships
+- docs/api-design/phase-plan.md - Implementation phase breakdown
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Skip OpenAPI design and jump to coding
+- Design endpoints without considering data models
+- Forget error response schemas
+- Use inconsistent naming (mix camelCase and snake_case)
+- Design endpoints that expose database structure directly
+- Create endpoints that require multiple roundtrips for simple operations
+
+## Real-World Design Decisions
+
+When designing blog API:
+
+**Good**: Separate read and write models
+```yaml
+CreatePostRequest:  # Only fields needed for creation
+PostResponse:       # All fields including computed ones
+```
+
+**Good**: Nested resources for relationships
+```yaml
+POST /posts/{postId}/comments
+GET /posts/{postId}/comments
+```
+
+**Bad**: Flat structure requiring manual joins
+```yaml
+POST /comments  # Requires postId in body, not path
+GET /comments   # Returns all comments, requires client filtering
+```
+
+## Next Steps
+
+After completing architect phase:
+1. Review OpenAPI spec with team or stakeholders
+2. Validate all examples against schemas
+3. Generate phase plan
+4. Move to Phase 0 (Skeleton)
+5. Reference this spec for all mock responses

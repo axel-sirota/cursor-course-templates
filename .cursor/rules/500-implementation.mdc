@@ -1,0 +1,394 @@
+---
+description: Implementation patterns and processor replacement guidelines
+globs: ["app/**/*.py"]
+alwaysApply: false
+---
+
+# Implementation: Processor Replacement Patterns
+
+## Purpose
+Guide the replacement of mock implementations with real business logic while maintaining test compatibility and code quality standards.
+
+## Pre-Implementation Checklist
+
+Before writing any implementation code:
+- [ ] E2E test is written and failing
+- [ ] Database migration created and applied
+- [ ] Domain models defined (layered architecture)
+- [ ] Repository interface designed
+- [ ] Service layer structure planned
+
+## Code Style Guidelines
+
+Follow Python Google Style Guide strictly:
+
+### Type Hints
+Always include type hints for function signatures:
+```python
+# Good
+async def create_post(self, post_data: PostCreate) -> Post:
+    """Create a new post"""
+    pass
+
+# Bad
+async def create_post(self, post_data):
+    """Create a new post"""
+    pass
+```
+
+### Docstrings
+Use Google-style docstrings for all public functions:
+```python
+def create_post(self, post_data: PostCreate) -> Post:
+    """Create a new blog post.
+    
+    Args:
+        post_data: Post creation data containing title, content, and author ID
+        
+    Returns:
+        Created post with generated ID and timestamps
+        
+    Raises:
+        ValueError: If post data is invalid
+        DatabaseError: If database operation fails
+    """
+    pass
+```
+
+### Function Length
+Keep functions focused and short:
+- Maximum 50 lines per function
+- Single responsibility principle
+- Extract complex logic into helper functions
+
+### Variable Naming
+- snake_case for variables and functions
+- PascalCase for classes
+- UPPER_CASE for constants
+- Descriptive names, avoid abbreviations
+
+## Processor Replacement Pattern
+
+### Step 1: Identify Mock Code
+Locate the mock implementation from Phase 0:
+```python
+@router.post("/posts", response_model=PostResponse)
+async def create_post(request: CreatePostRequest):
+    """Create a new blog post - MOCK IMPLEMENTATION"""
+    return PostResponse(
+        postId="mock-123",
+        title=request.title,
+        content=request.content,
+        authorId="mock-author",
+        createdAt="2024-01-01T00:00:00Z"
+    )
+```
+
+### Step 2: Add Service Layer
+Import and initialize service:
+```python
+from app.modules.posts.services.post_service import PostService
+
+service = PostService()
+```
+
+### Step 3: Convert API Model to Domain Model
+Transform request model to domain model:
+```python
+@router.post("/posts", response_model=PostResponse)
+async def create_post(
+    request: CreatePostRequest,
+    current_user: dict = Depends(require_auth)
+):
+    """Create a new blog post"""
+    # Convert API model (camelCase) to domain model (snake_case)
+    post_data = PostCreate(
+        title=request.title,
+        content=request.content,
+        author_id=current_user["user_id"]
+    )
+```
+
+### Step 4: Call Service Layer
+Execute business logic through service:
+```python
+    # Use service layer
+    try:
+        created_post = await service.create_post(post_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating post: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+```
+
+### Step 5: Convert Domain Model to API Response
+Transform domain model back to API response:
+```python
+    # Convert domain model to API response (snake_case to camelCase)
+    return PostResponse(
+        postId=str(created_post.id),
+        title=created_post.title,
+        content=created_post.content,
+        authorId=created_post.author_id,
+        createdAt=created_post.created_at.isoformat()
+    )
+```
+
+### Complete Implementation
+```python
+@router.post("/posts", response_model=PostResponse)
+async def create_post(
+    request: CreatePostRequest,
+    current_user: dict = Depends(require_auth)
+):
+    """Create a new blog post.
+    
+    Args:
+        request: Post creation request with title and content
+        current_user: Authenticated user from JWT token
+        
+    Returns:
+        Created post with generated ID and timestamps
+        
+    Raises:
+        HTTPException: 400 if validation fails, 500 if creation fails
+    """
+    # Convert API model to domain model
+    post_data = PostCreate(
+        title=request.title,
+        content=request.content,
+        author_id=current_user["user_id"]
+    )
+    
+    # Execute through service layer
+    service = PostService()
+    try:
+        created_post = await service.create_post(post_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating post: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+    
+    # Convert domain model to API response
+    return PostResponse(
+        postId=str(created_post.id),
+        title=created_post.title,
+        content=created_post.content,
+        authorId=created_post.author_id,
+        createdAt=created_post.created_at.isoformat()
+    )
+```
+
+## Error Handling Patterns
+
+### Input Validation
+Use Pydantic for automatic validation:
+```python
+class CreatePostRequest(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1, max_length=10000)
+    author_id: str = Field(alias="authorId")
+    
+    @validator('title')
+    def validate_title(cls, v):
+        if not v.strip():
+            raise ValueError("Title cannot be empty")
+        return v.strip()
+```
+
+### Business Logic Errors
+Handle in service layer:
+```python
+class PostService:
+    async def create_post(self, post_data: PostCreate) -> Post:
+        """Create a new post"""
+        # Validate business rules
+        if len(post_data.title) < 5:
+            raise ValueError("Title must be at least 5 characters")
+        
+        # Execute repository operation
+        try:
+            return await self.post_repo.create(post_data)
+        except Exception as e:
+            logger.error(f"Repository error: {e}")
+            raise
+```
+
+### HTTP Exception Mapping
+Map domain errors to HTTP status codes in API layer:
+```python
+try:
+    result = await service.create_post(post_data)
+except ValueError as e:
+    raise HTTPException(status_code=400, detail=str(e))
+except PermissionError as e:
+    raise HTTPException(status_code=403, detail=str(e))
+except NotFoundError as e:
+    raise HTTPException(status_code=404, detail=str(e))
+except Exception as e:
+    logger.error(f"Unexpected error: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
+```
+
+## Logging Patterns
+
+### Use Structured Logging
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Good: Structured with context
+logger.info(
+    "Post created",
+    extra={
+        "post_id": post.id,
+        "author_id": post.author_id,
+        "title_length": len(post.title)
+    }
+)
+
+# Bad: Unstructured
+logger.info(f"Created post {post.id}")
+```
+
+### Log Levels
+- DEBUG: Detailed information for debugging
+- INFO: General informational messages
+- WARNING: Warning messages for recoverable issues
+- ERROR: Error messages for failures
+- CRITICAL: Critical errors requiring immediate attention
+
+### What to Log
+```python
+# Log significant operations
+logger.info(f"Creating post for author {author_id}")
+
+# Log errors with context
+logger.error(f"Failed to create post: {e}", exc_info=True)
+
+# Log performance issues
+logger.warning(f"Slow query detected: {duration}ms")
+
+# Don't log sensitive data
+logger.info(f"User logged in: {user_id}")  # Good
+logger.info(f"User password: {password}")  # BAD - NEVER LOG SECRETS
+```
+
+## Database Transaction Patterns
+
+### Single Operation
+```python
+async def create_post(self, post_data: PostCreate) -> Post:
+    """Create post - single operation"""
+    return await self.post_repo.create(post_data)
+```
+
+### Multiple Operations
+```python
+async def create_post_with_tags(
+    self,
+    post_data: PostCreate,
+    tags: List[str]
+) -> Post:
+    """Create post with tags - multiple operations"""
+    # Use database transaction
+    async with db.transaction():
+        post = await self.post_repo.create(post_data)
+        for tag in tags:
+            await self.tag_repo.create_post_tag(post.id, tag)
+    return post
+```
+
+## Performance Considerations
+
+### Avoid N+1 Queries
+```python
+# Bad: N+1 query problem
+posts = await self.post_repo.get_all()
+for post in posts:
+    author = await self.user_repo.get_by_id(post.author_id)
+    post.author_name = author.name
+
+# Good: Single query with join
+posts_with_authors = await self.post_repo.get_all_with_authors()
+```
+
+### Use Pagination
+```python
+async def get_posts(
+    self,
+    limit: int = 20,
+    offset: int = 0
+) -> List[Post]:
+    """Get posts with pagination"""
+    return await self.post_repo.get_all(limit=limit, offset=offset)
+```
+
+### Cache Expensive Operations
+```python
+from functools import lru_cache
+
+@lru_cache(maxsize=100)
+def get_post_statistics(post_id: str) -> dict:
+    """Get cached post statistics"""
+    # Expensive calculation
+    return calculate_statistics(post_id)
+```
+
+## Testing Implementation
+
+After replacing processor:
+
+### Run E2E Tests
+```bash
+pytest tests/api/test_posts.py::test_create_post -v
+```
+
+### Verify Test Passes
+Tests should now pass with real implementation:
+- Actual database IDs generated
+- Real timestamps created
+- Data persisted correctly
+
+### Add Edge Case Tests
+```python
+def test_create_post_with_long_title():
+    """Test title length validation"""
+    pass
+
+def test_create_post_duplicate_check():
+    """Test duplicate prevention"""
+    pass
+```
+
+## Code Review Checklist
+
+Before marking implementation complete:
+- [ ] Type hints on all functions
+- [ ] Docstrings on all public functions
+- [ ] Error handling implemented
+- [ ] Logging added for operations
+- [ ] No hardcoded values
+- [ ] No secrets in code
+- [ ] Proper transaction handling
+- [ ] Performance considerations addressed
+- [ ] E2E tests passing
+- [ ] Code formatted with Black
+- [ ] No TODO comments without tickets
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Put business logic in API endpoints
+- Access repository directly from endpoints
+- Return raw database objects to API
+- Use bare except clauses
+- Log sensitive information
+- Hardcode configuration values
+- Skip error handling
+- Forget type hints
+- Use global state
+- Implement features not required by current phase

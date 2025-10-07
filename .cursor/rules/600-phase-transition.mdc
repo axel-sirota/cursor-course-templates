@@ -1,0 +1,383 @@
+---
+description: Phase completion and transition documentation rules
+globs: ["phases/**", "docs/**"]
+alwaysApply: false
+---
+
+# Phase Transition: Documentation and Handoff
+
+## Purpose
+Ensure proper documentation and knowledge transfer between phases. Each phase completion generates a summary that enables efficient continuation in the next phase.
+
+## Phase Completion Triggers
+
+Transition to next phase when:
+- All E2E tests passing
+- Code quality checks pass (Black, mypy)
+- Implementation complete per phase requirements
+- No known bugs or issues
+- Documentation updated
+
+## Phase Summary Generation
+
+Create phases/phase-N-summary.md for each completed phase.
+
+### Summary Template Structure
+
+```markdown
+# Phase N Summary: [HTTP Method] [Endpoint Path]
+
+## Overview
+Brief description of what was implemented in this phase.
+
+## Implementation Details
+
+### Database Changes
+- Tables created or modified
+- Migrations applied
+- Indexes added
+
+### Models Created
+- Domain models (with file paths)
+- API models (with file paths)
+- Purpose of each model
+
+### Repository Methods
+- Methods implemented
+- Type-safe mappers created
+- File location
+
+### Service Layer
+- Services created or updated
+- Business logic implemented
+- File location
+
+### API Endpoint
+- Endpoint path and method
+- Request/response models
+- Authentication requirements
+
+## Tests
+
+### E2E Tests
+- Test files created
+- Test scenarios covered
+- All tests passing: YES/NO
+
+### Unit Tests
+- Services tested
+- Coverage percentage (if applicable)
+
+## Shared Libraries
+
+### Available for Next Phases
+- Repository classes that can be reused
+- Service methods available
+- Models representing core entities
+- Utilities or helpers created
+
+### Dependencies
+- External packages added to requirements.txt
+- Configuration variables added to .env
+
+## Known Limitations
+
+### Current Implementation
+- Features not implemented yet
+- Performance considerations
+- Edge cases not handled
+
+### Technical Debt
+- Code that needs refactoring
+- Tests that need improvement
+- Documentation gaps
+
+## Next Phase Recommendations
+
+### Suggested Next Endpoint
+Recommend next endpoint based on:
+- Dependency on current phase
+- Complexity progression
+- User value
+
+### Prerequisite Work
+- Additional models needed
+- Migrations required
+- Shared services to build
+
+## Learnings and Gotchas
+
+### What Worked Well
+- Patterns that were effective
+- Tools that helped
+- Design decisions that paid off
+
+### Challenges Encountered
+- Problems solved during implementation
+- Workarounds applied
+- Areas needing improvement
+
+### Time Estimates
+- Estimated time for phase: X hours
+- Actual time spent: Y hours
+- Variance explanation
+
+## Code Quality Metrics
+
+### Formatting
+- Black formatter applied: YES/NO
+- Type hints coverage: X%
+- Docstrings added: YES/NO
+
+### Testing
+- E2E test coverage: X scenarios
+- Unit test coverage: Y%
+- All tests passing: YES/NO
+
+## Files Changed
+
+### Created
+- List of new files with paths
+
+### Modified
+- List of modified files with paths
+
+### Deleted
+- List of deleted files (if any)
+```
+
+## Example Phase Summary
+
+```markdown
+# Phase 1 Summary: POST /posts
+
+## Overview
+Implemented blog post creation endpoint with full database integration, authentication, and E2E testing.
+
+## Implementation Details
+
+### Database Changes
+- Created posts table via migration: 20240101000000_create_posts_table.sql
+- Added indexes on author_id and created_at
+- Applied migration successfully to local database
+
+### Models Created
+- PostBase (app/modules/posts/models/domain_models.py): Business fields only
+- Post (app/modules/posts/models/domain_models.py): Full model with metadata
+- PostCreate (app/modules/posts/models/domain_models.py): Creation model
+- PostUpdate (app/modules/posts/models/domain_models.py): Update model
+- CreatePostRequest (app/api/posts.py): API request model (camelCase)
+- PostResponse (app/api/posts.py): API response model (camelCase)
+
+### Repository Methods
+- PostRepository.create() - Create new post
+- PostRepository._supabase_to_model() - Type-safe mapper from DB
+- PostRepository._modelcreate_to_supabase() - Type-safe mapper to DB
+- File: app/modules/posts/repository/repository.py
+
+### Service Layer
+- PostService.create_post() - Business logic for post creation
+- Includes error handling and logging
+- File: app/modules/posts/services/post_service.py
+
+### API Endpoint
+- POST /api/posts
+- Request: CreatePostRequest (title, content, authorId)
+- Response: PostResponse (postId, title, content, authorId, createdAt)
+- Authentication: Required (JWT Bearer token)
+- File: app/api/posts.py
+
+## Tests
+
+### E2E Tests
+- tests/api/test_posts.py::test_create_post - Success case
+- tests/api/test_posts.py::test_create_post_validation - Validation errors
+- tests/api/test_posts.py::test_create_post_unauthorized - Auth requirement
+- All tests passing: YES
+
+### Unit Tests
+- tests/modules/posts/test_post_service.py - Service layer with mocked repo
+- Coverage: 95% of service methods
+
+## Shared Libraries
+
+### Available for Next Phases
+- PostRepository - Can be used for GET /posts/{id} in Phase 2
+- PostService - Can be extended with get_by_id() method
+- Post model - Represents core post entity
+- Database connection via app.core.database.db
+
+### Dependencies
+- No new packages added
+- No new environment variables needed
+
+## Known Limitations
+
+### Current Implementation
+- Only creation implemented, no read/update/delete yet
+- No support for tags or categories
+- No content length validation beyond Pydantic
+- No duplicate post prevention
+
+### Technical Debt
+- Consider adding content sanitization
+- May need to add post status field (draft/published)
+- Service layer could use dependency injection for testing
+
+## Next Phase Recommendations
+
+### Suggested Next Endpoint
+Phase 2: GET /posts/{id}
+- Depends on Phase 1 (need posts to read)
+- Simple implementation (reuse PostRepository)
+- High user value (view created posts)
+
+### Prerequisite Work
+- Add PostRepository.get_by_id() method
+- Add PostService.get_post_by_id() method
+- Add GET endpoint to app/api/posts.py
+- Write E2E test for retrieval
+
+## Learnings and Gotchas
+
+### What Worked Well
+- Layered model architecture prevented confusion
+- Type-safe mappers caught field name mismatches
+- TDD approach caught authentication bug early
+- Service layer made testing straightforward
+
+### Challenges Encountered
+- Initial confusion with camelCase API vs snake_case DB
+- Needed to ensure UUID conversion to string
+- Test fixtures required unique email addresses
+
+### Time Estimates
+- Estimated time: 25 minutes
+- Actual time: 30 minutes
+- Variance: +5 minutes for debugging UUID conversion
+
+## Code Quality Metrics
+
+### Formatting
+- Black formatter applied: YES
+- Type hints coverage: 100%
+- Docstrings added: YES
+
+### Testing
+- E2E test coverage: 3 scenarios
+- Unit test coverage: 95%
+- All tests passing: YES
+
+## Files Changed
+
+### Created
+- app/modules/posts/models/__init__.py
+- app/modules/posts/models/domain_models.py
+- app/modules/posts/repository/__init__.py
+- app/modules/posts/repository/repository.py
+- app/modules/posts/services/post_service.py
+- app/api/posts.py
+- tests/api/test_posts.py
+- tests/modules/posts/test_post_service.py
+- database/develop/supabase/migrations/20240101000000_create_posts_table.sql
+
+### Modified
+- app/main.py (added posts router)
+- requirements.txt (no changes)
+- .env.example (no changes)
+
+### Deleted
+- None
+```
+
+## Phase Transition Checklist
+
+Before generating summary and moving to next phase:
+
+### Code Quality
+- [ ] All E2E tests passing
+- [ ] All unit tests passing
+- [ ] Code formatted with Black
+- [ ] Type hints on all functions
+- [ ] Docstrings on all public APIs
+- [ ] No linting errors
+- [ ] No type checking errors
+
+### Documentation
+- [ ] Code comments for complex logic
+- [ ] README updated if needed
+- [ ] API documentation updated
+- [ ] Migration files documented
+
+### Testing
+- [ ] E2E test for success case
+- [ ] E2E test for error cases
+- [ ] E2E test for authentication
+- [ ] Unit tests for complex business logic
+- [ ] Test coverage adequate
+
+### Implementation
+- [ ] Feature complete per phase requirements
+- [ ] Error handling implemented
+- [ ] Logging added
+- [ ] No hardcoded values
+- [ ] Secrets properly managed
+
+### Knowledge Transfer
+- [ ] Shared libraries documented
+- [ ] Dependencies documented
+- [ ] Known limitations listed
+- [ ] Next phase recommendations provided
+
+## Generating the Summary
+
+When user says "Phase N complete" or "Transition to next phase":
+
+1. Read current phase implementation
+2. Analyze all changes made
+3. Generate comprehensive summary
+4. Save to phases/phase-N-summary.md
+5. Provide brief verbal summary to user
+6. Ask for confirmation before proceeding
+
+## Phase Kickoff
+
+When starting a new phase:
+
+1. Read previous phase summaries
+2. Identify available shared libraries
+3. Check dependencies
+4. Review recommendations
+5. Confirm phase requirements with user
+6. Begin with E2E test writing
+
+## Research Export
+
+When encountering issues requiring external research:
+
+Generate research-export.md using templates/research-export-template.md:
+- Document the problem clearly
+- List all attempted solutions
+- Include relevant code snippets
+- Formulate specific questions
+- Provide context from phase summaries
+
+## Continuous Improvement
+
+After each phase:
+- Update time estimates based on actual time
+- Note patterns that worked well
+- Document challenges for future reference
+- Suggest process improvements
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Move to next phase with failing tests
+- Skip phase summary generation
+- Document only what was built (also document why)
+- Forget to note known limitations
+- Skip recommendations for next phase
+- Generate summary without reading code
+- Use generic summaries (be specific)
+- Forget to document shared libraries
