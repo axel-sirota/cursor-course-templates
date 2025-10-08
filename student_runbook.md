@@ -2,10 +2,16 @@
 
 ## Project Setup
 
-### 1. Create Project
+### 1. Create Project and Virtual Environment
 ```bash
 mkdir project-name
 cd project-name
+
+# Create virtual environment in project root
+python3 -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
 ### 2. Copy Materials
@@ -214,7 +220,7 @@ pytest tests/api/test_[module].py::test_[endpoint] -v
 psql $DATABASE_URL -c "SELECT * FROM [table];"
 
 # Verify endpoint works
-curl -X POST http://localhost:8000/api/[endpoint] -H "Authorization: Bearer [token]"
+curl -X POST http://localhost:8000/api/[endpoint]
 ```
 
 ### Session Completion
@@ -505,10 +511,6 @@ DEBUG=True
 # Database
 DATABASE_URL=postgresql://user:pass@localhost:5432/dbname
 
-# JWT
-JWT_SECRET_KEY=change-in-production
-JWT_ALGORITHM=HS256
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # CORS
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080

@@ -1,0 +1,216 @@
+# Environment Setup and Dependency Management
+
+## Purpose
+This rule ensures proper Python virtual environment setup and dependency management for all projects.
+
+## Mandatory Environment Setup
+
+### 1. Virtual Environment Creation
+**ALWAYS** create a virtual environment in the project root before any development:
+
+```bash
+# Create virtual environment in project root
+python3 -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+### 2. Dependency Management Rules
+
+**ALWAYS** follow this workflow for dependencies:
+
+1. **Add to requirements.txt FIRST**:
+   ```bash
+   echo "package-name==version" >> requirements.txt
+   ```
+
+2. **Then install using virtual environment**:
+   ```bash
+   .venv/bin/python3 -m pip install package-name==version
+   ```
+
+3. **Never use system pip directly**:
+   ```bash
+   # ❌ DON'T DO THIS
+   pip install package-name
+   
+   # ✅ DO THIS INSTEAD
+   .venv/bin/python3 -m pip install package-name
+   ```
+
+### 3. Project Initialization Checklist
+
+When starting any new project, **ALWAYS**:
+
+1. Create virtual environment:
+   ```bash
+   python3 -m venv .venv
+   ```
+
+2. Activate virtual environment:
+   ```bash
+   source .venv/bin/activate
+   ```
+
+3. Create requirements.txt with initial dependencies:
+   ```bash
+   cat > requirements.txt << EOF
+   fastapi==0.115.0
+   uvicorn[standard]==0.32.0
+   pydantic[email]==2.10.0
+   pydantic-settings==2.7.0
+   pytest==8.3.0
+   pytest-asyncio==0.24.0
+   httpx>=0.24.0,<0.28.0
+   EOF
+   ```
+
+4. Install initial dependencies:
+   ```bash
+   .venv/bin/python3 -m pip install -r requirements.txt
+   ```
+
+### 4. Adding New Dependencies
+
+**ALWAYS** follow this exact sequence:
+
+1. **Add to requirements.txt**:
+   ```bash
+   echo "new-package==1.2.3" >> requirements.txt
+   ```
+
+2. **Install using virtual environment**:
+   ```bash
+   .venv/bin/python3 -m pip install new-package==1.2.3
+   ```
+
+3. **Verify installation**:
+   ```bash
+   .venv/bin/python3 -m pip list | grep new-package
+   ```
+
+### 5. Virtual Environment Activation
+
+**ALWAYS** remind users to activate virtual environment:
+
+```bash
+# Before any Python commands
+source .venv/bin/activate
+
+# Or use direct path for commands
+.venv/bin/python3 main.py
+.venv/bin/pip install package-name
+.venv/bin/pytest tests/
+```
+
+### 6. .gitignore Requirements
+
+**ALWAYS** ensure .gitignore includes:
+
+```gitignore
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+```
+
+### 7. Session Commands Integration
+
+When using session commands (@start-session, @architect, etc.):
+
+1. **ALWAYS** check if .venv exists
+2. **ALWAYS** create .venv if missing
+3. **ALWAYS** use .venv/bin/python3 for all Python commands
+4. **ALWAYS** update requirements.txt before installing dependencies
+
+### 8. Docker Integration
+
+When using Docker:
+
+```dockerfile
+# Use virtual environment in Docker
+COPY requirements.txt .
+RUN python3 -m venv .venv
+RUN .venv/bin/python3 -m pip install -r requirements.txt
+```
+
+### 9. CI/CD Integration
+
+In CI/CD pipelines:
+
+```yaml
+- name: Setup Python
+  run: |
+    python3 -m venv .venv
+    .venv/bin/python3 -m pip install -r requirements.txt
+```
+
+### 10. Common Commands Reference
+
+```bash
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate (Linux/Mac)
+source .venv/bin/activate
+
+# Activate (Windows)
+.venv\Scripts\activate
+
+# Install from requirements.txt
+.venv/bin/python3 -m pip install -r requirements.txt
+
+# Install new package
+.venv/bin/python3 -m pip install package-name
+
+# Run Python script
+.venv/bin/python3 main.py
+
+# Run tests
+.venv/bin/python3 -m pytest tests/
+
+# Run FastAPI
+.venv/bin/python3 -m uvicorn app.main:app --reload
+```
+
+## Anti-Patterns to Avoid
+
+**NEVER**:
+- Install packages without virtual environment
+- Use system pip directly
+- Forget to add dependencies to requirements.txt
+- Commit .venv/ directory to git
+- Use different virtual environment names (always use .venv)
+
+## Success Criteria
+
+Environment setup is correct when:
+- [ ] .venv/ directory exists in project root
+- [ ] requirements.txt contains all dependencies
+- [ ] All Python commands use .venv/bin/python3
+- [ ] .venv/ is in .gitignore
+- [ ] Virtual environment is activated before development
+- [ ] Dependencies are installed using virtual environment pip

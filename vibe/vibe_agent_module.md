@@ -56,13 +56,13 @@ module_name/
 1. **Experience APIs** (`/api/*`): UI-facing APIs for human users
    - Handle user authentication and authorization
    - Optimized for presentation layer concerns
-   - Use user tokens and session management
+   - Handle user authentication and authorization
    - Located in `app/api/`
 
 2. **Agent Tools APIs** (`/api/tools/*`): Internal APIs for AI agents and automation
    - Handle service-to-service authentication
    - Optimized for programmatic access
-   - Use service tokens and API keys
+   - Use service authentication
    - Located in `app/api/tools/`
 
 **Example Structure:**
@@ -74,7 +74,7 @@ app/api/
 ```
 
 **Benefits:**
-- Different authentication models (user vs service tokens)
+- Different authentication models (user vs service auth)
 - Different response formats (UI-optimized vs agent-optimized)
 - Different rate limiting and usage patterns
 - Cleaner separation of concerns
@@ -131,9 +131,9 @@ from typing import Optional
 router = APIRouter(prefix="/tools/{module_name}", tags=["{module_name}_tools"])
 
 @router.get("/data")
-async def get_data_for_agent(x_service_token: Optional[str] = Header(None)):
+async def get_data_for_agent():
     """Agent-facing endpoint for automation"""
-    # Service token validation would go here
+    # Service authentication would go here
     return {"data": "Agent-optimized response"}
 ```
 
@@ -308,20 +308,10 @@ async def test_{agent_name}_agent_flow():
 
 def test_{module_name}_api_endpoint():
     """Test API endpoint"""
-    # Register and get token
-    register_response = client.post("/api/auth/register", json={{
-        "email": "test_{module_name}@example.com", 
-        "password": "testpass",
-        "fullName": "API Test User"
-    }})
-    assert register_response.status_code == 200
-    token = register_response.json()["accessToken"]
-    
-    # Test the module endpoint
+    # Test the module endpoint (no auth needed in demo)
     response = client.post(
         "/api/{module_name}/execute",
-        json={{"userRequest": "test request"}},
-        headers={{"Authorization": f"Bearer {{token}}"}}
+        json={{"userRequest": "test request"}}
     )
     assert response.status_code == 200
     

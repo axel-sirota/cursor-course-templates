@@ -5,6 +5,7 @@ Begin execution of a specific session following the session-based development ap
 ## Prerequisites
 
 Before starting a session, read:
+- @.cursor/rules/000-environment-setup.mdc - Virtual environment and dependency management
 - @plan/sessions/session-N-phase-M.md - Session plan and objectives
 - @plan/sessions/session-N-1-summary.md - Previous session summary (if not Session 1)
 - @.cursor/rules/200-skeleton-phase.mdc - For Session 1
@@ -18,6 +19,7 @@ Before starting a session, read:
 - Review session plan objectives
 - Confirm prerequisites are met
 - Check dependencies from previous sessions
+- Verify virtual environment is set up (.venv exists)
 - Verify environment is ready
 
 ### 2. Follow Session-Specific Rules

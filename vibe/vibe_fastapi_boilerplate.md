@@ -103,10 +103,6 @@ SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 SUPABASE_ANON_KEY=your_anon_key
 
-# JWT
-JWT_SECRET_KEY=your_super_secret_key_here
-JWT_ALGORITHM=HS256
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # LLM (Optional - remove if not needed)
 # OPENAI_API_KEY=your_openai_key
@@ -176,10 +172,6 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = ""
     supabase_anon_key: str = ""
     
-    # JWT
-    jwt_secret_key: str = "fallback_secret_key_change_in_production"
-    jwt_algorithm: str = "HS256"
-    jwt_access_token_expire_minutes: int = 30
     
     # LLM (Optional)
     openai_api_key: str = ""
@@ -487,26 +479,14 @@ class RequestResponseMiddleware(BaseHTTPMiddleware):
 
 **app/core/dependencies.py**
 ```python
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError, jwt
-from app.core.config import settings
+from fastapi import HTTPException, status
 from typing import List, Optional
 import logging
 
 logger = logging.getLogger(__name__)
 
-security = HTTPBearer(auto_error=False)
-
-# Public routes that don't require authentication
-PUBLIC_ROUTES = {
-    "/health",
-    "/docs",
-    "/openapi.json",
-    "/redoc",
-    "/api/auth/login",
-    "/api/auth/register"
-}
+# Simple in-memory user storage for demo purposes
+USERS_DB = {}
 
 class Permission:
     """Permission constants"""
@@ -514,73 +494,25 @@ class Permission:
     WRITE = "write"
     ADMIN = "admin"
 
-def is_public_route(path: str) -> bool:
-    """Check if route is public"""
-    return path in PUBLIC_ROUTES or path.startswith("/docs") or path.startswith("/openapi")
-
-def decode_jwt_token(token: str) -> Optional[dict]:
-    """Decode JWT token"""
-    try:
-        payload = jwt.decode(
-            token, 
-            settings.jwt_secret_key, 
-            algorithms=[settings.jwt_algorithm]
-        )
-        return payload
-    except JWTError as e:
-        logger.warning(f"JWT decode error: {e}")
-        return None
-
-async def get_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
-) -> Optional[dict]:
-    """Get current user from JWT token"""
-    if not credentials:
-        return None
-    
-    payload = decode_jwt_token(credentials.credentials)
-    if not payload:
-        return None
-    
+def get_current_user() -> Optional[dict]:
+    """Get current user - simplified for demo without authentication"""
+    # For demo purposes, return a default user
+    # In a real app, you might use session-based auth or other methods
     return {
-        "user_id": payload.get("sub"),
-        "email": payload.get("email"),
-        "permissions": payload.get("permissions", [])
+        "user_id": "demo-user-123",
+        "email": "demo@example.com",
+        "full_name": "Demo User",
+        "permissions": [Permission.READ, Permission.WRITE]
     }
 
 def require_permission(required_permissions: List[str] = None):
     """Dependency factory for permission checking"""
     required_permissions = required_permissions or []
     
-    async def permission_checker(
-        current_user: Optional[dict] = Depends(get_current_user)
-    ) -> dict:
-        # Allow access if no specific permissions required and user is authenticated
-        if not required_permissions and current_user:
-            return current_user
+    def permission_checker() -> dict:
+        current_user = get_current_user()
         
-        # Deny access if user not authenticated and permissions required
-        if not current_user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authentication required"
-            )
-        
-        # Check specific permissions
-        user_permissions = current_user.get("permissions", [])
-        
-        # Admin has all permissions
-        if Permission.ADMIN in user_permissions:
-            return current_user
-        
-        # Check if user has required permissions
-        for perm in required_permissions:
-            if perm not in user_permissions:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Permission '{perm}' required"
-                )
-        
+        # For demo, always return the demo user
         return current_user
     
     return permission_checker
@@ -639,14 +571,10 @@ async def health_check():
 **app/api/auth.py**
 ```python
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, EmailStr
-from jose import jwt
-from datetime import datetime, timedelta, timezone
-from app.core.config import settings
+from pydantic import BaseModel, EmailStr, Field
 from app.core.dependencies import require_auth, Permission
 from typing import List
 import logging
-import hashlib
 import secrets
 
 logger = logging.getLogger(__name__)
@@ -667,10 +595,9 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
-class TokenResponse(BaseModel):
-    access_token: str = Field(alias="accessToken")
-    token_type: str = Field(default="bearer", alias="tokenType")
-    expires_in: int = Field(alias="expiresIn")
+class AuthResponse(BaseModel):
+    message: str
+    user: dict
 
 class UserResponse(BaseModel):
     user_id: str = Field(alias="userId")
@@ -680,35 +607,7 @@ class UserResponse(BaseModel):
     
     model_config = {"validate_by_name": True}  # Allow both snake_case and camelCase
 
-def hash_password(password: str) -> str:
-    """Hash password with salt"""
-    salt = secrets.token_hex(16)
-    hashed = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
-    return f"{salt}:{hashed.hex()}"
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    """Verify password against hash"""
-    try:
-        salt, hash_hex = hashed_password.split(':')
-        hashed = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
-        return hash_hex == hashed.hex()
-    except ValueError:
-        return False
-
-def create_access_token(data: dict) -> str:
-    """Create JWT access token"""
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_access_token_expire_minutes)
-    to_encode.update({"exp": expire})
-    
-    encoded_jwt = jwt.encode(
-        to_encode, 
-        settings.jwt_secret_key, 
-        algorithm=settings.jwt_algorithm
-    )
-    return encoded_jwt
-
-@router.post("/register", response_model=TokenResponse)
+@router.post("/register", response_model=AuthResponse)
 async def register(request: RegisterRequest):
     """Register new user"""
     email = request.email.lower()
@@ -722,57 +621,48 @@ async def register(request: RegisterRequest):
     
     # Create user
     user_id = secrets.token_urlsafe(16)
-    hashed_password = hash_password(request.password)
     
     USERS_DB[email] = {
         "user_id": user_id,
         "email": email,
         "full_name": request.full_name,
-        "password": hashed_password,
+        "password": request.password,  # In real app, hash this
         "permissions": [Permission.READ, Permission.WRITE]  # Default permissions
     }
     
-    # Create access token
-    access_token = create_access_token({
-        "sub": user_id,
-        "email": email,
-        "permissions": [Permission.READ, Permission.WRITE]
-    })
-    
     logger.info(f"User registered: {email}")
     
-    return TokenResponse(
-        accessToken=access_token,
-        tokenType="bearer",
-        expiresIn=settings.jwt_access_token_expire_minutes * 60
+    return AuthResponse(
+        message="Registration successful",
+        user={
+            "userId": user_id,
+            "email": email,
+            "fullName": request.full_name
+        }
     )
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=AuthResponse)
 async def login(request: LoginRequest):
     """User login"""
     email = request.email.lower()
     
     # Find user
     user = USERS_DB.get(email)
-    if not user or not verify_password(request.password, user["password"]):
+    if not user or user["password"] != request.password:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials"
         )
     
-    # Create access token
-    access_token = create_access_token({
-        "sub": user["user_id"],
-        "email": email,
-        "permissions": user["permissions"]
-    })
-    
     logger.info(f"User logged in: {email}")
     
-    return TokenResponse(
-        accessToken=access_token,
-        tokenType="bearer",
-        expiresIn=settings.jwt_access_token_expire_minutes * 60
+    return AuthResponse(
+        message="Login successful",
+        user={
+            "userId": user["user_id"],
+            "email": email,
+            "fullName": user["full_name"]
+        }
     )
 
 @router.get("/me", response_model=UserResponse)
@@ -781,13 +671,13 @@ async def get_current_user_info(current_user: dict = Depends(require_auth)):
     return UserResponse(
         userId=current_user["user_id"],
         email=current_user["email"],
-        fullName="Test User",  # Would come from database in real implementation
+        fullName=current_user.get("full_name", "Demo User"),
         permissions=current_user.get("permissions", [])
     )
 
 @router.post("/logout")
 async def logout():
-    """User logout (client should discard token)"""
+    """User logout"""
     return {"message": "Logged out successfully"}
 ```
 
@@ -923,8 +813,9 @@ def test_register():
     assert response.status_code == 200
     
     data = response.json()
-    assert "accessToken" in data
-    assert data["tokenType"] == "bearer"
+    assert "message" in data
+    assert "user" in data
+    assert data["message"] == "Registration successful"
 
 def test_login():
     """Test user login"""
@@ -943,47 +834,40 @@ def test_login():
     assert response.status_code == 200
     
     data = response.json()
-    assert "accessToken" in data
+    assert "message" in data
+    assert data["message"] == "Login successful"
 
 def test_protected_endpoint():
     """Test accessing protected endpoint"""
-    # Register and get token
-    register_response = client.post("/api/auth/register", json={
-        "email": "test3@example.com",
-        "password": "testpassword",
-        "full_name": "Test User 3"
-    })
-    token = register_response.json()["accessToken"]
-    
-    # Access protected endpoint
-    response = client.get(
-        "/api/auth/me",
-        headers={"Authorization": f"Bearer {token}"}
-    )
+    # Access protected endpoint (no auth needed in demo)
+    response = client.get("/api/auth/me")
     assert response.status_code == 200
     
     data = response.json()
-    assert data["email"] == "test3@example.com"
+    assert "userId" in data
+    assert data["email"] == "demo@example.com"
 
 def test_unauthorized_access():
-    """Test accessing protected endpoint without token"""
+    """Test accessing protected endpoint without auth"""
     response = client.get("/api/auth/me")
-    assert response.status_code == 401
+    assert response.status_code == 200  # No auth required in demo
 ```
 
 ## Usage Instructions
 
-### 1. Create Project
+### 1. Create Project and Virtual Environment
 ```bash
 # Create project directory
 mkdir my_project && cd my_project
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Create virtual environment in project root
+python3 -m venv .venv
 
-# Install dependencies
-pip install -r requirements.txt
+# Activate virtual environment
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies using virtual environment
+.venv/bin/python3 -m pip install -r requirements.txt
 ```
 
 ### 2. Configure Environment
@@ -1008,7 +892,7 @@ pytest tests/
 - Test health: GET /health
 - Register user: POST /api/auth/register
 - Login: POST /api/auth/login
-- Access protected endpoint: GET /api/auth/me (with Bearer token)
+- Access protected endpoint: GET /api/auth/me
 
 ## API Architecture Pattern
 
@@ -1019,13 +903,13 @@ This boilerplate supports a **dual API architecture** that separates concerns ba
 1. **Experience APIs** (`/api/*`): UI-facing APIs for human users
    - Handle user authentication and authorization
    - Optimized for presentation layer concerns
-   - Use user tokens and session management
+   - Handle user authentication and authorization
    - Located in `app/api/`
 
 2. **Agent Tools APIs** (`/api/tools/*`): Internal APIs for AI agents and automation
    - Handle service-to-service authentication
    - Optimized for programmatic access
-   - Use service tokens and API keys
+   - Use service authentication
    - Located in `app/api/tools/`
 
 ### Example Dual API Implementation
@@ -1051,9 +935,9 @@ from typing import Optional
 router = APIRouter(prefix="/tools/module", tags=["module_tools"])
 
 @router.get("/data")
-async def get_data_for_agent(x_service_token: Optional[str] = Header(None)):
+async def get_data_for_agent():
     """Agent-facing endpoint for automation"""
-    # Service token validation would go here
+    # Service authentication would go here
     return {"data": "Agent-optimized response", "timestamp": "2024-01-01T00:00:00Z"}
 ```
 
@@ -1069,7 +953,7 @@ app.include_router(module_tool_api.router, prefix="/api")
 
 ### Benefits of Dual API Pattern
 
-- **Different authentication models**: User tokens vs service tokens
+- **Different authentication models**: User auth vs service auth
 - **Different response formats**: UI-optimized vs agent-optimized
 - **Different rate limiting**: User-based vs service-based quotas
 - **Cleaner separation of concerns**: UI logic vs automation logic
@@ -1321,5 +1205,4 @@ After creating the boilerplate:
 
 **"Module not found" errors**: Ensure all __init__.py files are present
 **Database connection fails**: Check Supabase credentials in .env
-**JWT errors**: Verify JWT_SECRET_KEY is set in .env
 **CORS errors**: Add your frontend URL to ALLOWED_ORIGINS in .env

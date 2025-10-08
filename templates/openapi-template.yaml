@@ -24,11 +24,6 @@ tags:
     description: Comment management
 
 components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
 
   schemas:
     # Health Check
@@ -81,18 +76,24 @@ components:
           format: password
           example: securepassword123
 
-    TokenResponse:
+    AuthResponse:
       type: object
       properties:
-        accessToken:
+        message:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        tokenType:
-          type: string
-          example: bearer
-        expiresIn:
-          type: integer
-          example: 1800
+          example: Login successful
+        user:
+          type: object
+          properties:
+            userId:
+              type: string
+              example: user-123
+            email:
+              type: string
+              example: user@example.com
+            fullName:
+              type: string
+              example: John Doe
 
     UserResponse:
       type: object
@@ -266,7 +267,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenResponse'
+                $ref: '#/components/schemas/AuthResponse'
         '400':
           description: Invalid request
           content:
@@ -277,7 +278,7 @@ paths:
   /api/auth/login:
     post:
       summary: User login
-      description: Authenticate user and get access token
+      description: Authenticate user
       tags:
         - Authentication
       requestBody:
@@ -292,13 +293,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenResponse'
-        '401':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/AuthResponse'
 
   /api/auth/me:
     get:
@@ -306,8 +301,6 @@ paths:
       description: Get authenticated user information
       tags:
         - Authentication
-      security:
-        - BearerAuth: []
       responses:
         '200':
           description: User information
@@ -315,12 +308,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        '401':
-          description: Not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
   /api/posts:
     post:
@@ -328,8 +315,6 @@ paths:
       description: Create a new blog post
       tags:
         - Posts
-      security:
-        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -349,20 +334,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
     get:
       summary: List posts
       description: Get list of blog posts with pagination
       tags:
         - Posts
-      security:
-        - BearerAuth: []
       parameters:
         - name: limit
           in: query
@@ -384,12 +361,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PostListResponse'
-        '401':
-          description: Not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
   /api/posts/{postId}:
     get:
@@ -397,8 +368,6 @@ paths:
       description: Get a single blog post by ID
       tags:
         - Posts
-      security:
-        - BearerAuth: []
       parameters:
         - name: postId
           in: path
@@ -418,20 +387,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
     put:
       summary: Update post
       description: Update an existing blog post
       tags:
         - Posts
-      security:
-        - BearerAuth: []
       parameters:
         - name: postId
           in: path
@@ -457,20 +418,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
       summary: Delete post
       description: Delete a blog post
       tags:
         - Posts
-      security:
-        - BearerAuth: []
       parameters:
         - name: postId
           in: path
@@ -486,12 +439,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
   /api/posts/{postId}/comments:
     post:
@@ -499,8 +446,6 @@ paths:
       description: Add a comment to a blog post
       tags:
         - Comments
-      security:
-        - BearerAuth: []
       parameters:
         - name: postId
           in: path
@@ -526,20 +471,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
     get:
       summary: List comments
       description: Get all comments for a blog post
       tags:
         - Comments
-      security:
-        - BearerAuth: []
       parameters:
         - name: postId
           in: path
@@ -555,12 +492,6 @@ paths:
                 $ref: '#/components/schemas/CommentListResponse'
         '404':
           description: Post not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Not authenticated
           content:
             application/json:
               schema:

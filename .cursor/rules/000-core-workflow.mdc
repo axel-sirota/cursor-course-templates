@@ -19,6 +19,13 @@ All feature development follows this structure:
 
 ## Golden Rules
 
+### Always Setup Virtual Environment First
+Before any development work:
+- Create virtual environment: `python3 -m venv .venv`
+- Activate virtual environment: `source .venv/bin/activate`
+- Use virtual environment for all Python commands: `.venv/bin/python3`
+- Add dependencies to requirements.txt before installing
+
 ### Always Read Vibe Guides First
 Before starting any phase, read the relevant guide from the vibe/ folder:
 - vibe_phase_workflow.md - Phase-based development patterns

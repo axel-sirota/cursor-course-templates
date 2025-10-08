@@ -48,8 +48,10 @@ Ensure you have installed:
 ### Setup
 
 1. Clone or download this repository
-2. Open the project in Cursor: `cursor .`
-3. Follow exercises/session1.md instructions
+2. Create virtual environment: `python3 -m venv .venv`
+3. Activate virtual environment: `source .venv/bin/activate`
+4. Open the project in Cursor: `cursor .`
+5. Follow exercises/session1.md instructions
 
 ### Understanding the Workflow
 
@@ -247,7 +249,6 @@ cp .env.example .env
 Required variables:
 - PORT - API server port (default: 8000)
 - DATABASE_URL - PostgreSQL connection string
-- JWT_SECRET_KEY - Secret for JWT tokens
 - ALLOWED_ORIGINS - CORS allowed origins
 
 ## Running the Application
