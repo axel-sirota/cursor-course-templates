@@ -1,37 +1,46 @@
 ---
-description: Implementation rules for Phase 1+ endpoint development
-globs: ["app/modules/**", "app/api/**", "tests/**"]
+description: Session N: Phase M endpoint implementation with database integration
+globs: ["app/modules/**", "app/api/**", "tests/**", "plan/sessions/**"]
 alwaysApply: false
 ---
 
-# Phase 1+ Endpoint Implementation
+# Session N: Phase M Endpoint Implementation
 
 ## Purpose
-Implement one endpoint per phase following strict test-driven development. Each phase transforms one mock endpoint into a fully functional implementation with database integration and passing E2E tests.
+Execute individual session to implement one endpoint per session following strict test-driven development. Each session transforms one mock endpoint into a fully functional implementation with database integration and passing E2E tests.
 
-## Phase Selection
+## Session Prerequisites
+- Previous session completed successfully
+- Session plan reviewed (plan/sessions/session-N-phase-M.md)
+- Phase 0 skeleton with all mock endpoints working
+- OpenAPI specification available
+- Database environment ready
 
-Choose next endpoint based on:
-1. Dependencies (must have data to read before implementing read endpoints)
-2. Complexity (simple before complex)
-3. Shared infrastructure (group endpoints using same services)
+## Session Selection
 
-Example order for blog API:
-- Phase 1: POST /posts (create posts)
-- Phase 2: GET /posts/{id} (read single post)
-- Phase 3: GET /posts (list posts)
-- Phase 4: POST /posts/{id}/comments (create comments)
-- Phase 5: GET /posts/{id}/comments (read comments)
+Choose next session based on plan/sessions/ folder:
+1. Review plan/sessions/session-N-phase-M.md
+2. Check dependencies from previous sessions
+3. Confirm prerequisites are met
+4. Follow session plan objectives
 
-## Implementation Steps
+Example session progression:
+- Session 2: Phase 1 (POST /posts) - create posts
+- Session 3: Phase 2 (GET /posts/{id}) - read single post  
+- Session 4: Phase 3 (GET /posts) - list posts
+- Session 5: Phase 4 (POST /posts/{id}/comments) - create comments
+- Session 6: Phase 5 (GET /posts/{id}/comments) - read comments
 
-### 1. Phase Initialization
-Document the phase:
+## Session Execution Steps
+
+### 1. Session Initialization
+Review session plan and document current session:
 ```
-Phase N: [HTTP Method] [Endpoint Path]
-Goal: [One sentence description]
-Dependencies: [List previous phases required]
-Estimated time: [Your estimate]
+Session N: Phase M ([HTTP Method] [Endpoint Path])
+Goal: [One sentence description from session plan]
+Dependencies: [List previous sessions required]
+Estimated time: [From session plan]
+Session Plan: plan/sessions/session-N-phase-M.md
 ```
 
 ### 2. E2E Test First (MUST BE FIRST)
@@ -40,7 +49,7 @@ Reference 400-testing-first.mdc for detailed testing rules.
 Write test using skeleton's mock data as expected output:
 ```python
 def test_create_post():
-    """Phase 1: POST /posts implementation"""
+    """Session 2: Phase 1 - POST /posts implementation"""
     response = client.post("/api/posts", json={
         "title": "Test Post",
         "content": "Test content",
@@ -244,8 +253,8 @@ If tests fail:
 - Check data transformation logic
 - Review error logs
 
-### 9. Code Quality
-Before phase completion:
+### 9. Session Code Quality
+Before session completion:
 ```bash
 # Format code
 black app/ tests/
@@ -257,8 +266,9 @@ mypy app/modules/posts/
 pytest tests/
 ```
 
-## Phase Completion Checklist
+## Session Completion Checklist
 
+- [ ] Session plan reviewed and objectives confirmed
 - [ ] E2E test written and initially failed
 - [ ] Database migration created and applied
 - [ ] Domain models implemented (layered architecture)
@@ -271,30 +281,68 @@ pytest tests/
 - [ ] Docstrings added
 - [ ] Error handling implemented
 - [ ] Logging added
+- [ ] Session summary generated
 
-## Shared Libraries
+## Session Shared Libraries
 
-Document any shared code created:
+Document any shared code created in session summary:
 - New repositories available for other endpoints
 - New services that can be reused
 - New models that represent core entities
 - New utilities or helpers
 
-## Phase Transition
+## Session Completion Response
 
-Reference 600-phase-transition.mdc for transition process.
+When session is complete, respond with:
 
-Generate phases/phase-N-summary.md including:
-- What was implemented
+```
+Session N Complete: Phase M ([METHOD] [ENDPOINT])
+
+Implemented:
+- [Specific endpoint] with real database integration
+- Database migration: [migration file]
+- Domain models: [model files]
+- Repository: [repository file]
+- Service layer: [service file]
+- API endpoint: [endpoint file]
+
+Tests:
+- E2E tests passing: [test file]
+- All tests passing: YES/NO
+
+Shared Libraries Created:
+- [Repository] - available for future sessions
+- [Service] - available for future sessions
+- [Models] - available for future sessions
+
+Session Summary:
+- Generated plan/sessions/session-N-summary.md
+- Documented implementation details
+- Listed shared libraries created
+- Noted dependencies for next session
+
+Next Session:
+- Review plan/sessions/session-N+1-phase-M+1.md for next phase
+- When ready, say "Start Session N+1" to begin next implementation
+
+DO NOT proceed to Session N+1 automatically.
+```
+
+## Session Transition Documentation
+
+Generate plan/sessions/session-N-summary.md including:
+- What was implemented in this session
 - Tests that now pass
 - Shared libraries created
-- Dependencies for next phase
+- Dependencies for next session
 - Known limitations
 - Performance considerations
+- Prerequisites for Session N+1
 
 ## Anti-Patterns to Avoid
 
 Do NOT:
+- Skip session plan review
 - Skip E2E test writing
 - Implement without failing test first
 - Use single model for all operations
@@ -302,5 +350,7 @@ Do NOT:
 - Access repository directly from API
 - Skip error handling
 - Forget to document shared libraries
-- Move to next phase with failing tests
-- Implement more than one endpoint per phase
+- Move to next session with failing tests
+- Implement more than one endpoint per session
+- Skip session summary documentation
+- Automatically start next session

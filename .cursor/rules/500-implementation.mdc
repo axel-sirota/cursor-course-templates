@@ -1,22 +1,24 @@
 ---
-description: Implementation patterns and processor replacement guidelines
-globs: ["app/**/*.py"]
+description: Session-based implementation patterns and processor replacement guidelines
+globs: ["app/**/*.py", "plan/sessions/**"]
 alwaysApply: false
 ---
 
-# Implementation: Processor Replacement Patterns
+# Session-Based Implementation: Processor Replacement Patterns
 
 ## Purpose
-Guide the replacement of mock implementations with real business logic while maintaining test compatibility and code quality standards.
+Guide the replacement of mock implementations with real business logic within individual sessions while maintaining test compatibility and code quality standards.
 
-## Pre-Implementation Checklist
+## Session Pre-Implementation Checklist
 
-Before writing any implementation code:
+Before writing any implementation code in current session:
+- [ ] Session plan reviewed (plan/sessions/session-N-phase-M.md)
 - [ ] E2E test is written and failing
 - [ ] Database migration created and applied
 - [ ] Domain models defined (layered architecture)
 - [ ] Repository interface designed
 - [ ] Service layer structure planned
+- [ ] Previous session dependencies confirmed
 
 ## Code Style Guidelines
 
@@ -67,10 +69,17 @@ Keep functions focused and short:
 - UPPER_CASE for constants
 - Descriptive names, avoid abbreviations
 
-## Processor Replacement Pattern
+## Session Processor Replacement Pattern
 
-### Step 1: Identify Mock Code
-Locate the mock implementation from Phase 0:
+### Step 1: Review Session Plan
+Review plan/sessions/session-N-phase-M.md to understand:
+- Current session objectives
+- Endpoint to be implemented
+- Dependencies from previous sessions
+- Expected deliverables
+
+### Step 2: Identify Mock Code
+Locate the mock implementation from Session 1 (Phase 0):
 ```python
 @router.post("/posts", response_model=PostResponse)
 async def create_post(request: CreatePostRequest):
@@ -84,7 +93,7 @@ async def create_post(request: CreatePostRequest):
     )
 ```
 
-### Step 2: Add Service Layer
+### Step 3: Add Service Layer
 Import and initialize service:
 ```python
 from app.modules.posts.services.post_service import PostService
@@ -92,7 +101,7 @@ from app.modules.posts.services.post_service import PostService
 service = PostService()
 ```
 
-### Step 3: Convert API Model to Domain Model
+### Step 4: Convert API Model to Domain Model
 Transform request model to domain model:
 ```python
 @router.post("/posts", response_model=PostResponse)
@@ -109,7 +118,7 @@ async def create_post(
     )
 ```
 
-### Step 4: Call Service Layer
+### Step 5: Call Service Layer
 Execute business logic through service:
 ```python
     # Use service layer
@@ -122,7 +131,7 @@ Execute business logic through service:
         raise HTTPException(status_code=500, detail="Internal server error")
 ```
 
-### Step 5: Convert Domain Model to API Response
+### Step 6: Convert Domain Model to API Response
 Transform domain model back to API response:
 ```python
     # Convert domain model to API response (snake_case to camelCase)
@@ -338,9 +347,9 @@ def get_post_statistics(post_id: str) -> dict:
     return calculate_statistics(post_id)
 ```
 
-## Testing Implementation
+## Session Testing Implementation
 
-After replacing processor:
+After replacing processor in current session:
 
 ### Run E2E Tests
 ```bash
@@ -364,9 +373,10 @@ def test_create_post_duplicate_check():
     pass
 ```
 
-## Code Review Checklist
+## Session Code Review Checklist
 
-Before marking implementation complete:
+Before marking session implementation complete:
+- [ ] Session plan objectives met
 - [ ] Type hints on all functions
 - [ ] Docstrings on all public functions
 - [ ] Error handling implemented
@@ -375,13 +385,15 @@ Before marking implementation complete:
 - [ ] No secrets in code
 - [ ] Proper transaction handling
 - [ ] Performance considerations addressed
-- [ ] E2E tests passing
+- [ ] E2E tests passing for current endpoint
 - [ ] Code formatted with Black
 - [ ] No TODO comments without tickets
+- [ ] Session summary documents implementation
 
-## Anti-Patterns to Avoid
+## Session Implementation Anti-Patterns
 
 Do NOT:
+- Skip session plan review
 - Put business logic in API endpoints
 - Access repository directly from endpoints
 - Return raw database objects to API
@@ -391,4 +403,6 @@ Do NOT:
 - Skip error handling
 - Forget type hints
 - Use global state
-- Implement features not required by current phase
+- Implement features not required by current session
+- Implement endpoints from other sessions
+- Skip session documentation

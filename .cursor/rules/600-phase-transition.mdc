@@ -1,34 +1,35 @@
 ---
-description: Phase completion and transition documentation rules
-globs: ["phases/**", "docs/**"]
+description: Session completion and transition documentation rules
+globs: ["plan/sessions/**", "phases/**", "docs/**"]
 alwaysApply: false
 ---
 
-# Phase Transition: Documentation and Handoff
+# Session Transition: Documentation and Handoff
 
 ## Purpose
-Ensure proper documentation and knowledge transfer between phases. Each phase completion generates a summary that enables efficient continuation in the next phase.
+Ensure proper documentation and knowledge transfer between sessions. Each session completion generates a summary that enables efficient continuation in the next session.
 
-## Phase Completion Triggers
+## Session Completion Triggers
 
-Transition to next phase when:
-- All E2E tests passing
+Transition to next session when:
+- All E2E tests passing for current endpoint
 - Code quality checks pass (Black, mypy)
-- Implementation complete per phase requirements
+- Implementation complete per session requirements
 - No known bugs or issues
-- Documentation updated
+- Session documentation updated
+- Session plan objectives met
 
-## Phase Summary Generation
+## Session Summary Generation
 
-Create phases/phase-N-summary.md for each completed phase.
+Create plan/sessions/session-N-summary.md for each completed session.
 
-### Summary Template Structure
+### Session Summary Template Structure
 
 ```markdown
-# Phase N Summary: [HTTP Method] [Endpoint Path]
+# Session N Summary: Phase M ([HTTP Method] [Endpoint Path])
 
 ## Overview
-Brief description of what was implemented in this phase.
+Brief description of what was implemented in this session.
 
 ## Implementation Details
 
@@ -92,13 +93,14 @@ Brief description of what was implemented in this phase.
 - Tests that need improvement
 - Documentation gaps
 
-## Next Phase Recommendations
+## Next Session Recommendations
 
-### Suggested Next Endpoint
-Recommend next endpoint based on:
-- Dependency on current phase
+### Suggested Next Session
+Recommend next session based on:
+- Dependency on current session
 - Complexity progression
 - User value
+- Session plan availability
 
 ### Prerequisite Work
 - Additional models needed
@@ -146,10 +148,10 @@ Recommend next endpoint based on:
 - List of deleted files (if any)
 ```
 
-## Example Phase Summary
+## Example Session Summary
 
 ```markdown
-# Phase 1 Summary: POST /posts
+# Session 2 Summary: Phase 1 (POST /posts)
 
 ## Overview
 Implemented blog post creation endpoint with full database integration, authentication, and E2E testing.
@@ -201,8 +203,8 @@ Implemented blog post creation endpoint with full database integration, authenti
 
 ## Shared Libraries
 
-### Available for Next Phases
-- PostRepository - Can be used for GET /posts/{id} in Phase 2
+### Available for Next Sessions
+- PostRepository - Can be used for GET /posts/{id} in Session 3
 - PostService - Can be extended with get_by_id() method
 - Post model - Represents core post entity
 - Database connection via app.core.database.db
@@ -226,11 +228,12 @@ Implemented blog post creation endpoint with full database integration, authenti
 
 ## Next Phase Recommendations
 
-### Suggested Next Endpoint
-Phase 2: GET /posts/{id}
-- Depends on Phase 1 (need posts to read)
+### Suggested Next Session
+Session 3: Phase 2 (GET /posts/{id})
+- Depends on Session 2 (need posts to read)
 - Simple implementation (reuse PostRepository)
 - High user value (view created posts)
+- Session plan: plan/sessions/session-3-phase-2.md
 
 ### Prerequisite Work
 - Add PostRepository.get_by_id() method
@@ -290,9 +293,9 @@ Phase 2: GET /posts/{id}
 - None
 ```
 
-## Phase Transition Checklist
+## Session Transition Checklist
 
-Before generating summary and moving to next phase:
+Before generating summary and moving to next session:
 
 ### Code Quality
 - [ ] All E2E tests passing
@@ -317,7 +320,7 @@ Before generating summary and moving to next phase:
 - [ ] Test coverage adequate
 
 ### Implementation
-- [ ] Feature complete per phase requirements
+- [ ] Feature complete per session requirements
 - [ ] Error handling implemented
 - [ ] Logging added
 - [ ] No hardcoded values
@@ -327,28 +330,29 @@ Before generating summary and moving to next phase:
 - [ ] Shared libraries documented
 - [ ] Dependencies documented
 - [ ] Known limitations listed
-- [ ] Next phase recommendations provided
+- [ ] Next session recommendations provided
+- [ ] Session plan objectives met
 
-## Generating the Summary
+## Generating the Session Summary
 
-When user says "Phase N complete" or "Transition to next phase":
+When user says "Session N complete" or "Transition to next session":
 
-1. Read current phase implementation
+1. Read current session implementation
 2. Analyze all changes made
 3. Generate comprehensive summary
-4. Save to phases/phase-N-summary.md
+4. Save to plan/sessions/session-N-summary.md
 5. Provide brief verbal summary to user
 6. Ask for confirmation before proceeding
 
-## Phase Kickoff
+## Session Kickoff
 
-When starting a new phase:
+When starting a new session:
 
-1. Read previous phase summaries
-2. Identify available shared libraries
-3. Check dependencies
-4. Review recommendations
-5. Confirm phase requirements with user
+1. Read previous session summaries
+2. Review next session plan (plan/sessions/session-N-phase-M.md)
+3. Identify available shared libraries
+4. Check dependencies
+5. Confirm session requirements with user
 6. Begin with E2E test writing
 
 ## Research Export
@@ -364,20 +368,24 @@ Generate research-export.md using templates/research-export-template.md:
 
 ## Continuous Improvement
 
-After each phase:
+After each session:
 - Update time estimates based on actual time
 - Note patterns that worked well
 - Document challenges for future reference
 - Suggest process improvements
+- Update session plans for future projects
 
-## Anti-Patterns to Avoid
+## Session Transition Anti-Patterns
 
 Do NOT:
-- Move to next phase with failing tests
-- Skip phase summary generation
+- Move to next session with failing tests
+- Skip session summary generation
 - Document only what was built (also document why)
 - Forget to note known limitations
-- Skip recommendations for next phase
+- Skip recommendations for next session
 - Generate summary without reading code
 - Use generic summaries (be specific)
 - Forget to document shared libraries
+- Skip session plan review
+- Automatically start next session
+- Combine multiple sessions into one

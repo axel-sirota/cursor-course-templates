@@ -1,21 +1,29 @@
 ---
-description: Test-driven development patterns for E2E and unit tests
-globs: ["tests/**", "**/*test*.py"]
+description: Session-based test-driven development patterns for E2E and unit tests
+globs: ["tests/**", "**/*test*.py", "plan/sessions/**"]
 alwaysApply: false
 ---
 
-# Testing First: Test-Driven Development
+# Session-Based Testing First: Test-Driven Development
 
 ## Purpose
-Enforce strict test-driven development where E2E tests are written before implementation, tests drive design decisions, and all tests must pass before phase completion.
+Enforce strict test-driven development within each session where E2E tests are written before implementation, tests drive design decisions, and all tests must pass before session completion.
 
-## Core Principle
+## Session TDD Core Principle
 
-RED → GREEN → REFACTOR
+RED → GREEN → REFACTOR (per session)
 
-1. RED: Write test that fails
-2. GREEN: Implement minimum code to pass test
-3. REFACTOR: Improve code while keeping tests green
+1. RED: Write test that fails (at session start)
+2. GREEN: Implement minimum code to pass test (during session)
+3. REFACTOR: Improve code while keeping tests green (before session end)
+
+## Session Testing Context
+
+Each session follows TDD principles:
+- Session N: Write E2E tests for current endpoint
+- Session N: Implement endpoint to make tests pass
+- Session N: Refactor while keeping tests green
+- Session N: Document test results in session summary
 
 ## E2E Testing Patterns
 
@@ -68,7 +76,7 @@ POST /posts returns:
 **Step 2: Write test using structure**
 ```python
 def test_create_post():
-    """Phase 1: Create post with real implementation"""
+    """Session 2: Phase 1 - Create post with real implementation"""
     response = client.post("/api/posts", json={
         "title": "Test Post",
         "content": "Test content",
@@ -286,26 +294,26 @@ tests/
 └── conftest.py            # Shared fixtures
 ```
 
-## Test Execution Strategy
+## Session Test Execution Strategy
 
-### Development (TDD Cycle)
+### Session Development (TDD Cycle)
 ```bash
-# Run specific test while implementing
+# Run specific test while implementing in current session
 pytest tests/api/test_posts.py::test_create_post -v
 
 # Watch mode (if using pytest-watch)
 ptw tests/api/test_posts.py
 ```
 
-### Phase Completion
+### Session Completion
 ```bash
-# Run all E2E tests
-pytest tests/api/ -v
+# Run all E2E tests for current session
+pytest tests/api/test_posts.py -v
 
-# Run all tests
+# Run all tests to ensure no regressions
 pytest tests/ -v
 
-# Run with coverage
+# Run with coverage for session
 pytest tests/ --cov=app --cov-report=html
 ```
 
@@ -365,25 +373,28 @@ get_response = client.get(f"/api/posts/{response.json()['postId']}")
 assert get_response.status_code == 200
 ```
 
-## Testing Checklist
+## Session Testing Checklist
 
-Before completing any phase:
+Before completing any session:
 
+- [ ] Session plan reviewed and test objectives confirmed
 - [ ] E2E test written before implementation
 - [ ] Test initially fails (proves it tests something)
 - [ ] Test uses skeleton mock data structure
-- [ ] All success cases tested
-- [ ] All error cases tested
+- [ ] All success cases tested for current endpoint
+- [ ] All error cases tested for current endpoint
 - [ ] Authentication tested
 - [ ] Validation tested
-- [ ] All E2E tests passing
+- [ ] All E2E tests passing for current endpoint
 - [ ] Unit tests added for complex business logic
 - [ ] Test coverage adequate for new code
 - [ ] Tests are maintainable and readable
+- [ ] Session summary documents test results
 
-## Anti-Patterns to Avoid
+## Session Testing Anti-Patterns
 
 Do NOT:
+- Skip session plan review
 - Write implementation before test
 - Skip test because "it's simple"
 - Test implementation details instead of behavior
@@ -393,3 +404,5 @@ Do NOT:
 - Test only happy path
 - Commit code with failing tests
 - Skip tests during "rapid development"
+- Test endpoints from other sessions
+- Skip session test documentation

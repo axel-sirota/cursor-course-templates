@@ -1,22 +1,48 @@
 ---
-description: Phase 0 skeleton creation with all endpoints returning mock data
-globs: ["app/api/**", "templates/**", "docker-compose.yml"]
+description: Session 1: Phase 0 skeleton creation with all endpoints returning mock data
+globs: ["app/api/**", "templates/**", "docker-compose.yml", "plan/sessions/**"]
 alwaysApply: false
 ---
 
-# Phase 0: Skeleton Implementation
+# Session 1: Phase 0 (Skeleton Implementation)
 
 ## Purpose
-Create a fully functional API skeleton where all endpoints return mock data matching the OpenAPI specification. This establishes project structure, enables E2E test writing, and validates API contracts.
+Execute Session 1 to create a fully functional API skeleton where all endpoints return mock data matching the OpenAPI specification. This establishes project structure, enables E2E test writing, and validates API contracts.
 
-## Pre-requisites
+## CRITICAL: This Session Stops After Skeleton - No Endpoint Implementation
+
+DO NOT:
+- Implement real business logic
+- Create database migrations
+- Create domain models beyond API request/response
+- Create repositories or services
+- Proceed to Session 2 automatically
+
+ONLY:
+- Create project structure
+- Implement mock endpoints
+- Set up Docker Compose
+- Configure environment
+- Create basic HTML templates
+
+Session 2 (First real endpoint implementation) is a SEPARATE session that requires explicit user command.
+
+## Session Prerequisites
 - OpenAPI specification complete and validated
-- Phase plan generated
+- Plan folder structure created with session plans
+- Session 1 plan reviewed (plan/sessions/session-1-phase-0.md)
 - Development environment ready
 
-## Implementation Steps
+## Session Execution Steps
 
-### 1. Project Structure
+### 1. Review Session Plan
+Before starting implementation:
+- Read plan/sessions/session-1-phase-0.md
+- Confirm session objectives and deliverables
+- Review OpenAPI specification
+- Check prerequisites are met
+
+### 2. Project Structure
 Follow vibe_fastapi_boilerplate.md exactly:
 
 Create complete directory structure:
@@ -35,7 +61,7 @@ app/
 └── main.py
 ```
 
-### 2. Configuration Setup
+### 3. Configuration Setup
 Reference vibe_fastapi_boilerplate.md for:
 - Environment variable management
 - CORS configuration
@@ -49,7 +75,7 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/dbname
 JWT_SECRET_KEY=change-in-production
 ```
 
-### 3. Docker Compose Setup
+### 4. Docker Compose Setup
 Use templates/docker-compose.template.yml.
 
 Include services:
@@ -59,7 +85,7 @@ Include services:
 
 Ensure proper networking and volume mounting.
 
-### 4. Mock Endpoint Implementation
+### 5. Mock Endpoint Implementation
 
 For each endpoint in OpenAPI spec, create mock implementation:
 
@@ -97,7 +123,7 @@ async def get_post(
     )
 ```
 
-### 5. Request/Response Models
+### 6. Request/Response Models
 Create Pydantic models matching OpenAPI schemas.
 
 Use camelCase aliases for API models (vibe_fastapi_boilerplate.md):
@@ -119,7 +145,7 @@ class PostResponse(BaseModel):
     model_config = {"validate_by_name": True}
 ```
 
-### 6. Basic HTML Templates
+### 7. Basic HTML Templates
 Create simple HTML templates for each endpoint (optional):
 
 **templates/index.html:**
@@ -138,7 +164,7 @@ Create simple HTML templates for each endpoint (optional):
 </html>
 ```
 
-### 7. Testing Setup
+### 8. Testing Setup
 Create test structure:
 ```
 tests/
@@ -155,8 +181,8 @@ asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 ```
 
-### 8. Verification
-Before completing Phase 0:
+### 9. Session Verification
+Before completing Session 1:
 
 **Manual testing:**
 ```bash
@@ -205,8 +231,9 @@ async def get_post(post_id: str):
     return mock_response
 ```
 
-## Phase 0 Completion Checklist
+## Session 1 Completion Checklist
 
+- [ ] Session plan reviewed and objectives confirmed
 - [ ] All endpoints implemented with mock responses
 - [ ] Request/response models match OpenAPI spec
 - [ ] Docker Compose configuration working
@@ -216,24 +243,58 @@ async def get_post(post_id: str):
 - [ ] Basic HTML templates created (if applicable)
 - [ ] Test structure created
 - [ ] All mock endpoints manually tested
-- [ ] Phase 0 summary generated
+- [ ] Session 1 summary generated in plan/sessions/
 
-## Phase Transition
+## Session Completion Response
 
-Generate phases/phase-0-summary.md including:
+When Session 1 is complete, respond with:
+
+```
+Session 1 Complete: Phase 0 (Skeleton)
+
+Created:
+- Project structure following FastAPI boilerplate
+- [N] mock endpoints matching OpenAPI spec
+- Docker Compose with PostgreSQL
+- Environment configuration
+- Test structure
+
+Verification:
+- Visit http://localhost:8000/docs to test all endpoints
+- All endpoints return mock data
+- Health check: http://localhost:8000/health
+
+Session Summary:
+- Generated plan/sessions/session-1-summary.md
+- Documented all implemented endpoints
+- Listed mock data patterns used
+- Noted dependencies and configuration
+
+Next Session:
+- Review plan/sessions/session-2-phase-1.md for next phase
+- When ready, say "Start Session 2" to begin Phase 1 implementation
+
+DO NOT proceed to Session 2 automatically.
+```
+
+## Session Transition Documentation
+
+Generate plan/sessions/session-1-summary.md including:
 - List of all implemented endpoints
 - Mock data patterns used
 - Dependencies added (requirements.txt)
 - Configuration variables needed
 - Known limitations of mock implementation
-- Next phase recommendations
+- Prerequisites for Session 2
 
 ## Anti-Patterns to Avoid
 
 Do NOT:
-- Implement real business logic in Phase 0
+- Implement real business logic in Session 1
 - Connect to actual database
 - Make external API calls
 - Implement complex validation beyond Pydantic
 - Skip any endpoints from OpenAPI spec
 - Use inconsistent mock data patterns
+- Automatically start Session 2 implementation
+- Skip session summary documentation
