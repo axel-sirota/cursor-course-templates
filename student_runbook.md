@@ -304,8 +304,11 @@ git commit -m "Session N: Phase M ([METHOD] [PATH]) - [Description]"
 # Generate transition
 @next-session
 
-# Read project context
+# Read project context (quick)
 @read
+
+# Read full context (comprehensive)
+@context
 
 # Export research when stuck
 @research-export [problem description]
@@ -391,7 +394,8 @@ docker-compose --profile app up
 @architect - API design and session planning
 @start-session - Begin session execution  
 @next-session - Generate session transitions
-@read - Read project context
+@read - Read essential project context (quick)
+@context - Read full project context (comprehensive)
 @research-export - Export research when stuck
 @claude-desktop - Generate research prompts
 @terraform - Infrastructure management
