@@ -4,9 +4,9 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: blog_postgres
+    container_name: project_postgres
     environment:
-      POSTGRES_DB: ${DATABASE_NAME:-blog_db}
+      POSTGRES_DB: ${DATABASE_NAME:-app_db}
       POSTGRES_USER: ${DATABASE_USER:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
       POSTGRES_HOST_AUTH_METHOD: trust
@@ -21,12 +21,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - blog_network
+      - project_network
 
   # pgAdmin (Optional - for database management UI)
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: blog_pgadmin
+    container_name: project_pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
@@ -36,7 +36,7 @@ services:
     depends_on:
       - postgres
     networks:
-      - blog_network
+      - project_network
     profiles:
       - tools
 
@@ -45,19 +45,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: blog_api
+    container_name: project_api
     environment:
       PORT: ${PORT:-8000}
       HOST: ${HOST:-0.0.0.0}
       DEBUG: ${DEBUG:-True}
       
       # Database
-      DATABASE_URL: postgresql://${DATABASE_USER:-postgres}:${DATABASE_PASSWORD:-postgres}@postgres:5432/${DATABASE_NAME:-blog_db}
-      
-      # Supabase (if using)
-      SUPABASE_URL: ${SUPABASE_URL:-}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
-      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      DATABASE_URL: postgresql://${DATABASE_USER:-postgres}:${DATABASE_PASSWORD:-postgres}@postgres:5432/${DATABASE_NAME:-app_db}
       
       # JWT
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-in-production}
@@ -76,7 +71,7 @@ services:
         condition: service_healthy
     command: python main.py
     networks:
-      - blog_network
+      - project_network
     profiles:
       - app
 
@@ -85,5 +80,5 @@ volumes:
     driver: local
 
 networks:
-  blog_network:
+  project_network:
     driver: bridge

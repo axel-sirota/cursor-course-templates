@@ -15,7 +15,7 @@
 - All endpoints with mock responses matching OpenAPI
 - Docker Compose configuration
 - Environment setup (.env.example)
-- Basic HTML templates (if applicable)
+- Development tooling configured (ruff, mypy, pytest)
 - Health check endpoint
 - Authentication endpoints (register, login)
 
@@ -197,6 +197,7 @@ After Phase 9: Full system integration tests
 
 ### Before Completing Each Phase
 - [ ] All E2E tests passing
+- [ ] Linting passing (ruff)
 - [ ] Code formatted (Black)
 - [ ] Type checking passing (mypy)
 - [ ] No linting errors

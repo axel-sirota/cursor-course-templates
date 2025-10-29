@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This guide provides instructions for the Cursor LLM on how to manage the Git workflow and development lifecycle for this project. Use this as a reference when the user requests Git operations.
+This guide provides instructions for the Cursor LLM on how to manage the Git workflow and development lifecycle for Python/FastAPI projects. Use this as a reference when the user requests Git operations.
 
 ## Git Workflow Commands
 
@@ -10,7 +10,7 @@ This guide provides instructions for the Cursor LLM on how to manage the Git wor
 **User says:** "Start new feature: [feature-name]"
 **You do:** 
 ```bash
-cd geniegets_api
+cd your_project
 make start-feature FEATURE_NAME=[feature-name]
 ```
 
@@ -18,16 +18,14 @@ make start-feature FEATURE_NAME=[feature-name]
 - Switches to develop branch
 - Pulls latest develop
 - Creates feature branch: `feature/[feature-name]`
-- **Pushes monorepo branch to remote**
-- **Syncs latest UI changes from UI repository**
-- **Creates corresponding branch in UI repository**
+- Pushes feature branch to remote
 - Validates feature name (alphanumeric, hyphens, underscores only)
 
 ### Push Feature
 **User says:** "Push feature" or "Merge [feature-name]"
 **You do:**
 ```bash
-cd geniegets_api
+cd your_project
 make push-feature
 ```
 
@@ -35,17 +33,15 @@ make push-feature
 - Checks you're on a feature branch
 - Pulls latest develop and rebases
 - Runs quality checks (`make quality`)
-- Pushes feature branch to monorepo
-- **Pushes UI changes to UI repository**
-- **Creates PR in monorepo** from feature → develop
-- **Creates PR in UI repository** from feature → develop
+- Pushes feature branch to remote
+- Creates PR from feature → develop
 - Uses GitHub CLI if available, otherwise provides manual instructions
 
 ### Complete Feature
 **User says:** "Complete feature" or "Finish feature" (after PR is merged)
 **You do:**
 ```bash
-cd geniegets_api
+cd your_project
 make complete-feature
 ```
 
@@ -56,7 +52,6 @@ make complete-feature
 - Pulls latest develop
 - Deletes local feature branch
 - Deletes remote feature branch
-- **Merges UI changes back to develop in UI repository**
 - Runs final quality check on develop
 - Provides next steps guidance
 
@@ -69,7 +64,7 @@ make complete-feature
 **User says:** "Release to production" or "Deploy to production"
 **You do:**
 ```bash
-cd geniegets_api
+cd your_project
 make deploy-production
 ```
 
@@ -80,9 +75,7 @@ make deploy-production
 - Generates changelog from commit messages
 - Updates version in pyproject.toml
 - Pushes develop with release updates
-- **Syncs UI changes to UI repository**
-- **Creates PR in monorepo** from develop → main
-- **Creates PR in UI repository** from develop → main
+- Creates PR from develop → main
 - Provides release checklist and next steps
 
 **PR Description Format:**
@@ -90,41 +83,16 @@ make deploy-production
 - **Summary**: Brief description of the release
 - **Key Changes**: Bullet list of main changes from recent commits
 
-## UI Subtree Workflow
+## Project Structure
 
 ### Overview
-This project uses a **git subtree** to integrate the UI repository (`geniegets-web`) into the monorepo. This enables coordinated development between the API and UI while maintaining separate repositories.
+This guide assumes a standard Python/FastAPI project structure with proper Git workflow management.
 
 ### Repository Structure
-- **Monorepo**: `genie-gets` (contains API + UI subtree)
-- **UI Repository**: `geniegets-web` (Lovable-controlled)
-- **Subtree Directory**: `geniegets_web/` (UI code in monorepo)
-
-### Dual-Repository Coordination
-All workflow commands now handle **both repositories**:
-
-**Start Feature:**
-- Creates branch in monorepo
-- Creates corresponding branch in UI repository
-- Syncs latest UI changes
-
-**Push Feature:**
-- Pushes changes to monorepo
-- Pushes UI changes to UI repository
-- Creates PRs in both repositories
-
-**Complete Feature:**
-- Cleans up monorepo branch
-- Merges UI changes back to UI repository develop
-
-**Deploy Production:**
-- Creates production PRs in both repositories
-- Ensures coordinated releases
-
-### UI Repository Access
-- **URL**: `https://github.com/garage-vibe/geniegets-web.git`
-- **Branch**: `develop` (main development branch)
-- **Subtree Commands**: Automatically handled by scripts
+- **Main Repository**: Your project repository
+- **Development Branch**: `develop` (main development branch)
+- **Production Branch**: `main` (production releases)
+- **Feature Branches**: `feature/[feature-name]` (feature development)
 
 ## Branch Strategy
 
@@ -135,7 +103,7 @@ All workflow commands now handle **both repositories**:
 ## Quality Gates
 
 All commands automatically run:
-- `make quality` (format, lint, type-check, test)
+- `make quality` (ruff, black, mypy, pytest)
 - Rebase on latest develop
 - Commit message validation
 - Feature branch naming validation
@@ -153,7 +121,7 @@ The changelog generator looks for these prefixes:
 ## File Structure
 
 ```
-geniegets_api/
+your_project/
 ├── scripts/
 │   ├── start-feature.sh      # Feature branch creation
 │   ├── push-feature.sh       # Feature push and PR creation
@@ -163,7 +131,9 @@ geniegets_api/
 │   ├── pull_request_template.md
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── Makefile                  # Enhanced with Git workflow commands
-├── pyproject.toml           # Version management
+├── pyproject.toml           # Version management and tool configuration
+├── requirements.txt         # Python dependencies
+├── requirements-dev.txt     # Development dependencies
 └── CHANGELOG.md             # Generated changelog
 ```
 
@@ -171,37 +141,37 @@ geniegets_api/
 
 ### "Start new feature: user authentication"
 ```bash
-cd geniegets_api
+cd your_project
 make start-feature FEATURE_NAME=user-authentication
 ```
 
 ### "Push feature"
 ```bash
-cd geniegets_api
+cd your_project
 make push-feature
 ```
 
 ### "Complete feature"
 ```bash
-cd geniegets_api
+cd your_project
 make complete-feature
 ```
 
 ### "Release to production"
 ```bash
-cd geniegets_api
+cd your_project
 make deploy-production
 ```
 
 ### "Merge user authentication"
 ```bash
-cd geniegets_api
+cd your_project
 make push-feature
 ```
 
 ### "Complete user authentication"
 ```bash
-cd geniegets_api
+cd your_project
 make complete-feature
 ```
 
@@ -222,7 +192,7 @@ If any command fails:
 
 ## Notes for Future Self
 
-- Always run commands from the `geniegets_api` directory
+- Always run commands from the project root directory
 - The scripts are already executable and ready to use
 - Quality gates ensure code quality before any Git operations
 - Changelog generation is automatic and follows conventional commit format
@@ -268,7 +238,7 @@ chmod +x scripts/*.sh
 
 **"Not in git repository" errors:**
 ```bash
-cd geniegets_api
+cd your_project
 ```
 
 **"GitHub CLI not found" warnings:**
@@ -278,28 +248,26 @@ cd geniegets_api
 - Run `make quality` manually to see specific issues
 - Fix issues and try again
 
-## Dual-Repository Workflow
+## Development Workflow
 
 ### Important Notes
-- **Both repositories** must be coordinated for proper development
-- **PRs are created in both repositories** for each feature
-- **Both PRs must be merged** for complete feature completion
-- **Production releases** require coordination between both repositories
+- **Single repository** workflow for Python/FastAPI projects
+- **PRs are created** for each feature
+- **PRs must be merged** for complete feature completion
+- **Production releases** require proper testing and validation
 
 ### Workflow Summary
-1. **Start Feature** → Branches created in both repos
-2. **Push Feature** → PRs created in both repos
-3. **Merge PRs** → Both repositories updated
-4. **Complete Feature** → Both repositories cleaned up
-5. **Deploy Production** → Production PRs in both repos
+1. **Start Feature** → Branch created from develop
+2. **Push Feature** → PR created from feature → develop
+3. **Merge PR** → Repository updated
+4. **Complete Feature** → Branch cleaned up
+5. **Deploy Production** → Production PR from develop → main
 
-### Troubleshooting Subtree Issues
-**"Subtree push failed" errors:**
-- Ensure working tree is clean before running commands
-- Check that UI repository is accessible
-- Verify GitHub CLI is installed for PR creation
+### Troubleshooting Common Issues
+**"Working tree not clean" errors:**
+- Ensure all changes are committed or stashed before running commands
+- Check git status for uncommitted changes
 
-**"UI repository not in sync" warnings:**
-- Run `git subtree pull` to sync latest UI changes
-- Check that both repositories have the same branch names
-- Ensure PRs are merged in both repositories
+**"Branch not found" errors:**
+- Verify you're on the correct branch
+- Check that the feature branch exists locally and remotely

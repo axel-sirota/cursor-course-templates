@@ -23,7 +23,7 @@
 - [ ] Test run and confirmed FAILING
 - [ ] Test failure makes sense (no implementation yet)
 
-## Step 2: Database Migration (5-10 min)
+## Step 2: Database Migration/Setup (Alembic) (5-10 min)
 - [ ] Migration file created with timestamp
 - [ ] Schema matches domain model requirements
 - [ ] Primary key defined (UUID with default)
@@ -46,16 +46,18 @@
 
 ## Step 4: Repository (10-15 min)
 - [ ] Repository class created
-- [ ] table_name configured
-- [ ] _supabase_to_model() mapper implemented
-- [ ] _modelcreate_to_supabase() mapper implemented
-- [ ] _update_to_supabase() mapper implemented
+- [ ] SQLAlchemy model(s) identified
+- [ ] Session injected (dependency or constructor)
+- [ ] row_to_model() mapper implemented (if needed)
+- [ ] create_input_to_orm() mapper implemented (if needed)
+- [ ] update_input_to_orm() mapper implemented (if needed)
 - [ ] create() method implemented (if needed)
 - [ ] get_by_id() method implemented (if needed)
 - [ ] get_all() method implemented (if needed)
 - [ ] update() method implemented (if needed)
 - [ ] delete() method implemented (if needed)
 - [ ] Error handling added
+- [ ] Transactions and rollbacks handled
 - [ ] Logging added
 - [ ] Type hints on all methods
 - [ ] Docstrings on all methods
@@ -91,8 +93,9 @@
 - [ ] All test scenarios passing
 
 ## Step 8: Code Quality (5 min)
+- [ ] Linting passed: ruff check app/ tests/
 - [ ] Code formatted with Black: black app/ tests/
-- [ ] Type checking passed: mypy app/modules/[module]/
+- [ ] Type checking passed: mypy app/
 - [ ] All tests passing: pytest tests/
 - [ ] No linting errors
 - [ ] No type checking errors

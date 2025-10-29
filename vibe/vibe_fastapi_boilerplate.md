@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This guide provides step-by-step instructions for creating a complete FastAPI project boilerplate with authentication, database integration, and modular structure. After following this guide, you'll have a working API that starts with `python main.py`.
+This guide provides step-by-step instructions for creating a complete FastAPI project boilerplate with authentication, database integration, and modular structure. After following this guide, you'll have a working API that starts with `python main.py` and follows Python best practices with ruff, mypy, and pytest.
 
 ## Quick Start Checklist
 
@@ -80,7 +80,9 @@ fastapi==0.115.0
 uvicorn[standard]==0.32.0
 pydantic[email]==2.10.0
 pydantic-settings==2.7.0
-supabase==2.8.0
+sqlalchemy==2.0.25
+alembic==1.13.1
+psycopg2-binary==2.9.9
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.12
 pytest==8.3.0
@@ -98,11 +100,18 @@ DEBUG=True
 # CORS
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
 
-# Supabase
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-SUPABASE_ANON_KEY=your_anon_key
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/your_database
+DATABASE_NAME=your_database
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
 
+# JWT
+JWT_SECRET_KEY=your-secret-key-change-in-production
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # LLM (Optional - remove if not needed)
 # OPENAI_API_KEY=your_openai_key
@@ -167,11 +176,18 @@ class Settings(BaseSettings):
     port: int = 8001
     debug: bool = False
     
-    # Supabase
-    supabase_url: str = ""
-    supabase_service_role_key: str = ""
-    supabase_anon_key: str = ""
+    # Database
+    database_url: str = ""
+    database_name: str = "your_database"
+    database_user: str = "postgres"
+    database_password: str = "postgres"
+    database_host: str = "localhost"
+    database_port: int = 5432
     
+    # JWT
+    jwt_secret_key: str = "your-secret-key-change-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 30
     
     # LLM (Optional)
     openai_api_key: str = ""
@@ -275,87 +291,76 @@ logger = logging.getLogger(__name__)
 
 **app/core/database.py**
 ```python
-from supabase import create_client, Client
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 from typing import Optional
-import time
 import logging
 
 logger = logging.getLogger(__name__)
 
-class Database:
-    def __init__(self) -> None:
-        self._client: Optional[Client] = None
-        self._client_created: float = 0
-        self._client_ttl: int = 60  # 1 minute
+# Create database engine
+engine = create_engine(
+    settings.database_url,
+    echo=settings.debug,
+    pool_pre_ping=True,
+    pool_recycle=300
+)
 
-    @property
-    def client(self) -> Optional[Client]:
-        now = time.time()
-        
-        # Create new client if none exists or TTL expired
-        if (self._client is None or 
-            (now - self._client_created) > self._client_ttl):
-            
-            if settings.supabase_url and settings.supabase_service_role_key:
-                try:
-                    self._client = create_client(
-                        settings.supabase_url,
-                        settings.supabase_service_role_key
-                    )
-                    self._client_created = now
-                    logger.info("Database client created successfully")
-                except Exception as e:
-                    logger.error(f"Failed to create database client: {e}")
-                    self._client = None
-            else:
-                logger.warning("Supabase credentials not configured")
-        
-        return self._client
-    
-    @property
-    def admin_client(self) -> Optional[Client]:
-        """Client with service role key for admin operations"""
-        if settings.supabase_url and settings.supabase_service_role_key:
-            try:
-                return create_client(
-                    settings.supabase_url,
-                    settings.supabase_service_role_key
-                )
-            except Exception as e:
-                logger.error(f"Failed to create admin database client: {e}")
-                return None
-        return None
+# Create session factory
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create base class for models
+Base = declarative_base()
+
+def get_db():
+    """Dependency to get database session"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def init_db():
+    """Initialize database tables"""
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Failed to create database tables: {e}")
+        raise
 
 # Create global database instance
-db = Database()
+db = engine
 ```
 
 **app/core/storage.py**
 ```python
-from supabase import Client
-from app.core.database import db
 from typing import Optional, BinaryIO
+import os
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 class StorageClient:
-    def __init__(self):
-        self._client: Optional[Client] = None
-    
-    @property
-    def client(self) -> Optional[Client]:
-        return db.client
+    def __init__(self, storage_path: str = "storage"):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(exist_ok=True)
     
     def upload_file(self, bucket: str, path: str, file: BinaryIO) -> bool:
-        """Upload file to Supabase storage"""
-        if not self.client:
-            logger.error("Storage client not available")
-            return False
-        
+        """Upload file to local storage"""
         try:
-            result = self.client.storage.from_(bucket).upload(path, file)
+            bucket_path = self.storage_path / bucket
+            bucket_path.mkdir(exist_ok=True)
+            
+            file_path = bucket_path / path
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(file_path, "wb") as f:
+                f.write(file.read())
+            
             logger.info(f"File uploaded successfully to {bucket}/{path}")
             return True
         except Exception as e:
@@ -363,14 +368,13 @@ class StorageClient:
             return False
     
     def download_file(self, bucket: str, path: str) -> Optional[bytes]:
-        """Download file from Supabase storage"""
-        if not self.client:
-            logger.error("Storage client not available")
-            return None
-        
+        """Download file from local storage"""
         try:
-            result = self.client.storage.from_(bucket).download(path)
-            return result
+            file_path = self.storage_path / bucket / path
+            if file_path.exists():
+                with open(file_path, "rb") as f:
+                    return f.read()
+            return None
         except Exception as e:
             logger.error(f"Failed to download file: {e}")
             return None
@@ -550,13 +554,14 @@ async def health_check():
     # Check database connectivity
     db_healthy = False
     try:
-        if db.client:
-            # Simple connection test - just check if client is available
-            # This is the simplest way to verify database connectivity
+        if db:
+            # Simple connection test - execute a simple query
+            with db.connect() as conn:
+                conn.execute("SELECT 1")
             db_healthy = True
             logger.info("Database health check passed")
         else:
-            logger.warning("Database client not available - check Supabase credentials")
+            logger.warning("Database not available - check database credentials")
     except Exception as e:
         logger.warning(f"Database health check failed: {e}")
         db_healthy = False
@@ -1009,8 +1014,11 @@ mypy==1.8.0
 black==24.0.0
 isort==5.13.0
 
-# Testing tools (if not already in main requirements)
+# Testing tools
+pytest==8.3.0
+pytest-asyncio==0.24.0
 pytest-cov==4.1.0
+httpx>=0.24.0,<0.28.0
 ```
 
 **pyproject.toml** (add to existing or create new)
@@ -1062,7 +1070,7 @@ strict_equality = true
 
 # External dependencies
 [[tool.mypy.overrides]]
-module = ["supabase.*", "jose.*"]
+module = ["sqlalchemy.*", "jose.*", "alembic.*"]
 ignore_missing_imports = true
 
 # Skip internal implementation details
@@ -1116,10 +1124,10 @@ pip install -r requirements-dev.txt
 ```bash
 make quality
 # Or individually:
-ruff check app/ tests/        # Catch import errors, undefined names
+ruff check app/ tests/ --fix  # Catch import errors, undefined names, auto-fix
 mypy app/api/ app/core/ app/modules/*/services/  # Type checking (edge points only)
 black app/ tests/             # Format code
-pytest tests/                 # Run tests
+pytest tests/ -v              # Run tests with verbose output
 ```
 
 ### IDE Integration
@@ -1165,6 +1173,7 @@ This setup uses a **focused approach** to code quality:
 ```python
 # This will be caught by ruff (all code)
 from nonexistent_module import something  # Import error
+undefined_variable = 123  # Undefined variable
 
 # This will be caught by mypy (edge points only)
 @app.post("/api/analyze")
@@ -1182,7 +1191,7 @@ Add this to your CI pipeline:
     
 - name: Lint and type check
   run: |
-    ruff check app/ tests/
+    ruff check app/ tests/ --fix
     mypy app/api/ app/core/ app/modules/*/services/
     
 - name: Run tests
@@ -1195,14 +1204,14 @@ This setup ensures code quality from development through deployment, focusing ty
 
 After creating the boilerplate:
 
-1. **Configure Supabase**: Update .env with your Supabase credentials
-2. **Add Modules**: Create new modules in the modules/ directory following the Agentic Module Pattern
+1. **Configure Database**: Update .env with your database credentials
+2. **Add Modules**: Create new modules in the modules/ directory following the modular pattern
 3. **Implement Real LLM**: Replace mock LLM client with actual OpenAI integration
-4. **Database Models**: Create tables in Supabase and update auth to use real database
-5. **Production Setup**: Configure Railway deployment settings
+4. **Database Models**: Create SQLAlchemy models and run migrations
+5. **Production Setup**: Configure deployment settings
 
 ## Troubleshooting
 
 **"Module not found" errors**: Ensure all __init__.py files are present
-**Database connection fails**: Check Supabase credentials in .env
+**Database connection fails**: Check database credentials in .env
 **CORS errors**: Add your frontend URL to ALLOWED_ORIGINS in .env

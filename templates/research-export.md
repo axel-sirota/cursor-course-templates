@@ -172,7 +172,8 @@
 
 ### Official Documentation Consulted
 - [FastAPI docs link] - [What was checked]
-- [Supabase docs link] - [What was checked]
+- [SQLAlchemy docs link] - [What was checked]
+- [Alembic docs link] - [What was checked]
 - [Python docs link] - [What was checked]
 
 ### Stack Overflow / Forum Posts

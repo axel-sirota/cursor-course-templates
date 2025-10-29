@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This guide documents the phase-based development workflow for building production-ready FastAPI applications using test-driven development. This workflow prioritizes incremental implementation, comprehensive testing, and knowledge documentation.
+This guide documents the phase-based development workflow for building production-ready Python applications with FastAPI using test-driven development. This workflow prioritizes incremental implementation, comprehensive testing, and knowledge documentation.
 
 ## Core Philosophy
 
@@ -53,7 +53,7 @@ Create complete API skeleton with all endpoints returning mock data.
 4. Implement all endpoints with mock responses
 5. Set up Docker Compose for local development
 6. Configure environment variables
-7. Create basic HTML templates (if applicable)
+7. Set up development tools (ruff, mypy, pytest)
 8. Verify all endpoints return expected mock data
 
 **Deliverables:**
@@ -94,14 +94,14 @@ def test_create_post():
 
 Run test and verify it fails (proves test is valid).
 
-#### Step 2: Database Migration (5-10 minutes)
-Create migration for required tables:
+#### Step 2: Database Setup (5-10 minutes)
+Set up database schema for required tables:
 - Define schema matching domain models
 - Include proper indexes and constraints
-- Apply migration locally
+- Apply schema locally
 - Verify schema in database
 
-Reference vibe_database.md for migration patterns.
+Reference vibe_database.md for database patterns.
 
 #### Step 3: Domain Models (5-10 minutes)
 Create layered models following repository pattern:
@@ -145,6 +145,7 @@ Tests should now pass with real implementation.
 #### Step 8: Code Quality (5 minutes)
 Format and validate code:
 ```bash
+ruff check app/ tests/ --fix
 black app/ tests/
 mypy app/modules/posts/
 pytest tests/
@@ -249,6 +250,7 @@ tests/
 - E2E tests: All success and error paths
 - Unit tests: Complex business logic
 - Coverage: Minimum 80% for services
+- All tests must pass before phase completion
 
 ## Knowledge Management
 
@@ -315,7 +317,7 @@ Reference vibe_development_lifecycle.md for:
 
 ### Phase Completion
 - All E2E tests passing
-- Code formatted and type-checked
+- Code formatted (ruff, black) and type-checked (mypy)
 - Phase summary generated
 - No known bugs
 
@@ -347,7 +349,8 @@ Do NOT:
 
 ### Quality Focus
 - Write good tests first
-- Follow style guidelines
+- Follow style guidelines (ruff, black)
+- Use type hints (mypy)
 - Document as you go
 - Refactor incrementally
 

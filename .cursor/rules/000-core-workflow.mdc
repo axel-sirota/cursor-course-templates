@@ -51,7 +51,9 @@ Follow Python Google Style Guide:
 ### Phase Transition Checklist
 Before transitioning to next phase:
 - [ ] All E2E tests passing
+- [ ] Linting passed (ruff)
 - [ ] Code formatted with Black
+- [ ] Type checking passed (mypy)
 - [ ] Type hints added to all functions
 - [ ] Docstrings added to public APIs
 - [ ] Phase summary generated

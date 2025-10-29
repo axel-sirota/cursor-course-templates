@@ -2,7 +2,7 @@
 
 ## Purpose & Scope
 
-This guide provides rules, patterns, and instructions for AI coding assistants (Claude Code, Cursor, etc.) working on database-related tasks in projects using Supabase with the Repository Pattern. Reference this document when implementing database models, repositories, services, or migration tasks.
+This guide provides rules, patterns, and instructions for AI coding assistants (Claude Code, Cursor, etc.) working on database-related tasks in projects using SQLAlchemy with the Repository Pattern. Reference this document when implementing database models, repositories, services, or migration tasks.
 
 **Related Documents:**
 - [FastAPI Boilerplate Guide](vibe_fastapi_boilerplate.md) - For API model patterns and camelCase conventions
@@ -11,7 +11,7 @@ This guide provides rules, patterns, and instructions for AI coding assistants (
 **When to use this guide:**
 - Creating database models and repositories from migrations
 - Implementing CRUD operations for database tables
-- Working with Supabase database schemas
+- Working with SQLAlchemy database schemas
 - Managing database migrations across environments
 - Creating domain services that use multiple repositories
 
@@ -22,22 +22,16 @@ This guide provides rules, patterns, and instructions for AI coding assistants (
 2. **Layered Model Architecture**: Use Base → Full → Create/Update model hierarchy for type safety
 3. **Service Layer**: Complex operations and JOINs are handled in services, not repositories
 4. **Module Isolation**: Repositories are never exported or accessed from outside their module
-5. **Migration-Driven**: Database schema changes are managed through Supabase CLI migrations
-6. **Centralized Database Access**: Use shared database client instead of individual Supabase clients
+5. **Migration-Driven**: Database schema changes are managed through Alembic migrations
+6. **Centralized Database Access**: Use shared database session instead of individual connections
 
 ### Environment Structure
 ```
-database/
-├── develop/
-│   └── supabase/
-│       ├── config.toml
-│       └── migrations/
-│           └── {timestamp}_{description}.sql
-└── prod/
-    └── supabase/
-        ├── config.toml
-        └── migrations/
-            └── {timestamp}_{description}.sql
+alembic/
+├── versions/
+│   └── {timestamp}_{description}.py
+├── env.py
+└── alembic.ini
 ```
 
 ### Module Directory Structure
@@ -66,7 +60,7 @@ domain_models.py structure:
 3. **Flexibility**: Different models for different operations (create vs update)
 4. **Maintainability**: Schema changes don't break business logic
 5. **Validation**: Pydantic handles validation at model boundaries
-6. **Centralized Database Access**: Single database client reduces complexity
+6. **Centralized Database Access**: Single database session reduces complexity
 
 ### Data Flow Pattern
 ```
@@ -107,16 +101,16 @@ API Response ← Service Layer ← Repository ← Database
 ### 3. Repository Implementation
 - **ALWAYS** implement full CRUD operations (Create, Read, Update, Delete)
 - **ALWAYS** include type-safe mapper functions for each model type (Base, Create, Update)
-- **ALWAYS** use centralized database client (`db.client`) instead of individual Supabase clients
+- **ALWAYS** use centralized database session (`get_db()`) instead of individual connections
 - **ALWAYS** handle database exceptions gracefully
 - **NEVER** perform JOINs across different tables in repositories
 - **ALWAYS** use operation-specific models in method signatures (Create for create, Update for update)
 
 ### 4. Migration Management
-- **ALWAYS** create migrations using Supabase CLI only
+- **ALWAYS** create migrations using Alembic only
 - **ALWAYS** test migrations on develop environment first
-- **ALWAYS** manually copy migrations to prod when ready for release
-- **NEVER** automate production migration deployment
+- **ALWAYS** review migrations before applying to production
+- **NEVER** skip migration testing
 
 ### 5. Testing Strategy
 - **NEVER** write unit tests for repositories (they're straightforward CRUD)
@@ -197,9 +191,11 @@ __all__ = ["User", "UserCreate", "UserUpdate"]
 
 4. **Create repository class** in `app/modules/{module_name}/repository/repository.py`:
 ```python
-from typing import List, Optional, Dict, Any
-from app.core.database import db
+from typing import List, Optional
+from sqlalchemy.orm import Session
+from app.core.database import get_db
 from app.modules.{module_name}.models import User, UserCreate, UserUpdate
+from app.modules.{module_name}.models.database_models import UserDB
 import logging
 
 logger = logging.getLogger(__name__)
@@ -207,131 +203,133 @@ logger = logging.getLogger(__name__)
 class UserRepository:
     """Repository for User table operations"""
     
-    def __init__(self):
-        self.table_name = "users"
+    def __init__(self, db: Session):
+        self.db = db
     
-    def _supabase_to_model(self, row: Dict[str, Any]) -> User:
-        """Convert Supabase row to User model"""
-        return User(
-            id=str(row["id"]),  # Convert UUID to string
-            email=row["email"],
-            full_name=row["full_name"],
-            created_at=row["created_at"],
-            updated_at=row["updated_at"]
-        )
-    
-    def _modelcreate_to_supabase(self, user_data: UserCreate) -> Dict[str, Any]:
-        """Convert UserCreate model to Supabase row format"""
-        return {
-            "email": user_data.email,
-            "full_name": user_data.full_name,
-        }
-    
-    def _update_to_supabase(self, user_data: UserUpdate) -> Dict[str, Any]:
-        """Convert UserUpdate model to Supabase row format"""
-        return user_data.model_dump(exclude_none=True)
-    
-    async def create(self, user_data: UserCreate) -> User:
+    def create(self, user_data: UserCreate) -> User:
         """Create a new user"""
         try:
-            data = self._modelcreate_to_supabase(user_data)
-            result = db.client.table(self.table_name).insert(data).execute()
+            db_user = UserDB(
+                email=user_data.email,
+                full_name=user_data.full_name
+            )
+            self.db.add(db_user)
+            self.db.commit()
+            self.db.refresh(db_user)
             
-            if result.data:
-                return self._supabase_to_model(result.data[0])
-            else:
-                raise Exception("Failed to create user")
+            return User(
+                id=str(db_user.id),
+                email=db_user.email,
+                full_name=db_user.full_name,
+                created_at=db_user.created_at,
+                updated_at=db_user.updated_at
+            )
                 
         except Exception as e:
             logger.error(f"Error creating user: {e}")
+            self.db.rollback()
             raise
     
-    async def get_by_id(self, user_id: str) -> Optional[User]:
+    def get_by_id(self, user_id: str) -> Optional[User]:
         """Get user by ID"""
         try:
-            result = (
-                db.client.table(self.table_name)
-                .select("*")
-                .eq("id", user_id)
-                .execute()
-            )
+            db_user = self.db.query(UserDB).filter(UserDB.id == user_id).first()
             
-            if result.data:
-                return self._supabase_to_model(result.data[0])
+            if db_user:
+                return User(
+                    id=str(db_user.id),
+                    email=db_user.email,
+                    full_name=db_user.full_name,
+                    created_at=db_user.created_at,
+                    updated_at=db_user.updated_at
+                )
             return None
             
         except Exception as e:
             logger.error(f"Error getting user by ID {user_id}: {e}")
             raise
     
-    async def get_by_email(self, email: str) -> Optional[User]:
+    def get_by_email(self, email: str) -> Optional[User]:
         """Get user by email"""
         try:
-            result = (
-                db.client.table(self.table_name)
-                .select("*")
-                .eq("email", email)
-                .execute()
-            )
+            db_user = self.db.query(UserDB).filter(UserDB.email == email).first()
             
-            if result.data:
-                return self._supabase_to_model(result.data[0])
+            if db_user:
+                return User(
+                    id=str(db_user.id),
+                    email=db_user.email,
+                    full_name=db_user.full_name,
+                    created_at=db_user.created_at,
+                    updated_at=db_user.updated_at
+                )
             return None
             
         except Exception as e:
             logger.error(f"Error getting user by email {email}: {e}")
             raise
     
-    async def get_all(self, limit: int = 100, offset: int = 0) -> List[User]:
+    def get_all(self, limit: int = 100, offset: int = 0) -> List[User]:
         """Get all users with pagination"""
         try:
-            result = (
-                db.client.table(self.table_name)
-                .select("*")
-                .range(offset, offset + limit - 1)
-                .execute()
-            )
+            db_users = self.db.query(UserDB).offset(offset).limit(limit).all()
             
-            return [self._supabase_to_model(row) for row in result.data]
+            return [
+                User(
+                    id=str(db_user.id),
+                    email=db_user.email,
+                    full_name=db_user.full_name,
+                    created_at=db_user.created_at,
+                    updated_at=db_user.updated_at
+                )
+                for db_user in db_users
+            ]
             
         except Exception as e:
             logger.error(f"Error getting all users: {e}")
             raise
     
-    async def update(self, user_id: str, user_data: UserUpdate) -> User:
+    def update(self, user_id: str, user_data: UserUpdate) -> User:
         """Update an existing user"""
         try:
-            data = self._update_to_supabase(user_data)
-            result = (
-                db.client.table(self.table_name)
-                .update(data)
-                .eq("id", user_id)
-                .execute()
-            )
+            db_user = self.db.query(UserDB).filter(UserDB.id == user_id).first()
             
-            if result.data:
-                return self._supabase_to_model(result.data[0])
-            else:
-                raise Exception("Failed to update user")
+            if not db_user:
+                raise Exception("User not found")
+            
+            update_data = user_data.model_dump(exclude_none=True)
+            for field, value in update_data.items():
+                setattr(db_user, field, value)
+            
+            self.db.commit()
+            self.db.refresh(db_user)
+            
+            return User(
+                id=str(db_user.id),
+                email=db_user.email,
+                full_name=db_user.full_name,
+                created_at=db_user.created_at,
+                updated_at=db_user.updated_at
+            )
                 
         except Exception as e:
             logger.error(f"Error updating user {user_id}: {e}")
+            self.db.rollback()
             raise
     
-    async def delete(self, user_id: str) -> bool:
+    def delete(self, user_id: str) -> bool:
         """Delete a user by ID"""
         try:
-            result = (
-                db.client.table(self.table_name)
-                .delete()
-                .eq("id", user_id)
-                .execute()
-            )
+            db_user = self.db.query(UserDB).filter(UserDB.id == user_id).first()
             
-            return len(result.data) > 0
+            if db_user:
+                self.db.delete(db_user)
+                self.db.commit()
+                return True
+            return False
             
         except Exception as e:
             logger.error(f"Error deleting user {user_id}: {e}")
+            self.db.rollback()
             raise
 ```
 
