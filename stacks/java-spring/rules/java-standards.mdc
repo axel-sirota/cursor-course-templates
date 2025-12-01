@@ -1,0 +1,26 @@
+---
+description: Java Spring Boot Coding Standards & Best Practices
+globs: **/*.java
+---
+
+# Java Spring Boot Guidelines
+
+## Code Style
+- **Naming**: `PascalCase` for classes, `camelCase` for methods/variables, `SCREAMING_SNAKE_CASE` for constants.
+- **Lombok**: Use `@Data`, `@Builder`, `@RequiredArgsConstructor` (for DI) to reduce boilerplate.
+- **Injection**: Always use **Constructor Injection** (via `@RequiredArgsConstructor`). Avoid `@Autowired` on fields.
+
+## Architecture (Layered)
+1.  **Web Layer** (`web/`): `@RestController`. DTOs in, DTOs out. No business logic.
+2.  **Service Layer** (`service/`): `@Service`. Transactional boundaries (`@Transactional`).
+3.  **Repository Layer** (`repository/`): `JpaRepository` interfaces.
+4.  **Model Layer** (`model/`): `@Entity` classes.
+
+## Testing
+- **Unit**: Use JUnit 5 and Mockito (`@ExtendWith(MockitoExtension.class)`).
+- **Integration**: Use `@SpringBootTest` with **Testcontainers** for DB.
+- **Convention**: Test classes mirror source structure (e.g., `src/test/java/.../UserServiceTest.java`).
+
+## Error Handling
+- Use `@RestControllerAdvice` for global exception handling.
+- Map exceptions to standardized `ProblemDetail` or custom error DTOs.

@@ -1,75 +1,35 @@
-# Next Session Transition Generator
+---
+description: Generate a transition prompt for the next coding session
+---
 
-Generate a comprehensive transition prompt for the next session of development.
+# Next Session Command
 
-## Prerequisites
+Wraps up the current work and generates a "Context Beacon" for the next time you work.
 
-Before generating transition prompt, read:
-- @plan/sessions/session-N-summary.md - Current session summary
-- @plan/sessions/session-N+1-phase-M.md - Next session plan
-- @.cursor/rules/600-phase-transition.mdc - Session transition rules
-- @vibe/vibe_phase_workflow.md - Development workflow patterns
+## Execution Flow
 
-## Transition Prompt Structure
+**1. Analyze Session**
+- What files were changed?
+- What tests are passing?
+- What is pending?
 
-Generate transition prompt with:
+**2. Update Context**
+- If `.cursor/context.md` tracks "Active Phase", suggest updating it if the phase is complete.
 
-### 1. Session Completion Summary
-- Summary of completed work in current session
-- List of all modified files with paths
-- Tests implemented and passing status
-- Shared libraries created
+**3. Generate Transition Prompt**
+Output a code block the user can copy-paste (or save to a file):
 
-### 2. Next Session Context
-- Reference to @plan/sessions/session-N+1-phase-M.md
-- Session objectives and deliverables
-- Prerequisites and dependencies
-- Estimated completion time
+```markdown
+# Session Transition
+**Last Status**: [Success/Fail]
+**Stopped At**: [Function/File being worked on]
+**Next Step**: [Immediate action for next session]
 
-### 3. Implementation Guidance
-- Specific implementation steps from session plan
-- Key technical decisions to make
-- Database changes required
-- Testing strategy
-
-### 4. Transition Prompt Format
-```
-Session N Complete: Phase M ([METHOD] [ENDPOINT])
-
-Implemented:
-- [Specific endpoint] with real database integration
-- Database migration: [migration file]
-- Domain models: [model files]
-- Repository: [repository file]
-- Service layer: [service file]
-- API endpoint: [endpoint file]
-
-Tests:
-- E2E tests passing: [test file]
-- All tests passing: YES/NO
-
-Shared Libraries Created:
-- [Repository] - available for future sessions
-- [Service] - available for future sessions
-- [Models] - available for future sessions
-
-Session Summary:
-- Generated plan/sessions/session-N-summary.md
-- Documented implementation details
-- Listed shared libraries created
-- Noted dependencies for next session
-
-Next Session:
-- Review plan/sessions/session-N+1-phase-M.md for next phase
-- When ready, say "Start Session N+1" to begin next implementation
-
-DO NOT proceed to Session N+1 automatically.
+**Context to Load**:
+- @.cursor/context.md
+- @[Relevant Source File]
 ```
 
-## File References
-
-Always include proper @ references to:
-- @plan/sessions/session-N-summary.md - Current session documentation
-- @plan/sessions/session-N+1-phase-M.md - Next session plan
-- @templates/phase_plan_template.md - Session planning template
-- @.cursor/rules/ - All relevant development rules
+## Usage
+`@next-session`
+-> *Generates summary and next steps.*

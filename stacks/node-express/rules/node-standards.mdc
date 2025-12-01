@@ -1,0 +1,27 @@
+---
+description: Node.js Express & TypeScript Standards
+globs: **/*.ts
+---
+
+# Node.js Express Guidelines
+
+## Code Style
+- **TypeScript**: Strict mode enabled. No `any`. Use `unknown` if necessary.
+- **Naming**: `camelCase` for variables/functions. `PascalCase` for classes/types.
+- **Async**: Always use `async/await`. No `then/catch` chains.
+
+## Architecture
+1.  **Routes** (`routes/`): Define endpoints and middleware.
+2.  **Controllers** (`controllers/`): Parse Request -> Call Service -> Send Response.
+3.  **Services** (`services/`): Business logic. Throw errors here, don't send responses.
+4.  **Prisma** (`prisma/`): Database schema and migrations.
+
+## Testing
+- **Framework**: Jest.
+- **Integration**: Supertest.
+- **Mocks**: Mock Prisma client for unit tests.
+
+## Security
+- **Validation**: Use **Zod** for all request bodies and query params.
+- **Secrets**: Use `dotenv`. Never commit secrets.
+- **Logs**: Use `winston` or `pino`. No `console.log`.

@@ -1,30 +1,28 @@
+---
+description: Read essential project context (Context-Aware)
+---
+
 # Read Command
 
-Read essential project files for quick context. For comprehensive context, use @context instead.
+Read essential project files to load context for the AI. This command is "Stack Aware" and looks for the active configuration.
 
-Usage: `@read`
+## What this command reads:
 
-**What this command reads:**
-1. Core vibe guides:
-   @vibe/vibe_phase_workflow.md
-   @vibe/vibe_database.md
-   @vibe/vibe_fastapi_boilerplate.md
+1.  **Active Context**:
+    - `@.cursor/context.md` (The Source of Truth)
+    - `@.cursor/rules/*.mdc` (Active Rules)
 
-2. Current session plan:
-   @plan/sessions/session-N-phase-M.md (replace N and M with current session)
+2.  **Methodology**:
+    - `@METHODOLOGY.md` (Core Phase/TDD principles)
 
-3. Current OpenAPI specification:
-   @openapi.yaml
+3.  **Current Status**:
+    - Checks for `plan/active-session.md` or similar session tracking files if they exist.
 
-4. Student runbook:
-   @student_runbook.md
+## Usage
+`@read` -> Loads the brain of the project.
 
-**Use @context for comprehensive project understanding including all planning documents, commands, and vibe guides.**
-
-## Quick Context Summary
-
+## Quick Summary Output
 After reading, provide:
-- Current session status
-- Next immediate actions
-- Key dependencies available
-- Session objectives
+- **Stack**: {Language} / {Framework}
+- **Current Phase**: {Phase}
+- **Next Step**: What should be done next based on context?

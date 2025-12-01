@@ -1,78 +1,32 @@
+---
+description: Begin a development session with active context
+---
+
 # Start Session Command
 
-Begin execution of a specific session following the session-based development approach.
+Initializes the AI context for the current work session. This command ensures the AI "knows" the project rules, stack, and current phase before writing any code.
 
-## Prerequisites
+## Execution Flow
 
-Before starting a session, read:
-- @.cursor/rules/000-environment-setup.mdc - Virtual environment and dependency management
-- @plan/sessions/session-N-phase-M.md - Session plan and objectives
-- @plan/sessions/session-N-1-summary.md - Previous session summary (if not Session 1)
-- @.cursor/rules/200-skeleton-phase.mdc - For Session 1
-- @.cursor/rules/300-endpoint-phase.mdc - For Session 2+
-- @.cursor/rules/400-testing-first.mdc - Testing requirements
-- @.cursor/rules/500-implementation.mdc - Implementation patterns
+**1. Context Check**
+- Read `.cursor/context.md`.
+- **Condition**: If the file contains "No Stack Configured" or is missing:
+  - Stop.
+  - Tell the user: "⚠️ Project is not configured. Please run **`@setup-stack`** first."
 
-## Session Execution Process
+**2. Context Loading**
+- Display a brief summary of the active context:
+  > "Context Loaded: **{Language} / {Framework}**"
+  > "Current Phase: **{Active Phase}**"
+  > "Strictness: **{Strictness Level}**"
 
-### 1. Session Initialization
-- Review session plan objectives
-- Confirm prerequisites are met
-- Check dependencies from previous sessions
-- Verify virtual environment is set up (.venv exists)
-- Verify environment is ready
+**3. Session Goal**
+- Ask: "What is the goal for this session?"
+- If the user provides a goal (e.g., "Implement POST /users"), cross-reference it with the Active Phase in `context.md`.
 
-### 2. Follow Session-Specific Rules
+**4. Rule Enforcement**
+- Remind the user (internally) to adhere to the active rules in `.cursor/rules/`.
+- **Constraint**: Do not suggest code that violates the active style guide (e.g., don't use `camelCase` in Python if `snake_case` is mandated).
 
-**For Session 1 (Phase 0 - Skeleton):**
-- Follow @.cursor/rules/200-skeleton-phase.mdc
-- Create project structure
-- Implement all mock endpoints
-- Set up Docker Compose
-- Create test structure
-
-**For Session N (Phase M - Implementation):**
-- Follow @.cursor/rules/300-endpoint-phase.mdc
-- Write E2E tests first (TDD)
-- Implement database migration
-- Create domain models and repository
-- Implement service layer
-- Update API endpoint
-- Verify tests pass
-
-### 3. Session Completion
-- Complete all session deliverables
-- Generate session summary in @plan/sessions/session-N-summary.md
-- Provide transition prompt for next session
-- Do NOT automatically proceed to next session
-
-## Session Commands
-
-### Start Session 1 (Skeleton)
-```bash
-# Start Session 1: Phase 0 (Skeleton Implementation)
-```
-
-### Start Session N (Implementation)
-```bash
-# Start Session N: Phase M ([METHOD] [ENDPOINT])
-```
-
-## Success Criteria
-
-Session is complete when:
-- [ ] All session objectives met
-- [ ] All deliverables completed
-- [ ] Tests passing
-- [ ] Code formatted and typed
-- [ ] Session summary generated
-- [ ] Transition prompt provided
-
-## Anti-Patterns
-
-Do NOT:
-- Skip session plan review
-- Implement multiple endpoints in one session
-- Skip E2E test writing
-- Automatically start next session
-- Skip session documentation
+**5. Ready State**
+- Confirm readiness: "I am ready. Guides are active. Let's build."

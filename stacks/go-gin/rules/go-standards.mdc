@@ -1,0 +1,26 @@
+---
+description: Go Gin & GORM Standards
+globs: **/*.go
+---
+
+# Go Gin Guidelines
+
+## Code Style
+- **Formatting**: `gofmt` is mandatory.
+- **Naming**: Short, concise names (`ctx`, `req`, `svc`).
+- **Errors**: Return error as the last return value. Check `if err != nil` immediately.
+
+## Architecture (Standard Layout)
+1.  `cmd/server/`: Entrypoint (`main.go`).
+2.  `internal/api/`: Gin Handlers (Controllers).
+3.  `internal/core/`: Service logic / Domain models.
+4.  `internal/data/`: GORM Repositories.
+
+## Testing
+- **Unit**: Use standard `testing` package with table-driven tests.
+- **Assertions**: Use `github.com/stretchr/testify/assert`.
+- **Mocks**: Define interfaces for all services/repos to enable mocking.
+
+## Configuration
+- Use `viper` to read from `.env` or YAML.
+- Inject configuration into the Server struct.

@@ -1,0 +1,25 @@
+---
+description: Terraform & DevOps Scripting Standards
+globs: "**/*.tf, **/*.py"
+---
+
+# DevOps Guidelines
+
+## Terraform (Infrastructure)
+- **Style**: Use `terraform fmt`.
+- **Structure**:
+    - `main.tf`: Root module calls.
+    - `variables.tf`: Input definitions with types and descriptions.
+    - `outputs.tf`: Explicit outputs.
+- **State**: Remote state (S3+Dynamo) required.
+- **Security**: Run `checkov` on commit. No secrets in plain text.
+
+## Python Scripts (Automation)
+- **Style**: `snake_case`. Use `click` or `argparse` for CLIs.
+- **Boto3**: Use `boto3` for AWS interactions.
+- **Type Hints**: Use `mypy` types for all function signatures.
+- **Logging**: Use standard `logging` library, not `print`.
+
+## Testing
+- **Infrastructure**: Run `terraform validate` and `tflint`.
+- **Scripts**: Write `pytest` unit tests for logic functions.

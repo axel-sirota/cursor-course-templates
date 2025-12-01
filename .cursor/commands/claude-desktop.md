@@ -1,64 +1,25 @@
-# Claude Desktop Research Prompt Generator
+---
+description: Integration guide for Claude Desktop and MCP
+---
 
-Create a comprehensive research prompt for Claude Desktop to perform deep research on the specified topic.
+# Claude Desktop Integration
 
-## Process
+This command configures or guides the integration between Cursor and Claude Desktop using MCP (Model Context Protocol).
 
-1. **Create Research Prompt File**
-   - Create file in `prompts/` directory with descriptive name
-   - Use format: `prompts/research-{topic}-{date}.md`
+## Setup Checks
 
-2. **Include Essential Context Files**
-   - @vibe/vibe_phase_workflow.md - Development workflow patterns
-   - @vibe/vibe_fastapi_boilerplate.md - Project structure and patterns
-   - @vibe/vibe_database.md - Database patterns and models
-   - @vibe/vibe_development_lifecycle.md - Git workflow and deployment
-   - @templates/openapi-template.yaml - API design patterns
-   - @templates/docker-compose-template.yaml - Infrastructure setup
-   - @.cursor/rules/ - All development rules and patterns
+**1. MCP Config**
+- Check for `claude_desktop_config.json` (typical location depends on OS).
+- Verify if Cursor is acting as an MCP Client or Server (usually Client).
 
-3. **Research Prompt Structure**
-   ```markdown
-   # Deep Research: {Topic}
-   
-   ## Problem Statement
-   - Clear description of the problem
-   - Why deep research is needed
-   - Context and constraints
-   
-   ## Research Objectives
-   - Specific questions to answer
-   - Technical requirements
-   - Success criteria
-   
-   ## Context Files
-   - List all relevant files with @ references
-   - Explain relevance of each file
-   
-   ## Tools and Versions
-   - All tools used in the project
-   - Version specifications
-   - Environment requirements
-   
-   ## Architecture Context
-   - Core system architecture
-   - Deployment strategy
-   - Integration points
-   
-   ## Expected Deliverables
-   - Research findings
-   - Recommendations
-   - Implementation guidance
-   ```
+## Workflow Integration
+- **Handoff**: How to pass a complex reasoning task from Cursor to Claude Desktop.
+- **Context Sharing**: Ensure both tools see the same `context.md`.
 
-4. **Research Focus Areas**
-   - Technical feasibility
-   - Best practices and patterns
-   - Integration considerations
-   - Performance implications
-   - Security considerations
-   - Deployment requirements
+## Best Practices
+- Use Claude Desktop for **High-Level Reasoning** and **Architecture Review**.
+- Use Cursor for **Implementation** and **File Editing**.
 
-## Template Usage
+## Usage
+`@claude-desktop` -> *Displays setup status and integration tips.*
 
-Use @templates/research-export.md as the foundation for structuring research findings and export format.

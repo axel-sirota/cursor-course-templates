@@ -1,94 +1,40 @@
+---
+description: Generate a comprehensive research export document for external review
+---
+
 # Research Export Command
 
-Generate a comprehensive research export document when encountering issues requiring external research.
+Generate a structured Markdown document to explain a complex problem to an external expert or colleague.
 
-## Prerequisites
+## Execution Flow
 
-Before generating research export, read:
-- @templates/research-export.md - Research export template
-- @vibe/vibe_phase_workflow.md - Development context
-- @plan/sessions/session-N-phase-M.md - Current session context
-- Relevant implementation files for context
+**1. Gather Context**
+- Read `.cursor/context.md`
+- Read the current error logs or problem description provided by the user.
 
-## Research Export Process
-
-### 1. Document the Problem
-- Clear description of the issue
-- Context from current session
-- What has been attempted
-- Why external research is needed
-
-### 2. Use Research Export Template
-
-Follow @templates/research-export.md structure:
+**2. Generate Document**
+Create a file `research-exports/research-[topic]-[date].md` with this structure:
 
 ```markdown
-# Research Export: [Issue Title]
+# Research Export: [Topic]
 
-## Problem Statement
-- Detailed description of the problem
-- Current session context
-- Impact on development progress
+## 1. Problem Statement
+- **Goal**: What are we trying to do?
+- **Blocker**: What is stopping us?
+- **Stack**: [Insert active stack from context]
 
-## Attempted Solutions
-- List all solutions tried
-- Code snippets and configurations
-- Error messages and logs
-- Results of each attempt
+## 2. Attempted Solutions
+- Approach A: [Result]
+- Approach B: [Result]
 
-## Context Files
-- Reference relevant files with @ syntax
-- Explain relevance of each file
-- Include current implementation state
+## 3. Relevant Code
+[Insert snippet or file reference]
 
-## Specific Questions
-- Formulate clear, specific questions
-- Include technical requirements
-- Specify desired outcomes
-
-## Research Areas
-- Technical feasibility
-- Best practices
-- Integration considerations
-- Performance implications
-- Security considerations
-
-## Expected Deliverables
-- Research findings
-- Recommendations
-- Implementation guidance
-- Alternative approaches
+## 4. Specific Questions
+- [Question 1]
+- [Question 2]
 ```
 
-### 3. Include Relevant Context
-
-Always include @ references to:
-- @plan/sessions/session-N-phase-M.md - Current session plan
-- @vibe/vibe_phase_workflow.md - Development patterns
-- @.cursor/rules/ - Relevant development rules
-- Current implementation files
-- Error logs and configurations
-
-### 4. Export Location
-
-Save research export to:
-- `research-exports/research-{issue}-{date}.md`
-- Use descriptive filename
-- Include timestamp for tracking
-
-## Research Focus Areas
-
-Structure research around:
-- **Technical Feasibility**: Can it be implemented?
-- **Best Practices**: How should it be done?
-- **Integration**: How does it fit with existing code?
-- **Performance**: What are the implications?
-- **Security**: Are there security considerations?
-- **Alternatives**: What other approaches exist?
-
-## Integration with Development
-
-- Use research findings to update session plan
-- Document decisions in session summary
-- Update templates if patterns emerge
-- Share learnings in transition prompts
+## Usage
+`@research-export "Database connection timeout"`
+-> *Creates research-exports/research-db-timeout-20240101.md*
