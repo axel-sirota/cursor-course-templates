@@ -3,6 +3,10 @@ teacher_runbook.md
 TEACHER_CHEAT_SHEET.md
 solutions/
 
+# Claude Code local files (user-specific)
+CLAUDE.local.md
+.claude/settings.local.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

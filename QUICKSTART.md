@@ -1,13 +1,17 @@
 # Quickstart Guide 🚀
 
-Welcome to the **Cursor Master Template**. This guide will help you start a new project or adapt an existing one in minutes.
+Welcome to the **AI-Assisted Development Template**. This guide will help you start a new project or adapt an existing one in minutes.
+
+**Works with both Cursor IDE and Claude Code.**
 
 ---
 
 ## 1. Prerequisites
 
 Before you begin, ensure you have:
--   **Cursor IDE**: [Download here](https://cursor.sh)
+-   **Choose your tool**:
+    -   **Cursor IDE**: [Download here](https://cursor.sh) *OR*
+    -   **Claude Code**: [Installation guide](https://docs.claude.com/en/docs/claude-code/overview)
 -   **Docker Desktop**: Running (required for databases)
 -   **Git**: Installed
 
@@ -26,14 +30,21 @@ Before you begin, ensure you have:
     git init     # Start fresh
     ```
 
-2.  **Open in Cursor**:
+2.  **Choose your tool**:
+
+    **Option A: Cursor IDE**
     ```bash
     cursor .
     ```
+    Then open the Chat (`Cmd+L`) and type: **`@setup-stack`**
 
-3.  **Run Setup**:
-    Open the Chat (`Cmd+L`) and type:
-    > **`@setup-stack`**
+    **Option B: Claude Code**
+    ```bash
+    claude
+    ```
+    Then type: **/setup-stack**
+
+3.  **Run Setup**: Follow the prompts from the command above.
 
 4.  **Select Your Stack**:
     -   `python-fastapi` (Reference implementation)
@@ -43,31 +54,35 @@ Before you begin, ensure you have:
     -   `blank` (Custom)
 
 5.  **Start Building**:
-    > **`@architect "Build a [Idea]"`**
+    -   Cursor: **`@architect "Build a [Idea]"`**
+    -   Claude Code: **/architect "Build a [Idea]"**
 
 ---
 
 ### Path B: Adapt an Existing Project (The Rescue Mission)
 *Best for: Legacy codebases, refactoring, adding AI powers.*
 
-1.  **Copy the Brain**:
-    Copy the `.cursor/` folder from this repo into your existing project root.
-    ```bash
-    # From your project root
-    cp -r /path/to/cursor-course-templates/.cursor .
-    ```
+1.  **Copy the Configuration**:
 
-2.  **Open Cursor**:
+    **For Cursor**:
     ```bash
+    cp -r /path/to/cursor-course-templates/.cursor .
     cursor .
     ```
 
-3.  **Run Detection**:
-    Open Chat and type:
-    > **`@detect-stack`**
+    **For Claude Code**:
+    ```bash
+    cp -r /path/to/cursor-course-templates/.claude .
+    cp /path/to/cursor-course-templates/CLAUDE.md .
+    claude
+    ```
 
-4.  **Review Context**:
-    The Agent will generate a `.cursor/context.md` based on your files.
+2.  **Run Detection**:
+    -   Cursor: **`@detect-stack`**
+    -   Claude Code: **/detect-stack**
+
+3.  **Review Context**:
+    The Agent will generate a context file based on your codebase.
     -   **Check**: Does it match your reality?
     -   **Strictness**: Ensure it is set to `Low` initially to avoid "Linter Hell".
 
@@ -97,16 +112,16 @@ Before you begin, ensure you have:
 ## 3. Common Workflows
 
 ### "I want to build a feature"
-1.  **Design**: `@architect "Add User Profiles"`
+1.  **Design**: `@architect` (Cursor) or `/architect` (Claude Code)
 2.  **Plan**: Review `plan/sessions/`
-3.  **Execute**: `@start-session 1`
+3.  **Execute**: `@start-session` or `/start-session`
 
 ### "I am stuck / It's broken"
-1.  **Research**: `@research "Why is the DB connection failing?"`
-2.  **Export**: `@research-export "Complex Issue"` (share with team)
+1.  **Research**: `@research` or `/research`
+2.  **Export**: `@research-export` or `/research-export` (share with team)
 
 ### "I want to verify my code"
-1.  **Review**: `@code-review`
+1.  **Review**: `@code-review` or `/code-review`
 2.  **Tests**: Run the command specific to your stack (`pytest`, `npm test`, etc.)
 
 ---
@@ -115,10 +130,10 @@ Before you begin, ensure you have:
 
 | Issue | Fix |
 | :--- | :--- |
-| **Agent suggests Python code in Node project** | Run `@setup-stack` again or check `.cursor/context.md`. |
-| **"Command not found"** | Ensure `.cursor/commands/` exists. Restart Cursor. |
+| **Agent suggests wrong stack** | Run setup command again and check context file (`.cursor/context.md` or `CLAUDE.md`). |
+| **"Command not found"** | Ensure commands folder exists (`.cursor/commands/` or `.claude/commands/`). |
 | **Docker fails** | Run `docker-compose down -v` to reset state. |
-| **Too many linter errors** | Edit `.cursor/context.md` -> Set `Strictness: Low`. |
+| **Too many linter errors** | Edit context file -> Set `Strictness: Low`. |
 
 ---
 

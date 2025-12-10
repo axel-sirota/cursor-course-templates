@@ -36,7 +36,9 @@ Create `.mdc` files in `stacks/node-express/rules/`.
 - `testing.mdc`: How to write Jest tests (describe/it blocks).
 
 ### 4. Use It
-Run `@setup-stack` in Cursor. Your new stack will appear in the list.
+Run the setup command (` @setup-stack` in Cursor or `/setup-stack` in Claude Code). Your new stack will appear in the list.
+
+**Note**: Rules in `stacks/` are written as `.mdc` files. Both Cursor and Claude Code can read these files - the setup command copies them to the appropriate directory (`.cursor/rules/` or `.claude/rules/`).
 
 ---
 
@@ -44,11 +46,20 @@ Run `@setup-stack` in Cursor. Your new stack will appear in the list.
 
 You have an existing massive repo?
 
+### For Cursor IDE:
 1.  **Copy the `.cursor` folder** from this repo into your legacy repo.
 2.  Run `@setup-stack`.
 3.  Select **"3. Analyze Code"**.
-4.  The AI will scan your files and generate a custom `context.md`.
+4.  The AI will scan your files and generate a custom `.cursor/context.md`.
 5.  **Edit the Context**: Open `.cursor/context.md` and set `Strictness: Low`.
+    - This tells the AI: "Don't refactor everything. Just write clean *new* code."
+
+### For Claude Code:
+1.  **Copy the `.claude` folder and `CLAUDE.md`** from this repo into your legacy repo.
+2.  Run `/setup-stack`.
+3.  Select **"3. Analyze Code"**.
+4.  The AI will scan your files and generate a custom `CLAUDE.md`.
+5.  **Edit the Context**: Open `CLAUDE.md` and set `Strictness: Low`.
     - This tells the AI: "Don't refactor everything. Just write clean *new* code."
 
 ## Concept Mapping
