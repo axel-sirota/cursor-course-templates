@@ -188,6 +188,39 @@ These commands are available in both Cursor IDE (using `@` prefix) and Claude Co
 
 ---
 
+### Infrastructure Commands
+
+#### `dockerize` (or `@dockerize` / `/dockerize`)
+**Purpose**: Containerize the application with Docker and Docker Compose.
+
+**What it does:**
+1. Detects the active stack from context
+2. Analyzes application (entry point, dependencies, database)
+3. Generates multi-stage `Dockerfile` optimized for the stack
+4. Generates `docker-compose.yml` with app + database + health checks
+5. Generates `.dockerignore` with appropriate exclusions
+6. Creates or updates `.env.example` with environment variables
+7. Adds `/health` endpoint if missing
+
+**When to use:** After Phase 0 skeleton is complete, or when preparing for deployment.
+
+**Example:**
+```
+@dockerize
+```
+or
+```
+/dockerize
+```
+
+**Key features generated:**
+- Multi-stage builds (smaller images)
+- Non-root user (security)
+- Health checks (reliability)
+- Environment variables via .env (no secrets in image)
+
+---
+
 ## Workflow Chains
 
 Here's how to chain commands together for each of the three core workflows.

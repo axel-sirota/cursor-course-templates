@@ -1,0 +1,150 @@
+---
+description: Node.js-specific Docker patterns for Express/Fastify/NestJS
+alwaysApply: false
+globs: ["Dockerfile", "docker-compose*.yml", "*.dockerfile"]
+---
+
+# Node.js Docker Standards
+
+## Base Image Selection
+
+- **Production**: Use `node:20-alpine` (small, secure)
+- **Development**: Use `node:20-slim` if Alpine compatibility issues arise
+
+## Multi-Stage Dockerfile Pattern
+
+```dockerfile
+# Build stage
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Runtime stage
+FROM node:20-alpine
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S app && adduser -S -u 1001 app -G app
+USER app
+
+# Copy dependencies and app
+COPY --from=builder --chown=app:app /app/node_modules ./node_modules
+COPY --chown=app:app . .
+
+ENV NODE_ENV=production
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+CMD ["node", "dist/server.js"]
+```
+
+## Key Node-Specific Settings
+
+### Environment Variables
+
+```dockerfile
+# Set production mode
+ENV NODE_ENV=production
+
+# Disable npm update check
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+```
+
+### Health Check (Alpine-compatible)
+
+```dockerfile
+# Using wget (available in alpine)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+```
+
+### npm vs yarn vs pnpm
+
+**npm:**
+
+```dockerfile
+COPY package*.json ./
+RUN npm ci --only=production
+```
+
+**yarn:**
+
+```dockerfile
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --production
+```
+
+**pnpm:**
+
+```dockerfile
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod
+```
+
+### Framework-Specific CMD
+
+**Express/Fastify:**
+
+```dockerfile
+CMD ["node", "dist/server.js"]
+```
+
+**NestJS:**
+
+```dockerfile
+CMD ["node", "dist/main.js"]
+```
+
+**With TypeScript (ts-node in dev):**
+
+```dockerfile
+# Production: compiled JS
+CMD ["node", "dist/server.js"]
+
+# Development: ts-node
+CMD ["npx", "ts-node", "src/server.ts"]
+```
+
+## Node-Specific .dockerignore Additions
+
+```
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+coverage/
+.nyc_output/
+dist/
+build/
+*.tsbuildinfo
+```
+
+## Development vs Production
+
+### Development (with hot reload)
+
+```yaml
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules  # Preserve container node_modules
+    command: npm run dev
+```
+
+### Production
+
+```yaml
+services:
+  app:
+    build: .
+    # No volume mount
+    command: node dist/server.js
+```

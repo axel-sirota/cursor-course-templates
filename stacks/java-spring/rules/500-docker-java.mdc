@@ -1,0 +1,181 @@
+---
+description: Java-specific Docker patterns for Spring Boot
+alwaysApply: false
+globs: ["Dockerfile", "docker-compose*.yml", "*.dockerfile"]
+---
+
+# Java Docker Standards
+
+## Base Image Selection
+
+- **Build stage**: Use `eclipse-temurin:21-jdk-alpine` or `maven:3.9-eclipse-temurin-21-alpine`
+- **Runtime stage**: Use `eclipse-temurin:21-jre-alpine` (JRE only, smaller)
+
+## Multi-Stage Dockerfile Pattern (Maven)
+
+```dockerfile
+# Build stage
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
+WORKDIR /app
+
+# Copy pom and download dependencies (cached layer)
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Build application
+COPY src ./src
+RUN mvn package -DskipTests -B
+
+# Runtime stage
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S app && adduser -S -u 1001 app -G app
+USER app
+
+# Copy JAR
+COPY --from=builder --chown=app:app /app/target/*.jar app.jar
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+
+# JVM tuning for containers
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+```
+
+## Multi-Stage Dockerfile Pattern (Gradle)
+
+```dockerfile
+# Build stage
+FROM gradle:8-jdk21-alpine AS builder
+WORKDIR /app
+
+# Copy gradle files and download dependencies
+COPY build.gradle settings.gradle ./
+COPY gradle ./gradle
+RUN gradle dependencies --no-daemon
+
+# Build application
+COPY src ./src
+RUN gradle build -x test --no-daemon
+
+# Runtime stage
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+RUN addgroup -g 1001 -S app && adduser -S -u 1001 app -G app
+USER app
+
+COPY --from=builder --chown=app:app /app/build/libs/*.jar app.jar
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+```
+
+## Key Java-Specific Settings
+
+### JVM Container Support
+
+```dockerfile
+# Required for proper memory allocation in containers
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+```
+
+### Longer Start Period
+
+```dockerfile
+# Java apps need more startup time
+HEALTHCHECK --start-period=30s ...
+```
+
+### Spring Boot Actuator Health
+
+```dockerfile
+# Use actuator endpoint
+CMD wget --spider http://localhost:8080/actuator/health
+```
+
+Ensure actuator is enabled in `application.properties`:
+
+```properties
+management.endpoints.web.exposure.include=health
+management.endpoint.health.show-details=always
+```
+
+## Layered JAR (Spring Boot 2.3+)
+
+For better Docker layer caching:
+
+```dockerfile
+# Build stage
+FROM eclipse-temurin:21-jdk-alpine AS builder
+WORKDIR /app
+COPY target/*.jar app.jar
+RUN java -Djarmode=layertools -jar app.jar extract
+
+# Runtime stage
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+RUN addgroup -g 1001 -S app && adduser -S -u 1001 app -G app
+USER app
+
+COPY --from=builder --chown=app:app /app/dependencies/ ./
+COPY --from=builder --chown=app:app /app/spring-boot-loader/ ./
+COPY --from=builder --chown=app:app /app/snapshot-dependencies/ ./
+COPY --from=builder --chown=app:app /app/application/ ./
+
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
+```
+
+## Java-Specific .dockerignore Additions
+
+```
+target/
+build/
+.gradle/
+.mvn/
+*.class
+*.jar
+*.war
+*.ear
+.idea/
+*.iml
+```
+
+## Development vs Production
+
+### Development (with Spring DevTools)
+
+```yaml
+services:
+  app:
+    build:
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/app/src
+      - ~/.m2:/root/.m2  # Cache maven dependencies
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+```
+
+### Production
+
+```yaml
+services:
+  app:
+    build: .
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-XX:MaxRAMPercentage=75.0
+```

@@ -560,6 +560,63 @@ git commit -m "Add /api/v2/users endpoint"
 
 ---
 
+## Docker Quick Reference
+
+### The `/dockerize` Command
+
+Containerize your application with one command:
+
+```
+@dockerize  or  /dockerize
+```
+
+This generates:
+- `Dockerfile` - Multi-stage build (smaller images)
+- `docker-compose.yml` - App + database with health checks
+- `.dockerignore` - Excludes unnecessary files
+- `.env.example` - Environment variable template
+
+### Common Docker Commands
+
+| Command | What It Does |
+|---------|--------------|
+| `docker compose up --build` | Build and start all services |
+| `docker compose up -d` | Start in background |
+| `docker compose logs -f app` | Follow app logs |
+| `docker compose down` | Stop and remove containers |
+| `docker compose down -v` | Stop and reset database |
+| `docker compose exec app /bin/sh` | Shell into container |
+
+### Typical Docker Flow
+
+```bash
+# 1. Generate Docker config
+/dockerize
+
+# 2. Build and start
+docker compose up --build
+
+# 3. Verify health
+curl http://localhost:8000/health
+
+# 4. View logs if issues
+docker compose logs -f app
+
+# 5. Stop when done
+docker compose down
+```
+
+### Docker Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| "Port already in use" | Change `APP_PORT` in `.env` or run `docker compose down` |
+| "Database connection refused" | Wait for health check or run `docker compose down -v` |
+| "Module not found" | Rebuild: `docker compose build --no-cache app` |
+| "Permission denied" | Check Dockerfile has non-root user |
+
+---
+
 ## Further Reading
 
 - **[METHODOLOGY.md](METHODOLOGY.md)**: Deep dive into Phase-Based Development, TDD, command workflows

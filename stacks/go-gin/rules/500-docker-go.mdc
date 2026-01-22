@@ -1,0 +1,155 @@
+---
+description: Go-specific Docker patterns for Gin/Echo/Chi
+alwaysApply: false
+globs: ["Dockerfile", "docker-compose*.yml", "*.dockerfile"]
+---
+
+# Go Docker Standards
+
+## Base Image Selection
+
+- **Build stage**: Use `golang:1.21-alpine`
+- **Runtime stage**: Use `alpine:3.18` (Go compiles to static binary)
+
+## Multi-Stage Dockerfile Pattern
+
+```dockerfile
+# Build stage
+FROM golang:1.21-alpine AS builder
+WORKDIR /app
+
+# Install dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Build static binary
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+
+# Runtime stage (minimal)
+FROM alpine:3.18
+WORKDIR /app
+
+# Add CA certificates for HTTPS
+RUN apk --no-cache add ca-certificates
+
+# Create non-root user
+RUN adduser -D -g '' app
+USER app
+
+# Copy binary only
+COPY --from=builder /app/main .
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
+
+CMD ["./main"]
+```
+
+## Key Go-Specific Settings
+
+### Static Binary Build
+
+```dockerfile
+# Required for alpine runtime
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+```
+
+### Build Flags for Smaller Binary
+
+```dockerfile
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o main .
+```
+
+- `-s`: Omit symbol table
+- `-w`: Omit DWARF debugging info
+
+### Scratch Image (Smallest Possible)
+
+```dockerfile
+# For truly minimal images
+FROM scratch
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /app/main /main
+CMD ["/main"]
+```
+
+Note: Scratch has no shell, wget, or debugging tools.
+
+## Framework-Specific Patterns
+
+### Gin
+
+```go
+// main.go health endpoint
+r.GET("/health", func(c *gin.Context) {
+    c.JSON(200, gin.H{"status": "healthy"})
+})
+```
+
+### Echo
+
+```go
+e.GET("/health", func(c echo.Context) error {
+    return c.JSON(200, map[string]string{"status": "healthy"})
+})
+```
+
+### Chi
+
+```go
+r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte(`{"status":"healthy"}`))
+})
+```
+
+## Go-Specific .dockerignore Additions
+
+```
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+go.work
+```
+
+## Development vs Production
+
+### Development (with air hot reload)
+
+```yaml
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+    command: air
+```
+
+**Dockerfile.dev:**
+
+```dockerfile
+FROM golang:1.21-alpine
+WORKDIR /app
+RUN go install github.com/cosmtrek/air@latest
+COPY go.mod go.sum ./
+RUN go mod download
+CMD ["air"]
+```
+
+### Production
+
+```yaml
+services:
+  app:
+    build: .
+    # No volume mount - static binary
+```

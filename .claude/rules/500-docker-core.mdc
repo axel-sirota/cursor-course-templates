@@ -1,0 +1,188 @@
+---
+description: Universal Docker containerization standards (applies to all stacks)
+alwaysApply: true
+---
+
+# Docker & Containerization Rules (Universal)
+
+## Core Principles
+
+1. **Local-First Development**: Use Docker Compose for local dev, keep production config separate
+2. **Multi-Stage Builds**: Always use multi-stage Dockerfiles to minimize image size
+3. **No Secrets in Images**: Never bake secrets into Dockerfile - use env vars or secrets management
+4. **Reproducible Builds**: Pin versions for base images and dependencies
+
+## Dockerfile Standards
+
+### Multi-Stage Pattern (Required)
+
+All Dockerfiles MUST use multi-stage builds:
+
+- Stage 1: Build (install dependencies, compile)
+- Stage 2: Runtime (minimal image with only what's needed)
+
+### Required Labels
+
+```dockerfile
+LABEL maintainer="team@example.com"
+LABEL version="1.0.0"
+LABEL description="Service description"
+```
+
+### Health Checks (Required)
+
+Always include HEALTHCHECK instruction:
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+```
+
+### Security Best Practices
+
+- Use non-root user in containers when possible
+- Pin base image versions (no `:latest`)
+- Minimize installed packages
+
+## Docker Compose Standards
+
+### File Naming
+
+- `docker-compose.yml` - local development
+- `docker-compose.override.yml` - local overrides (gitignored)
+- `docker-compose.prod.yml` - production config (if needed)
+
+### Required Elements
+
+- **Version**: Use `"3.8"` or higher
+- **Health checks**: All services must have health checks
+- **Depends on with condition**: Use `condition: service_healthy`
+- **Named volumes**: For data persistence
+- **Environment variables**: Never hardcode secrets
+
+### Service Template
+
+```yaml
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/app}
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+```
+
+## .dockerignore Requirements
+
+Always create `.dockerignore` to exclude:
+
+```
+.git
+.gitignore
+.env
+.env.*
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+htmlcov/
+node_modules/
+.venv/
+venv/
+*.log
+.DS_Store
+Dockerfile*
+docker-compose*
+README.md
+docs/
+tests/
+.claude/
+.cursor/
+```
+
+## Workflow Integration
+
+### Phase 0 (Skeleton)
+
+- Create Dockerfile with multi-stage build
+- Create docker-compose.yml for local dev
+- Verify: `docker compose up` works, app responds
+
+### Phase 1+ (Implementation)
+
+- Keep Dockerfile updated as dependencies change
+- Add new services to docker-compose.yml as needed
+- Test in container before committing
+
+### Before Deployment
+
+- Run `docker compose build --no-cache` to verify clean build
+- Check image size: `docker images | grep {app-name}`
+- Scan for vulnerabilities: `docker scout cves {image}`
+
+## Common Commands
+
+```bash
+# Build and start
+docker compose up --build
+
+# Start in background
+docker compose up -d
+
+# View logs
+docker compose logs -f app
+
+# Stop and remove
+docker compose down
+
+# Stop and remove with volumes (reset DB)
+docker compose down -v
+
+# Rebuild single service
+docker compose build app
+
+# Shell into running container
+docker compose exec app /bin/sh
+```
+
+## Security Checklist
+
+- [ ] No secrets in Dockerfile or docker-compose.yml
+- [ ] Base images pinned to specific versions
+- [ ] Non-root user in Dockerfile (where possible)
+- [ ] .dockerignore excludes sensitive files
+- [ ] Health checks configured
+- [ ] Resource limits set (in production)

@@ -165,3 +165,4 @@ terraform_plans/
 # OS
 .DS_Store
 Thumbs.db
+docker_research/
