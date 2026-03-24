@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code &mdash; The Complete Guide to AI-Assisted Development</title>
+
+  <!-- Pico.css v2 classless indigo variant -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.indigo.min.css" />
+
+  <!-- Google Fonts: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js: Tomorrow theme + core languages -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+  <style>
+    /* ===== Base Overrides ===== */
+    :root {
+      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-family-monospace: 'JetBrains Mono', 'Fira Code', monospace;
+      --toc-width: 260px;
+      --header-height: 0px;
+      --callout-tip: #2e7d32;
+      --callout-warning: #e65100;
+      --callout-info: #1565c0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --callout-tip: #66bb6a;
+        --callout-warning: #ff9800;
+        --callout-info: #42a5f5;
+      }
+    }
+
+    [data-theme="dark"] {
+      --callout-tip: #66bb6a;
+      --callout-warning: #ff9800;
+      --callout-info: #42a5f5;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-family);
+      margin: 0;
+      padding: 0;
+    }
+
+    code, pre, kbd, samp {
+      font-family: var(--font-family-monospace);
+    }
+
+    /* ===== Hero Header ===== */
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem 2rem;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #4a1a6b 100%);
+      color: #e0e0e0;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .hero .subtitle {
+      font-size: 1.15rem;
+      opacity: 0.85;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-indigo { background: #7c4dff; color: #fff; }
+    .badge-teal { background: #00897b; color: #fff; }
+    .badge-amber { background: #ff8f00; color: #fff; }
+    .badge-beta {
+      background: #7c4dff;
+      color: #fff;
+      font-size: 0.7rem;
+      vertical-align: super;
+      padding: 0.15rem 0.5rem;
+    }
+
+    /* ===== Layout: Sidebar + Main ===== */
+    .page-wrapper {
+      display: block;
+    }
+
+    @media (min-width: 992px) {
+      .page-wrapper {
+        display: grid;
+        grid-template-columns: var(--toc-width) 1fr;
+        min-height: 100vh;
+      }
+    }
+
+    /* ===== Sidebar / TOC ===== */
+    .sidebar {
+      display: none;
+    }
+
+    @media (min-width: 992px) {
+      .sidebar {
+        display: block;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 1.5rem 1rem;
+        border-right: 1px solid var(--pico-muted-border-color, #ddd);
+        font-size: 0.85rem;
+        background: var(--pico-background-color, #fff);
+      }
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar nav ul li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .sidebar nav ul li a {
+      display: block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      text-decoration: none;
+      color: var(--pico-color, #333);
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.4;
+    }
+
+    .sidebar nav ul li a:hover,
+    .sidebar nav ul li a.active {
+      background: var(--pico-primary-background, #7c4dff);
+      color: var(--pico-primary-inverse, #fff);
+    }
+
+    .sidebar nav ul li.sub a {
+      padding-left: 1.5rem;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .sidebar-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.75rem;
+      color: var(--pico-muted-color, #666);
+    }
+
+    /* Mobile TOC */
+    .mobile-toc {
+      display: block;
+      margin: 1rem;
+    }
+
+    @media (min-width: 992px) {
+      .mobile-toc {
+        display: none;
+      }
+    }
+
+    .mobile-toc summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .mobile-toc ul {
+      list-style: none;
+      padding-left: 0.5rem;
+    }
+
+    .mobile-toc ul li a {
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    /* ===== Main Content ===== */
+    .main-content {
+      max-width: 54rem;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .main-content section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 1rem;
+    }
+
+    .main-content h2 {
+      border-bottom: 2px solid var(--pico-primary, #7c4dff);
+      padding-bottom: 0.4rem;
+      margin-top: 2.5rem;
+    }
+
+    .main-content h3 {
+      margin-top: 1.8rem;
+    }
+
+    /* ===== Callout Boxes ===== */
+    .callout {
+      border-left: 4px solid;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 6px 6px 0;
+      background: color-mix(in srgb, var(--callout-color) 8%, transparent);
+    }
+
+    .callout-tip    { --callout-color: var(--callout-tip);     border-color: var(--callout-tip); }
+    .callout-warning { --callout-color: var(--callout-warning); border-color: var(--callout-warning); }
+    .callout-info   { --callout-color: var(--callout-info);    border-color: var(--callout-info); }
+
+    .callout .callout-title {
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      color: var(--callout-color);
+    }
+
+    .callout p { margin: 0.3rem 0; }
+
+    /* ===== Quote ===== */
+    blockquote.philosophy {
+      border-left: 4px solid var(--pico-primary, #7c4dff);
+      font-style: italic;
+      font-size: 1.1rem;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    /* ===== Tables ===== */
+    .main-content table {
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      font-weight: 600;
+    }
+
+    /* ===== Screenshot Placeholder ===== */
+    .screenshot-placeholder {
+      border: 2px dashed var(--pico-muted-border-color, #ccc);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      color: var(--pico-muted-color, #999);
+      font-style: italic;
+      margin: 1rem 0;
+      background: color-mix(in srgb, var(--pico-muted-color, #999) 5%, transparent);
+    }
+
+    /* ===== Steps List ===== */
+    .steps {
+      counter-reset: step-counter;
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .steps li {
+      counter-increment: step-counter;
+      position: relative;
+      padding-left: 3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .steps li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--pico-primary, #7c4dff);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    /* ===== Mermaid ===== */
+    .mermaid {
+      text-align: center;
+      margin: 1.5rem 0;
+    }
+
+    /* ===== Footer ===== */
+    footer.site-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--pico-muted-color, #999);
+      border-top: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    /* ===== Print ===== */
+    @media print {
+      .sidebar, .mobile-toc, .hero .badge-row { display: none; }
+      .page-wrapper { display: block; }
+      .hero { padding: 1rem; }
+      .hero h1 { font-size: 1.5rem; }
+      pre { white-space: pre-wrap; word-wrap: break-word; }
+      .mermaid { break-inside: avoid; }
+      section { break-inside: avoid; }
+    }
+
+    /* ===== Code Blocks ===== */
+    pre[class*="language-"] {
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    code:not([class*="language-"]) {
+      background: color-mix(in srgb, var(--pico-muted-color, #999) 12%, transparent);
+      padding: 0.15rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.88em;
+    }
+
+    /* ===== Command table highlight ===== */
+    .cmd-name {
+      font-family: var(--font-family-monospace);
+      font-weight: 600;
+      color: var(--pico-primary, #7c4dff);
+    }
+
+    /* ===== Lifecycle table category header ===== */
+    .lifecycle-category {
+      background: color-mix(in srgb, var(--pico-primary, #7c4dff) 10%, transparent);
+      font-weight: 700;
+    }
+
+    /* Dark mode auto-switch for Pico */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        color-scheme: dark;
+      }
+      .hero {
+        background: linear-gradient(135deg, #0d0520 0%, #1a0e30 50%, #2d0f45 100%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <h1>Claude Code</h1>
+    <p class="subtitle">The Complete Guide to AI-Assisted Development from the Terminal</p>
+    <div class="badge-row">
+      <span class="badge badge-indigo">CLAUDE.md</span>
+      <span class="badge badge-teal">Skills</span>
+      <span class="badge badge-amber">Hooks</span>
+      <span class="badge badge-indigo">MCP</span>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE TOC ===== -->
+  <details class="mobile-toc">
+    <summary>Table of Contents</summary>
+    <ul>
+      <li><a href="#introduction">1. Introduction</a></li>
+      <li><a href="#core-features">2. Core Features &amp; Tools</a></li>
+      <li><a href="#claude-md">3. CLAUDE.md System</a></li>
+      <li><a href="#skills">4. Skills &amp; Slash Commands</a></li>
+      <li><a href="#sdd-tdd">5. SDD &amp; TDD</a></li>
+      <li><a href="#workflow">6. The Workflow</a></li>
+      <li><a href="#demo">7. Practical Demo</a></li>
+      <li><a href="#hooks">8. Hooks System</a></li>
+      <li><a href="#mcp">9. MCP Servers</a></li>
+      <li><a href="#agents">10. Subagents &amp; Worktrees</a></li>
+      <li><a href="#settings">11. Settings &amp; Permissions</a></li>
+      <li><a href="#memory">12. Memory System</a></li>
+    </ul>
+  </details>
+
+  <div class="page-wrapper">
+
+    <!-- ===== SIDEBAR TOC ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">Contents</div>
+      <nav>
+        <ul>
+          <li><a href="#introduction">1. Introduction</a></li>
+          <li class="sub"><a href="#what-is-claude-code">What is Claude Code</a></li>
+          <li class="sub"><a href="#agentic-engineering">Agentic Engineering</a></li>
+          <li><a href="#core-features">2. Core Features</a></li>
+          <li class="sub"><a href="#tool-system">Tool System</a></li>
+          <li class="sub"><a href="#context-system">Context System</a></li>
+          <li class="sub"><a href="#plan-mode">Plan Mode</a></li>
+          <li><a href="#claude-md">3. CLAUDE.md System</a></li>
+          <li class="sub"><a href="#claude-md-hierarchy">File Hierarchy</a></li>
+          <li class="sub"><a href="#claude-md-example">Real Example</a></li>
+          <li class="sub"><a href="#rules-directory">Rules Directory</a></li>
+          <li><a href="#skills">4. Skills &amp; Commands</a></li>
+          <li class="sub"><a href="#builtin-commands">Built-in Commands</a></li>
+          <li class="sub"><a href="#custom-skills">Custom Skills</a></li>
+          <li class="sub"><a href="#skill-example">Skill Example</a></li>
+          <li><a href="#sdd-tdd">5. SDD &amp; TDD</a></li>
+          <li class="sub"><a href="#schema-driven">Schema-Driven Dev</a></li>
+          <li class="sub"><a href="#tdd-workflow">TDD Workflow</a></li>
+          <li class="sub"><a href="#sdd-tdd-combined">SDD + TDD Combined</a></li>
+          <li><a href="#workflow">6. The Workflow</a></li>
+          <li class="sub"><a href="#phase-dev">Phase-Based Dev</a></li>
+          <li class="sub"><a href="#three-workflows">Three Workflows</a></li>
+          <li><a href="#demo">7. Practical Demo</a></li>
+          <li class="sub"><a href="#demo-steps">Step-by-Step</a></li>
+          <li><a href="#hooks">8. Hooks</a></li>
+          <li class="sub"><a href="#hook-events">Lifecycle Events</a></li>
+          <li class="sub"><a href="#hook-examples">Real-World Examples</a></li>
+          <li><a href="#mcp">9. MCP Servers</a></li>
+          <li class="sub"><a href="#mcp-config">Configuration</a></li>
+          <li class="sub"><a href="#mcp-examples">Popular Servers</a></li>
+          <li><a href="#agents">10. Subagents</a></li>
+          <li class="sub"><a href="#builtin-agents">Built-in Agents</a></li>
+          <li class="sub"><a href="#custom-agents">Custom Agents</a></li>
+          <li class="sub"><a href="#worktrees">Worktrees</a></li>
+          <li><a href="#settings">11. Settings</a></li>
+          <li class="sub"><a href="#permissions">Permissions</a></li>
+          <li class="sub"><a href="#keybindings">Keybindings</a></li>
+          <li><a href="#memory">12. Memory</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+      <!-- ==================== SECTION 1: Introduction ==================== -->
+      <section id="introduction">
+        <h2>1. Introduction</h2>
+
+        <h3 id="what-is-claude-code">What is Claude Code?</h3>
+        <p>
+          <strong>Claude Code</strong> is Anthropic&rsquo;s official agentic coding CLI. Unlike IDE-based
+          AI tools, Claude Code runs in your terminal and works with <em>any</em> editor. It reads your
+          codebase, edits files, runs commands, manages git, and integrates with external tools &mdash;
+          all through natural language conversation.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Cursor IDE</th>
+              <th>Claude Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Interface</td>
+              <td>GUI &mdash; forked VS Code editor</td>
+              <td>CLI-first &mdash; terminal + optional IDE extensions</td>
+            </tr>
+            <tr>
+              <td>Editor Lock-in</td>
+              <td>Must use Cursor editor</td>
+              <td>Works with any editor (VS Code, Vim, JetBrains, etc.)</td>
+            </tr>
+            <tr>
+              <td>Context System</td>
+              <td><code>.cursor/rules/*.mdc</code> with frontmatter</td>
+              <td><code>CLAUDE.md</code> files + <code>.claude/rules/</code></td>
+            </tr>
+            <tr>
+              <td>Custom Commands</td>
+              <td><code>.cursor/commands/*.md</code> (invoked with @)</td>
+              <td><code>.claude/skills/</code> (invoked with /slash)</td>
+            </tr>
+            <tr>
+              <td>Automation</td>
+              <td><code>.cursor/hooks.json</code> (Beta)</td>
+              <td><code>.claude/settings.json</code> hooks (production)</td>
+            </tr>
+            <tr>
+              <td>External Tools</td>
+              <td>VS Code extensions</td>
+              <td>MCP servers (Model Context Protocol)</td>
+            </tr>
+            <tr>
+              <td>Composability</td>
+              <td>GUI-centric workflows</td>
+              <td>Unix pipes, scripts, CI/CD integration</td>
+            </tr>
+            <tr>
+              <td>Parallelism</td>
+              <td>Single session</td>
+              <td>Git worktrees + subagents for parallel work</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 id="agentic-engineering">The Agentic Engineering Philosophy</h3>
+        <p>
+          Claude Code embodies the same fundamental truth as Cursor: <strong>AI is context-hungry</strong>.
+          Generic prompts produce generic code. But when you give the AI:
+        </p>
+        <ul>
+          <li>A clear technology stack (<code>CLAUDE.md</code>)</li>
+          <li>Explicit rules (<code>.claude/rules/</code>)</li>
+          <li>A structured workflow (Phase-Based Development)</li>
+          <li>Bounded sessions (<code>/start-session</code> &rarr; code &rarr; <code>/next-session</code>)</li>
+        </ul>
+        <p>
+          &hellip;you get consistent, professional, maintainable code that follows your standards.
+        </p>
+
+        <blockquote class="philosophy">
+          &ldquo;Explicit is better than implicit. Consistency is better than cleverness.&rdquo;
+        </blockquote>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Key Insight</div>
+          <p>
+            Claude Code follows the Unix philosophy: composable, scriptable, and integrates with your
+            existing tools through pipes, flags, and configuration files. The more context you provide
+            via CLAUDE.md and rules, the better it performs.
+          </p>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 2: Core Features ==================== -->
+      <section id="core-features">
+        <h2>2. Core Features &amp; Tools</h2>
+        <p>
+          Claude Code provides an agentic loop: you ask a question, Claude uses tools to gather context
+          and make changes, reports results, and waits for feedback. Understanding the tools is key to
+          productive AI-assisted development.
+        </p>
+
+        <div class="mermaid">
+flowchart TB
+    subgraph ClaudeCode["Claude Code CLI"]
+        direction TB
+        CHAT["Interactive Chat<br/>Terminal conversation"]
+        PIPE["Pipe Mode<br/>cat file | claude -p 'explain'"]
+        HEADLESS["Headless Mode<br/>claude -p 'query' (non-interactive)"]
+        IDE["IDE Extension<br/>VS Code / JetBrains sidebar"]
+    end
+
+    CHAT -->|"Full agentic loop"| LARGE["Complex Tasks<br/>Multi-file features, refactors,<br/>TDD cycles"]
+    PIPE -->|"Stdin processing"| MEDIUM["Data Processing<br/>Analyze logs, transform data,<br/>explain errors"]
+    HEADLESS -->|"Query &amp; exit"| SMALL["Quick Answers<br/>One-off questions,<br/>code search"]
+    IDE -->|"GUI integration"| VISUAL["Visual Workflow<br/>Diff review, file navigation,<br/>inline context"]
+
+    style CHAT fill:#7c4dff,color:#fff
+    style PIPE fill:#ff9800,color:#fff
+    style HEADLESS fill:#4caf50,color:#fff
+    style IDE fill:#2196f3,color:#fff
+        </div>
+
+        <h3 id="tool-system">The Tool System</h3>
+        <p>
+          Claude Code has built-in tools that it uses autonomously to accomplish tasks.
+          Each tool is purpose-built and follows the principle of least privilege.
+        </p>
+
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>Purpose</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>Read</code></td><td>Read files, images, PDFs, notebooks</td><td>Read <code>src/app.py</code> to understand the codebase</td></tr>
+            <tr><td><code>Edit</code></td><td>Exact string replacements in files</td><td>Replace a function body with a new implementation</td></tr>
+            <tr><td><code>Write</code></td><td>Create new files or full rewrites</td><td>Create <code>tests/test_auth.py</code> from scratch</td></tr>
+            <tr><td><code>Bash</code></td><td>Execute shell commands</td><td>Run <code>pytest</code>, <code>git status</code>, <code>npm install</code></td></tr>
+            <tr><td><code>Glob</code></td><td>Find files by pattern</td><td>Find all <code>**/*.test.ts</code> files</td></tr>
+            <tr><td><code>Grep</code></td><td>Search file contents (regex)</td><td>Search for <code>def create_user</code> across the project</td></tr>
+            <tr><td><code>WebFetch</code></td><td>Fetch web content</td><td>Read API documentation from a URL</td></tr>
+            <tr><td><code>WebSearch</code></td><td>Search the web</td><td>Look up latest library version or best practices</td></tr>
+            <tr><td><code>Agent</code></td><td>Spawn specialized subagents</td><td>Delegate research to an Explore agent</td></tr>
+            <tr><td><code>MCP tools</code></td><td>External integrations</td><td>Query a database, post to Slack, scrape a website</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <div class="callout-title">When to Use Which Interface</div>
+          <p><strong>Interactive (<code>claude</code>)</strong>: Full agentic coding &mdash; features, TDD, multi-file changes</p>
+          <p><strong>Headless (<code>claude -p</code>)</strong>: Quick queries, CI/CD integration, scripting</p>
+          <p><strong>Pipe (<code>cat file | claude -p</code>)</strong>: Process data, explain logs, transform content</p>
+          <p><strong>IDE Extension</strong>: Visual diff review, inline context, file navigation</p>
+        </div>
+
+        <h3 id="context-system">The Context System</h3>
+        <p>
+          Claude Code assembles context from multiple sources automatically. Unlike Cursor&rsquo;s
+          <code>@</code> mentions, Claude Code loads context through its file hierarchy and tool use.
+        </p>
+
+        <table>
+          <thead>
+            <tr><th>Context Source</th><th>How It&rsquo;s Loaded</th><th>Equivalent in Cursor</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>CLAUDE.md</code></td><td>Automatically at session start</td><td><code>.cursor/rules/*.mdc</code> (alwaysApply)</td></tr>
+            <tr><td><code>.claude/rules/</code></td><td>Path-scoped, loaded when matching files are touched</td><td><code>.cursor/rules/*.mdc</code> (glob-attached)</td></tr>
+            <tr><td><code>.claude/skills/</code></td><td>On-demand via <code>/slash-command</code></td><td><code>.cursor/commands/*.md</code></td></tr>
+            <tr><td>File reads</td><td>Claude uses <code>Read</code> tool to explore code</td><td><code>@file</code> mentions</td></tr>
+            <tr><td><code>Grep</code>/<code>Glob</code></td><td>Claude searches the codebase autonomously</td><td><code>@codebase</code> semantic search</td></tr>
+            <tr><td>MCP servers</td><td>External tool access via config</td><td>Extensions / <code>@docs</code></td></tr>
+            <tr><td>Memory</td><td>Persistent notes loaded from <code>memory/</code> folder</td><td>N/A (Cursor has no persistent memory)</td></tr>
+          </tbody>
+        </table>
+
+        <div class="mermaid">
+flowchart LR
+    subgraph Input["Your Prompt"]
+        P["/start-session<br/>Implement POST /users"]
+    end
+
+    subgraph Context["Context Assembly"]
+        R["CLAUDE.md<br/>+ .claude/rules/"]
+        CMD["Skill Content<br/>start-session"]
+        FS["File Reads<br/>via Read/Grep/Glob"]
+        MEM["Memory<br/>Persistent notes"]
+        MCP["MCP Servers<br/>External tools"]
+    end
+
+    subgraph AI["AI Processing"]
+        LLM["Claude receives:<br/>Instructions + Skill +<br/>Code + Memory +<br/>Your message"]
+    end
+
+    P --> CMD
+    P --> FS
+    CMD --> LLM
+    FS --> LLM
+    R --> LLM
+    MEM --> LLM
+    MCP --> LLM
+
+    style P fill:#ff9800,color:#fff
+    style LLM fill:#7c4dff,color:#fff
+        </div>
+
+        <h3 id="plan-mode">Plan Mode</h3>
+        <p>
+          Plan Mode is a read-only exploration mode where Claude analyzes your codebase
+          and designs an implementation strategy before writing any code.
+        </p>
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>Details</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Activate</strong></td><td><kbd>Shift+Tab</kbd> to toggle, or <code>claude --permission-mode plan</code></td></tr>
+            <tr><td><strong>Can do</strong></td><td>Read files, search code, ask questions, write plan files</td></tr>
+            <tr><td><strong>Cannot do</strong></td><td>Edit files, run commands, make any changes</td></tr>
+            <tr><td><strong>Output</strong></td><td>Detailed implementation plan for review before execution</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Pro Tip</div>
+          <p>
+            Use Plan Mode for multi-step features. Let Claude explore the codebase, design the approach,
+            then exit Plan Mode and execute. This prevents wasted tokens on wrong approaches.
+          </p>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 3: CLAUDE.md ==================== -->
+      <section id="claude-md">
+        <h2>3. CLAUDE.md System</h2>
+        <p>
+          <code>CLAUDE.md</code> files are the backbone of Claude Code&rsquo;s AI behavior. They are the
+          equivalent of Cursor&rsquo;s <code>.cursor/rules/*.mdc</code> system &mdash; persistent
+          instructions that tell the AI <em>how</em> to write code for your specific project.
+        </p>
+
+        <h3 id="claude-md-hierarchy">File Hierarchy</h3>
+        <p>Claude Code loads instructions from multiple scopes, merged in priority order:</p>
+
+        <table>
+          <thead>
+            <tr><th>Scope</th><th>Location</th><th>Visibility</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>User (Global)</strong></td>
+              <td><code>~/.claude/CLAUDE.md</code></td>
+              <td>Only you, all projects</td>
+              <td>Personal preferences, global tools</td>
+            </tr>
+            <tr>
+              <td><strong>Project (Shared)</strong></td>
+              <td><code>./CLAUDE.md</code> or <code>./.claude/CLAUDE.md</code></td>
+              <td>Everyone with the repo</td>
+              <td>Stack config, coding standards, workflow</td>
+            </tr>
+            <tr>
+              <td><strong>Folder-Scoped</strong></td>
+              <td><code>./src/api/CLAUDE.md</code></td>
+              <td>Everyone, loaded on-demand</td>
+              <td>Module-specific rules</td>
+            </tr>
+            <tr>
+              <td><strong>Organization</strong></td>
+              <td>System-level managed file</td>
+              <td>All org users, cannot be overridden</td>
+              <td>Security policies, compliance</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="mermaid">
+flowchart TD
+    A["Session Starts"] --> B{"Walk up directory tree"}
+    B --> C["./CLAUDE.md<br/>Project instructions"]
+    B --> D["~/.claude/CLAUDE.md<br/>User global preferences"]
+    B --> E[".claude/rules/*.md<br/>Path-scoped rules"]
+    B --> F["Managed policy<br/>Org-wide (cannot exclude)"]
+    C --> G["Merge All<br/>Instructions"]
+    D --> G
+    E --> G
+    F --> G
+    G --> H["Final Context<br/>Sent to Claude"]
+
+    style A fill:#7c4dff,color:#fff
+    style G fill:#00897b,color:#fff
+    style H fill:#ff8f00,color:#fff
+        </div>
+
+        <h3 id="claude-md-example">Real Example: Project CLAUDE.md</h3>
+        <pre><code class="language-markdown"># Project: Blog API
+
+## Tech Stack
+- Language: Python 3.11+
+- Framework: FastAPI
+- Database: PostgreSQL (SQLAlchemy 2.0+ AsyncIO)
+- Testing: Pytest (AsyncIO)
+- Linting: Ruff
+- Formatting: Black
+
+## Build &amp; Run
+- Install: `.venv/bin/python3 -m pip install -r requirements.txt`
+- Run: `.venv/bin/python3 -m uvicorn main:app --reload`
+- Test: `.venv/bin/python3 -m pytest tests/ -v`
+- Lint: `.venv/bin/python3 -m ruff check .`
+
+## Code Standards
+- Use snake_case for all Python identifiers
+- All endpoints must have type hints and docstrings
+- Use Pydantic models for request/response validation
+- Never use `print()` &mdash; use `logging` module
+
+## Architecture
+- Modular structure: `app/modules/{name}/`
+- Each module has: models/, services/, api/
+- Repository pattern for database access
+
+## Workflow
+- Active Phase: Phase 0 (Skeleton)
+- Strictness: High
+- TDD is mandatory: write failing tests before implementation
+
+## Common Patterns
+See @docs/patterns.md for shared utilities</code></pre>
+
+        <div class="callout callout-info">
+          <div class="callout-title">Imports with @</div>
+          <p>
+            Use <code>@path</code> syntax to include other files by reference:
+            <code>@README</code>, <code>@docs/style-guide.md</code>, <code>@~/.claude/my-prefs.md</code>.
+            This keeps CLAUDE.md concise while linking to detailed docs.
+          </p>
+        </div>
+
+        <h3 id="rules-directory">Rules Directory: <code>.claude/rules/</code></h3>
+        <p>
+          For more granular control, create topic-specific rule files in <code>.claude/rules/</code>.
+          These can be path-scoped to only load when matching files are being edited.
+        </p>
+
+        <pre><code class="language-markdown">---
+paths:
+  - "app/api/**/*.py"
+  - "tests/api/**/*.py"
+---
+
+# API Development Rules
+
+## Endpoint Standards
+- All endpoints MUST return Pydantic response models
+- Use dependency injection for database sessions
+- Include OpenAPI description in every route decorator
+
+## Error Handling
+- Use HTTPException with appropriate status codes
+- Never expose internal error messages to clients
+- Log all 500 errors with full traceback</code></pre>
+
+        <h4>Directory Structure</h4>
+        <pre><code class="language-text">.claude/
+├── CLAUDE.md              # Main project instructions (optional, can use root CLAUDE.md)
+├── settings.json          # Permissions, hooks, config (shared)
+├── settings.local.json    # Personal settings (gitignored)
+├── rules/
+│   ├── code-style.md      # Coding standards
+│   ├── testing.md         # Testing conventions
+│   ├── security.md        # Security requirements
+│   └── api/
+│       └── fastapi.md     # FastAPI-specific rules
+├── skills/
+│   ├── start-session/
+│   │   └── SKILL.md       # Custom /start-session command
+│   └── architect/
+│       └── SKILL.md       # Custom /architect command
+├── agents/
+│   └── code-reviewer/
+│       └── AGENT.md       # Custom subagent definition
+└── memory/                # Auto-managed persistent memory</code></pre>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Best Practices (same as Cursor rules)</div>
+          <p><strong>Keep files under 200 lines</strong> &mdash; Large files dilute attention. Split into composable rules.</p>
+          <p><strong>Be specific</strong> &mdash; &ldquo;Use snake_case for variables&rdquo; beats &ldquo;follow Python conventions.&rdquo;</p>
+          <p><strong>Path-scope when possible</strong> &mdash; API rules shouldn&rsquo;t load when editing Docker configs.</p>
+          <p><strong>Composable over monolithic</strong> &mdash; Many focused files beat one giant CLAUDE.md.</p>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 4: Skills ==================== -->
+      <section id="skills">
+        <h2>4. Skills &amp; Slash Commands</h2>
+        <p>
+          Skills are Claude Code&rsquo;s equivalent of Cursor&rsquo;s custom commands. They live in
+          <code>.claude/skills/</code> directories and are invoked with the <code>/</code> prefix.
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">How Skills Work</div>
+          <p>
+            When you type <code>/start-session</code>, Claude Code loads
+            <code>.claude/skills/start-session/SKILL.md</code> and injects its content into the prompt.
+            Any additional text you type after the command is passed as <code>$ARGUMENTS</code>.
+          </p>
+        </div>
+
+        <h3 id="builtin-commands">Built-in Commands</h3>
+        <table>
+          <thead>
+            <tr><th>Command</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="cmd-name">/help</td><td>Show available commands and usage</td></tr>
+            <tr><td class="cmd-name">/commit</td><td>Stage and commit changes with a generated message</td></tr>
+            <tr><td class="cmd-name">/compact</td><td>Summarize conversation to free context window</td></tr>
+            <tr><td class="cmd-name">/clear</td><td>Clear conversation history entirely</td></tr>
+            <tr><td class="cmd-name">/memory</td><td>Browse CLAUDE.md files and auto memory</td></tr>
+            <tr><td class="cmd-name">/config</td><td>Open settings interface</td></tr>
+            <tr><td class="cmd-name">/permissions</td><td>View and manage tool permissions</td></tr>
+            <tr><td class="cmd-name">/hooks</td><td>Browse configured hooks</td></tr>
+            <tr><td class="cmd-name">/agents</td><td>View, create, and manage subagents</td></tr>
+            <tr><td class="cmd-name">/init</td><td>Generate or improve CLAUDE.md for your project</td></tr>
+            <tr><td class="cmd-name">/resume</td><td>Resume a previous session by name or ID</td></tr>
+            <tr><td class="cmd-name">/rename</td><td>Name the current session for easy resumption</td></tr>
+            <tr><td class="cmd-name">/cost</td><td>Show session token usage and cost</td></tr>
+            <tr><td class="cmd-name">/context</td><td>Show current context window usage</td></tr>
+            <tr><td class="cmd-name">/add-dir</td><td>Add another working directory to the session</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Built-in Bundled Skills</h3>
+        <table>
+          <thead>
+            <tr><th>Skill</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="cmd-name">/batch</td><td>Decompose large changes into 5&ndash;30 parallel tasks across git worktrees</td></tr>
+            <tr><td class="cmd-name">/claude-api</td><td>Load Claude API reference (Python, TypeScript, etc.)</td></tr>
+            <tr><td class="cmd-name">/debug</td><td>Troubleshoot current session by reading debug logs</td></tr>
+            <tr><td class="cmd-name">/loop</td><td>Run a prompt repeatedly on an interval (e.g., <code>/loop 5m check deploy</code>)</td></tr>
+            <tr><td class="cmd-name">/simplify</td><td>Review changed files and fix quality/efficiency issues</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="custom-skills">Custom Skills</h3>
+        <p>Custom skills live in <code>.claude/skills/{name}/SKILL.md</code> with YAML frontmatter:</p>
+
+        <table>
+          <thead>
+            <tr><th>Scope</th><th>Location</th><th>Visibility</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Project</td><td><code>.claude/skills/</code></td><td>Everyone with the repo</td></tr>
+            <tr><td>User</td><td><code>~/.claude/skills/</code></td><td>Only you, across all projects</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Skill Frontmatter Options</h4>
+        <pre><code class="language-yaml">---
+name: my-skill
+description: When to auto-invoke this skill
+argument-hint: "[environment]"       # Autocomplete hint
+disable-model-invocation: true       # Manual-only (no auto-invoke)
+user-invocable: true                 # Can user call with /slash
+allowed-tools: Bash(npm *), Read     # Tools available without prompting
+model: sonnet                        # Model override (sonnet, opus, haiku, inherit)
+effort: high                         # Thinking effort level
+context: fork                        # Run in subagent for isolation
+agent: Explore                       # Agent type (Explore, Plan, general-purpose)
+---</code></pre>
+
+        <h3 id="skill-example">Real Example: <code>start-session</code></h3>
+        <pre><code class="language-markdown">---
+name: start-session
+description: Begin a development session with active context
+---
+
+# Start Session Command
+
+Initializes the AI context for the current work session.
+
+## Execution Flow
+
+**1. Context Check**
+- Read `CLAUDE.md` (project root).
+- If "No Stack Configured" or missing:
+  &rarr; Stop and tell user: "Run /setup-stack first."
+
+**2. Context Loading**
+- Display summary:
+  &gt; "Context Loaded: **{Language} / {Framework}**"
+  &gt; "Current Phase: **{Active Phase}**"
+  &gt; "Strictness: **{Strictness Level}**"
+
+**3. Session Goal**
+- Ask: "What is the goal for this session?"
+- Cross-reference with Active Phase in CLAUDE.md.
+
+**4. Rule Enforcement**
+- Adhere to active rules in `.claude/rules/`.
+- Never suggest code that violates the style guide.
+
+**5. Ready State**
+- Confirm: "I am ready. Guides are active. Let's build."</code></pre>
+
+        <div class="mermaid">
+sequenceDiagram
+    participant U as Developer
+    participant CC as Claude Code CLI
+    participant AI as Claude Model
+    participant FS as File System
+
+    U->>CC: Types /start-session
+    CC->>FS: Reads .claude/skills/start-session/SKILL.md
+    FS-->>CC: Skill markdown content
+    CC->>FS: Reads CLAUDE.md + .claude/rules/
+    FS-->>CC: Instructions &amp; rules
+    CC->>AI: Prompt = Skill + Rules + User message
+    AI-->>CC: "Context Loaded: Python / FastAPI"
+    CC-->>U: Displays AI response
+    U->>CC: "Implement POST /users"
+    CC->>AI: Prompt + session goal + full context
+    AI-->>CC: TDD-compliant implementation
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Dynamic Content in Skills</div>
+          <p>
+            Use <code>!`command`</code> syntax to run shell commands before the skill is sent to Claude:
+            <code>!`git diff`</code>, <code>!`gh pr view --comments`</code>. The output is injected into
+            the skill content dynamically.
+          </p>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 5: SDD & TDD ==================== -->
+      <section id="sdd-tdd">
+        <h2>5. Schema-Driven Development &amp; TDD</h2>
+        <p>
+          This methodology combines <strong>Schema-Driven Development (SDD)</strong>
+          &mdash; designing the API contract first &mdash; and <strong>Test-Driven Development (TDD)</strong>
+          &mdash; writing tests before implementation. The approach is identical whether you use
+          Cursor or Claude Code &mdash; only the invocation syntax changes.
+        </p>
+
+        <h3 id="schema-driven">Schema-Driven Development (SDD)</h3>
+        <p>
+          SDD means you <strong>define the shape of your API before writing any code</strong>.
+          The schema (OpenAPI spec) becomes the single source of truth.
+        </p>
+
+        <table>
+          <thead>
+            <tr><th>SDD Principle</th><th>What It Means</th><th>In Practice</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Contract First</strong></td>
+              <td>Design the API before implementing it</td>
+              <td><code>/architect</code> generates OpenAPI spec</td>
+            </tr>
+            <tr>
+              <td><strong>Schema = Truth</strong></td>
+              <td>The spec defines what gets built</td>
+              <td>Endpoints, models, and validation come from the spec</td>
+            </tr>
+            <tr>
+              <td><strong>Mock First</strong></td>
+              <td>Skeleton returns fake data matching the schema</td>
+              <td>Phase 0 creates all endpoints with mock responses</td>
+            </tr>
+            <tr>
+              <td><strong>Validate Shape</strong></td>
+              <td>Verify the API structure before adding logic</td>
+              <td>E2E tests run against mocks to prove the shape is right</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Why Schema First?</div>
+          <p>
+            When you tell the AI &ldquo;build a blog API,&rdquo; you might get 10 different designs.
+            With SDD, you <em>lock in the contract</em> during <code>/architect</code>, and the AI
+            follows that contract exactly during implementation. No surprises, no drift.
+          </p>
+        </div>
+
+        <h4>The SDD Flow</h4>
+        <div class="mermaid">
+flowchart LR
+    A["/architect<br/>'Build a blog API'"] --> B["OpenAPI Spec<br/>Generated"]
+    B --> C["Entities Defined<br/>Post, Author, Tag"]
+    C --> D["Endpoints Designed<br/>GET, POST, PUT, DELETE"]
+    D --> E["Request/Response<br/>Models Created"]
+    E --> F["Phase 0 Skeleton<br/>Mock Endpoints"]
+
+    style A fill:#7c4dff,color:#fff
+    style B fill:#00897b,color:#fff
+    style F fill:#ff8f00,color:#fff
+        </div>
+
+        <h3 id="tdd-workflow">Test-Driven Development (TDD)</h3>
+        <p>
+          TDD follows a strict <strong>Red &rarr; Green &rarr; Refactor</strong> cycle.
+          The CLAUDE.md rules <em>require</em> the AI to follow this cycle.
+        </p>
+
+        <div class="mermaid">
+flowchart TB
+    subgraph RED["RED &mdash; Write Failing Test"]
+        R1["Write E2E test for endpoint"]
+        R2["Test calls the API with<br/>expected inputs"]
+        R3["Assert expected status<br/>code + response shape"]
+        R4["Run test &rarr; FAILS<br/>(proves test works)"]
+        R1 --> R2 --> R3 --> R4
+    end
+
+    subgraph GREEN["GREEN &mdash; Make It Pass"]
+        G1["Implement the endpoint<br/>logic"]
+        G2["Add models, services,<br/>repositories"]
+        G3["Run test &rarr; PASSES"]
+        G1 --> G2 --> G3
+    end
+
+    subgraph REFACTOR["REFACTOR &mdash; Clean Up"]
+        RF1["Extract shared<br/>logic"]
+        RF2["Improve naming<br/>and structure"]
+        RF3["Run test &rarr; STILL PASSES"]
+        RF1 --> RF2 --> RF3
+    end
+
+    RED --> GREEN --> REFACTOR
+    REFACTOR -.->|"Next endpoint"| RED
+
+    style RED fill:#c62828,color:#fff
+    style GREEN fill:#2e7d32,color:#fff
+    style REFACTOR fill:#1565c0,color:#fff
+        </div>
+
+        <h4>TDD Rules Enforced by CLAUDE.md</h4>
+        <pre><code class="language-yaml"># From CLAUDE.md or .claude/rules/testing.md
+
+### Test-Driven Development (TDD)
+- E2E tests MUST be written before implementation
+- Tests MUST fail initially (proves they test something)
+- Implementation MUST make tests pass
+- Tests MUST pass before phase transition</code></pre>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">The Golden Rule</div>
+          <p>
+            <strong>Never skip the red step.</strong> If the AI writes implementation code without
+            a failing test first, it&rsquo;s violating the workflow. The CLAUDE.md rules enforce this.
+          </p>
+        </div>
+
+        <h3 id="sdd-tdd-combined">SDD + TDD: The Combined Flow</h3>
+
+        <div class="mermaid">
+flowchart TB
+    subgraph SDD["Schema-Driven Development"]
+        A1["/architect 'Build a blog API'"]
+        A2["Design Entities:<br/>Post, Author, Tag"]
+        A3["Define Endpoints:<br/>GET /posts<br/>POST /posts<br/>GET /posts/:id<br/>PUT /posts/:id<br/>DELETE /posts/:id"]
+        A4["Generate OpenAPI Spec"]
+        A1 --> A2 --> A3 --> A4
+    end
+
+    subgraph PH0["Phase 0 &mdash; Skeleton"]
+        B1["Create mock endpoints<br/>(all return fake data)"]
+        B2["Write E2E tests<br/>against mocks"]
+        B3["All tests PASS<br/>on mock data"]
+        B4["API shape verified"]
+        A4 --> B1 --> B2 --> B3 --> B4
+    end
+
+    subgraph PH1["Phase 1+ &mdash; Implementation (per endpoint)"]
+        C1["Update E2E test with<br/>real assertions (RED)"]
+        C2["Test FAILS<br/>(mock != real)"]
+        C3["Implement real logic:<br/>models, services, repos (GREEN)"]
+        C4["Test PASSES"]
+        C5["Refactor (BLUE)"]
+        C6{"More<br/>endpoints?"}
+        B4 --> C1 --> C2 --> C3 --> C4 --> C5 --> C6
+        C6 -->|Yes| C1
+        C6 -->|No| D1
+    end
+
+    subgraph DONE["Complete"]
+        D1["/code-review"]
+        D2["All tests pass<br/>All rules satisfied"]
+        D1 --> D2
+    end
+
+    style A1 fill:#7c4dff,color:#fff
+    style B4 fill:#00897b,color:#fff
+    style C2 fill:#c62828,color:#fff
+    style C4 fill:#2e7d32,color:#fff
+    style C5 fill:#1565c0,color:#fff
+    style D2 fill:#7b1fa2,color:#fff
+        </div>
+
+        <h4>Concrete Example: Implementing <code>POST /posts</code></h4>
+        <pre><code class="language-python"># Step 1: RED &mdash; Write the failing test
+# tests/api/test_posts.py
+
+@pytest.mark.asyncio
+async def test_create_post(client: AsyncClient, db_session):
+    """Test creating a blog post with real database persistence."""
+    response = await client.post("/posts/", json={
+        "title": "My First Post",
+        "content": "Hello, world!",
+        "author_id": 1,
+    })
+    assert response.status_code == 201
+    data = response.json()
+    assert data["title"] == "My First Post"
+    assert data["id"] is not None
+
+    # Verify it's actually in the database
+    from_db = await db_session.get(Post, data["id"])
+    assert from_db is not None
+    assert from_db.title == "My First Post"</code></pre>
+
+        <pre><code class="language-python"># Step 2: GREEN &mdash; Implement to make test pass
+# app/modules/posts/services/post_service.py
+
+class PostService:
+    def __init__(self, session: AsyncSession):
+        self.repo = PostRepository(session)
+
+    async def create(self, payload: PostCreate) -> Post:
+        """Create a new blog post."""
+        post = Post(
+            title=payload.title,
+            content=payload.content,
+            author_id=payload.author_id,
+            status="draft",
+        )
+        return await self.repo.save(post)</code></pre>
+
+        <pre><code class="language-python"># Step 3: REFACTOR &mdash; Extract validation
+# app/modules/posts/services/post_service.py
+
+class PostService:
+    def __init__(self, session: AsyncSession):
+        self.repo = PostRepository(session)
+
+    async def create(self, payload: PostCreate) -> Post:
+        """Create a new blog post with validation."""
+        await self._validate_author_exists(payload.author_id)
+        post = Post(**payload.model_dump(), status="draft")
+        return await self.repo.save(post)
+
+    async def _validate_author_exists(self, author_id: int) -> None:
+        """Raise 404 if author doesn't exist."""
+        author = await self.author_repo.get(author_id)
+        if not author:
+            raise HTTPException(404, f"Author {author_id} not found")</code></pre>
+      </section>
+
+      <!-- ==================== SECTION 6: Workflow ==================== -->
+      <section id="workflow">
+        <h2>6. The Workflow</h2>
+        <p>
+          The methodology is built on four core principles:
+          <strong>Phase-Based Development</strong>, <strong>TDD</strong>,
+          <strong>Bounded Sessions</strong>, and <strong>Context-First AI</strong>.
+        </p>
+
+        <h3 id="phase-dev">Phase-Based Development</h3>
+
+        <table>
+          <thead>
+            <tr><th>Phase</th><th>Goal</th><th>Output</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Phase 0 &mdash; Skeleton</strong></td>
+              <td>Build the structure. Mock every endpoint. Verify the &ldquo;shape&rdquo; of the API.</td>
+              <td>All endpoints return mocks, E2E tests pass on stubs</td>
+            </tr>
+            <tr>
+              <td><strong>Phase 1+ &mdash; Implementation</strong></td>
+              <td>Implement one endpoint at a time using TDD.</td>
+              <td>Real logic, passing tests, documented phase transitions</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>TDD Cycle</h4>
+        <div class="mermaid">
+flowchart LR
+    R["RED<br/>Write failing test"] --> G["GREEN<br/>Make it pass"]
+    G --> RF["REFACTOR<br/>Clean up"]
+    RF --> R
+
+    style R fill:#c62828,color:#fff
+    style G fill:#2e7d32,color:#fff
+    style RF fill:#1565c0,color:#fff
+        </div>
+
+        <h3>The Command Chain</h3>
+        <p>Development follows a structured chain of slash commands:</p>
+        <pre><code class="language-text">/setup-stack &rarr; /architect &rarr; /start-session &rarr; (code) &rarr; /code-review &rarr; /next-session</code></pre>
+
+        <h3 id="three-workflows">Three Workflows</h3>
+
+        <h4>Workflow 1: Fresh Project with Known Stack</h4>
+        <ol>
+          <li>Clone the template: <code>git clone &lt;repo&gt;</code></li>
+          <li>Open terminal: <code>cd project &amp;&amp; claude</code></li>
+          <li>Configure stack: <code>/setup-stack</code> &mdash; choose your stack</li>
+          <li>Design your feature: tell Claude <code>/architect "Build a task management API"</code></li>
+          <li>Start coding: <code>/start-session</code></li>
+        </ol>
+
+        <h4>Workflow 2: Fresh Project with Custom Stack</h4>
+        <ol>
+          <li>Clone the template</li>
+          <li>Create CLAUDE.md with your stack details</li>
+          <li>Create <code>.claude/rules/</code> with custom rule files</li>
+          <li>Optional: add skills in <code>.claude/skills/</code></li>
+          <li>Configure: <code>/setup-stack</code></li>
+          <li>Build: <code>/architect</code> &rarr; <code>/start-session</code></li>
+        </ol>
+
+        <h4>Workflow 3: Existing Codebase (Brownfield)</h4>
+        <ol>
+          <li>Navigate to your existing repo</li>
+          <li>Run <code>claude</code> in the terminal</li>
+          <li>Auto-detect: <code>/detect-stack</code> or <code>/init</code></li>
+          <li>Review generated CLAUDE.md, set Strictness to Low for legacy code</li>
+          <li>Start working: <code>/start-session</code></li>
+        </ol>
+
+        <div class="mermaid">
+flowchart TB
+    subgraph Setup["Setup Phase"]
+        A["cd project &amp;&amp; claude"] --> B{"Known Stack?"}
+        B -->|Yes| C["/setup-stack<br/>(choose stack)"]
+        B -->|No| D["Create CLAUDE.md<br/>+ .claude/rules/"]
+        D --> C
+    end
+
+    subgraph Phase0["Phase 0 &mdash; Skeleton"]
+        C --> E["/architect<br/>'Design my API'"]
+        E --> F["OpenAPI Spec<br/>Generated"]
+        F --> G["Mock Endpoints<br/>Created"]
+        G --> H["E2E Tests on<br/>Stubs Pass"]
+    end
+
+    subgraph PhaseN["Phase 1+ &mdash; Implementation"]
+        H --> I["/start-session<br/>'Implement POST /users'"]
+        I --> J["Write Failing<br/>E2E Test (RED)"]
+        J --> K["Implement<br/>Endpoint (GREEN)"]
+        K --> L["Refactor<br/>&amp; Clean (BLUE)"]
+        L --> M{"More<br/>endpoints?"}
+        M -->|Yes| J
+        M -->|No| N["/code-review"]
+    end
+
+    subgraph Transition["Session Transition"]
+        N --> O["/next-session<br/>Generate Summary"]
+        O --> P["Hand Off to<br/>Next Session"]
+    end
+
+    style A fill:#7c4dff,color:#fff
+    style E fill:#00897b,color:#fff
+    style I fill:#ff8f00,color:#fff
+    style N fill:#7b1fa2,color:#fff
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 7: Demo ==================== -->
+      <section id="demo">
+        <h2>7. Practical Demo Walkthrough</h2>
+        <p>Let&rsquo;s walk through building a Blog API from zero using Claude Code.</p>
+
+        <ol class="steps">
+          <li>
+            <h4>Install &amp; Open</h4>
+            <pre><code class="language-bash"># Install Claude Code
+curl -fsSL https://claude.ai/install.sh | bash
+
+# Authenticate
+claude auth login
+
+# Clone template and start
+git clone https://github.com/your-org/cursor-course-templates.git
+cd cursor-course-templates
+claude</code></pre>
+            <div class="screenshot-placeholder">[Screenshot: Claude Code CLI opens with welcome message]</div>
+          </li>
+
+          <li>
+            <h4>Run <code>/setup-stack</code></h4>
+            <p>In Claude Code&rsquo;s terminal, type <code>/setup-stack</code>. The AI will:</p>
+            <ul>
+              <li>Present available stacks (python-fastapi, node-express, etc.)</li>
+              <li>Generate <code>CLAUDE.md</code> with your stack configuration</li>
+              <li>Create <code>.claude/rules/</code> with appropriate rule files</li>
+              <li>Set up <code>.claude/skills/</code> with workflow commands</li>
+            </ul>
+            <p>After setup, your CLAUDE.md will contain:</p>
+            <pre><code class="language-yaml"># Tech Stack
+- Language: Python 3.11+
+- Framework: FastAPI
+- Database: PostgreSQL (SQLAlchemy 2.0+ AsyncIO)
+- Testing: Pytest (AsyncIO)
+- Linting: Ruff
+- Formatting: Black
+
+# Active Phase: Phase 0 (Skeleton)
+# Strictness: High</code></pre>
+            <div class="screenshot-placeholder">[Screenshot: /setup-stack output showing stack configured]</div>
+          </li>
+
+          <li>
+            <h4>Run <code>/architect "Build a blog API"</code></h4>
+            <p>The AI designs your API surface:</p>
+            <ul>
+              <li>Proposes entities: <code>Post</code>, <code>Author</code>, <code>Tag</code></li>
+              <li>Generates OpenAPI spec with all endpoints</li>
+              <li>Creates skeleton files with mock responses</li>
+              <li>Writes initial E2E tests against mocks</li>
+            </ul>
+            <pre><code class="language-python"># app/api/posts.py &mdash; Phase 0 Skeleton
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/posts", tags=["Posts"])
+
+@router.get("/")
+async def list_posts():
+    """List all blog posts (mock)."""
+    return [
+        {"id": 1, "title": "Hello World", "status": "draft"},
+        {"id": 2, "title": "Getting Started", "status": "published"},
+    ]
+
+@router.post("/", status_code=201)
+async def create_post():
+    """Create a blog post (mock)."""
+    return {"id": 3, "title": "New Post", "status": "draft"}</code></pre>
+            <div class="screenshot-placeholder">[Screenshot: /architect output showing API design]</div>
+          </li>
+
+          <li>
+            <h4>Run <code>/start-session</code></h4>
+            <p>The AI loads full context and asks for your session goal:</p>
+            <pre><code class="language-text">&gt; Context Loaded: Python / FastAPI
+&gt; Current Phase: Phase 0 (Skeleton)
+&gt; Strictness: High
+&gt;
+&gt; What is the goal for this session?</code></pre>
+            <p>You reply: <em>&ldquo;Implement POST /posts with validation and database persistence.&rdquo;</em></p>
+            <div class="screenshot-placeholder">[Screenshot: /start-session context loading in terminal]</div>
+          </li>
+
+          <li>
+            <h4>Implement with TDD</h4>
+            <p>Claude Code follows the TDD cycle enforced by CLAUDE.md rules. It will:</p>
+            <ol>
+              <li>Use <code>Write</code> tool to create the failing test file</li>
+              <li>Use <code>Bash</code> tool to run <code>pytest</code> &mdash; confirms test fails (RED)</li>
+              <li>Use <code>Edit</code> tool to implement the endpoint logic</li>
+              <li>Use <code>Bash</code> tool to run <code>pytest</code> &mdash; confirms test passes (GREEN)</li>
+              <li>Use <code>Edit</code> tool to refactor if needed (REFACTOR)</li>
+            </ol>
+            <pre><code class="language-python"># Claude creates: tests/api/test_posts.py (RED)
+import pytest
+from httpx import AsyncClient
+
+@pytest.mark.asyncio
+async def test_create_post(client: AsyncClient):
+    """Test creating a blog post with validation."""
+    response = await client.post("/posts/", json={
+        "title": "My First Post",
+        "content": "Hello, world!",
+        "author_id": 1,
+    })
+    assert response.status_code == 201
+    data = response.json()
+    assert data["title"] == "My First Post"
+    assert "id" in data</code></pre>
+            <div class="screenshot-placeholder">[Screenshot: Tests passing in Claude Code terminal output]</div>
+          </li>
+
+          <li>
+            <h4>Review &amp; Transition</h4>
+            <p>When the session&rsquo;s goal is complete:</p>
+            <ul>
+              <li>Run <code>/code-review</code> &mdash; AI audits code against all active rules</li>
+              <li>Fix any issues flagged by the review</li>
+              <li>Run <code>/next-session</code> &mdash; generates a transition summary</li>
+              <li>Run <code>/commit</code> &mdash; stages and commits with a generated message</li>
+            </ul>
+            <div class="screenshot-placeholder">[Screenshot: /code-review output with checklist]</div>
+          </li>
+        </ol>
+      </section>
+
+      <!-- ==================== SECTION 8: Hooks ==================== -->
+      <section id="hooks">
+        <h2>8. Hooks System</h2>
+        <p>
+          Hooks are lifecycle interceptors defined in <code>.claude/settings.json</code>. They let you
+          run shell commands <em>before</em> or <em>after</em> specific AI actions &mdash; format code,
+          block dangerous operations, inject context, and more.
+        </p>
+
+        <h3>Configuration Format</h3>
+        <p>Hooks are defined in the <code>"hooks"</code> key of your settings file:</p>
+        <pre><code class="language-json">{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write $(jq -r '.tool_input.file_path')"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/validate-bash.sh"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+        <h3 id="hook-events">Lifecycle Events</h3>
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Event</th><th>When It Fires</th></tr>
+          </thead>
+          <tbody>
+            <tr class="lifecycle-category"><td colspan="3">Session</td></tr>
+            <tr><td></td><td><code>SessionStart</code></td><td>New session begins or resumes</td></tr>
+            <tr><td></td><td><code>SessionEnd</code></td><td>Session terminates</td></tr>
+            <tr class="lifecycle-category"><td colspan="3">Tool</td></tr>
+            <tr><td></td><td><code>PreToolUse</code></td><td>Before a tool executes (can block with exit 2)</td></tr>
+            <tr><td></td><td><code>PostToolUse</code></td><td>After a tool completes successfully</td></tr>
+            <tr><td></td><td><code>PostToolUseFailure</code></td><td>After a tool fails</td></tr>
+            <tr class="lifecycle-category"><td colspan="3">Prompt</td></tr>
+            <tr><td></td><td><code>UserPromptSubmit</code></td><td>Before Claude processes your prompt</td></tr>
+            <tr><td></td><td><code>InstructionsLoaded</code></td><td>CLAUDE.md or rules loaded</td></tr>
+            <tr class="lifecycle-category"><td colspan="3">Permission</td></tr>
+            <tr><td></td><td><code>PermissionRequest</code></td><td>Permission dialog appears</td></tr>
+            <tr><td></td><td><code>Notification</code></td><td>Claude needs your attention</td></tr>
+            <tr class="lifecycle-category"><td colspan="3">Agent</td></tr>
+            <tr><td></td><td><code>SubagentStart</code></td><td>When a subagent is spawned</td></tr>
+            <tr><td></td><td><code>SubagentStop</code></td><td>When a subagent finishes</td></tr>
+            <tr><td></td><td><code>Stop</code></td><td>When Claude finishes responding</td></tr>
+            <tr class="lifecycle-category"><td colspan="3">Context</td></tr>
+            <tr><td></td><td><code>PreCompact</code></td><td>Before context compaction</td></tr>
+            <tr><td></td><td><code>PostCompact</code></td><td>After context compaction</td></tr>
+            <tr class="lifecycle-category"><td colspan="3">Config</td></tr>
+            <tr><td></td><td><code>ConfigChange</code></td><td>Settings or skills file changes</td></tr>
+            <tr class="lifecycle-category"><td colspan="3">Worktree</td></tr>
+            <tr><td></td><td><code>WorktreeCreate</code></td><td>Git worktree created</td></tr>
+            <tr><td></td><td><code>WorktreeRemove</code></td><td>Git worktree removed</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Hook Types</h3>
+        <table>
+          <thead>
+            <tr><th>Type</th><th>Runs</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Command</strong> (<code>"type": "command"</code>)</td>
+              <td>Shell command</td>
+              <td>Format code, run linters, block dangerous ops</td>
+            </tr>
+            <tr>
+              <td><strong>HTTP</strong> (<code>"type": "http"</code>)</td>
+              <td>POST to URL</td>
+              <td>Webhook notifications, external integrations</td>
+            </tr>
+            <tr>
+              <td><strong>Prompt</strong> (<code>"type": "prompt"</code>)</td>
+              <td>Single LLM call (Haiku)</td>
+              <td>Quick validation, content checks</td>
+            </tr>
+            <tr>
+              <td><strong>Agent</strong> (<code>"type": "agent"</code>)</td>
+              <td>Multi-turn subagent</td>
+              <td>Complex verification workflows</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Exit Codes</h3>
+        <table>
+          <thead>
+            <tr><th>Exit Code</th><th>Meaning</th><th>Behavior</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>0</code></td><td>Success</td><td>Action proceeds normally</td></tr>
+            <tr><td><code>2</code></td><td>Block</td><td>Action is prevented (write reason to stderr)</td></tr>
+            <tr><td>Other</td><td>Failure</td><td><strong>Fail-open</strong>: action proceeds anyway</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Configuration Levels</h3>
+        <p>Hooks are merged in priority order:</p>
+        <pre><code class="language-text">Managed (Org) &rarr; Project (.claude/settings.json) &rarr; Local (.claude/settings.local.json) &rarr; User (~/.claude/settings.json)</code></pre>
+        <p>Higher-priority hooks run first. Managed hooks cannot be overridden.</p>
+
+        <h3 id="hook-examples">Real-World Examples</h3>
+
+        <h4>Auto-Format on File Edit</h4>
+        <pre><code class="language-json">{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "jq -r '.tool_input.file_path' | xargs npx prettier --write"
+        }]
+      }
+    ]
+  }
+}</code></pre>
+
+        <h4>Block Dangerous Shell Commands</h4>
+        <pre><code class="language-json">{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{
+          "type": "command",
+          "command": "if echo \"$TOOL_INPUT\" | grep -qE '(rm -rf|drop table|truncate)'; then echo 'BLOCKED by hook policy' >&2; exit 2; fi"
+        }]
+      }
+    ]
+  }
+}</code></pre>
+
+        <h4>Desktop Notification When Claude Needs Attention</h4>
+        <pre><code class="language-json">{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [{
+          "type": "command",
+          "command": "osascript -e 'display notification \"Claude Code needs you\" with title \"Claude Code\"'"
+        }]
+      }
+    ]
+  }
+}</code></pre>
+
+        <div class="mermaid">
+sequenceDiagram
+    participant AI as Claude Agent
+    participant H as Hook Engine
+    participant S as Shell / HTTP
+    participant FS as File System
+
+    AI->>H: PreToolUse("Edit", {path})
+    H->>H: Check matchers
+    alt Matcher hits &amp; type=command
+        H->>S: Run shell command
+        S-->>H: Exit code
+        alt Exit code = 2
+            H-->>AI: BLOCK &mdash; action prevented
+        else Exit code = 0
+            H-->>AI: PROCEED
+        else Other exit code
+            H-->>AI: PROCEED (fail-open)
+        end
+    else No matcher
+        H-->>AI: PROCEED
+    end
+    AI->>FS: Edit(path, content)
+    FS-->>AI: File written
+    AI->>H: PostToolUse("Edit", {path})
+    H->>S: Run "prettier --write $FILE_PATH"
+    S-->>H: Exit 0
+    H-->>AI: Done
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 9: MCP ==================== -->
+      <section id="mcp">
+        <h2>9. MCP Servers (Model Context Protocol)</h2>
+        <p>
+          MCP is Claude Code&rsquo;s extension system &mdash; the equivalent of VS Code extensions for
+          Cursor. MCP servers provide external tools that Claude can use: databases, APIs, browsers,
+          web scrapers, and more.
+        </p>
+
+        <h3 id="mcp-config">Configuration</h3>
+        <p>MCP servers are defined in <code>.mcp.json</code> (project) or <code>~/.claude/mcp.json</code> (user):</p>
+
+        <pre><code class="language-json">{
+  "mcpServers": {
+    "github": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-github"]
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres",
+               "postgresql://user:pass@localhost/db"]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "slack": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}</code></pre>
+
+        <h4>Configuration Scopes</h4>
+        <table>
+          <thead>
+            <tr><th>Scope</th><th>Location</th><th>Shared?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>User</td><td><code>~/.claude/mcp.json</code></td><td>No &mdash; personal, all projects</td></tr>
+            <tr><td>Project</td><td><code>.mcp.json</code> or <code>.claude/mcp.json</code></td><td>Yes &mdash; team-shared</td></tr>
+            <tr><td>Local</td><td><code>.claude/mcp-local.json</code></td><td>No &mdash; personal, this project</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Server Types</h4>
+        <table>
+          <thead>
+            <tr><th>Type</th><th>Communication</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>stdio</code></td><td>Local process via stdin/stdout</td><td>CLI tools, local servers</td></tr>
+            <tr><td><code>http</code></td><td>HTTP POST</td><td>Local HTTP services</td></tr>
+            <tr><td><code>sse</code></td><td>Server-Sent Events</td><td>Remote servers</td></tr>
+            <tr><td><code>ws</code></td><td>WebSocket</td><td>Remote real-time servers</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="mcp-examples">Popular MCP Servers</h3>
+        <table>
+          <thead>
+            <tr><th>Server</th><th>Tools Provided</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>mcp-server-github</code></td><td>Search repos, open PRs, read issues</td><td>GitHub integration</td></tr>
+            <tr><td><code>@playwright/mcp</code></td><td>Browser automation, screenshots</td><td>E2E testing, web scraping</td></tr>
+            <tr><td><code>mcp-server-postgres</code></td><td>SQL queries, schema inspection</td><td>Database access</td></tr>
+            <tr><td><code>mcp-server-slack</code></td><td>Send messages, read channels</td><td>Team communication</td></tr>
+            <tr><td><code>mcp-server-filesystem</code></td><td>Extended file operations</td><td>File management beyond project</td></tr>
+            <tr><td><code>firecrawl</code></td><td>Web scraping, crawling, search</td><td>Research, data extraction</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <div class="callout-title">Permission Control for MCP</div>
+          <p>
+            Restrict MCP tools in <code>.claude/settings.json</code>:
+          </p>
+          <pre><code class="language-json">{
+  "permissions": {
+    "allow": ["mcp__github__*"],
+    "deny": ["mcp__github__delete_*"]
+  }
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 10: Agents ==================== -->
+      <section id="agents">
+        <h2>10. Subagents &amp; Worktrees</h2>
+        <p>
+          Subagents are specialized Claude instances that handle focused tasks with their own
+          system prompts, tool access, and isolated contexts. Worktrees provide git-level
+          isolation for parallel work.
+        </p>
+
+        <h3 id="builtin-agents">Built-in Subagents</h3>
+        <table>
+          <thead>
+            <tr><th>Agent</th><th>Purpose</th><th>Model</th><th>Tools</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Explore</strong></td><td>Fast read-only codebase research</td><td>Haiku</td><td>Read, Grep, Glob (no edits)</td></tr>
+            <tr><td><strong>Plan</strong></td><td>Pre-implementation design &amp; architecture</td><td>Inherited</td><td>Read, Grep, Glob (no edits)</td></tr>
+            <tr><td><strong>general-purpose</strong></td><td>Complex multi-step tasks</td><td>Inherited</td><td>All tools</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="custom-agents">Custom Agents</h3>
+        <p>
+          Define custom agents in <code>.claude/agents/{name}/AGENT.md</code>:
+        </p>
+
+        <pre><code class="language-markdown">---
+name: code-reviewer
+description: Expert code reviewer. Reviews code for quality, security, and maintainability.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+memory: project
+---
+
+You are a senior code reviewer. When invoked:
+
+1. Analyze the recent changes with `git diff`
+2. Review for: clarity, security, error handling, duplication, performance
+3. Provide feedback organized by priority (critical, warnings, suggestions)
+4. Include specific examples of how to fix issues
+
+## Review Checklist
+- [ ] No hardcoded secrets or credentials
+- [ ] Error handling covers edge cases
+- [ ] Functions have appropriate type hints
+- [ ] Tests cover the new code paths
+- [ ] No unused imports or dead code</code></pre>
+
+        <h4>Agent Frontmatter Options</h4>
+        <table>
+          <thead>
+            <tr><th>Field</th><th>Purpose</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>name</code></td><td>Identifier (required)</td><td><code>code-reviewer</code></td></tr>
+            <tr><td><code>description</code></td><td>When to delegate (required)</td><td><code>Reviews code quality</code></td></tr>
+            <tr><td><code>tools</code></td><td>Allowed tools</td><td><code>Read, Grep, Glob, Bash</code></td></tr>
+            <tr><td><code>disallowedTools</code></td><td>Denied tools</td><td><code>Write, Edit</code></td></tr>
+            <tr><td><code>model</code></td><td>Model override</td><td><code>sonnet</code>, <code>opus</code>, <code>haiku</code>, <code>inherit</code></td></tr>
+            <tr><td><code>maxTurns</code></td><td>Max agentic turns</td><td><code>20</code></td></tr>
+            <tr><td><code>memory</code></td><td>Persistent memory</td><td><code>project</code>, <code>user</code>, <code>local</code></td></tr>
+            <tr><td><code>isolation</code></td><td>Git isolation</td><td><code>worktree</code></td></tr>
+            <tr><td><code>background</code></td><td>Run in background</td><td><code>true</code></td></tr>
+            <tr><td><code>skills</code></td><td>Preloaded skills</td><td><code>[start-session]</code></td></tr>
+            <tr><td><code>mcpServers</code></td><td>Available MCP servers</td><td><code>[playwright]</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="worktrees">Git Worktrees for Parallel Work</h3>
+        <p>
+          Worktrees create isolated copies of your repo so multiple Claude sessions can
+          work in parallel without file conflicts.
+        </p>
+
+        <pre><code class="language-bash"># Start Claude in a named worktree
+claude --worktree feature-auth
+
+# Auto-generated worktree name
+claude --worktree
+
+# Use /batch to auto-decompose into parallel worktree agents
+/batch "Migrate all API endpoints from v1 to v2"</code></pre>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Parallel Development Pattern</div>
+          <p>
+            Use <code>/batch</code> for large refactors. It decomposes the task into 5&ndash;30 parallel
+            subtasks, each running in its own git worktree with a dedicated subagent. Results are
+            merged back into your branch automatically.
+          </p>
+        </div>
+
+        <div class="mermaid">
+flowchart TB
+    A["claude --worktree feature-auth"] --> B["Creates .claude/worktrees/feature-auth/"]
+    B --> C["New branch: worktree-feature-auth"]
+    C --> D["Isolated file system<br/>Independent from main"]
+    D --> E{"Work complete?"}
+    E -->|"Has changes"| F["Merge back or keep branch"]
+    E -->|"No changes"| G["Auto-cleanup"]
+
+    style A fill:#7c4dff,color:#fff
+    style D fill:#00897b,color:#fff
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 11: Settings ==================== -->
+      <section id="settings">
+        <h2>11. Settings &amp; Permissions</h2>
+
+        <h3 id="permissions">Permission System</h3>
+        <p>
+          Claude Code&rsquo;s permission system controls what tools can be used without prompting.
+          Settings are defined in <code>.claude/settings.json</code>.
+        </p>
+
+        <table>
+          <thead>
+            <tr><th>Mode</th><th>Behavior</th><th>Flag</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>default</strong></td><td>Ask permission for each tool use</td><td><code>--permission-mode default</code></td></tr>
+            <tr><td><strong>acceptEdits</strong></td><td>Auto-approve file edits</td><td><code>--permission-mode acceptEdits</code></td></tr>
+            <tr><td><strong>plan</strong></td><td>Read-only, no edits or execution</td><td><code>--permission-mode plan</code></td></tr>
+            <tr><td><strong>dontAsk</strong></td><td>Auto-deny unpre-approved tools</td><td><code>--permission-mode dontAsk</code></td></tr>
+            <tr><td><strong>bypassPermissions</strong></td><td>Skip all prompts (use with caution)</td><td><code>--dangerously-skip-permissions</code></td></tr>
+          </tbody>
+        </table>
+
+        <h4>Permission Rules</h4>
+        <pre><code class="language-json">{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Bash(git *)",
+      "Bash(npm run build)",
+      "Bash(pytest *)",
+      "Read(/src/**)",
+      "Edit(/src/**/*.py)",
+      "WebFetch(domain:github.com)",
+      "mcp__github__*"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Edit(.env)",
+      "Edit(.git/**)",
+      "mcp__github__delete_*"
+    ]
+  }
+}</code></pre>
+
+        <h4>Settings File Locations</h4>
+        <table>
+          <thead>
+            <tr><th>Scope</th><th>Location</th><th>Priority</th><th>Shared?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Managed (Org)</td><td>System-level</td><td>1 (highest)</td><td>Yes</td></tr>
+            <tr><td>CLI flags</td><td>Command line</td><td>2</td><td>Session only</td></tr>
+            <tr><td>Local project</td><td><code>.claude/settings.local.json</code></td><td>3</td><td>No</td></tr>
+            <tr><td>Project</td><td><code>.claude/settings.json</code></td><td>4</td><td>Yes</td></tr>
+            <tr><td>User</td><td><code>~/.claude/settings.json</code></td><td>5 (lowest)</td><td>No</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="keybindings">Keyboard Shortcuts</h3>
+        <p>
+          Customize keybindings in <code>~/.claude/keybindings.json</code>:
+        </p>
+
+        <pre><code class="language-json">{
+  "$schema": "https://www.schemastore.org/claude-code-keybindings.json",
+  "bindings": [
+    {
+      "context": "Chat",
+      "bindings": {
+        "ctrl+k": "chat:submit",
+        "ctrl+g": "chat:externalEditor",
+        "ctrl+s": "chat:stash"
+      }
+    },
+    {
+      "context": "Global",
+      "bindings": {
+        "ctrl+t": "app:toggleTodos",
+        "ctrl+o": "app:toggleTranscript"
+      }
+    }
+  ]
+}</code></pre>
+
+        <h4>Key Default Shortcuts</h4>
+        <table>
+          <thead>
+            <tr><th>Shortcut</th><th>Action</th><th>Context</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><kbd>Enter</kbd></td><td>Submit message</td><td>Chat</td></tr>
+            <tr><td><kbd>Shift+Tab</kbd></td><td>Toggle Plan Mode</td><td>Chat</td></tr>
+            <tr><td><kbd>Ctrl+C</kbd></td><td>Interrupt / Cancel</td><td>Global</td></tr>
+            <tr><td><kbd>Ctrl+D</kbd></td><td>Exit Claude Code</td><td>Global</td></tr>
+            <tr><td><kbd>Ctrl+G</kbd></td><td>Open external editor</td><td>Chat</td></tr>
+            <tr><td><kbd>Ctrl+R</kbd></td><td>Search history</td><td>Global</td></tr>
+            <tr><td><kbd>Ctrl+T</kbd></td><td>Toggle task list</td><td>Global</td></tr>
+            <tr><td><kbd>Ctrl+O</kbd></td><td>Toggle verbose/transcript mode</td><td>Global</td></tr>
+            <tr><td><kbd>Alt+T</kbd> / <kbd>Option+T</kbd></td><td>Toggle extended thinking</td><td>Global</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>Cancel input / dismiss</td><td>Chat</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ==================== SECTION 12: Memory ==================== -->
+      <section id="memory">
+        <h2>12. Memory System</h2>
+        <p>
+          Claude Code has a persistent, file-based memory system that carries knowledge across sessions.
+          This is a unique feature &mdash; Cursor IDE has no equivalent.
+        </p>
+
+        <h3>How It Works</h3>
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>Details</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Location</strong></td><td><code>~/.claude/projects/{project}/memory/</code></td></tr>
+            <tr><td><strong>Index</strong></td><td><code>MEMORY.md</code> &mdash; first 200 lines loaded each session</td></tr>
+            <tr><td><strong>Topic files</strong></td><td>Individual <code>.md</code> files loaded on-demand</td></tr>
+            <tr><td><strong>Auto-memory</strong></td><td>Claude takes notes automatically when enabled</td></tr>
+            <tr><td><strong>Browse</strong></td><td><code>/memory</code> command to view and edit</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Memory Types</h3>
+        <table>
+          <thead>
+            <tr><th>Type</th><th>Purpose</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>user</strong></td>
+              <td>User role, preferences, knowledge level</td>
+              <td>&ldquo;Senior Python dev, new to React frontend&rdquo;</td>
+            </tr>
+            <tr>
+              <td><strong>feedback</strong></td>
+              <td>Corrections and guidance from user</td>
+              <td>&ldquo;Don&rsquo;t mock the database in integration tests&rdquo;</td>
+            </tr>
+            <tr>
+              <td><strong>project</strong></td>
+              <td>Ongoing work, goals, deadlines</td>
+              <td>&ldquo;Merge freeze starts 2026-03-05 for mobile release&rdquo;</td>
+            </tr>
+            <tr>
+              <td><strong>reference</strong></td>
+              <td>Pointers to external resources</td>
+              <td>&ldquo;Pipeline bugs tracked in Linear project INGEST&rdquo;</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Memory File Format</h3>
+        <pre><code class="language-markdown">---
+name: testing-preferences
+description: How the team prefers to write and run tests
+type: feedback
+---
+
+- Integration tests must hit a real database, never mocks
+- Use pytest fixtures for database setup/teardown
+- Run tests with: `.venv/bin/python3 -m pytest tests/ -v`
+- Always test both happy path and error cases</code></pre>
+
+        <h3>MEMORY.md Index</h3>
+        <pre><code class="language-markdown"># Memory Index
+
+- [testing-preferences.md](testing-preferences.md) - Testing approach and conventions
+- [user-role.md](user-role.md) - User background and expertise
+- [project-status.md](project-status.md) - Current sprint goals and deadlines
+- [aws-patterns.md](aws-patterns.md) - AWS deployment patterns used in this project</code></pre>
+
+        <div class="callout callout-info">
+          <div class="callout-title">Enable Auto-Memory</div>
+          <p>
+            Add to <code>~/.claude/settings.json</code>:
+          </p>
+          <pre><code class="language-json">{
+  "autoMemoryEnabled": true
+}</code></pre>
+          <p>
+            Claude will automatically save important context across sessions &mdash; build commands,
+            debugging insights, user preferences, and project patterns.
+          </p>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Ask Claude to Remember</div>
+          <p>
+            You can explicitly ask: <em>&ldquo;Remember that we always use snake_case for database columns.&rdquo;</em>
+            Claude will save it to the appropriate memory file. You can also say <em>&ldquo;Forget the thing about snake_case&rdquo;</em>
+            to remove a memory.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <p>
+      Claude Code Course Materials &mdash; AI-Assisted Development from the Terminal
+      <br />
+      Built with <a href="https://picocss.com" target="_blank" rel="noopener">Pico.css</a>,
+      <a href="https://mermaid.js.org" target="_blank" rel="noopener">Mermaid.js</a>, and
+      <a href="https://prismjs.com" target="_blank" rel="noopener">Prism.js</a>.
+    </p>
+  </footer>
+
+  <!-- ===== JS: Prism.js ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+
+  <!-- ===== JS: Mermaid ===== -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+      sequence: { useMaxWidth: true },
+    });
+  </script>
+
+  <!-- ===== JS: Sidebar active link tracking ===== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.sidebar nav a');
+      const sections = document.querySelectorAll('main section, main h3[id]');
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            links.forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+            if (active) active.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-10% 0px -80% 0px' });
+
+      sections.forEach(s => { if (s.id) observer.observe(s); });
+    });
+  </script>
+
+</body>
+</html>
