@@ -243,12 +243,6 @@
       padding: 1rem 1.5rem;
     }
 
-    /* ===== Mermaid ===== */
-    .mermaid {
-      text-align: center;
-      margin: 1.5rem 0;
-    }
-
     /* ===== Footer ===== */
     footer.site-footer {
       text-align: center;
@@ -422,7 +416,8 @@
           your interactions and enriching them with context.
         </p>
 
-        <div class="mermaid">
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d1.svg" alt="Diagram 1" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart TB
     subgraph Cursor["Cursor IDE"]
         direction TB
@@ -442,7 +437,7 @@ flowchart TB
     style AI_LAYER fill:#2e7d32,color:#fff
     style CONTEXT fill:#00897b,color:#fff
     style LLM fill:#ff8f00,color:#fff
-        </div>
+    -->
 
         <div class="callout callout-tip">
           <div class="callout-title">Key Insight</div>
@@ -463,7 +458,8 @@ flowchart TB
           for productive AI-assisted development.
         </p>
 
-        <div class="mermaid">
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d2.svg" alt="Diagram 2" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart TB
     subgraph Interfaces["4 AI Interfaces"]
         direction LR
@@ -482,7 +478,7 @@ flowchart TB
     style CMDK fill:#ff9800,color:#fff
     style CHAT fill:#2196f3,color:#fff
     style AGENT fill:#9c27b0,color:#fff
-        </div>
+    -->
 
         <!-- Tab Completion -->
         <h3 id="tab-completion">Tab Completion</h3>
@@ -585,7 +581,8 @@ flowchart TB
         <!-- Decision Guide -->
         <h3 id="which-interface">Which Interface Should I Use?</h3>
 
-        <div class="mermaid">
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d3.svg" alt="Diagram 3" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart TD
     START["What do you need?"] --> Q1{"Editing code<br/>you already see?"}
     Q1 -->|"Yes, small change"| TAB["Use Tab<br/>Accept predictions"]
@@ -598,7 +595,7 @@ flowchart TD
     style CMDK fill:#ff9800,color:#fff
     style CHAT fill:#2196f3,color:#fff
     style AGENT fill:#9c27b0,color:#fff
-        </div>
+    -->
 
         <table>
           <thead>
@@ -684,7 +681,8 @@ flowchart TD
           write better prompts.
         </p>
 
-        <div class="mermaid">
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d4.svg" alt="Diagram 4" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     subgraph Input["Your Prompt"]
         P["Implement POST /users<br/>@app/api/posts.py"]
@@ -711,7 +709,7 @@ flowchart LR
     style P fill:#ff9800,color:#fff
     style LLM fill:#2e7d32,color:#fff
     style R fill:#00897b,color:#fff
-        </div>
+    -->
 
         <p>The AI sees everything at once: your rules, your project context, any files you
           referenced with <code>@</code>, and your message. This is why
@@ -815,21 +813,6 @@ flowchart LR
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
-
-  <!-- ===== Mermaid.js v11 ===== -->
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      || document.documentElement.getAttribute('data-theme') === 'dark';
-
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: isDark ? 'dark' : 'default',
-      flowchart: { useMaxWidth: true, htmlLabels: true },
-      sequence: { useMaxWidth: true },
-    });
-  </script>
 
   <!-- ===== Active TOC Highlighting ===== -->
   <script>

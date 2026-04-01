@@ -316,12 +316,6 @@
       font-size: 0.9rem;
     }
 
-    /* ===== Mermaid ===== */
-    .mermaid {
-      text-align: center;
-      margin: 1.5rem 0;
-    }
-
     /* ===== Footer ===== */
     footer.site-footer {
       text-align: center;
@@ -575,7 +569,8 @@
     because the structure does the heavy lifting.
   </p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d1.svg" alt="Diagram 1" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     subgraph Traditional["Traditional Ad-Hoc"]
         T1["Generic Prompt"] --> T2["Inconsistent Code"]
@@ -592,7 +587,7 @@ flowchart LR
     end
 
     Traditional -.->|"upgrade to"| Agentic
-  </div>
+    -->
 
   <p>
     Notice the loop in the traditional workflow. Because there is no upfront structure, the developer
@@ -623,7 +618,8 @@ flowchart LR
     are ready to proceed.
   </p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d2.svg" alt="Diagram 2" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     PRE["cursor-basics.html<br/>Prereq"] --> S2["Section 2<br/>Workflow + SDD<br/>Lab 1"]
     S2 --> S3["Section 3<br/>Skills<br/>Lab 2"]
@@ -631,7 +627,7 @@ flowchart LR
     S4 --> S5["Section 5<br/>TDD<br/>Lab 4"]
     S5 --> S6["Section 6<br/>MCP<br/>Lab 5"]
     S6 --> S7["Section 7<br/>Hooks"]
-  </div>
+    -->
 
   <p>Here is what each section covers and why it matters:</p>
 
@@ -774,7 +770,8 @@ flowchart LR
     spectrum helps you choose the right level of rigor for your team.
   </p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d3.svg" alt="Diagram 3" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     subgraph SDD["Spec-Driven Development Patterns"]
         SF["Spec-First<br/>OUR APPROACH<br/>API contract before code"]
@@ -786,7 +783,7 @@ flowchart LR
     style SF fill:#2e7d32,color:#fff
     style SA fill:#1565c0,color:#fff
     style SS fill:#6a1b9a,color:#fff
-  </div>
+    -->
 
   <table class="comparison-table">
     <thead>
@@ -919,7 +916,8 @@ flowchart LR
     AI-assisted development from vibe coding.
   </p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d4.svg" alt="Diagram 4" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     A["/architect<br/>Design API Contract"] --> B["OpenAPI Spec<br/>Entities + Endpoints"]
     B --> C["Phase 0 Skeleton<br/>Mock endpoints"]
@@ -930,7 +928,7 @@ flowchart LR
     style B fill:#00897b,color:#fff
     style C fill:#ff8f00,color:#fff
     style F fill:#2e7d32,color:#fff
-  </div>
+    -->
 
   <p>
     <strong>Stage 1 &mdash; Design the contract with <code>/architect</code>.</strong>
@@ -995,7 +993,8 @@ flowchart LR
     real tests and real implementations.
   </p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d5.svg" alt="Diagram 5" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart TB
     subgraph Phase0["Phase 0 - Skeleton"]
         P0A["Scaffold directory structure"]
@@ -1017,7 +1016,7 @@ flowchart TB
     DONE["Phase Transition<br/>code-review + next-session"]
     Phase0 --> Phase1
     P1F -->|"No"| DONE
-  </div>
+    -->
 
   <p>
     The phase transition is a formal checkpoint. Before moving from Phase 0 to Phase 1,
@@ -1092,7 +1091,8 @@ flowchart TB
     Fresh context produces consistent code.
   </p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d6.svg" alt="Diagram 6" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     S1["/start-session<br/>Load context<br/>Set goal"] --> S2["Execute<br/>ONE focused task<br/>TDD cycle"]
     S2 --> S3["/code-review<br/>Audit against rules"]
@@ -1101,7 +1101,7 @@ flowchart LR
     style S1 fill:#3f51b5,color:#fff
     style S2 fill:#2e7d32,color:#fff
     style S4 fill:#6a1b9a,color:#fff
-  </div>
+    -->
 
   <p>
     <strong>Starting a session with <code>/start-session</code></strong> does more than open a new
@@ -1421,7 +1421,8 @@ the AI "knows" the project rules, stack, and current phase before writing any co
 
   <!-- ===== Diagram 1: Command Execution Flow ===== -->
   <h4>Command Execution Flow</h4>
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d7.svg" alt="Diagram 7" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     U["Developer types<br/>/start-session"] --> L["Cursor loads<br/>.cursor/commands/start-session.md"]
     L --> A["Rules loaded<br/>.cursor/rules/*.mdc"]
@@ -1431,11 +1432,12 @@ flowchart LR
     style U fill:#ff9800,color:#fff
     style LLM fill:#3f51b5,color:#fff
     style R fill:#2e7d32,color:#fff
-  </div>
+    -->
 
   <!-- ===== Diagram 2: Sequence for /start-session ===== -->
   <h4>Sequence: What Happens When You Run <code>/start-session</code></h4>
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d8.svg" alt="Diagram 8" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 sequenceDiagram
     participant Dev as Developer
     participant Cursor as Cursor Agent
@@ -1455,7 +1457,7 @@ sequenceDiagram
     Dev->>Cursor: Implement POST /tasks
     Cursor->>LLM: Goal + full context
     LLM-->>Cursor: TDD-compliant implementation
-  </div>
+    -->
 
   <!-- ===== 3.4 Why Commands Save Tokens ===== -->
   <h3>Why Commands Save Tokens and Ensure Consistency</h3>
@@ -1506,7 +1508,8 @@ sequenceDiagram
     and sets up the next step:
   </p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d9.svg" alt="Diagram 9" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     SS["/setup-stack<br/>Configure stack"] --> AR["/architect<br/>Design spec + skeleton"]
     AR --> ST["/start-session<br/>Load context + goal"]
@@ -1520,7 +1523,7 @@ flowchart LR
     style CODE fill:#2e7d32,color:#fff
     style CR fill:#c62828,color:#fff
     style NS fill:#6a1b9a,color:#fff
-  </div>
+    -->
 
   <ol>
     <li><code>/setup-stack</code> &mdash; configure the project stack once</li>
@@ -1806,7 +1809,8 @@ Rule content in markdown...
 
   <!-- ============================================================ -->
   <h3 id="rule-loading-diagram">Rule Loading Decision Tree</h3>
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d10.svg" alt="Diagram 10" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart TD
     PROMPT["Prompt sent to AI"] --> SCAN["Scan .cursor/rules/"]
     SCAN --> AA["alwaysApply: true?<br/>Load always"]
@@ -1821,7 +1825,7 @@ flowchart TD
     style PROMPT fill:#3f51b5,color:#fff
     style COMBINE fill:#00897b,color:#fff
     style LLM fill:#ff8f00,color:#fff
-  </div>
+    -->
 
   <!-- ============================================================ -->
   <h3 id="rule-precedence">Rule Precedence and Stacking</h3>
@@ -1835,7 +1839,8 @@ flowchart TD
     <li><strong>Rules stack, not override</strong>: A later rule adds to context; it does not erase earlier rules. Design rules to be composable — each focused on one concern.</li>
   </ul>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d11.svg" alt="Diagram 11" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart TB
     subgraph Rules["Active Rules Stack"]
         R1["000-core-workflow.mdc<br/>alwaysApply: true<br/>Phase and TDD enforcement"]
@@ -1847,7 +1852,7 @@ flowchart TB
     CONTEXT --> AI["AI writes code that:<br/>Follows phases<br/>Writes tests first<br/>Matches Python style"]
     style CONTEXT fill:#00897b,color:#fff
     style AI fill:#2e7d32,color:#fff
-  </div>
+    -->
 
   <!-- ============================================================ -->
   <h3 id="rules-enforce-sdd">How Rules Enforce Spec-Driven Development</h3>
@@ -1889,7 +1894,8 @@ flowchart TB
     </tbody>
   </table>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d12.svg" alt="Diagram 12" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     subgraph SDD_Rules["Rules Enforcing Spec-First Flow"]
         AR["architect-phase.mdc<br/>Design API first<br/>No code before spec"]
@@ -1902,7 +1908,7 @@ flowchart LR
     TF -->|"Each endpoint"| EP
     style AR fill:#3f51b5,color:#fff
     style TF fill:#c62828,color:#fff
-  </div>
+    -->
 
   <!-- ============================================================ -->
   <h3 id="actual-rule-content">Real Rule File: <code>000-core-workflow.mdc</code></h3>
@@ -2211,7 +2217,8 @@ async def delete_task(task_id: int):
     you have no proof the test is meaningful. The red step is what gives TDD its entire value.
   </div>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d13.svg" alt="Diagram 13" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart TB
     subgraph RED["Red - Write Failing Test"]
         R1["Write E2E test<br/>for the endpoint"]
@@ -2241,7 +2248,7 @@ flowchart TB
     style RED fill:#c62828,color:#fff
     style GREEN fill:#2e7d32,color:#fff
     style REFACTOR fill:#1565c0,color:#fff
-  </div>
+    -->
 
   <!-- ============================================================ -->
   <h3 id="tdd-as-design">TDD as Design, Not Just Testing</h3>
@@ -2299,7 +2306,8 @@ flowchart TB
     that the real implementation must satisfy.
   </p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d14.svg" alt="Diagram 14" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     subgraph Phase0["Phase 0 - Shape Verification"]
         M1["Mock endpoint<br/>returns fake data"]
@@ -2321,7 +2329,7 @@ flowchart LR
     style M3 fill:#ff8f00,color:#fff
     style L2 fill:#c62828,color:#fff
     style L4 fill:#2e7d32,color:#fff
-  </div>
+    -->
 
   <!-- ============================================================ -->
   <h3 id="tdd-phase-1">TDD at Phase 1+: Testing the Logic</h3>
@@ -2376,7 +2384,8 @@ flowchart LR
     process does not. You configure the rules once, and the AI follows them forever.
   </div>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d15.svg" alt="Diagram 15" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart TB
     subgraph Spec["Spec-First Design"]
         S1["/architect<br/>Design entities and endpoints"]
@@ -2408,7 +2417,7 @@ flowchart TB
     style I1 fill:#c62828,color:#fff
     style I2 fill:#2e7d32,color:#fff
     style DONE fill:#6a1b9a,color:#fff
-  </div>
+    -->
 
   <!-- ============================================================ -->
   <h3 id="tdd-example">Concrete Example: POST /tasks</h3>
@@ -2622,7 +2631,8 @@ class TaskService:
   </ul>
 
   <div class="diagram-container">
-    <div class="mermaid">
+    <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d16.svg" alt="Diagram 16" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     subgraph Cursor["Cursor Agent"]
         AI["AI Model"]
@@ -2649,7 +2659,7 @@ flowchart LR
 
     style AI fill:#3f51b5,color:#fff
     style TOOLS fill:#00897b,color:#fff
-    </div>
+    -->
   </div>
 
   <h3 id="mcp-config">How MCP Works in Cursor</h3>
@@ -2666,7 +2676,8 @@ flowchart LR
   </ul>
 
   <div class="diagram-container">
-    <div class="mermaid">
+    <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d17.svg" alt="Diagram 17" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 flowchart LR
     CONFIG[".cursor/mcp.json<br/>Server definitions"] --> STARTUP["Cursor starts<br/>MCP processes"]
     STARTUP --> REG["Tools registered<br/>in Agent context"]
@@ -2676,7 +2687,7 @@ flowchart LR
     style CONFIG fill:#ff8f00,color:#fff
     style AVAIL fill:#00897b,color:#fff
     style USE fill:#2e7d32,color:#fff
-    </div>
+    -->
   </div>
 
   <h4>Configuration Format</h4>
@@ -3025,7 +3036,8 @@ flowchart LR
   <h3>7.6 Hook Execution Flow</h3>
   <p>The following diagram shows how the Hook Engine intercepts a tool call at both the pre- and post-use stages:</p>
 
-  <div class="mermaid">
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d18.svg" alt="Diagram 18" style="max-width:100%;height:auto" /></div>
+    <!-- mermaid source preserved:
 sequenceDiagram
     participant AI as AI Agent
     participant H as Hook Engine
@@ -3051,7 +3063,7 @@ sequenceDiagram
     H->>S: npx prettier --write path
     S-->>H: Exit 0
     H-->>AI: Done
-  </div>
+    -->
 
   <!-- ─── 7.7 Real-World Examples ─── -->
   <h3 id="hook-examples">7.7 Real-World Examples</h3>
@@ -3157,22 +3169,6 @@ sequenceDiagram
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
-
-  <!-- ===== Mermaid.js v11 ===== -->
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-
-    // Detect dark mode
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      || document.documentElement.getAttribute('data-theme') === 'dark';
-
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: isDark ? 'dark' : 'default',
-      flowchart: { useMaxWidth: true, htmlLabels: true },
-      sequence: { useMaxWidth: true },
-    });
-  </script>
 
   <!-- ===== Active TOC Highlighting ===== -->
   <script>
