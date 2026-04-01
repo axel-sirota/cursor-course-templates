@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cursor IDE Basics &mdash; Getting Started with AI-Assisted Editing</title>
+
+  <!-- Pico.css v2 classless indigo variant -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.indigo.min.css" />
+
+  <!-- Google Fonts: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js: Tomorrow theme + core languages -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+  <style>
+    /* ===== Base Overrides ===== */
+    :root {
+      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-family-monospace: 'JetBrains Mono', 'Fira Code', monospace;
+      --toc-width: 260px;
+      --header-height: 0px;
+      --callout-tip: #2e7d32;
+      --callout-warning: #e65100;
+      --callout-info: #1565c0;
+      --callout-lab: #6a1b9a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --callout-tip: #66bb6a;
+        --callout-warning: #ff9800;
+        --callout-info: #42a5f5;
+        --callout-lab: #ce93d8;
+      }
+    }
+
+    [data-theme="dark"] {
+      --callout-tip: #66bb6a;
+      --callout-warning: #ff9800;
+      --callout-info: #42a5f5;
+      --callout-lab: #ce93d8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-family);
+      margin: 0;
+      padding: 0;
+    }
+
+    code, pre, kbd, samp {
+      font-family: var(--font-family-monospace);
+    }
+
+    /* ===== Hero Header ===== */
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem 2rem;
+      background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 50%, #2d4a22 100%);
+      color: #e0e0e0;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .hero .subtitle {
+      font-size: 1.15rem;
+      opacity: 0.85;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-green { background: #2e7d32; color: #fff; }
+    .badge-teal { background: #00897b; color: #fff; }
+    .badge-amber { background: #ff8f00; color: #fff; }
+    .badge-prereq {
+      background: #43a047;
+      color: #fff;
+      font-size: 0.7rem;
+      vertical-align: super;
+      margin-left: 0.3rem;
+    }
+
+    /* ===== Page Layout ===== */
+    .page-wrapper {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: var(--header-height, 0);
+      align-self: flex-start;
+      width: var(--toc-width);
+      min-width: var(--toc-width);
+      height: calc(100vh - var(--header-height, 0px));
+      overflow-y: auto;
+      padding: 1.5rem 0.75rem 2rem 0;
+      font-size: 0.85rem;
+      border-right: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    .sidebar .sidebar-title {
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--pico-muted-color, #999);
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar li {
+      margin-bottom: 0.35rem;
+    }
+
+    .sidebar li.sub {
+      padding-left: 1rem;
+      font-size: 0.82rem;
+    }
+
+    .sidebar a {
+      text-decoration: none;
+      color: var(--pico-muted-color, #666);
+      display: block;
+      padding: 0.15rem 0;
+      transition: color 0.15s;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      color: var(--pico-primary, #3f51b5);
+      font-weight: 600;
+    }
+
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      padding: 2rem 0 4rem 2.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .page-wrapper { flex-direction: column; }
+      .sidebar { display: none; }
+      .main-content { padding: 1.5rem 0; }
+    }
+
+    /* ===== Mobile TOC ===== */
+    .mobile-toc {
+      display: none;
+      margin: 1rem;
+      padding: 0.75rem;
+      border: 1px solid var(--pico-muted-border-color, #ddd);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .mobile-toc { display: block; }
+    }
+
+    /* ===== Section Styling ===== */
+    section {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    section:last-child {
+      border-bottom: none;
+    }
+
+    /* ===== Callouts ===== */
+    .callout {
+      border-left: 4px solid;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+      background: color-mix(in srgb, var(--pico-card-background-color, #fff) 95%, transparent);
+    }
+
+    .callout-tip { border-color: var(--callout-tip); }
+    .callout-warning { border-color: var(--callout-warning); }
+    .callout-info { border-color: var(--callout-info); }
+    .callout-lab { border-color: var(--callout-lab); }
+
+    .callout-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .callout-tip .callout-title { color: var(--callout-tip); }
+    .callout-warning .callout-title { color: var(--callout-warning); }
+    .callout-info .callout-title { color: var(--callout-info); }
+    .callout-lab .callout-title { color: var(--callout-lab); }
+
+    /* ===== Keyboard Shortcuts ===== */
+    kbd {
+      background: var(--pico-card-background-color, #f5f5f5);
+      border: 1px solid var(--pico-muted-border-color, #ddd);
+      border-radius: 4px;
+      padding: 0.15rem 0.4rem;
+      font-size: 0.85em;
+      font-family: var(--font-family-monospace);
+      box-shadow: 0 1px 0 var(--pico-muted-border-color, #ddd);
+    }
+
+    /* ===== Philosophy block ===== */
+    blockquote.philosophy {
+      border-left: 4px solid var(--pico-primary, #3f51b5);
+      font-style: italic;
+      font-size: 1.1rem;
+      padding: 1rem 1.5rem;
+    }
+
+    /* ===== Mermaid ===== */
+    .mermaid {
+      text-align: center;
+      margin: 1.5rem 0;
+    }
+
+    /* ===== Footer ===== */
+    footer.site-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--pico-muted-color, #999);
+      border-top: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    /* ===== Print ===== */
+    @media print {
+      .sidebar, .mobile-toc, .hero .badge-row { display: none; }
+      .page-wrapper { display: block; }
+      .hero { padding: 1rem; }
+      .hero h1 { font-size: 1.5rem; }
+      pre { white-space: pre-wrap; word-wrap: break-word; }
+      .mermaid { break-inside: avoid; }
+      section { break-inside: avoid; }
+    }
+
+    /* ===== Code Blocks ===== */
+    pre[class*="language-"] {
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    code:not([class*="language-"]) {
+      background: color-mix(in srgb, var(--pico-muted-color, #999) 12%, transparent);
+      padding: 0.15rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.88em;
+    }
+
+    /* ===== Shortcut table ===== */
+    .shortcut-table td:first-child {
+      white-space: nowrap;
+    }
+
+    /* Dark mode auto-switch for Pico */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        color-scheme: dark;
+      }
+      .hero {
+        background: linear-gradient(135deg, #0a0f14 0%, #111b26 50%, #1a2e15 100%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <h1>Cursor IDE Basics</h1>
+    <p class="subtitle">Getting Started with AI-Assisted Editing</p>
+    <div class="badge-row">
+      <span class="badge badge-green">Prerequisite</span>
+      <span class="badge badge-teal">30 min</span>
+      <span class="badge badge-amber">Hands-On</span>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE TOC ===== -->
+  <details class="mobile-toc">
+    <summary>Table of Contents</summary>
+    <ul>
+      <li><a href="#what-is-cursor">1. What is Cursor?</a></li>
+      <li><a href="#ai-interfaces">2. The 4 AI Interfaces</a></li>
+      <li><a href="#context-system">3. The Context System</a></li>
+      <li><a href="#exercise">4. Quick Exercise</a></li>
+    </ul>
+  </details>
+
+  <div class="page-wrapper">
+
+    <!-- ===== SIDEBAR TOC ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">Contents</div>
+      <nav>
+        <ul>
+          <li><a href="#what-is-cursor">1. What is Cursor?</a></li>
+          <li class="sub"><a href="#why-cursor">Why Not Just VS Code?</a></li>
+          <li class="sub"><a href="#architecture">Under the Hood</a></li>
+          <li><a href="#ai-interfaces">2. The 4 AI Interfaces</a></li>
+          <li class="sub"><a href="#tab-completion">Tab Completion</a></li>
+          <li class="sub"><a href="#inline-edit">Inline Edit (Cmd+K)</a></li>
+          <li class="sub"><a href="#chat-panel">Chat Panel</a></li>
+          <li class="sub"><a href="#agent-mode">Agent / Composer</a></li>
+          <li class="sub"><a href="#which-interface">Which to Use?</a></li>
+          <li><a href="#context-system">3. Context System</a></li>
+          <li class="sub"><a href="#at-symbols">@ Symbols</a></li>
+          <li class="sub"><a href="#context-flow">How Context Flows</a></li>
+          <li><a href="#exercise">4. Quick Exercise</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+      <!-- ==================== SECTION 1: What is Cursor? ==================== -->
+      <section id="what-is-cursor">
+        <h2>1. What is Cursor?</h2>
+
+        <p>
+          <strong>Cursor</strong> is an AI-first code editor built on top of Visual Studio Code.
+          Unlike traditional editors that bolt on AI as an extension, Cursor integrates large language
+          models into every layer of the editing experience: completions, refactoring, search, debugging,
+          and multi-file orchestration.
+        </p>
+
+        <p>
+          Think of it as <strong>VS Code + a senior AI pair programmer</strong> that can read your entire
+          project, understand your conventions, and write code that matches your style.
+        </p>
+
+        <h3 id="why-cursor">Why Not Just VS Code + Copilot?</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>VS Code + Copilot</th>
+              <th>Cursor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AI Integration</td>
+              <td>Extension (bolt-on)</td>
+              <td>Native, first-class</td>
+            </tr>
+            <tr>
+              <td>Context Awareness</td>
+              <td>Current file + neighbors</td>
+              <td>Full project via Rules, Context files, and @ symbols</td>
+            </tr>
+            <tr>
+              <td>Multi-file Editing</td>
+              <td>One file at a time</td>
+              <td>Agent mode orchestrates across files</td>
+            </tr>
+            <tr>
+              <td>Custom Rules</td>
+              <td>Not supported</td>
+              <td>.cursor/rules/*.mdc enforce your standards</td>
+            </tr>
+            <tr>
+              <td>Slash Commands</td>
+              <td>Limited built-in</td>
+              <td>Custom commands in .cursor/commands/</td>
+            </tr>
+            <tr>
+              <td>Terminal Integration</td>
+              <td>Separate</td>
+              <td>AI reads errors, fixes code, reruns</td>
+            </tr>
+            <tr>
+              <td>VS Code Extensions</td>
+              <td>Native</td>
+              <td>Full compatibility (same extension ecosystem)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 id="architecture">Under the Hood</h3>
+
+        <p>
+          Cursor is a fork of VS Code, so everything you know about VS Code works:
+          extensions, keybindings, themes, settings. The AI layer sits on top, intercepting
+          your interactions and enriching them with context.
+        </p>
+
+        <div class="mermaid">
+flowchart TB
+    subgraph Cursor["Cursor IDE"]
+        direction TB
+        VSCODE["VS Code Core<br/>Editor, Extensions, Terminal"]
+        AI_LAYER["AI Layer<br/>LLM Integration"]
+        CONTEXT["Context Engine<br/>Rules, Commands, @ Symbols"]
+    end
+
+    VSCODE --> AI_LAYER
+    AI_LAYER --> CONTEXT
+    CONTEXT --> LLM["LLM Provider<br/>Claude, GPT, etc."]
+
+    USER["Developer"] --> Cursor
+    LLM --> AI_LAYER
+
+    style Cursor fill:#1b2838,color:#fff
+    style AI_LAYER fill:#2e7d32,color:#fff
+    style CONTEXT fill:#00897b,color:#fff
+    style LLM fill:#ff8f00,color:#fff
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Key Insight</div>
+          <p>
+            Cursor does not replace VS Code &mdash; it <em>is</em> VS Code, with an AI brain
+            grafted on. Your extensions, settings, and muscle memory all transfer.
+          </p>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 2: The 4 AI Interfaces ==================== -->
+      <section id="ai-interfaces">
+        <h2>2. The 4 AI Interfaces</h2>
+
+        <p>
+          Cursor provides four distinct ways to interact with AI, each suited to different
+          tasks. Understanding when to use each one is the single most important skill
+          for productive AI-assisted development.
+        </p>
+
+        <div class="mermaid">
+flowchart TB
+    subgraph Interfaces["4 AI Interfaces"]
+        direction LR
+        TAB["Tab<br/>Inline predictions"]
+        CMDK["Cmd+K<br/>Targeted edit"]
+        CHAT["Chat<br/>Q and A"]
+        AGENT["Agent<br/>Multi-file"]
+    end
+
+    TAB -->|"Auto-complete<br/>as you type"| S1["Small Changes<br/>Variable names,<br/>boilerplate, patterns"]
+    CMDK -->|"Select code,<br/>describe change"| S2["Medium Changes<br/>Refactor function,<br/>add error handling"]
+    CHAT -->|"Ask questions,<br/>get explanations"| S3["Exploration<br/>Understand code,<br/>debug, plan"]
+    AGENT -->|"Autonomous<br/>multi-step"| S4["Large Changes<br/>New features,<br/>TDD cycles, refactors"]
+
+    style TAB fill:#4caf50,color:#fff
+    style CMDK fill:#ff9800,color:#fff
+    style CHAT fill:#2196f3,color:#fff
+    style AGENT fill:#9c27b0,color:#fff
+        </div>
+
+        <!-- Tab Completion -->
+        <h3 id="tab-completion">Tab Completion</h3>
+        <p>
+          As you type, Cursor predicts your next edit and shows it as <strong>ghost text</strong>.
+          This goes far beyond simple autocomplete &mdash; it can predict multi-line blocks,
+          suggest the next logical edit location, and even anticipate refactoring patterns
+          based on what you just changed.
+        </p>
+
+        <table class="shortcut-table">
+          <thead>
+            <tr><th>Action</th><th>Shortcut</th><th>What Happens</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Accept full suggestion</td><td><kbd>Tab</kbd></td><td>Inserts the entire ghost-text prediction</td></tr>
+            <tr><td>Accept one word</td><td><kbd>Ctrl+&rarr;</kbd></td><td>Inserts one word at a time for fine control</td></tr>
+            <tr><td>Reject suggestion</td><td><kbd>Esc</kbd></td><td>Dismisses the ghost text</td></tr>
+            <tr><td>Next edit location</td><td><kbd>Tab</kbd> (after accept)</td><td>Jumps to the next predicted edit spot</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Pro Tip</div>
+          <p>
+            Tab predictions are <strong>context-aware</strong>. They read your open files,
+            recent edits, and active rules. The more rules and context files you have,
+            the more accurate and consistent predictions become.
+          </p>
+        </div>
+
+        <p><strong>Best for:</strong> Writing code you already know how to write, just faster.
+          Variable names, boilerplate, repetitive patterns, completing function bodies.</p>
+
+        <!-- Inline Edit -->
+        <h3 id="inline-edit">Inline Edit (Cmd+K)</h3>
+        <p>
+          Select a block of code and press <kbd>Cmd+K</kbd> (Mac) or <kbd>Ctrl+K</kbd>
+          (Windows/Linux). A small prompt appears inline where you describe the change you want.
+          The AI edits <em>just that region</em>, leaving everything else untouched.
+        </p>
+
+        <p><strong>Examples:</strong></p>
+        <ul>
+          <li>&ldquo;Add error handling for null input&rdquo;</li>
+          <li>&ldquo;Convert this to async/await&rdquo;</li>
+          <li>&ldquo;Add type annotations&rdquo;</li>
+          <li>&ldquo;Rename variables to be more descriptive&rdquo;</li>
+        </ul>
+
+        <p><strong>Best for:</strong> Targeted refactors, adding error handling, converting patterns,
+          or cleaning up a specific function &mdash; without leaving the editor flow.</p>
+
+        <!-- Chat Panel -->
+        <h3 id="chat-panel">Chat Panel (Cmd+L)</h3>
+        <p>
+          Press <kbd>Cmd+L</kbd> to open the <strong>Chat Panel</strong> on the right side.
+          This is a conversational interface for asking questions, exploring code, debugging,
+          and planning. You can reference files using <code>@</code> symbols.
+        </p>
+
+        <p><strong>Examples:</strong></p>
+        <ul>
+          <li>&ldquo;Explain how <code>@app/core/database.py</code> handles connections&rdquo;</li>
+          <li>&ldquo;Why is this test failing?&rdquo; (with error pasted)</li>
+          <li>&ldquo;What would be a good approach to add caching here?&rdquo;</li>
+        </ul>
+
+        <p><strong>Best for:</strong> Understanding code, asking questions, debugging errors,
+          planning before coding. Does not directly edit files.</p>
+
+        <!-- Agent / Composer -->
+        <h3 id="agent-mode">Agent / Composer Mode (Cmd+I)</h3>
+        <p>
+          Press <kbd>Cmd+I</kbd> to open <strong>Agent Mode</strong> (also called Composer).
+          This is the powerhouse. The AI becomes an autonomous agent that can:
+        </p>
+        <ul>
+          <li><strong>Create, edit, and delete</strong> multiple files</li>
+          <li><strong>Run terminal commands</strong> (build, test, lint)</li>
+          <li><strong>Read your rules</strong> and context files automatically</li>
+          <li><strong>Execute slash commands</strong> (<code>/setup-stack</code>, <code>/architect</code>, etc.)</li>
+          <li><strong>Iterate on errors</strong>: if a test fails, it reads the error and fixes the code</li>
+          <li><strong>Use MCP tools</strong>: query databases, call APIs, read docs</li>
+        </ul>
+
+        <p><strong>Best for:</strong> Building features, running TDD cycles, multi-file refactors,
+          any task that requires creating or editing several files in coordination.</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">Agent Mode Is Where the Magic Happens</div>
+          <p>
+            For the rest of this course, almost all work happens in Agent Mode.
+            It is the interface that uses Rules, Commands, and Context to produce
+            structured, professional code. Tab and Cmd+K are for quick edits;
+            Agent Mode is for building.
+          </p>
+        </div>
+
+        <!-- Decision Guide -->
+        <h3 id="which-interface">Which Interface Should I Use?</h3>
+
+        <div class="mermaid">
+flowchart TD
+    START["What do you need?"] --> Q1{"Editing code<br/>you already see?"}
+    Q1 -->|"Yes, small change"| TAB["Use Tab<br/>Accept predictions"]
+    Q1 -->|"Yes, targeted change"| CMDK["Use Cmd+K<br/>Describe the edit"]
+    Q1 -->|"No"| Q2{"Need to understand<br/>or plan?"}
+    Q2 -->|"Yes"| CHAT["Use Chat (Cmd+L)<br/>Ask questions"]
+    Q2 -->|"No, need to build"| AGENT["Use Agent (Cmd+I)<br/>Multi-file work"]
+
+    style TAB fill:#4caf50,color:#fff
+    style CMDK fill:#ff9800,color:#fff
+    style CHAT fill:#2196f3,color:#fff
+    style AGENT fill:#9c27b0,color:#fff
+        </div>
+
+        <table>
+          <thead>
+            <tr><th>Interface</th><th>Shortcut</th><th>Edits Files?</th><th>Multi-file?</th><th>Uses Rules?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Tab</strong></td><td><kbd>Tab</kbd></td><td>Yes (inline)</td><td>No</td><td>Reads context</td></tr>
+            <tr><td><strong>Cmd+K</strong></td><td><kbd>Cmd+K</kbd></td><td>Yes (selected region)</td><td>No</td><td>Reads context</td></tr>
+            <tr><td><strong>Chat</strong></td><td><kbd>Cmd+L</kbd></td><td>No (read-only)</td><td>No</td><td>Optional</td></tr>
+            <tr><td><strong>Agent</strong></td><td><kbd>Cmd+I</kbd></td><td>Yes (creates/edits)</td><td>Yes</td><td>Full enforcement</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ==================== SECTION 3: Context System ==================== -->
+      <section id="context-system">
+        <h2>3. The Context System</h2>
+
+        <p>
+          The quality of AI output depends entirely on the <strong>context</strong> it receives.
+          Cursor uses <code>@</code> symbols to let you attach specific context to any prompt.
+          This is how you tell the AI <em>what to look at</em>.
+        </p>
+
+        <h3 id="at-symbols">@ Symbols Reference</h3>
+
+        <table>
+          <thead>
+            <tr><th>Symbol</th><th>What It Attaches</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>@file</code></td>
+              <td>Full contents of a specific file</td>
+              <td><code>@app/api/posts.py</code></td>
+            </tr>
+            <tr>
+              <td><code>@folder</code></td>
+              <td>File tree of a directory</td>
+              <td><code>@app/modules/</code></td>
+            </tr>
+            <tr>
+              <td><code>@codebase</code></td>
+              <td>Semantic search across the entire project</td>
+              <td><code>@codebase how is auth handled?</code></td>
+            </tr>
+            <tr>
+              <td><code>@web</code></td>
+              <td>Live web search results</td>
+              <td><code>@web FastAPI dependency injection</code></td>
+            </tr>
+            <tr>
+              <td><code>@docs</code></td>
+              <td>Crawled documentation from a URL</td>
+              <td><code>@docs https://fastapi.tiangolo.com</code></td>
+            </tr>
+            <tr>
+              <td><code>@git</code></td>
+              <td>Git diff, commits, or PR context</td>
+              <td><code>@git diff HEAD~3</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <div class="callout-title">@ is for Context, / is for Commands</div>
+          <p>
+            <strong>Important distinction:</strong> The <code>@</code> symbol attaches <em>context</em>
+            (files, folders, search results). The <code>/</code> prefix <em>invokes commands</em>
+            (slash commands like <code>/setup-stack</code>). These are different mechanisms:
+          </p>
+          <p>
+            <code>@app/api/posts.py</code> = &ldquo;Read this file and include it in context&rdquo;<br/>
+            <code>/setup-stack</code> = &ldquo;Execute this command&rdquo;
+          </p>
+        </div>
+
+        <h3 id="context-flow">How Context Flows to the AI</h3>
+
+        <p>
+          When you type a message in Chat or Agent, Cursor assembles a rich context
+          package before sending it to the LLM. Understanding this flow helps you
+          write better prompts.
+        </p>
+
+        <div class="mermaid">
+flowchart LR
+    subgraph Input["Your Prompt"]
+        P["Implement POST /users<br/>@app/api/posts.py"]
+    end
+
+    subgraph Automatic["Auto-Loaded"]
+        R["Rules<br/>.cursor/rules/*.mdc"]
+        CTX["Project Context<br/>.cursor/context.md"]
+    end
+
+    subgraph Explicit["You Attached"]
+        F["File Content<br/>posts.py via @"]
+    end
+
+    subgraph Assembly["Context Assembly"]
+        LLM["LLM receives ALL of:<br/>Rules + Context +<br/>File + Your message"]
+    end
+
+    P --> LLM
+    R --> LLM
+    CTX --> LLM
+    F --> LLM
+
+    style P fill:#ff9800,color:#fff
+    style LLM fill:#2e7d32,color:#fff
+    style R fill:#00897b,color:#fff
+        </div>
+
+        <p>The AI sees everything at once: your rules, your project context, any files you
+          referenced with <code>@</code>, and your message. This is why
+          <strong>rules and context files are so powerful</strong> &mdash; they are injected
+          into every prompt automatically.</p>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Pro Tip: Context Budget</div>
+          <p>
+            LLMs have a limited context window. Attaching too many large files with <code>@</code>
+            can dilute the AI's attention. Be selective: attach the 2-3 most relevant files,
+            not the entire project. Use <code>@codebase</code> for broad searches, and
+            <code>@file</code> for specific references.
+          </p>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 4: Quick Exercise ==================== -->
+      <section id="exercise">
+        <h2>4. Quick Exercise</h2>
+
+        <p>
+          Let&rsquo;s try each of the four AI interfaces. This exercise takes about
+          <strong>10 minutes</strong> and will give you hands-on experience with Cursor&rsquo;s
+          AI capabilities.
+        </p>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Exercise: Your First AI-Assisted Edits</div>
+
+          <p><strong>Prerequisites:</strong> Cursor installed, a project open (any project works).</p>
+
+          <p><strong>Step 1: Tab Completion</strong></p>
+          <ol>
+            <li>Open or create a Python file (e.g., <code>hello.py</code>)</li>
+            <li>Start typing: <code>def calculate_average(numbers):</code></li>
+            <li>On the next line, start typing <code>return</code></li>
+            <li>Observe the ghost-text prediction</li>
+            <li>Press <kbd>Tab</kbd> to accept</li>
+          </ol>
+
+          <p><strong>Step 2: Inline Edit (Cmd+K)</strong></p>
+          <ol>
+            <li>Select the function you just wrote</li>
+            <li>Press <kbd>Cmd+K</kbd></li>
+            <li>Type: &ldquo;Add input validation for empty list and non-numeric values&rdquo;</li>
+            <li>Press <kbd>Enter</kbd></li>
+            <li>Review the AI&rsquo;s edit and accept it</li>
+          </ol>
+
+          <p><strong>Step 3: Chat Panel</strong></p>
+          <ol>
+            <li>Press <kbd>Cmd+L</kbd> to open Chat</li>
+            <li>Type: &ldquo;Explain the time complexity of <code>@hello.py</code>&rdquo;</li>
+            <li>Read the AI&rsquo;s explanation</li>
+            <li>Ask a follow-up: &ldquo;How could I make it more efficient?&rdquo;</li>
+          </ol>
+
+          <p><strong>Step 4: Agent Mode</strong></p>
+          <ol>
+            <li>Press <kbd>Cmd+I</kbd> to open Agent/Composer</li>
+            <li>Type: &ldquo;Create a file <code>test_hello.py</code> with pytest tests
+              for the <code>calculate_average</code> function in <code>@hello.py</code>.
+              Include tests for: normal input, empty list, single element, and negative numbers.&rdquo;</li>
+            <li>Watch the Agent create the test file</li>
+            <li>Observe: it reads your function, understands the validation, and writes matching tests</li>
+          </ol>
+
+          <p><strong>Checkpoint:</strong> You should now have two files: <code>hello.py</code>
+            with a validated average function, and <code>test_hello.py</code> with 4+ tests.</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What's Next?</div>
+          <p>
+            Now that you&rsquo;re comfortable with Cursor&rsquo;s interfaces, you&rsquo;re ready
+            for the main course: <strong>Cursor IDE &mdash; The Complete Guide to AI-Assisted Development</strong>.
+            That guide covers the structured methodology (Spec-Driven Development, Rules, Commands, MCP)
+            that turns Cursor from a smart editor into a professional development workflow.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <p>
+      Cursor IDE Basics &mdash; AI-Assisted Development Course
+      <br />
+      Built with <a href="https://picocss.com" target="_blank" rel="noopener">Pico.css</a>,
+      <a href="https://mermaid.js.org" target="_blank" rel="noopener">Mermaid.js</a>, and
+      <a href="https://prismjs.com" target="_blank" rel="noopener">Prism.js</a>
+    </p>
+  </footer>
+
+  <!-- ===== Prism.js ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+
+  <!-- ===== Mermaid.js v11 ===== -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      || document.documentElement.getAttribute('data-theme') === 'dark';
+
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: isDark ? 'dark' : 'default',
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+      sequence: { useMaxWidth: true },
+    });
+  </script>
+
+  <!-- ===== Active TOC Highlighting ===== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const sections = document.querySelectorAll('main section[id], main h3[id], main h4[id]');
+      const tocLinks = document.querySelectorAll('.sidebar nav a');
+
+      if (!sections.length || !tocLinks.length) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id = entry.target.id;
+              tocLinks.forEach((link) => {
+                link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+              });
+            }
+          });
+        },
+        { rootMargin: '-10% 0px -80% 0px', threshold: 0 }
+      );
+
+      sections.forEach((section) => observer.observe(section));
+
+      document.documentElement.removeAttribute('data-theme');
+    });
+  </script>
+
+</body>
+</html>

@@ -26,6 +26,7 @@
       --callout-tip: #2e7d32;
       --callout-warning: #e65100;
       --callout-info: #1565c0;
+      --callout-lab: #6a1b9a;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -33,6 +34,7 @@
         --callout-tip: #66bb6a;
         --callout-warning: #ff9800;
         --callout-info: #42a5f5;
+        --callout-lab: #ce93d8;
       }
     }
 
@@ -40,6 +42,7 @@
       --callout-tip: #66bb6a;
       --callout-warning: #ff9800;
       --callout-info: #42a5f5;
+      --callout-lab: #ce93d8;
     }
 
     html { scroll-behavior: smooth; }
@@ -238,6 +241,8 @@
     .callout-tip    { --callout-color: var(--callout-tip);     border-color: var(--callout-tip); }
     .callout-warning { --callout-color: var(--callout-warning); border-color: var(--callout-warning); }
     .callout-info   { --callout-color: var(--callout-info);    border-color: var(--callout-info); }
+    .callout-lab    { border-color: var(--callout-lab); }
+    .callout-lab .callout-title { color: var(--callout-lab); }
 
     .callout .callout-title {
       font-weight: 700;
@@ -381,10 +386,11 @@
     <h1>Cursor IDE</h1>
     <p class="subtitle">The Complete Guide to AI-Assisted Development</p>
     <div class="badge-row">
-      <span class="badge badge-indigo">Rules</span>
-      <span class="badge badge-teal">Commands</span>
-      <span class="badge badge-amber">Workflow</span>
-      <span class="badge badge-indigo">Hooks</span>
+      <span class="badge badge-indigo">Spec-Driven Dev</span>
+      <span class="badge badge-teal">Skills</span>
+      <span class="badge badge-amber">Rules</span>
+      <span class="badge badge-indigo">MCP</span>
+      <span class="badge badge-teal">Hooks</span>
     </div>
   </header>
 
@@ -393,13 +399,12 @@
     <summary>Table of Contents</summary>
     <ul>
       <li><a href="#introduction">1. Introduction</a></li>
-      <li><a href="#cursor-features">2. Cursor Core Features</a></li>
-      <li><a href="#rules">3. Rules System</a></li>
-      <li><a href="#commands">4. Custom Commands</a></li>
-      <li><a href="#sdd-tdd">5. SDD &amp; TDD</a></li>
-      <li><a href="#workflow">6. The Workflow</a></li>
-      <li><a href="#demo">7. Practical Demo</a></li>
-      <li><a href="#hooks">8. Hooks (Advanced)</a></li>
+      <li><a href="#workflow">2. Workflow: Spec-Driven Dev</a></li>
+      <li><a href="#commands">3. Skills &mdash; Slash Commands</a></li>
+      <li><a href="#rules">4. Rules System</a></li>
+      <li><a href="#tdd">5. TDD in Practice</a></li>
+      <li><a href="#mcp">6. MCP Servers</a></li>
+      <li><a href="#hooks">7. Hooks (Beta)</a></li>
     </ul>
   </details>
 
@@ -411,31 +416,38 @@
       <nav>
         <ul>
           <li><a href="#introduction">1. Introduction</a></li>
-          <li class="sub"><a href="#what-is-cursor">What is Cursor</a></li>
-          <li class="sub"><a href="#agentic-engineering">Agentic Engineering</a></li>
-          <li><a href="#cursor-features">2. Cursor Features</a></li>
-          <li class="sub"><a href="#tab-completion">Tab Completion</a></li>
-          <li class="sub"><a href="#chat-composer">Chat &amp; Composer</a></li>
-          <li class="sub"><a href="#context-system">Context System</a></li>
-          <li><a href="#rules">3. Rules System</a></li>
-          <li class="sub"><a href="#rule-types">The 4 Rule Types</a></li>
-          <li class="sub"><a href="#rule-example">Real Rule Example</a></li>
-          <li class="sub"><a href="#rule-best-practices">Best Practices</a></li>
-          <li><a href="#commands">4. Custom Commands</a></li>
+          <li class="sub"><a href="#agentic-philosophy">Agentic Philosophy</a></li>
+          <li class="sub"><a href="#course-roadmap">Course Roadmap</a></li>
+          <li><a href="#workflow">2. Workflow: Spec-Driven Dev</a></li>
+          <li class="sub"><a href="#what-is-sdd">What is SDD?</a></li>
+          <li class="sub"><a href="#spec-first-pattern">Spec-First Pattern</a></li>
+          <li class="sub"><a href="#phase-based-dev">Phase-Based Dev</a></li>
+          <li class="sub"><a href="#session-workflow">Session Workflow</a></li>
+          <li class="sub"><a href="#lab-1">Lab 1</a></li>
+          <li><a href="#commands">3. Skills &mdash; Slash Commands</a></li>
+          <li class="sub"><a href="#slash-vs-at">/ vs @ Distinction</a></li>
+          <li class="sub"><a href="#command-anatomy">Command Anatomy</a></li>
+          <li class="sub"><a href="#command-chain">Command Chain</a></li>
           <li class="sub"><a href="#command-reference">Command Reference</a></li>
-          <li class="sub"><a href="#command-example">Command Example</a></li>
-          <li><a href="#sdd-tdd">5. SDD &amp; TDD</a></li>
-          <li class="sub"><a href="#schema-driven">Schema-Driven Dev</a></li>
-          <li class="sub"><a href="#tdd-workflow">TDD Workflow</a></li>
-          <li class="sub"><a href="#sdd-tdd-combined">SDD + TDD Combined</a></li>
-          <li><a href="#workflow">6. The Workflow</a></li>
-          <li class="sub"><a href="#phase-dev">Phase-Based Dev</a></li>
-          <li class="sub"><a href="#three-workflows">Three Workflows</a></li>
-          <li><a href="#demo">7. Practical Demo</a></li>
-          <li class="sub"><a href="#demo-steps">Step-by-Step</a></li>
-          <li><a href="#hooks">8. Hooks <span class="badge badge-beta">Beta</span></a></li>
+          <li class="sub"><a href="#lab-2">Lab 2</a></li>
+          <li><a href="#rules">4. Rules System</a></li>
+          <li class="sub"><a href="#what-are-rules">What Are Rules?</a></li>
+          <li class="sub"><a href="#rule-types">The 4 Rule Types</a></li>
+          <li class="sub"><a href="#rules-enforce-sdd">Rules Enforce SDD</a></li>
+          <li class="sub"><a href="#lab-3">Lab 3</a></li>
+          <li><a href="#tdd">5. TDD in Practice</a></li>
+          <li class="sub"><a href="#red-green-refactor">Red-Green-Refactor</a></li>
+          <li class="sub"><a href="#tdd-as-design">TDD as Design</a></li>
+          <li class="sub"><a href="#phase-0-vs-1">Phase 0 vs Phase 1</a></li>
+          <li class="sub"><a href="#lab-4">Lab 4</a></li>
+          <li><a href="#mcp">6. MCP Servers</a></li>
+          <li class="sub"><a href="#what-is-mcp">What is MCP?</a></li>
+          <li class="sub"><a href="#mcp-configuration">Configuration</a></li>
+          <li class="sub"><a href="#popular-servers">Popular Servers</a></li>
+          <li class="sub"><a href="#lab-5">Lab 5</a></li>
+          <li><a href="#hooks">7. Hooks <span class="badge badge-beta">Beta</span></a></li>
           <li class="sub"><a href="#hook-events">Lifecycle Events</a></li>
-          <li class="sub"><a href="#hook-examples">Real-World Examples</a></li>
+          <li class="sub"><a href="#hook-examples">Hook Examples</a></li>
         </ul>
       </nav>
     </aside>
@@ -443,318 +455,1471 @@
     <!-- ===== MAIN CONTENT ===== -->
     <main class="main-content">
 
-      <!-- ==================== SECTION 1: Introduction ==================== -->
       <section id="introduction">
-        <h2>1. Introduction</h2>
+  <h2>Section 1: Introduction and Philosophy</h2>
+  <p class="section-meta">Estimated time: 10 minutes</p>
 
-        <h3 id="what-is-cursor">What is Cursor?</h3>
-        <p>
-          <strong>Cursor</strong> is an AI-first code editor, forked from Visual Studio Code, that deeply
-          integrates large language models into every aspect of the developer workflow. Unlike traditional
-          editors that bolt AI on as an afterthought, Cursor is built from the ground up to make AI your
-          pair-programming partner.
-        </p>
+  <p>
+    Welcome to this course on structured, agentic development with Cursor IDE. Before diving into
+    commands, rules, or code generation, we need to establish the foundational mindset that separates
+    developers who get mediocre results from AI tools from those who get consistently excellent results.
+    That mindset is <strong>Agentic Engineering</strong>.
+  </p>
 
-        <table class="comparison-table">
-          <thead>
-            <tr>
-              <th>Aspect</th>
-              <th>Traditional IDE</th>
-              <th>Cursor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>AI Integration</td>
-              <td>Plugin / Extension</td>
-              <td>Native, first-class</td>
-            </tr>
-            <tr>
-              <td>Context Awareness</td>
-              <td>Current file only</td>
-              <td>Full project via Rules &amp; Context files</td>
-            </tr>
-            <tr>
-              <td>Code Generation</td>
-              <td>Generic completions</td>
-              <td>Stack-aware, rule-enforced generation</td>
-            </tr>
-            <tr>
-              <td>Workflow</td>
-              <td>Manual, ad-hoc</td>
-              <td>Structured phases &amp; sessions</td>
-            </tr>
-            <tr>
-              <td>Consistency</td>
-              <td>Depends on developer</td>
-              <td>Enforced via composable rules</td>
-            </tr>
-            <tr>
-              <td>VS Code Extensions</td>
-              <td>N/A (is VS Code)</td>
-              <td>Full VS Code extension compatibility</td>
-            </tr>
-          </tbody>
-        </table>
+  <p>
+    This section answers three questions: What is the Agentic Engineering philosophy? What will you
+    learn in this course? And how does agentic development differ from the ad-hoc approach most
+    developers start with?
+  </p>
 
-        <h3 id="agentic-engineering">The Agentic Engineering Philosophy</h3>
-        <p>
-          This template embodies a fundamental truth: <strong>AI is context-hungry</strong>.
-          Generic prompts produce generic code. But when you give the AI:
-        </p>
-        <ul>
-          <li>A clear technology stack (<code>context.md</code>)</li>
-          <li>Explicit rules (<code>rules/*.mdc</code>)</li>
-          <li>A structured workflow (Phase-Based Development)</li>
-          <li>Bounded sessions (<code>start-session</code> &rarr; code &rarr; <code>next-session</code>)</li>
-        </ul>
-        <p>
-          &hellip;you get consistent, professional, maintainable code that follows your standards.
-        </p>
-        <p>
-          The methodology works because it treats AI like a <strong>junior developer who needs clear
-          guidance</strong>, not a magic solution that reads your mind.
-        </p>
+  <!-- ============================================================ -->
+  <h3 id="agentic-philosophy">1.1 The Agentic Engineering Philosophy</h3>
 
-        <blockquote class="philosophy">
-          &ldquo;Explicit is better than implicit. Consistency is better than cleverness.&rdquo;
-        </blockquote>
+  <p>
+    Every AI coding tool — Cursor, GitHub Copilot, Claude Code, or any other — is, at its core, a
+    context-processing machine. It reads context, it generates text that continues that context. That
+    single insight explains why so many developers feel disappointed by AI tools after their initial
+    excitement: they treat the AI like a search engine, typing short, vague queries and expecting
+    brilliant answers. Then they wonder why the output is generic, inconsistent, or just wrong.
+  </p>
 
-        <div class="callout callout-tip">
-          <div class="callout-title">Key Insight</div>
-          <p>
-            The more context you provide, the better the AI performs. Rules, commands, and structured
-            workflows are the mechanism for delivering that context consistently across every session.
-          </p>
-        </div>
-      </section>
+  <div class="callout callout-tip">
+    <strong>Core Insight:</strong> AI is context-hungry. The quality of AI output is almost entirely
+    determined by the quality of context you provide. Generic prompts produce generic code. Structured
+    context produces structured, reliable code.
+  </div>
 
-      <!-- ==================== SECTION 2: Cursor Core Features ==================== -->
-      <section id="cursor-features">
-        <h2>2. Cursor Core Features</h2>
-        <p>
-          Cursor provides several AI-powered interfaces, each suited to different tasks.
-          Understanding when to use each one is key to productive AI-assisted development.
-        </p>
+  <p>
+    Think about what happens when you ask a senior engineer to implement a feature with no context
+    versus when you hand them a well-written specification, the relevant existing code, the test
+    requirements, and your team's coding standards. The difference in output quality is enormous —
+    and the exact same dynamic applies to AI. The model is not the bottleneck. <strong>Your context
+    is the bottleneck.</strong>
+  </p>
 
-        <div class="mermaid">
-flowchart TB
-    subgraph Cursor["Cursor IDE"]
-        direction TB
-        TAB["Tab Completion<br/>⌨️ Inline predictions"]
-        INLINE["Inline Edit<br/>✏️ Cmd+K in editor"]
-        CHAT["Chat Panel<br/>💬 Side panel Q&A"]
-        COMPOSER["Composer / Agent<br/>🤖 Multi-file agentic mode"]
-    end
+  <h4>The Four Pillars of Structured Agentic Development</h4>
 
-    TAB -->|"Single line/block"| SMALL["Small Changes<br/>Completions, variable names,<br/>boilerplate"]
-    INLINE -->|"Targeted region"| MEDIUM["Medium Changes<br/>Refactor a function,<br/>add error handling"]
-    CHAT -->|"Q&A + single file"| EXPLORE["Exploration<br/>Understand code,<br/>debug, plan"]
-    COMPOSER -->|"Multi-file orchestration"| LARGE["Large Changes<br/>New features, refactors,<br/>TDD cycles"]
+  <p>This course teaches a methodology built on four mutually reinforcing pillars:</p>
 
-    style TAB fill:#4caf50,color:#fff
-    style INLINE fill:#ff9800,color:#fff
-    style CHAT fill:#2196f3,color:#fff
-    style COMPOSER fill:#9c27b0,color:#fff
-        </div>
+  <ul>
+    <li>
+      <strong>Spec-Driven Development (SDD):</strong> Before writing a single line of code, you write
+      a structured specification. The spec becomes the AI's primary context. When the AI knows what
+      you are building, why, what the inputs and outputs are, and what the acceptance criteria look
+      like, it produces code that actually matches your intent.
+    </li>
+    <li>
+      <strong>Rules:</strong> Your team's coding standards, architecture decisions, and style
+      conventions are encoded as <code>.cursorrules</code> files. Every AI interaction in your project
+      automatically inherits these rules. Consistency stops being a discipline problem and becomes a
+      structural guarantee.
+    </li>
+    <li>
+      <strong>Commands:</strong> Repetitive, multi-step workflows — "review this PR", "write tests for
+      this function", "refactor to use the repository pattern" — are encoded as slash commands. You
+      invoke them with a single keystroke. The AI executes a consistent, repeatable process every time.
+    </li>
+    <li>
+      <strong>Test-Driven Development (TDD):</strong> Tests written before implementation give the AI
+      a precise, executable specification of correct behavior. The AI is not guessing what "correct"
+      means — it can run the tests and verify its own output. This dramatically reduces hallucination
+      and drift.
+    </li>
+  </ul>
 
-        <h3 id="tab-completion">Tab Completion</h3>
-        <p>
-          Cursor&rsquo;s <strong>Tab</strong> autocomplete predicts your next edit as you type.
-          It goes beyond simple token completion &mdash; it can predict multi-line blocks,
-          suggest the next logical edit location, and even anticipate refactoring patterns.
-        </p>
-        <table>
-          <thead>
-            <tr><th>Feature</th><th>Shortcut</th><th>What It Does</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Accept suggestion</td><td><kbd>Tab</kbd></td><td>Accept the full ghost-text prediction</td></tr>
-            <tr><td>Accept word</td><td><kbd>Ctrl+→</kbd></td><td>Accept one word at a time</td></tr>
-            <tr><td>Reject</td><td><kbd>Esc</kbd></td><td>Dismiss the suggestion</td></tr>
-            <tr><td>Next cursor position</td><td><kbd>Tab</kbd> (after accept)</td><td>Jump to next predicted edit location</td></tr>
-          </tbody>
-        </table>
+  <blockquote class="philosophy">
+    "Explicit is better than implicit. Consistency is better than cleverness."
+    <cite>— The Agentic Engineering Principle</cite>
+  </blockquote>
 
-        <div class="callout callout-tip">
-          <div class="callout-title">Pro Tip</div>
-          <p>
-            Tab completion is context-aware. It reads your open files, recent edits,
-            and active rules to predict what you&rsquo;ll type next. The more rules you have,
-            the more accurate predictions become.
-          </p>
-        </div>
+  <p>
+    This quote deserves unpacking. "Explicit is better than implicit" means you should never rely on
+    the AI inferring your intent from vague instructions. Say what you mean. Write it down. Put it in
+    a spec, a rule file, or a command definition. "Consistency is better than cleverness" means a
+    workflow that produces good-enough results every single time is more valuable than a clever prompt
+    that occasionally produces something brilliant but usually produces something unpredictable. Agentic
+    Engineering optimises for repeatability, not occasional magic.
+  </p>
 
-        <h3>Inline Edit (Cmd+K)</h3>
-        <p>
-          Select code and press <kbd>Cmd+K</kbd> (Mac) / <kbd>Ctrl+K</kbd> (Windows/Linux)
-          to open an inline prompt. Describe what you want changed and the AI edits just that region.
-          Perfect for targeted refactors without leaving the editor.
-        </p>
+  <p>
+    The more structure you give the AI, the better it performs. This is not a limitation — it is a
+    feature. It means that your investment in writing clear specifications, encoding rules, and building
+    commands compounds over time. Each spec you write makes the next one faster. Each rule you encode
+    eliminates an entire class of inconsistency. Each command you build turns a 10-step process into
+    one keystroke.
+  </p>
 
-        <h3 id="chat-composer">Chat Panel &amp; Composer (Agent Mode)</h3>
-        <p>
-          The <strong>Chat Panel</strong> (<kbd>Cmd+L</kbd>) is a side panel for asking questions,
-          debugging, and planning. It can read files you <code>@mention</code> but typically
-          works on one file at a time.
-        </p>
-        <p>
-          <strong>Composer / Agent Mode</strong> (<kbd>Cmd+I</kbd>) is the powerhouse. It can:
-        </p>
-        <ul>
-          <li>Create, edit, and delete multiple files autonomously</li>
-          <li>Run terminal commands (build, test, lint)</li>
-          <li>Read your rules and context files automatically</li>
-          <li>Execute custom commands (<code>@setup-stack</code>, <code>@architect</code>, etc.)</li>
-          <li>Iterate on errors: if a test fails, it reads the error and fixes the code</li>
-        </ul>
+  <h4>Traditional vs Agentic Development: A Side-by-Side View</h4>
 
-        <div class="callout callout-info">
-          <div class="callout-title">When to Use Which</div>
-          <p><strong>Tab</strong>: You know what to write, just need speed</p>
-          <p><strong>Cmd+K</strong>: Small, targeted edit to selected code</p>
-          <p><strong>Chat</strong>: Understanding code, asking questions, planning</p>
-          <p><strong>Composer/Agent</strong>: Building features, TDD cycles, multi-file changes</p>
-        </div>
+  <p>
+    To make this concrete, consider how the same task — implementing a new feature — plays out under
+    traditional ad-hoc AI usage versus the structured agentic approach.
+  </p>
 
-        <h3 id="context-system">The Context System</h3>
-        <p>
-          Cursor uses <code>@</code> symbols to attach context to any prompt.
-          This is how you tell the AI <em>what to look at</em>:
-        </p>
-        <table>
-          <thead>
-            <tr><th>Symbol</th><th>What It Attaches</th><th>Example</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>@file</code></td><td>Contents of a specific file</td><td><code>@app/api/posts.py</code></td></tr>
-            <tr><td><code>@folder</code></td><td>File tree of a directory</td><td><code>@app/modules/</code></td></tr>
-            <tr><td><code>@codebase</code></td><td>Semantic search across the whole project</td><td><code>@codebase how is auth handled?</code></td></tr>
-            <tr><td><code>@web</code></td><td>Live web search results</td><td><code>@web FastAPI dependency injection</code></td></tr>
-            <tr><td><code>@docs</code></td><td>Crawled documentation site</td><td><code>@docs https://fastapi.tiangolo.com</code></td></tr>
-            <tr><td><code>@git</code></td><td>Git diff, commits, or PRs</td><td><code>@git diff HEAD~3</code></td></tr>
-            <tr><td><code>@command</code></td><td>A custom command file</td><td><code>@start-session</code></td></tr>
-          </tbody>
-        </table>
+  <p>
+    In the <strong>traditional approach</strong>, a developer opens a chat, types something like "write
+    a function to handle user authentication", gets some code back, pastes it in, runs it, discovers
+    it does not match the project's patterns, manually edits it, asks for fixes, and repeats. There
+    are no rules governing what the AI produces. There is no specification the AI can reference. Every
+    session starts from scratch. The developer is essentially doing code review and manual correction
+    as a constant overhead on every AI interaction.
+  </p>
 
-        <div class="mermaid">
+  <p>
+    In the <strong>agentic approach</strong>, the developer starts by writing or retrieving a spec for
+    the feature. The AI reads the spec, the relevant rules, and the existing codebase context. It
+    generates code that is already consistent with the project's patterns because those patterns are
+    encoded in rules. The developer runs the tests — which were specified before implementation — and
+    the AI iterates until they pass. A command handles the review step. Session transitions are managed
+    so context is never lost between working sessions. The developer's cognitive load drops dramatically
+    because the structure does the heavy lifting.
+  </p>
+
+  <div class="mermaid">
 flowchart LR
-    subgraph Input["Your Prompt"]
-        P["@start-session<br/>Implement POST /users<br/>@app/api/posts.py"]
+    subgraph Traditional["Traditional Ad-Hoc"]
+        T1["Generic Prompt"] --> T2["Inconsistent Code"]
+        T2 --> T3["Manual Review"]
+        T3 --> T4["Fix by Hand"]
+        T4 --> T1
     end
 
-    subgraph Context["Context Assembly"]
-        R["Rules<br/>.cursor/rules/*.mdc"]
-        CMD["Command<br/>start-session.md"]
-        F["File Content<br/>posts.py"]
-        CTX["Project Context<br/>context.md"]
+    subgraph Agentic["Structured Agentic SDLC"]
+        A1["Spec-First Design"] --> A2["Rules-Enforced Code"]
+        A2 --> A3["TDD Verified"]
+        A3 --> A4["Command-Driven Review"]
+        A4 --> A5["Session Transition"]
     end
 
-    subgraph AI["AI Processing"]
-        LLM["LLM receives:<br/>Rules + Command +<br/>File + Context +<br/>Your message"]
+    Traditional -.->|"upgrade to"| Agentic
+  </div>
+
+  <p>
+    Notice the loop in the traditional workflow. Because there is no upfront structure, the developer
+    is trapped in a fix-and-retry cycle. The agentic workflow is a pipeline — each phase hands off to
+    the next with clear artifacts. There is still iteration, but it is structured iteration bounded by
+    tests, not unbounded manual debugging.
+  </p>
+
+  <div class="callout callout-tip">
+    <strong>Key Takeaway:</strong> The agentic approach does not make you dependent on AI — it makes
+    you <em>effective</em> with AI. You are in control of the structure. The AI executes within that
+    structure. You get the leverage without losing authorship.
+  </div>
+
+  <!-- ============================================================ -->
+  <h3 id="course-roadmap">1.2 What You Will Learn: Course Roadmap</h3>
+
+  <p>
+    This course is designed as a progressive skill-building journey. Each section introduces a concept,
+    explains the reasoning behind it, shows it in practice, and then reinforces it with a hands-on lab.
+    By the end, you will have a complete, working methodology you can apply to any project.
+  </p>
+
+  <p>
+    Before this course, you should complete the <code>cursor-basics.html</code> prerequisite guide,
+    which covers Cursor IDE installation, the interface, basic AI interactions, and the Composer panel.
+    If you are already comfortable with Cursor's UI and have used it for simple code generation, you
+    are ready to proceed.
+  </p>
+
+  <div class="mermaid">
+flowchart LR
+    PRE["cursor-basics.html<br/>Prereq"] --> S2["Section 2<br/>Workflow + SDD<br/>Lab 1"]
+    S2 --> S3["Section 3<br/>Skills<br/>Lab 2"]
+    S3 --> S4["Section 4<br/>Rules<br/>Lab 3"]
+    S4 --> S5["Section 5<br/>TDD<br/>Lab 4"]
+    S5 --> S6["Section 6<br/>MCP<br/>Lab 5"]
+    S6 --> S7["Section 7<br/>Hooks"]
+  </div>
+
+  <p>Here is what each section covers and why it matters:</p>
+
+  <dl>
+    <dt><strong>Section 2: Workflow and Spec-Driven Development (Lab 1)</strong></dt>
+    <dd>
+      You will learn the full agentic development workflow: how a session starts, how a spec is written,
+      how context is managed, and how a session ends with a clean handoff. Lab 1 walks you through
+      writing your first structured specification for a real feature. This is the foundation everything
+      else builds on.
+    </dd>
+
+    <dt><strong>Section 3: Skills (Lab 2)</strong></dt>
+    <dd>
+      Cursor's "skills" system allows you to define reusable capabilities — context-aware instructions
+      that can be injected into any conversation. You will learn to build skills for your most common
+      tasks: debugging, refactoring, documentation, and more. Lab 2 has you building a skill library
+      for a sample project.
+    </dd>
+
+    <dt><strong>Section 4: Rules (Lab 3)</strong></dt>
+    <dd>
+      Rules are the mechanism by which your team's standards become structural guarantees rather than
+      aspirational guidelines. You will learn to write effective <code>.cursorrules</code> files:
+      what to encode, how to structure them, and how to layer project-level rules on top of
+      global rules. Lab 3 has you encoding a full rule set for a realistic codebase.
+    </dd>
+
+    <dt><strong>Section 5: Test-Driven Development (Lab 4)</strong></dt>
+    <dd>
+      TDD with AI is qualitatively different from TDD without AI. When the AI can run tests and
+      self-correct, the write-test-then-implement loop becomes dramatically faster. You will learn
+      the TDD workflow optimised for AI collaboration, including how to write test specifications
+      the AI can execute against. Lab 4 is a full TDD exercise from red to green.
+    </dd>
+
+    <dt><strong>Section 6: Model Context Protocol — MCP (Lab 5)</strong></dt>
+    <dd>
+      MCP extends Cursor's AI with external tools and data sources: databases, APIs, documentation
+      servers, and more. You will learn what MCP is, how to configure MCP servers, and how to use
+      them to give the AI access to live context it cannot get from your codebase alone. Lab 5
+      connects your project to a real MCP data source.
+    </dd>
+
+    <dt><strong>Section 7: Hooks</strong></dt>
+    <dd>
+      Hooks allow you to trigger automated actions at specific points in the AI workflow — before a
+      commit, after a file is generated, when a spec is approved. You will learn to use hooks to
+      integrate Cursor into your broader development pipeline, including CI checks and pre-commit
+      validation.
+    </dd>
+  </dl>
+
+  <div class="callout callout-tip">
+    <strong>How to Use This Course:</strong> Each section builds on the previous one. If you skip
+    ahead, you will find references to concepts introduced earlier. The labs are not optional — they
+    are where the methodology becomes muscle memory. Plan to spend roughly equal time on the reading
+    and the labs.
+  </div>
+
+  <!-- ============================================================ -->
+  <h3>1.3 Setting Expectations: What Agentic Engineering Is Not</h3>
+
+  <p>
+    Before moving on, it is worth being direct about what this methodology is not, because there is
+    a lot of hype in this space and hype creates unrealistic expectations that lead to frustration.
+  </p>
+
+  <p>
+    <strong>Agentic Engineering is not about removing developers from the loop.</strong> You will
+    still write specifications. You will still review generated code. You will still make architecture
+    decisions. The AI handles execution within a structure you define. You remain the author; the AI
+    is a very fast, very capable pair programmer who needs clear direction.
+  </p>
+
+  <p>
+    <strong>Agentic Engineering is not a shortcut around understanding your codebase.</strong> In fact,
+    writing good specs requires deep understanding of what you are building. The methodology rewards
+    developers who think carefully about design before writing code — which is just good engineering
+    practice, with or without AI.
+  </p>
+
+  <p>
+    <strong>Agentic Engineering is not tool-specific.</strong> While this course uses Cursor, the
+    principles apply to any AI-assisted development environment. The concepts of spec-driven context,
+    encoded rules, and command-driven workflows translate directly to Claude Code, GitHub Copilot
+    Workspace, and future tools we cannot yet anticipate. You are learning a methodology, not just
+    a set of Cursor features.
+  </p>
+
+  <p>
+    What Agentic Engineering <em>is</em> is a structured, repeatable way to collaborate with AI
+    that produces consistent, high-quality results at a pace that would be impossible without AI
+    assistance. That is a meaningful claim, and the rest of this course is the evidence for it.
+  </p>
+
+  <p>
+    Let us begin with the foundation: workflow and Spec-Driven Development.
+  </p>
+</section>
+
+<section id="workflow">
+  <h2>2. The Workflow &mdash; Spec-Driven Development</h2>
+
+  <p>
+    The single most important lesson in this course is not a keyboard shortcut or a clever prompt
+    &mdash; it is a methodology. Without a structured workflow, AI-assisted development devolves into
+    what the industry calls <strong>"vibe coding"</strong>: asking the AI to build things in an
+    ad-hoc stream of consciousness, accumulating technical debt with every session, and eventually
+    losing track of what the codebase is supposed to do.
+  </p>
+  <p>
+    This section introduces <strong>Spec-Driven Development (SDD)</strong> &mdash; the architectural
+    philosophy that underpins everything else in this course &mdash; along with the Phase-Based
+    Development and Session-Based workflow patterns that make it practical.
+  </p>
+
+  <!-- ==================== 2.1: What is SDD? ==================== -->
+  <h3 id="spec-driven-dev">2.1 What is Spec-Driven Development?</h3>
+
+  <p>
+    <strong>Spec-Driven Development</strong> is an industry-recognized methodology, featured in the
+    ThoughtWorks Technology Radar 2025, that inverts the traditional software development workflow.
+    In conventional development, you write code first and document it (if at all) as an afterthought.
+    SDD flips that: <em>the specification comes first, and the code is derived from it</em>.
+  </p>
+  <p>
+    The core insight is simple but powerful: an AI model that receives a precise, structured
+    specification produces far more consistent, correct, and maintainable code than one that is
+    given a vague natural-language description. By anchoring every coding session to a formal
+    spec, you give the AI an unambiguous source of truth to build against.
+  </p>
+
+  <blockquote class="philosophy">
+    &ldquo;Code drifts. Specs don&rsquo;t. Anchor the AI to the spec, and the code stays honest.&rdquo;
+  </blockquote>
+
+  <p>
+    SDD manifests in three progressively sophisticated patterns. Understanding where they sit on the
+    spectrum helps you choose the right level of rigor for your team.
+  </p>
+
+  <div class="mermaid">
+flowchart LR
+    subgraph SDD["Spec-Driven Development Patterns"]
+        SF["Spec-First<br/>OUR APPROACH<br/>API contract before code"]
+        SA["Spec-Anchored<br/>Governance layers<br/>Audit trails"]
+        SS["Spec-as-Source<br/>Specs become<br/>source code"]
     end
+    SF -->|"add governance"| SA
+    SA -->|"full automation"| SS
+    style SF fill:#2e7d32,color:#fff
+    style SA fill:#1565c0,color:#fff
+    style SS fill:#6a1b9a,color:#fff
+  </div>
 
-    P --> CMD
-    P --> F
-    CMD --> LLM
-    F --> LLM
-    R --> LLM
-    CTX --> LLM
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Pattern</th>
+        <th>Core Idea</th>
+        <th>Best For</th>
+        <th>Our Use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Spec-First</strong></td>
+        <td>Design the API contract (OpenAPI, entities, endpoints) before writing any implementation code</td>
+        <td>Individual developers, small teams, learning environments</td>
+        <td>Yes &mdash; this course</td>
+      </tr>
+      <tr>
+        <td><strong>Spec-Anchored</strong></td>
+        <td>Spec governs the entire SDLC; changes require spec approval; full audit trail</td>
+        <td>Enterprise teams, regulated industries, multi-team APIs</td>
+        <td>Optional extension</td>
+      </tr>
+      <tr>
+        <td><strong>Spec-as-Source</strong></td>
+        <td>The spec <em>is</em> the source &mdash; code, tests, mocks, and docs are all generated from the spec</td>
+        <td>Mature platform engineering teams with strong tooling</td>
+        <td>Not in scope</td>
+      </tr>
+    </tbody>
+  </table>
 
-    style P fill:#ff9800,color:#fff
+  <p>
+    We use the <strong>Spec-First Pattern</strong> &mdash; the lightest, most accessible form of SDD.
+    You design the API contract once, in one session, before a single line of business logic is written.
+    That contract then governs every subsequent AI interaction. It is the ceiling and the floor:
+    the AI cannot add endpoints you did not spec, and it cannot skip endpoints you did.
+  </p>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What Is an "API Contract"?</div>
+    <p>
+      In this context, an API contract is a formal description of your service&rsquo;s interface:
+      the endpoints, their HTTP methods, the request and response schemas, the HTTP status codes,
+      and the domain entities. We express this as an <strong>OpenAPI 3.x specification</strong>
+      (a YAML or JSON file). The contract does <em>not</em> describe implementation details &mdash;
+      only the observable shape of the API.
+    </p>
+  </div>
+
+  <!-- ==================== 2.2: SDD vs TDD ==================== -->
+  <h3 id="sdd-vs-tdd">2.2 SDD vs TDD: Complementary, Not Competing</h3>
+
+  <p>
+    A common source of confusion is how Spec-Driven Development relates to
+    Test-Driven Development (TDD). They sound similar, and both emphasize
+    &ldquo;define before implement&rdquo; &mdash; but they operate at entirely different layers
+    of the development process. Understanding this distinction prevents you from thinking
+    you have to choose one over the other.
+  </p>
+
+  <p>
+    Think of it this way: <strong>SDD answers the architectural question</strong>
+    (&ldquo;what are we building, and what does it look like from the outside?&rdquo;)
+    while <strong>TDD answers the implementation question</strong>
+    (&ldquo;how do we prove that each piece of logic works correctly?&rdquo;).
+    SDD operates at the level of API contracts, domain models, and endpoint shapes.
+    TDD operates at the level of individual functions, edge cases, and business rules.
+    They reinforce each other: the spec gives tests a fixed, authoritative target to assert against.
+  </p>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Approach</th>
+        <th>Layer</th>
+        <th>Answers</th>
+        <th>Artifact</th>
+        <th>When</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>SDD (Spec-First)</strong></td>
+        <td>Architecture / Contract</td>
+        <td>What to build</td>
+        <td>OpenAPI spec, entity models</td>
+        <td>Phase 0, before any code</td>
+      </tr>
+      <tr>
+        <td><strong>TDD</strong></td>
+        <td>Implementation</td>
+        <td>How to prove it works</td>
+        <td>Unit tests, integration tests</td>
+        <td>Phase 1+, endpoint by endpoint</td>
+      </tr>
+      <tr>
+        <td><strong>BDD</strong></td>
+        <td>Behaviour / Acceptance</td>
+        <td>Whether stakeholder goals are met</td>
+        <td>Gherkin scenarios, feature files</td>
+        <td>Alongside stakeholder sign-off</td>
+      </tr>
+      <tr>
+        <td><strong>Vibe Coding</strong></td>
+        <td>None</td>
+        <td>Whatever the AI guesses</td>
+        <td>Mystery code, no spec, no tests</td>
+        <td>Never (in production)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">The Key Insight</div>
+    <p>
+      SDD and TDD are not alternatives &mdash; they are <strong>stacked layers</strong>.
+      SDD comes first and defines the contract. TDD comes second and verifies each piece
+      of logic satisfies that contract. Every green test is a proof that your implementation
+      matches what the spec promised.
+    </p>
+  </div>
+
+  <!-- ==================== 2.3: The Spec-First Workflow ==================== -->
+  <h3 id="spec-first">2.3 Our Spec-First Workflow</h3>
+
+  <p>
+    The Spec-First Workflow has three distinct stages. Each stage is a gate: you do not move
+    forward until the current stage is complete. This discipline is what separates professional
+    AI-assisted development from vibe coding.
+  </p>
+
+  <div class="mermaid">
+flowchart LR
+    A["/architect<br/>Design API Contract"] --> B["OpenAPI Spec<br/>Entities + Endpoints"]
+    B --> C["Phase 0 Skeleton<br/>Mock endpoints"]
+    C --> D["E2E Tests on Mocks<br/>Prove API shape"]
+    D --> E["Phase 1 plus<br/>TDD Implementation"]
+    E --> F["All Tests Pass<br/>Feature Complete"]
+    style A fill:#3f51b5,color:#fff
+    style B fill:#00897b,color:#fff
+    style C fill:#ff8f00,color:#fff
+    style F fill:#2e7d32,color:#fff
+  </div>
+
+  <p>
+    <strong>Stage 1 &mdash; Design the contract with <code>/architect</code>.</strong>
+    You describe the feature in plain English to the <code>/architect</code> command. The AI
+    produces an OpenAPI specification, a list of domain entities, and a breakdown of endpoints.
+    This is a conversation, not a one-shot generation: you review the output, challenge
+    assumptions, and iterate until the spec reflects what you actually want to build. At the
+    end of this stage you have a specification document you would be comfortable sharing with
+    a colleague or a client &mdash; before touching any implementation code.
+  </p>
+  <p>
+    <strong>Stage 2 &mdash; Build the skeleton (Phase 0).</strong>
+    With the spec as the blueprint, the AI scaffolds the entire project: directory structure,
+    router files, model files, and mock endpoint handlers. Every endpoint in the spec gets a
+    corresponding route that returns a hardcoded mock response with the correct schema. At this
+    stage, nothing is real &mdash; but everything is <em>shaped correctly</em>. You can run the
+    application, open the Swagger UI, and see every endpoint listed with its documented request
+    and response types.
+  </p>
+  <p>
+    <strong>Stage 3 &mdash; Implement with TDD (Phase 1+).</strong>
+    Now you implement one endpoint at a time. For each endpoint, you first update the test to
+    assert real business logic (not just mock data), watch it fail (red), implement the logic
+    to make it pass (green), then refactor (blue). The spec is always the reference: if an
+    implementation deviates from the spec, the spec wins.
+  </p>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">The Most Common Mistake</div>
+    <p>
+      Jumping straight from <code>/architect</code> to implementation without building Phase 0 first.
+      The skeleton stage looks like busy work, but it is not &mdash; it validates the API shape
+      before you invest time in business logic. Finding a design flaw at Phase 0 costs five minutes.
+      Finding it after four endpoints are implemented costs hours.
+    </p>
+  </div>
+
+  <!-- ==================== 2.4: Phase-Based Development ==================== -->
+  <h3 id="phase-based">2.4 Phase-Based Development</h3>
+
+  <p>
+    The Spec-First Workflow is structured into <strong>numbered phases</strong>. Phases are
+    explicit checkpoints that prevent the most common failure mode in AI-assisted development:
+    getting so deep into implementation details that you lose sight of the overall architecture.
+    Phases enforce the discipline of proving each layer works before building the next layer on
+    top of it.
+  </p>
+
+  <p>
+    <strong>Phase 0 (Skeleton)</strong> is entirely structural. Its job is to prove that the
+    application can be built, not to prove that the logic is correct. You scaffold the
+    directory layout, create every file the spec requires, wire up every route, and return
+    mock responses from every handler. When Phase 0 is complete, a fresh developer
+    joining the project can run the app, browse the API documentation, and understand the
+    entire surface area of the system &mdash; with zero business logic implemented.
+  </p>
+  <p>
+    <strong>Phase 1 and beyond</strong> are implementation phases. Each phase typically
+    covers a logical group of endpoints (e.g., all authentication endpoints, all user
+    management endpoints, or all task CRUD endpoints). Each endpoint follows a strict
+    red-green-refactor TDD loop. Phase 1 does not end until every endpoint in scope has
+    real tests and real implementations.
+  </p>
+
+  <div class="mermaid">
+flowchart TB
+    subgraph Phase0["Phase 0 - Skeleton"]
+        P0A["Scaffold directory structure"]
+        P0B["Create mock endpoints"]
+        P0C["Write E2E tests against mocks"]
+        P0D["All tests pass on stubs"]
+        P0A --> P0B --> P0C --> P0D
+    end
+    subgraph Phase1["Phase 1 plus - Implementation"]
+        P1A["Pick one endpoint"]
+        P1B["Update test with real assertions"]
+        P1C["Test FAILS - red"]
+        P1D["Implement real logic - green"]
+        P1E["Refactor - blue"]
+        P1F{"More endpoints?"}
+        P1A --> P1B --> P1C --> P1D --> P1E --> P1F
+        P1F -->|"Yes"| P1A
+    end
+    DONE["Phase Transition<br/>code-review + next-session"]
+    Phase0 --> Phase1
+    P1F -->|"No"| DONE
+  </div>
+
+  <p>
+    The phase transition is a formal checkpoint. Before moving from Phase 0 to Phase 1,
+    or from Phase 1 to Phase 2, you run <code>/code-review</code> to audit the current
+    state against your rules, then <code>/next-session</code> to document what was
+    accomplished and set up the context for the next phase. This creates a clear paper
+    trail: anyone who reads the session history can understand exactly what was built,
+    in what order, and why.
+  </p>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Phase</th>
+        <th>Goal</th>
+        <th>Tests Passing?</th>
+        <th>Real Logic?</th>
+        <th>Exit Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Phase 0</strong></td>
+        <td>Prove API shape</td>
+        <td>Yes (on mocks)</td>
+        <td>No</td>
+        <td>All endpoints return correct shape; <code>pytest</code> green</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 1</strong></td>
+        <td>Implement core endpoints</td>
+        <td>Yes (on real logic)</td>
+        <td>Yes</td>
+        <td>All Phase 1 endpoints pass real assertions; no mocks remain</td>
+      </tr>
+      <tr>
+        <td><strong>Phase N</strong></td>
+        <td>Implement remaining scope</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>All spec endpoints implemented; full test suite green</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">Why Not Just Write All the Code at Once?</div>
+    <p>
+      AI models have a limited context window and will drift over a long conversation. By the
+      time you are implementing your fifth endpoint in a single session, the model may have
+      forgotten the naming conventions from your first endpoint, or the error handling pattern
+      you established in the second. Phases + sessions keep the context small and focused,
+      which keeps the output consistent and correct.
+    </p>
+  </div>
+
+  <!-- ==================== 2.5: Session-Based Workflow ==================== -->
+  <h3 id="session-workflow">2.5 Session-Based Workflow</h3>
+
+  <p>
+    AI language models do not retain memory between conversations. Even within a single long
+    conversation, context quality degrades as the conversation grows: early instructions get
+    pushed further away from the model&rsquo;s attention window, and subtle drift accumulates.
+    The <strong>session-based workflow</strong> is the practical solution to this fundamental
+    constraint.
+  </p>
+  <p>
+    A <strong>session</strong> is a bounded unit of work. It has a defined start, a single
+    focused goal, and a formal end. You do not try to build an entire feature in one session.
+    You pick <em>one endpoint</em>, or <em>one layer</em>, or <em>one concern</em>, complete
+    it, review it, document the transition, and start a fresh session for the next unit.
+    Fresh context produces consistent code.
+  </p>
+
+  <div class="mermaid">
+flowchart LR
+    S1["/start-session<br/>Load context<br/>Set goal"] --> S2["Execute<br/>ONE focused task<br/>TDD cycle"]
+    S2 --> S3["/code-review<br/>Audit against rules"]
+    S3 --> S4["/next-session<br/>Document transition"]
+    S4 -.->|"next session"| S1
+    style S1 fill:#3f51b5,color:#fff
+    style S2 fill:#2e7d32,color:#fff
+    style S4 fill:#6a1b9a,color:#fff
+  </div>
+
+  <p>
+    <strong>Starting a session with <code>/start-session</code></strong> does more than open a new
+    chat window. The command reads your <code>.cursor/context.md</code>, the active session plan,
+    any open issues or notes from the previous session, and injects all of that into the AI&rsquo;s
+    context before you write a single prompt. The AI begins the session already knowing the stack,
+    the rules, the phase, and the specific goal &mdash; without you having to re-explain any of it.
+  </p>
+  <p>
+    <strong>During execution</strong>, you stay focused on one thing. The session is not over when
+    the feature works &mdash; it is over when the tests pass, the code is clean, and the output
+    matches the spec. Resist the temptation to fix a nearby bug or add an unrelated endpoint
+    &ldquo;while you&rsquo;re at it.&rdquo; Context pollution is how sessions spiral into
+    unreviewed, inconsistent code.
+  </p>
+  <p>
+    <strong>Ending a session with <code>/next-session</code></strong> generates a structured
+    transition document: what was completed, what tests pass, what the next session should pick up,
+    and any decisions or open questions to carry forward. This document becomes the starting
+    context for the <em>next</em> call to <code>/start-session</code>. The loop is self-sustaining.
+  </p>
+
+  <div class="callout callout-info">
+    <div class="callout-title">Sessions Are Not Optional</div>
+    <p>
+      The most experienced developers on this workflow run the full
+      <code>/start-session</code> &rarr; execute &rarr; <code>/next-session</code> loop
+      <em>every single time</em>, even for tiny changes. The overhead is less than two minutes.
+      The benefit is a codebase where every session is auditable, the AI never drifts from the
+      rules, and you can hand off to a teammate &mdash; or resume after a week&rsquo;s break &mdash;
+      without losing context.
+    </p>
+  </div>
+
+  <p>
+    Putting it all together: SDD gives you the contract, Phase-Based Development gives you the
+    structure to build against that contract incrementally, and the Session-Based Workflow ensures
+    the AI stays aligned with your rules and context throughout the entire process. These three
+    patterns are not independent techniques &mdash; they are designed to work as a single,
+    coherent system.
+  </p>
+
+  <!-- ==================== LAB 1 ==================== -->
+  <div class="callout callout-lab">
+    <div class="callout-title">Lab 1: Setup and Architect (15 min)</div>
+
+    <p>
+      <strong>Objective:</strong> Configure your development stack, produce a formal API specification,
+      and build the Phase 0 skeleton so that all endpoints appear in Swagger UI with mock responses.
+    </p>
+
+    <p><strong>Prerequisites:</strong> Cursor installed, Node.js and Python 3.10+ available, Git installed.</p>
+
+    <p><strong>Step 1: Clone the template repository</strong></p>
+    <pre><code class="language-bash">git clone &lt;repo&gt; my-project
+cd my-project
+cursor .</code></pre>
+    <p>This opens the project in Cursor. You should see a <code>.cursor/</code> directory at the root.</p>
+
+    <p><strong>Step 2: Configure your stack</strong></p>
+    <ol>
+      <li>Open Agent Mode with <kbd>Cmd+I</kbd> (Mac) or <kbd>Ctrl+I</kbd> (Windows/Linux)</li>
+      <li>Type: <code>/setup-stack</code></li>
+      <li>When prompted, select <code>python-fastapi</code></li>
+      <li>The command will create or update <code>.cursor/context.md</code> and populate <code>.cursor/rules/</code> with stack-specific rules</li>
+    </ol>
+
+    <p><strong>Step 3: Inspect what was created</strong></p>
+    <p>Open the following files and read them before proceeding:</p>
+    <ul>
+      <li><code>.cursor/context.md</code> &mdash; the project context file the AI will read at every session start</li>
+      <li><code>.cursor/rules/</code> &mdash; the rule files that govern AI behaviour (naming conventions, error handling patterns, test structure, etc.)</li>
+    </ul>
+    <p>Understanding these files is important: they are the mechanism by which the AI learns your standards.</p>
+
+    <p><strong>Step 4: Design the API contract</strong></p>
+    <ol>
+      <li>In Agent Mode, run: <code>/architect "Build a task management API with users and tasks"</code></li>
+      <li>Review the AI&rsquo;s proposed OpenAPI spec, entity definitions, and endpoint breakdown</li>
+      <li>Ask clarifying questions or request changes until the spec reflects what you want to build</li>
+      <li>Confirm when satisfied &mdash; the command will save the spec and session plan to <code>plan/sessions/</code></li>
+    </ol>
+
+    <p><strong>Step 5: Inspect the generated artifacts</strong></p>
+    <ul>
+      <li><code>plan/sessions/</code> &mdash; session plan files generated by <code>/architect</code></li>
+      <li><code>app/</code> &mdash; skeleton files: routers, models, and mock handlers</li>
+      <li><code>openapi.yaml</code> (or equivalent) &mdash; the formal API contract</li>
+    </ul>
+
+    <p><strong>Step 6: Run the application</strong></p>
+    <pre><code class="language-bash">python main.py</code></pre>
+    <p>
+      Navigate to <code>http://localhost:8000/docs</code> in your browser.
+      You should see the Swagger UI with every endpoint listed and documented.
+    </p>
+
+    <p><strong>Step 7: Verify the Phase 0 checkpoint</strong></p>
+    <pre><code class="language-bash">pytest</code></pre>
+    <p>All tests should pass. Every test is asserting against mock responses at this stage &mdash; that is correct and expected.</p>
+
+    <p>
+      <strong>Deliverable:</strong> A running application where every endpoint appears in Swagger UI
+      and returns a <code>200</code> with mock data. <code>pytest</code> passes with no failures.
+    </p>
+
+    <p>
+      <strong>Checkpoint:</strong> Before moving to Phase 1, confirm:
+    </p>
+    <ul>
+      <li>Every endpoint in the spec has a corresponding route in the skeleton</li>
+      <li>Every route returns a response whose shape matches the spec&rsquo;s schema</li>
+      <li><code>pytest</code> passes</li>
+      <li>The Swagger UI is accurate and readable</li>
+    </ul>
+
+    <p>
+      <strong>What to observe:</strong> Notice that the AI designed the entire API contract
+      &mdash; endpoints, methods, request bodies, response schemas, status codes &mdash;
+      <em>before</em> writing a single line of business logic. The skeleton is real code,
+      but it is structural code: it proves the shape of the system without implementing
+      its behaviour. That is the Spec-First pattern in action.
+    </p>
+  </div>
+
+</section>
+
+<section id="commands">
+  <h2>3. Skills — Slash Commands <span style="font-size:0.7em;font-weight:400;opacity:0.7">(20 min + Lab 2)</span></h2>
+  <p>
+    Commands are the productivity backbone of the Cursor AI workflow. They let you encode
+    complex, multi-step workflows into a single keystroke, ensuring every session starts
+    with the right context and follows the right process &mdash; automatically.
+  </p>
+
+  <!-- ===== CRITICAL WARNING: /command vs @symbol ===== -->
+  <div class="callout callout-warning">
+    <div class="callout-title">Critical Syntax Rule: / vs @</div>
+    <p>
+      Commands are <strong>invoked with a forward slash</strong>: <code>/setup-stack</code>,
+      <code>/architect</code>, <code>/start-session</code>.
+    </p>
+    <p>
+      The <code>@</code> symbol is <strong>exclusively for attaching context</strong>:
+      <code>@app/api/posts.py</code>, <code>@codebase</code>, <code>@web</code>.
+    </p>
+    <p>
+      <strong>Never write <code>@setup-stack</code> or <code>@architect</code> to invoke a
+      command</strong> &mdash; those forms are incorrect. The correct invocation is always
+      <code>/command-name</code>.
+    </p>
+  </div>
+
+  <!-- ===== 3.1 What Are Commands? ===== -->
+  <h3 id="what-are-commands">What Are Commands?</h3>
+  <p>
+    A command is nothing more than a <strong>plain markdown file</strong> stored in
+    <code>.cursor/commands/</code>. The filename determines the command name:
+    <code>setup-stack.md</code> becomes <code>/setup-stack</code>,
+    <code>start-session.md</code> becomes <code>/start-session</code>, and so on.
+  </p>
+  <p>
+    When you type <code>/start-session</code> in Cursor&rsquo;s Agent panel, Cursor reads that
+    markdown file and <strong>injects its entire contents into the AI&rsquo;s prompt</strong>
+    as a system-level instruction. There is no templating engine, no compilation step &mdash;
+    pure markdown, injected as context.
+  </p>
+  <p>
+    This is how you encode complex, repeatable workflows as reusable prompts. Instead of
+    retyping &ldquo;read the context file, check the rules, load the phase&hellip;&rdquo; on
+    every session, you type <code>/start-session</code> and the full workflow fires.
+  </p>
+
+  <div class="callout callout-info">
+    <div class="callout-title">How Commands Work Under the Hood</div>
+    <p>
+      Cursor searches for <code>.cursor/commands/&lt;name&gt;.md</code> (project-level) or
+      <code>~/.cursor/commands/&lt;name&gt;.md</code> (user-level), reads the file, and prepends
+      its body to the AI prompt &mdash; <em>before</em> your message. The AI sees the full command
+      instruction set, then your request, in a single prompt turn.
+    </p>
+  </div>
+
+  <!-- ===== 3.2 / vs @ The Critical Distinction ===== -->
+  <h3 id="slash-vs-at">/ vs @ &mdash; The Critical Distinction</h3>
+
+  <div class="callout callout-info">
+    <div class="callout-title">Two Symbols, Two Completely Different Jobs</div>
+    <p>
+      <strong><code>/command-name</code></strong> &mdash; <em>invokes</em> a command.
+      Cursor loads the corresponding <code>.md</code> file and executes the workflow it contains.
+    </p>
+    <p>
+      <strong><code>@symbol</code></strong> &mdash; <em>attaches context</em>.
+      It tells Cursor to include a file, folder, web search result, or codebase index in the prompt.
+    </p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Syntax</th>
+        <th>What It Does</th>
+        <th>Example</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/setup-stack</code></td>
+        <td>Invokes the setup-stack command workflow</td>
+        <td>Configures project stack from scratch</td>
+      </tr>
+      <tr>
+        <td><code>/architect "Build a blog"</code></td>
+        <td>Invokes architect command with your description</td>
+        <td>Designs API spec and generates skeleton</td>
+      </tr>
+      <tr>
+        <td><code>/start-session</code></td>
+        <td>Invokes session-start workflow</td>
+        <td>Loads context, phase, and strictness level</td>
+      </tr>
+      <tr>
+        <td><code>@app/api/posts.py</code></td>
+        <td>Attaches a specific file as context</td>
+        <td>AI can read that file during the session</td>
+      </tr>
+      <tr>
+        <td><code>@codebase</code></td>
+        <td>Searches the entire codebase semantically</td>
+        <td>AI finds relevant code across all files</td>
+      </tr>
+      <tr>
+        <td><code>@web</code></td>
+        <td>Includes live web search results as context</td>
+        <td>AI can reference current documentation</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    You can <strong>combine both</strong> in a single message. For example:
+  </p>
+  <pre><code class="language-markdown">/code-review @app/api/tasks.py @app/tests/test_tasks.py</code></pre>
+  <p>
+    This invokes the <code>/code-review</code> command workflow <em>and</em> attaches two files
+    as context for the audit.
+  </p>
+
+  <!-- ===== 3.3 Command Anatomy ===== -->
+  <h3 id="command-anatomy">Command Anatomy</h3>
+  <p>
+    Every command file follows the same simple structure: an optional YAML frontmatter block
+    followed by a markdown body that contains the full workflow instruction.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Part</th><th>Required</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>description:</code> (frontmatter)</td>
+        <td>Optional</td>
+        <td>Tells the AI agent <em>when</em> to auto-invoke this command (used by autonomous agents)</td>
+      </tr>
+      <tr>
+        <td>Markdown body</td>
+        <td>Yes</td>
+        <td>The full workflow instruction injected verbatim into the AI&rsquo;s prompt</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Here is the complete content of <code>start-session.md</code> &mdash; the command that begins every development session:</p>
+
+  <pre><code class="language-markdown">---
+description: Begin a development session with active context
+---
+
+# Start Session Command
+
+Initializes the AI context for the current work session. This command ensures
+the AI "knows" the project rules, stack, and current phase before writing any code.
+
+## Execution Flow
+
+**1. Context Check**
+- Read `.cursor/context.md`.
+- **Condition**: If the file contains "No Stack Configured" or is missing:
+  - Stop.
+  - Tell the user: "Project is not configured. Please run /setup-stack first."
+
+**2. Context Loading**
+- Display a brief summary of the active context:
+  > "Context Loaded: **{Language} / {Framework}**"
+  > "Current Phase: **{Active Phase}**"
+  > "Strictness: **{Strictness Level}**"
+
+**3. Session Goal**
+- Ask: "What is the goal for this session?"
+- If the user provides a goal (e.g., "Implement POST /users"), cross-reference
+  it with the Active Phase in `context.md`.
+
+**4. Rule Enforcement**
+- Remind the user (internally) to adhere to the active rules in `.cursor/rules/`.
+- **Constraint**: Do not suggest code that violates the active style guide
+  (e.g., don't use camelCase in Python if snake_case is mandated).
+
+**5. Ready State**
+- Confirm readiness: "I am ready. Guides are active. Let's build."</code></pre>
+
+  <p>
+    Notice: the entire body becomes the AI&rsquo;s operating instruction the moment you type
+    <code>/start-session</code>. No extra setup required.
+  </p>
+
+  <!-- ===== Diagram 1: Command Execution Flow ===== -->
+  <h4>Command Execution Flow</h4>
+  <div class="mermaid">
+flowchart LR
+    U["Developer types<br/>/start-session"] --> L["Cursor loads<br/>.cursor/commands/start-session.md"]
+    L --> A["Rules loaded<br/>.cursor/rules/*.mdc"]
+    A --> CTX["Context loaded<br/>.cursor/context.md"]
+    CTX --> LLM["LLM receives:<br/>Command + Rules +<br/>Context + Message"]
+    LLM --> R["AI Response<br/>following the workflow"]
+    style U fill:#ff9800,color:#fff
     style LLM fill:#3f51b5,color:#fff
-        </div>
-      </section>
+    style R fill:#2e7d32,color:#fff
+  </div>
 
-      <!-- ==================== SECTION 3: Rules ==================== -->
-      <section id="rules">
-        <h2>3. Rules System</h2>
-        <p>
-          Rules are the backbone of Cursor&rsquo;s AI behavior. They live in
-          <code>.cursor/rules/*.mdc</code> files and tell the AI <em>how</em> to write code for your
-          specific project.
-        </p>
+  <!-- ===== Diagram 2: Sequence for /start-session ===== -->
+  <h4>Sequence: What Happens When You Run <code>/start-session</code></h4>
+  <div class="mermaid">
+sequenceDiagram
+    participant Dev as Developer
+    participant Cursor as Cursor Agent
+    participant FS as File System
+    participant LLM as AI Model
 
-        <h3>Rule File Format</h3>
-        <p>Each <code>.mdc</code> file has YAML frontmatter followed by markdown content:</p>
-        <pre><code class="language-yaml">---
+    Dev->>Cursor: /start-session
+    Cursor->>FS: Load .cursor/commands/start-session.md
+    FS-->>Cursor: Command instructions
+    Cursor->>FS: Load .cursor/rules/*.mdc
+    FS-->>Cursor: Active rules
+    Cursor->>FS: Load .cursor/context.md
+    FS-->>Cursor: Stack + Phase + Strictness
+    Cursor->>LLM: Command + Rules + Context + Message
+    LLM-->>Cursor: Context Loaded: Python / FastAPI
+    Cursor-->>Dev: Ready. What is your session goal?
+    Dev->>Cursor: Implement POST /tasks
+    Cursor->>LLM: Goal + full context
+    LLM-->>Cursor: TDD-compliant implementation
+  </div>
+
+  <!-- ===== 3.4 Why Commands Save Tokens ===== -->
+  <h3>Why Commands Save Tokens and Ensure Consistency</h3>
+  <p>
+    Every time you retype a complex instruction in natural language, two things happen:
+    you consume tokens unnecessarily, and you introduce variation. Slightly different wording
+    produces different AI behaviour.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Without Commands</th><th>With Commands</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Retype the full context every session</td>
+        <td>One keystroke: <code>/start-session</code></td>
+      </tr>
+      <tr>
+        <td>Forget to mention rules, phase, or stack</td>
+        <td>Command injects everything automatically</td>
+      </tr>
+      <tr>
+        <td>Inconsistent AI behaviour across sessions</td>
+        <td>Identical prompt = identical workflow every time</td>
+      </tr>
+      <tr>
+        <td>High token cost for repeated context</td>
+        <td>Pre-written, dense prompts minimise overhead</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">Rules + Commands = Full Context on Every Prompt</div>
+    <p>
+      Rules load automatically based on file globs. Commands load the workflow you choose.
+      Together, the AI always has the right behavioural guardrails <em>and</em> the right
+      task instruction &mdash; without you repeating yourself.
+    </p>
+  </div>
+
+  <!-- ===== 3.5 The Full Command Chain ===== -->
+  <h3 id="command-chain">The Full Command Chain</h3>
+  <p>
+    The commands are designed to hand off to one another, forming a complete
+    <strong>Spec-Driven Development lifecycle</strong>. Each command marks a phase transition
+    and sets up the next step:
+  </p>
+
+  <div class="mermaid">
+flowchart LR
+    SS["/setup-stack<br/>Configure stack"] --> AR["/architect<br/>Design spec + skeleton"]
+    AR --> ST["/start-session<br/>Load context + goal"]
+    ST --> CODE["TDD Code<br/>Red - Green - Refactor"]
+    CODE --> CR["/code-review<br/>Audit rules"]
+    CR --> NS["/next-session<br/>Transition summary"]
+    NS -.->|"next session"| ST
+    style SS fill:#3f51b5,color:#fff
+    style AR fill:#00897b,color:#fff
+    style ST fill:#ff8f00,color:#fff
+    style CODE fill:#2e7d32,color:#fff
+    style CR fill:#c62828,color:#fff
+    style NS fill:#6a1b9a,color:#fff
+  </div>
+
+  <ol>
+    <li><code>/setup-stack</code> &mdash; configure the project stack once</li>
+    <li><code>/architect</code> &mdash; design the API spec and create the skeleton</li>
+    <li><code>/start-session</code> &mdash; begin every coding session by loading context</li>
+    <li>TDD code &mdash; Red &rarr; Green &rarr; Refactor, guided by the active rules</li>
+    <li><code>/code-review</code> &mdash; audit the session&rsquo;s output against all rules</li>
+    <li><code>/next-session</code> &mdash; generate a transition summary and hand off to the next session</li>
+  </ol>
+
+  <p>
+    The chain keeps repeating steps 3&ndash;6 until a phase is complete, then
+    <code>/architect</code> drives the next phase. The workflow is deterministic and
+    self-documenting.
+  </p>
+
+  <!-- ===== 3.6 Command Reference Table ===== -->
+  <h3 id="command-reference">Command Reference</h3>
+  <p>The project ships with 11 purpose-built commands covering every stage of development:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Command</th>
+        <th>Purpose</th>
+        <th>Phase / When to Use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="cmd-name">/setup-stack</td>
+        <td>Configure project technology stack, rules, and context file</td>
+        <td>Setup &mdash; first thing on a new project</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/detect-stack</td>
+        <td>Auto-analyze an existing codebase and generate stack config</td>
+        <td>Setup &mdash; brownfield / inherited projects</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/architect</td>
+        <td>Design the API surface and create a walking skeleton</td>
+        <td>Phase 0 &mdash; before any implementation</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/start-project</td>
+        <td>Domain modeling &mdash; propose entities, relationships, and API shape</td>
+        <td>Phase 0 &mdash; greenfield domain design</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/start-session</td>
+        <td>Load context, phase, and strictness; ask for session goal</td>
+        <td>Any phase &mdash; at the start of every coding session</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/read</td>
+        <td>Quick context load to understand project state without full session setup</td>
+        <td>Any phase &mdash; fast orientation</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/research</td>
+        <td>3-cycle deep investigation: hypothesis &rarr; search &rarr; refutation &rarr; refinement</td>
+        <td>Any phase &mdash; when exploring unknown territory</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/research-export</td>
+        <td>Export research findings as a shareable document for team review</td>
+        <td>Any phase &mdash; after a research cycle</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/code-review</td>
+        <td>Comprehensive audit of session output against all active stack rules</td>
+        <td>Review &mdash; after completing a feature or endpoint</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/next-session</td>
+        <td>Wrap up the session and generate a transition summary for continuity</td>
+        <td>Transition &mdash; at the end of every session</td>
+      </tr>
+      <tr>
+        <td class="cmd-name">/dockerize</td>
+        <td>Containerize the application with Docker and Docker Compose</td>
+        <td>Deployment &mdash; when preparing for staging or production</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== 3.7 Command Scope ===== -->
+  <h3>Command Scope</h3>
+  <p>Commands can live in two places, each with a different visibility scope:</p>
+
+  <table>
+    <thead>
+      <tr><th>Scope</th><th>Location</th><th>Visibility</th><th>Best For</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Project</strong></td>
+        <td><code>.cursor/commands/</code></td>
+        <td>Everyone with the repo (checked in to git)</td>
+        <td>Shared team workflows, project-specific conventions</td>
+      </tr>
+      <tr>
+        <td><strong>User</strong></td>
+        <td><code>~/.cursor/commands/</code></td>
+        <td>Only you, across all projects</td>
+        <td>Personal productivity shortcuts, cross-project utilities</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">Team Tip: Check Commands Into the Repo</div>
+    <p>
+      Store commands in <code>.cursor/commands/</code> and commit them. Every developer who
+      clones the repo immediately gets the full command suite &mdash; no setup, no sharing
+      files manually. The workflow is part of the codebase.
+    </p>
+  </div>
+
+  <!-- ===== LAB 2 ===== -->
+  <div class="callout callout-lab" style="--callout-color:#6a1b9a; border-color:#6a1b9a; background:color-mix(in srgb,#6a1b9a 8%,transparent);">
+    <div class="callout-title" style="color:#6a1b9a;">Lab 2 (15 min): The Command Chain</div>
+
+    <p><strong>Objective:</strong> Run the full development command chain on the skeleton built in Lab 1 and observe how each command hands context to the next.</p>
+    <p><strong>Prerequisites:</strong> Lab 1 completed &mdash; your skeleton project is running with stack configured.</p>
+
+    <p><strong>Steps:</strong></p>
+    <ol class="steps">
+      <li>
+        Open Cursor&rsquo;s Agent panel (<kbd>Cmd+I</kbd> on macOS / <kbd>Ctrl+I</kbd> on Windows)
+        and type <code>/start-session</code>. Press Enter.
+      </li>
+      <li>
+        Observe the AI response. It should display something like:<br />
+        <em>&ldquo;Context Loaded: Python / FastAPI, Phase 0, Strictness: High&rdquo;</em><br />
+        If it says &ldquo;Project is not configured&rdquo;, run <code>/setup-stack</code> first
+        (Lab 1 prerequisite not met).
+      </li>
+      <li>
+        When the AI asks for your session goal, enter:<br />
+        <em>&ldquo;Implement GET /tasks &mdash; return all tasks from the database&rdquo;</em>
+      </li>
+      <li>
+        Let the AI work through the TDD cycle. Watch it write a <strong>failing test first</strong>
+        (Red step), then implement the endpoint (Green step). Do not interrupt this process &mdash;
+        observe the order.
+      </li>
+      <li>
+        Once the implementation is complete, type <code>/code-review</code>.
+        Observe the audit output: which rules does it check? Does it flag anything?
+      </li>
+      <li>
+        Finally, type <code>/next-session</code>. Observe the transition summary: it should
+        document what was built, what tests pass, and what the next goal should be.
+      </li>
+      <li>
+        Optional: copy the transition summary text and use it as the input to
+        <code>/start-session</code> in a new chat window. Notice how the AI picks up exactly
+        where you left off.
+      </li>
+    </ol>
+
+    <p><strong>Deliverable:</strong> An implemented <code>GET /tasks</code> endpoint with a passing test, plus a code-review audit report and a session transition summary &mdash; all generated by the command chain.</p>
+
+    <p>
+      <strong>Key observation:</strong> At no point did you manually re-explain the stack,
+      the phase, or the coding rules. Every command loaded that context automatically.
+      This is the core value of the command system.
+    </p>
+  </div>
+
+</section>
+
+<section id="rules">
+  <h2>Section 4: Rules System <span class="duration">20 min + Lab 3</span></h2>
+  <p class="section-intro">
+    Rules are the mechanism that makes Cursor's AI write <em>your</em> style of code instead of generic code.
+    Every rule file is injected silently into matching AI prompts — you write the rule once and the AI obeys it on every prompt, forever.
+  </p>
+
+  <!-- ============================================================ -->
+  <h3 id="what-are-rules">What Are Rules?</h3>
+  <p>
+    Rules live in <code>.cursor/rules/</code> as <code>.mdc</code> files (Markdown with a YAML frontmatter header).
+    Cursor reads every file in that directory and, based on the frontmatter, decides which rules to inject into the
+    AI's context before it sees your prompt.
+  </p>
+  <ul>
+    <li><strong>.mdc files</strong> — plain text files: YAML frontmatter on top, Markdown body below.</li>
+    <li><strong>Injected automatically</strong> — you never paste your standards into the chat; Cursor does it for you.</li>
+    <li><strong>Enforce your style</strong> — snake_case, TDD, phase gates, logging patterns — whatever matters to your team.</li>
+    <li><strong>Rules + Commands = complete guardrails</strong> — Commands define <em>workflows</em>; Rules define <em>standards</em>. Together they make the AI a disciplined team member.</li>
+  </ul>
+
+  <!-- ============================================================ -->
+  <h3 id="rule-format">Rule File Format</h3>
+  <p>Every <code>.mdc</code> file follows this exact structure:</p>
+  <pre><code class="language-yaml">---
 description: Core workflow and phase-based development rules
 alwaysApply: true
-globs:                  # optional, for auto-attached rules
+globs:
   - "app/**/*.py"
 ---
 
 # Rule Title
 
-Your rule content in markdown...</code></pre>
+Rule content in markdown...
+</code></pre>
+  <ul>
+    <li><code>description</code> — One-line summary. The AI reads this to decide whether to load the rule when in Agent-Requested mode.</li>
+    <li><code>alwaysApply</code> — Boolean. When <code>true</code>, the rule is loaded on <em>every</em> prompt regardless of context.</li>
+    <li><code>globs</code> — File patterns. When any open or edited file matches, the rule is auto-attached.</li>
+    <li>The <strong>body</strong> is plain Markdown — headings, lists, code blocks, checklists. The AI understands all of it.</li>
+  </ul>
 
-        <h3 id="rule-types">The 4 Rule Types</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Trigger</th>
-              <th>Frontmatter</th>
-              <th>Use Case</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Always Apply</strong></td>
-              <td>Every prompt, automatically</td>
-              <td><code>alwaysApply: true</code></td>
-              <td>Core workflow, coding standards</td>
-            </tr>
-            <tr>
-              <td><strong>Auto-Attached</strong></td>
-              <td>When matching files are open</td>
-              <td><code>globs: ["*.py"]</code></td>
-              <td>Language-specific rules</td>
-            </tr>
-            <tr>
-              <td><strong>Agent-Requested</strong></td>
-              <td>AI picks based on <code>description</code></td>
-              <td><code>description: "..."</code></td>
-              <td>Situational rules (testing, deployment)</td>
-            </tr>
-            <tr>
-              <td><strong>Manual</strong></td>
-              <td>User types <code>@rule-name</code></td>
-              <td>(no special field)</td>
-              <td>On-demand references</td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- ============================================================ -->
+  <h3 id="rule-types">The 4 Rule Types</h3>
+  <p>Cursor supports four distinct loading strategies. Choose the right one for each rule to keep context lean and focused.</p>
 
-        <h3>Rule Precedence</h3>
-        <p>Rules are loaded in priority order: <strong>Team</strong> &gt; <strong>Project</strong> &gt; <strong>User</strong>. When multiple rules apply, they are combined (not overridden) in this order.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Frontmatter signal</th>
+        <th>When it loads</th>
+        <th>Best used for</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Always Apply</strong></td>
+        <td><code>alwaysApply: true</code></td>
+        <td>Every single prompt, no exceptions</td>
+        <td>Core workflow rules, phase gates, TDD enforcement, global coding standards</td>
+      </tr>
+      <tr>
+        <td><strong>Auto-Attached</strong></td>
+        <td><code>globs: ["*.py"]</code></td>
+        <td>When a matching file is open or being edited</td>
+        <td>Language-specific style (Python, TypeScript), framework-specific patterns (FastAPI, React)</td>
+      </tr>
+      <tr>
+        <td><strong>Agent-Requested</strong></td>
+        <td>Only a <code>description</code> field (no alwaysApply, no globs)</td>
+        <td>AI reads all descriptions and pulls the rule when it judges it relevant</td>
+        <td>Situational rules — Docker deployment, database migration steps, security checklists</td>
+      </tr>
+      <tr>
+        <td><strong>Manual</strong></td>
+        <td>No special frontmatter</td>
+        <td>User explicitly types <code>@rule-name</code> in the chat</td>
+        <td>Reference material, rarely-needed standards, legacy migration guides</td>
+      </tr>
+    </tbody>
+  </table>
 
-        <div class="mermaid">
+  <h4>Always Apply</h4>
+  <p>
+    The most powerful type. Use it for rules that must <em>never</em> be skipped — phase-based development workflow,
+    TDD golden rule, secrets management. The tradeoff is token cost: every prompt pays for these rules.
+    Keep them focused and under 200 lines each.
+  </p>
+
+  <h4>Auto-Attached</h4>
+  <p>
+    Scoped by file pattern. A Python style guide with <code>globs: ["app/**/*.py"]</code> loads only when you are
+    editing Python files — your TypeScript work is unaffected. This keeps context clean and tokens low.
+  </p>
+
+  <h4>Agent-Requested</h4>
+  <p>
+    The AI autonomously decides when to pull these in, based on the <code>description</code> field.
+    Write descriptions that are concrete and action-oriented: <em>"Docker Compose deployment rules for staging environment"</em>
+    is far better than <em>"deployment stuff"</em>.
+  </p>
+
+  <h4>Manual</h4>
+  <p>
+    You are fully in control. Type <code>@700-logging</code> in the chat when you want that rule active.
+    Good for one-off tasks or rules so specialized they should never load automatically.
+  </p>
+
+  <!-- ============================================================ -->
+  <h3 id="rule-loading-diagram">Rule Loading Decision Tree</h3>
+  <div class="mermaid">
 flowchart TD
-    A["Prompt Sent to AI"] --> B{"Scan .cursor/rules/"}
-    B --> C["alwaysApply: true<br/>→ Always loaded"]
-    B --> D["globs match open files?<br/>→ Auto-attached"]
-    B --> E["AI reads descriptions<br/>→ Agent-requested"]
-    B --> F["User typed @rule-name?<br/>→ Manual"]
-    C --> G["Combine All<br/>Matching Rules"]
-    D --> G
-    E --> G
-    F --> G
-    G --> H["Final Context<br/>Sent to LLM"]
+    PROMPT["Prompt sent to AI"] --> SCAN["Scan .cursor/rules/"]
+    SCAN --> AA["alwaysApply: true?<br/>Load always"]
+    SCAN --> GLOB["globs match open files?<br/>Auto-attach"]
+    SCAN --> DESC["AI reads description<br/>Agent-requested"]
+    SCAN --> MANUAL["User typed @rule-name?<br/>Manual load"]
+    AA --> COMBINE["Combine all<br/>matching rules"]
+    GLOB --> COMBINE
+    DESC --> COMBINE
+    MANUAL --> COMBINE
+    COMBINE --> LLM["Final context<br/>sent to LLM"]
+    style PROMPT fill:#3f51b5,color:#fff
+    style COMBINE fill:#00897b,color:#fff
+    style LLM fill:#ff8f00,color:#fff
+  </div>
 
-    style A fill:#3f51b5,color:#fff
-    style G fill:#00897b,color:#fff
-    style H fill:#ff8f00,color:#fff
-        </div>
+  <!-- ============================================================ -->
+  <h3 id="rule-precedence">Rule Precedence and Stacking</h3>
+  <p>
+    When multiple rules match, Cursor <strong>combines</strong> them — it does not pick a winner and discard the rest.
+    All matching rules are stacked into one combined context block injected before your prompt.
+  </p>
+  <ul>
+    <li><strong>Load order</strong>: Numeric file prefixes control the order — <code>000-core.mdc</code> loads before <code>100-style.mdc</code>. Put foundational rules at lower numbers.</li>
+    <li><strong>Team &gt; Project &gt; User</strong>: Team-level rules (committed to the repo) take precedence over personal user rules.</li>
+    <li><strong>Rules stack, not override</strong>: A later rule adds to context; it does not erase earlier rules. Design rules to be composable — each focused on one concern.</li>
+  </ul>
 
-        <h3 id="rule-example">Real Example: Core Workflow Rule</h3>
-        <p>From <code>stacks/python-fastapi/rules/000-core-workflow.mdc</code>:</p>
-        <pre><code class="language-yaml">---
+  <div class="mermaid">
+flowchart TB
+    subgraph Rules["Active Rules Stack"]
+        R1["000-core-workflow.mdc<br/>alwaysApply: true<br/>Phase and TDD enforcement"]
+        R2["100-architect-phase.mdc<br/>alwaysApply: true<br/>Spec-first design"]
+        R3["400-testing-first.mdc<br/>alwaysApply: true<br/>TDD golden rule"]
+        R4["500-implementation.mdc<br/>globs: app and py<br/>Python code standards"]
+    end
+    Rules --> CONTEXT["Combined context<br/>injected into every prompt"]
+    CONTEXT --> AI["AI writes code that:<br/>Follows phases<br/>Writes tests first<br/>Matches Python style"]
+    style CONTEXT fill:#00897b,color:#fff
+    style AI fill:#2e7d32,color:#fff
+  </div>
+
+  <!-- ============================================================ -->
+  <h3 id="rules-enforce-sdd">How Rules Enforce Spec-Driven Development</h3>
+  <p>
+    Spec-Driven Development (SDD) depends on phases being respected — you cannot implement before designing,
+    and you cannot merge before tests pass. Rules encode these gates directly into the AI's context so it
+    enforces them without you having to remind it every prompt.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Rule file</th>
+        <th>Phase it governs</th>
+        <th>What it enforces</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>000-core-workflow.mdc</code></td>
+        <td>All phases</td>
+        <td>Phase sequence, TDD requirement, virtual environment setup, directory structure</td>
+      </tr>
+      <tr>
+        <td><code>100-architect-phase.mdc</code></td>
+        <td>Architect Phase</td>
+        <td>API contract (OpenAPI spec) must exist before any implementation code is written</td>
+      </tr>
+      <tr>
+        <td><code>200-skeleton-phase.mdc</code></td>
+        <td>Phase 0 (Skeleton)</td>
+        <td>Endpoints return mock responses only — no real business logic during skeleton phase</td>
+      </tr>
+      <tr>
+        <td><code>400-testing-first.mdc</code></td>
+        <td>Phase 1+ (Implementation)</td>
+        <td>E2E test must be written and must <em>fail</em> before implementation begins (Red-Green-Refactor)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="mermaid">
+flowchart LR
+    subgraph SDD_Rules["Rules Enforcing Spec-First Flow"]
+        AR["architect-phase.mdc<br/>Design API first<br/>No code before spec"]
+        SK["skeleton-phase.mdc<br/>Mock endpoints only<br/>No real logic in Phase 0"]
+        TF["testing-first.mdc<br/>Test must fail first<br/>Red before Green"]
+        EP["endpoint-phase.mdc<br/>One endpoint per session<br/>No scope creep"]
+    end
+    AR -->|"Phase 0"| SK
+    SK -->|"Phase 1 plus"| TF
+    TF -->|"Each endpoint"| EP
+    style AR fill:#3f51b5,color:#fff
+    style TF fill:#c62828,color:#fff
+  </div>
+
+  <!-- ============================================================ -->
+  <h3 id="actual-rule-content">Real Rule File: <code>000-core-workflow.mdc</code></h3>
+  <p>
+    This is the actual <code>000-core-workflow.mdc</code> from the Python FastAPI stack.
+    It is loaded on <em>every</em> prompt (<code>alwaysApply: true</code>) and governs the entire development lifecycle.
+  </p>
+  <pre><code class="language-yaml">---
 description: Core vibe coding workflow and phase-based development rules
 alwaysApply: true
 ---
 
 # Core Vibe Coding Workflow
+
+## Purpose
+This rule defines the fundamental workflow for phase-based development with test-driven
+implementation. Always apply these principles regardless of the specific task.
 
 ## Workflow Phases
 
@@ -767,11 +1932,34 @@ All feature development follows this structure:
 
 ## Golden Rules
 
+### Always Setup Virtual Environment First
+Before any development work:
+- Create virtual environment: `python3 -m venv .venv`
+- Activate virtual environment: `source .venv/bin/activate`
+- Use virtual environment for all Python commands: `.venv/bin/python3`
+- Add dependencies to requirements.txt before installing
+
+### Always Read Vibe Guides First
+Before starting any phase, read the relevant guide from the vibe/ folder:
+- vibe_phase_workflow.md - Phase-based development patterns
+- vibe_fastapi_boilerplate.md - Project structure and patterns
+- vibe_database.md - Database models and repository patterns
+- vibe_development_lifecycle.md - Git workflow and deployment
+
 ### Test-Driven Development (TDD)
 - E2E tests MUST be written before implementation
 - Tests MUST fail initially (proves they test something)
 - Implementation MUST make tests pass
 - Tests MUST pass before phase transition
+
+### Code Style Guidelines
+Follow Python Google Style Guide:
+- Use type hints for all function signatures
+- Write docstrings for all public functions and classes
+- Maximum line length: 88 characters (Black formatter)
+- Use snake_case for variables and functions
+- Use PascalCase for classes
+- Keep functions focused and single-purpose
 
 ### Phase Transition Checklist
 Before transitioning to next phase:
@@ -779,629 +1967,882 @@ Before transitioning to next phase:
 - [ ] Linting passed (ruff)
 - [ ] Code formatted with Black
 - [ ] Type checking passed (mypy)
-- [ ] Phase summary generated</code></pre>
+- [ ] Type hints added to all functions
+- [ ] Docstrings added to public APIs
+- [ ] Phase summary generated
+- [ ] Shared libraries documented
 
-        <h3 id="rule-best-practices">Best Practices</h3>
-        <div class="callout callout-info">
-          <div class="callout-title">Rule Writing Best Practices</div>
-          <p><strong>Numeric prefixes</strong> &mdash; Name rules like <code>000-core.mdc</code>, <code>010-testing.mdc</code> to control load order.</p>
-          <p><strong>Keep rules under 500 lines</strong> &mdash; Large rules dilute the AI&rsquo;s attention. Split into composable files.</p>
-          <p><strong>Be specific</strong> &mdash; &ldquo;Use snake_case for variables&rdquo; beats &ldquo;follow Python conventions.&rdquo;</p>
-          <p><strong>Composable over monolithic</strong> &mdash; Many focused rules beat one giant rule file.</p>
-        </div>
-      </section>
+## Directory Structure Enforcement
 
-      <!-- ==================== SECTION 4: Commands ==================== -->
-      <section id="commands">
-        <h2>4. Custom Commands (Slash Commands)</h2>
-        <p>
-          Commands are plain markdown files in <code>.cursor/commands/*.md</code>. The filename
-          becomes the command name, invoked with the <code>@</code> prefix in Cursor&rsquo;s chat.
-        </p>
+When creating files, follow this structure:
+```
+app/
+├── core/           # Database, config, dependencies
+├── api/            # API endpoints (Experience APIs)
+│   └── tools/      # Agent Tools APIs
+├── modules/        # Business modules
+│   └── {module}/
+│       ├── models/
+│       ├── repository/
+│       └── services/
+└── tests/
+    ├── api/
+    └── modules/
+```
 
-        <div class="callout callout-info">
-          <div class="callout-title">How Commands Work</div>
-          <p>
-            When you type <code>@setup-stack</code> in Cursor&rsquo;s chat, it loads
-            <code>.cursor/commands/setup-stack.md</code> and appends it to the AI&rsquo;s prompt.
-            Any additional text you type after the command name is also sent as part of the prompt.
-          </p>
-          <p>No templating engine &mdash; commands are pure markdown injected into context.</p>
-        </div>
+## Error Handling
 
-        <h3>Command Scope</h3>
-        <table>
-          <thead>
-            <tr><th>Scope</th><th>Location</th><th>Visibility</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Project</td><td><code>.cursor/commands/</code></td><td>Everyone with the repo</td></tr>
-            <tr><td>User</td><td><code>~/.cursor/commands/</code></td><td>Only you, across all projects</td></tr>
-            <tr><td>Team</td><td>Cursor Settings &rarr; Team</td><td>All team members</td></tr>
-          </tbody>
-        </table>
+When encountering unknown issues:
+1. Document the problem clearly
+2. List what has been tried
+3. Collect relevant code snippets
+4. Generate research-export.md for external review
+5. Wait for human input before major refactoring
 
-        <h3 id="command-reference">Command Reference</h3>
-        <p>Our project ships with 12 purpose-built commands:</p>
-        <table>
-          <thead>
-            <tr><th>Command</th><th>Purpose</th><th>Phase</th></tr>
-          </thead>
-          <tbody>
-            <tr><td class="cmd-name">@setup-stack</td><td>Configure project&rsquo;s technology stack</td><td>Setup</td></tr>
-            <tr><td class="cmd-name">@detect-stack</td><td>Auto-analyze existing codebase to generate config</td><td>Setup</td></tr>
-            <tr><td class="cmd-name">@architect</td><td>Design API surface &amp; create walking skeleton</td><td>Phase 0</td></tr>
-            <tr><td class="cmd-name">@start-project</td><td>Domain modeling &mdash; propose entities and API</td><td>Phase 0</td></tr>
-            <tr><td class="cmd-name">@start-session</td><td>Load context and begin a development session</td><td>Any</td></tr>
-            <tr><td class="cmd-name">@read</td><td>Quick context load to understand project state</td><td>Any</td></tr>
-            <tr><td class="cmd-name">@research</td><td>Deep investigation with 3-cycle validation</td><td>Any</td></tr>
-            <tr><td class="cmd-name">@research-export</td><td>Generate document for sharing with experts</td><td>Any</td></tr>
-            <tr><td class="cmd-name">@code-review</td><td>Comprehensive audit against active stack rules</td><td>Review</td></tr>
-            <tr><td class="cmd-name">@next-session</td><td>Wrap up and generate transition summary</td><td>Transition</td></tr>
-            <tr><td class="cmd-name">@dockerize</td><td>Containerize with Docker &amp; Docker Compose</td><td>Deployment</td></tr>
-          </tbody>
-        </table>
+## Secrets Management
 
-        <h3 id="command-example">Real Example: <code>start-session.md</code></h3>
-        <pre><code class="language-markdown">---
-description: Begin a development session with active context
+NEVER commit secrets to repository:
+- Use .env files for local development
+- Reference .env.example for required variables
+- Use environment variables in docker-compose.yml
+- Validate all required secrets at startup
+
+## Response Format
+
+When generating phase summaries or documentation:
+- Use clear, professional language
+- Include concrete examples
+- Reference specific files and line numbers
+- List dependencies for next phases
+- Note any gotchas or learnings
+</code></pre>
+
+  <div class="callout callout-tip">
+    <strong>Notice what this rule does.</strong> It defines phases, enforces TDD, mandates a directory structure,
+    and specifies code style — all in one file, loaded silently on every prompt.
+    You never type any of this into the chat. The AI already knows it.
+  </div>
+
+  <!-- ============================================================ -->
+  <h3 id="rules-save-tokens">How Rules Save Tokens</h3>
+  <p>
+    Every token you spend describing your stack to the AI is a token that could have been spent on your actual
+    problem. Rules eliminate that overhead entirely.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Without rules</th>
+        <th>With rules</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>"Use snake_case, type hints, Black formatter, Google docstrings, and write the test first…"</td>
+        <td>"Implement POST /tasks"</td>
+      </tr>
+      <tr>
+        <td>Repeated context on every prompt — inconsistent results</td>
+        <td>Context injected once, consistently, every time</td>
+      </tr>
+      <tr>
+        <td>AI may drift from standards mid-session</td>
+        <td>AI cannot drift — the rule is always present</td>
+      </tr>
+      <tr>
+        <td>New team members must learn to write the right prompts</td>
+        <td>New team members inherit standards automatically</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Composable Rules Beat Monolithic Rules</h4>
+  <p>
+    One 2,000-line rule file is worse than ten 200-line rule files. The AI's attention degrades as context grows.
+    Focused, composable rules keep each concern sharp:
+  </p>
+  <ul>
+    <li><code>000-core-workflow.mdc</code> — phase gates and TDD only</li>
+    <li><code>100-architect-phase.mdc</code> — spec-first design only</li>
+    <li><code>500-python-style.mdc</code> — Python code standards only</li>
+    <li><code>700-logging.mdc</code> — structured logging only</li>
+  </ul>
+  <p>Each rule loads only when relevant. The AI gets exactly the context it needs — nothing more, nothing less.</p>
+
+  <div class="callout callout-warning">
+    <strong>Keep rules under 500 lines.</strong> Large rule files dilute AI attention.
+    If a rule is growing unwieldy, split it into two focused files with adjacent numeric prefixes
+    (e.g., <code>500-python-style.mdc</code> and <code>510-python-async.mdc</code>).
+  </div>
+
+  <!-- ============================================================ -->
+  <h3 id="rule-best-practices">Rule Best Practices</h3>
+  <ul>
+    <li><strong>Use numeric prefixes</strong> — <code>000-</code>, <code>100-</code>, <code>200-</code> — to control load order and make the priority hierarchy obvious at a glance.</li>
+    <li><strong>Be specific</strong> — <em>"Use snake_case for all variable and function names"</em> beats <em>"follow Python conventions"</em>. The AI needs unambiguous instructions.</li>
+    <li><strong>Composable over monolithic</strong> — one rule, one concern. Makes rules easier to maintain, override, and reason about.</li>
+    <li><strong>Always Apply for workflow rules</strong> — phase gates and TDD enforcement must never be skipped, so they belong in <code>alwaysApply: true</code> rules.</li>
+    <li><strong>Globs for language/framework rules</strong> — Python style rules have no business loading when you are editing a Dockerfile. Use <code>globs</code> to scope them.</li>
+    <li><strong>Descriptive descriptions</strong> — the Agent-Requested mechanism is only as good as your <code>description</code> fields. Write them as if explaining to a new engineer what the rule does and when it applies.</li>
+    <li><strong>Version-control your rules</strong> — rules are code. Commit them, review them in PRs, and iterate on them as your team's standards evolve.</li>
+  </ul>
+
+  <!-- ============================================================ -->
+  <div class="callout callout-lab" id="lab-3">
+    <h3>Lab 3 (15 min): Rules in Action</h3>
+
+    <p><strong>Objective</strong>: Observe how rules silently constrain AI behavior, then create a custom rule and watch it take effect without any explicit prompt instructions.</p>
+
+    <p><strong>Prerequisites</strong>: Lab 1 and Lab 2 completed. Your project has <code>.cursor/rules/</code> populated from the Python FastAPI stack.</p>
+
+    <h4>Steps</h4>
+    <ol>
+      <li>
+        <strong>Read the core workflow rule.</strong><br>
+        Open <code>.cursor/rules/000-core-workflow.mdc</code> in the editor and read through it.
+        Note the TDD section: <em>"Tests MUST fail initially (proves they test something)."</em>
+      </li>
+      <li>
+        <strong>Try to skip TDD — observe the guardrail.</strong><br>
+        Switch to Agent mode (<kbd>Cmd+I</kbd>) and type:
+        <pre><code>Implement DELETE /tasks without writing tests first</code></pre>
+        Observe: the AI either refuses the instruction or automatically writes the test before the implementation.
+        You did not tell it to — the rule did.
+      </li>
+      <li>
+        <strong>Create a custom logging rule.</strong><br>
+        Create the file <code>.cursor/rules/700-logging.mdc</code> with this content:
+        <pre><code class="language-yaml">---
+description: Structured logging requirements for all API endpoints
+alwaysApply: true
 ---
 
-# Start Session Command
+# Structured Logging
 
-Initializes the AI context for the current work session.
+## Mandatory Logging Rule
 
-## Execution Flow
+All API endpoints MUST include a structured log entry at the start of each
+handler using Python's `logging` module.
 
-**1. Context Check**
-- Read `.cursor/context.md`.
-- If "No Stack Configured" or missing:
-  → Stop and tell user: "Run @setup-stack first."
+Each log entry MUST include:
+- HTTP method
+- Request path
+- Timestamp (ISO 8601)
 
-**2. Context Loading**
-- Display summary:
-  > "Context Loaded: **{Language} / {Framework}**"
-  > "Current Phase: **{Active Phase}**"
-  > "Strictness: **{Strictness Level}**"
+Example:
+```python
+import logging
+logger = logging.getLogger(__name__)
 
-**3. Session Goal**
-- Ask: "What is the goal for this session?"
-- Cross-reference with Active Phase in context.md.
+@router.delete("/tasks/{task_id}")
+async def delete_task(task_id: int):
+    logger.info("method=DELETE path=/tasks/%s timestamp=%s", task_id, datetime.utcnow().isoformat())
+    ...
+```
+</code></pre>
+      </li>
+      <li>
+        <strong>Start a new session and implement DELETE /tasks/{id}.</strong><br>
+        Run <code>/start-session</code> in Agent mode, then type:
+        <pre><code>Implement DELETE /tasks/{id}</code></pre>
+        Do <em>not</em> mention logging anywhere in your prompt.
+      </li>
+      <li>
+        <strong>Observe the result.</strong><br>
+        The AI adds structured logging to the DELETE handler automatically — because <code>700-logging.mdc</code>
+        is active. You never mentioned it. The rule did the work.
+      </li>
+    </ol>
 
-**4. Rule Enforcement**
-- Adhere to active rules in `.cursor/rules/`.
-- Never suggest code that violates the style guide.
+    <h4>Deliverable</h4>
+    <ul>
+      <li>Custom <code>700-logging.mdc</code> rule file committed to <code>.cursor/rules/</code></li>
+      <li>DELETE <code>/tasks/{id}</code> endpoint implemented with TDD (test written first, test fails, implementation passes)</li>
+      <li>Endpoint includes structured logging added automatically by the rule</li>
+    </ul>
 
-**5. Ready State**
-- Confirm: "I am ready. Guides are active. Let's build."</code></pre>
+    <h4>What to Observe</h4>
+    <p>
+      Rules run silently in the background. You did not type "add logging" anywhere in your prompt —
+      but the AI added it because <code>700-logging.mdc</code> was active. This is the power of the rules system:
+      standards are enforced consistently, invisibly, and without any extra effort from the developer.
+      Scale this to a team of ten engineers and every endpoint gets the same logging format, every time,
+      without a single code review comment about it.
+    </p>
+  </div>
 
-        <div class="mermaid">
-sequenceDiagram
-    participant U as Developer
-    participant C as Cursor Chat
-    participant AI as AI Model
-    participant FS as File System
+</section>
 
-    U->>C: Types @start-session
-    C->>FS: Reads .cursor/commands/start-session.md
-    FS-->>C: Command markdown content
-    C->>FS: Reads matching .cursor/rules/*.mdc
-    FS-->>C: Active rules
-    C->>AI: Prompt = Command + Rules + User message
-    AI-->>C: "Context Loaded: Python / FastAPI"
-    C-->>U: Displays AI response
-    U->>C: "Implement POST /users"
-    C->>AI: Prompt + session goal + full context
-    AI-->>C: TDD-compliant implementation
-        </div>
-      </section>
+<section id="tdd">
+  <h2>Section 5: TDD in Practice <span class="time-badge">20 min + Lab 4</span></h2>
 
-      <!-- ==================== SECTION 5: SDD & TDD ==================== -->
-      <section id="sdd-tdd">
-        <h2>5. Schema-Driven Development &amp; TDD</h2>
-        <p>
-          This methodology combines two powerful practices: <strong>Schema-Driven Development (SDD)</strong>
-          &mdash; designing the API contract first &mdash; and <strong>Test-Driven Development (TDD)</strong>
-          &mdash; writing tests before implementation. Together, they ensure the AI builds exactly what
-          you designed, with proof it works.
-        </p>
+  <p>
+    Test-Driven Development (TDD) is the execution engine of this methodology. Combined with Spec-First Design,
+    it ensures every line of implementation code is preceded by a failing test that proves the code is
+    actually needed. This section walks through the full cycle — theory, tooling, and a concrete example.
+  </p>
 
-        <h3 id="schema-driven">Schema-Driven Development (SDD)</h3>
-        <p>
-          SDD means you <strong>define the shape of your API before writing any code</strong>.
-          The schema (OpenAPI spec) becomes the single source of truth that drives everything:
-          endpoints, request/response models, validation rules, and documentation.
-        </p>
+  <!-- ============================================================ -->
+  <h3 id="red-green-refactor">The Red-Green-Refactor Cycle (Deep Dive)</h3>
 
-        <table>
-          <thead>
-            <tr><th>SDD Principle</th><th>What It Means</th><th>In Practice</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Contract First</strong></td>
-              <td>Design the API before implementing it</td>
-              <td><code>@architect</code> generates OpenAPI spec</td>
-            </tr>
-            <tr>
-              <td><strong>Schema = Truth</strong></td>
-              <td>The spec defines what gets built</td>
-              <td>Endpoints, models, and validation come from the spec</td>
-            </tr>
-            <tr>
-              <td><strong>Mock First</strong></td>
-              <td>Skeleton returns fake data that matches the schema</td>
-              <td>Phase 0 creates all endpoints with mock responses</td>
-            </tr>
-            <tr>
-              <td><strong>Validate Shape</strong></td>
-              <td>Verify the API structure before adding logic</td>
-              <td>E2E tests run against mocks to prove the shape is right</td>
-            </tr>
-          </tbody>
-        </table>
+  <p>
+    The Red-Green-Refactor loop is the heartbeat of TDD. Every feature, every endpoint, every function
+    follows this exact sequence — no shortcuts, no exceptions.
+  </p>
 
-        <div class="callout callout-tip">
-          <div class="callout-title">Why Schema First?</div>
-          <p>
-            When you tell the AI &ldquo;build a blog API,&rdquo; you might get 10 different designs.
-            With SDD, you <em>lock in the contract</em> during <code>@architect</code>, and the AI
-            follows that contract exactly during implementation. No surprises, no drift.
-          </p>
-        </div>
+  <ul>
+    <li>
+      <strong>RED — Write a failing test first.</strong> The test must fail to prove it actually tests something.
+      A test that passes before any implementation is written is a test that proves nothing.
+    </li>
+    <li>
+      <strong>GREEN — Write the minimum code to make the test pass.</strong> No extras, no polish yet.
+      Your only job in this step is to turn the red light green. Over-engineering here is a violation of the process.
+    </li>
+    <li>
+      <strong>REFACTOR — Clean up while keeping tests green.</strong> Extract logic, improve names, remove
+      duplication. The tests are your safety net — if they stay green, you have not broken anything.
+    </li>
+  </ul>
 
-        <h4>The SDD Flow</h4>
-        <div class="mermaid">
-flowchart LR
-    A["@architect<br/>'Build a blog API'"] --> B["OpenAPI Spec<br/>Generated"]
-    B --> C["Entities Defined<br/>Post, Author, Tag"]
-    C --> D["Endpoints Designed<br/>GET, POST, PUT, DELETE"]
-    D --> E["Request/Response<br/>Models Created"]
-    E --> F["Phase 0 Skeleton<br/>Mock Endpoints"]
+  <div class="callout callout-warning">
+    <strong>The Golden Rule: Never skip the red step.</strong> If you write the implementation before the test,
+    you have no proof the test is meaningful. The red step is what gives TDD its entire value.
+  </div>
 
-    style A fill:#3f51b5,color:#fff
-    style B fill:#00897b,color:#fff
-    style F fill:#ff8f00,color:#fff
-        </div>
-
-        <h3 id="tdd-workflow">Test-Driven Development (TDD)</h3>
-        <p>
-          TDD follows a strict <strong>Red &rarr; Green &rarr; Refactor</strong> cycle.
-          In our workflow, the AI is <em>required</em> by the rules to follow this cycle.
-          It cannot implement code without a failing test first.
-        </p>
-
-        <h4>The TDD Cycle in Detail</h4>
-        <div class="mermaid">
+  <div class="mermaid">
 flowchart TB
-    subgraph RED["🔴 RED — Write Failing Test"]
-        R1["Write E2E test for endpoint"]
-        R2["Test calls the API with<br/>expected inputs"]
-        R3["Assert expected status<br/>code + response shape"]
-        R4["Run test → FAILS<br/>(proves test works)"]
+    subgraph RED["Red - Write Failing Test"]
+        R1["Write E2E test<br/>for the endpoint"]
+        R2["Test calls API<br/>with real inputs"]
+        R3["Assert expected status<br/>code and response shape"]
+        R4["Run test<br/>FAILS - proves it works"]
         R1 --> R2 --> R3 --> R4
     end
 
-    subgraph GREEN["🟢 GREEN — Make It Pass"]
-        G1["Implement the endpoint<br/>logic"]
-        G2["Add models, services,<br/>repositories"]
-        G3["Run test → PASSES"]
+    subgraph GREEN["Green - Make It Pass"]
+        G1["Implement the<br/>endpoint handler"]
+        G2["Add model, service,<br/>repository"]
+        G3["Run test<br/>PASSES"]
         G1 --> G2 --> G3
     end
 
-    subgraph REFACTOR["🔵 REFACTOR — Clean Up"]
-        RF1["Extract shared<br/>logic"]
+    subgraph REFACTOR["Refactor - Clean Up"]
+        RF1["Extract shared logic<br/>to services"]
         RF2["Improve naming<br/>and structure"]
-        RF3["Run test → STILL PASSES"]
+        RF3["Run test<br/>STILL PASSES"]
         RF1 --> RF2 --> RF3
     end
 
     RED --> GREEN --> REFACTOR
-    REFACTOR -.->|"Next endpoint"| RED
+    REFACTOR -.->|"next endpoint"| RED
 
     style RED fill:#c62828,color:#fff
     style GREEN fill:#2e7d32,color:#fff
     style REFACTOR fill:#1565c0,color:#fff
-        </div>
+  </div>
 
-        <h4>TDD Rules Enforced by Cursor</h4>
-        <pre><code class="language-yaml"># From 000-core-workflow.mdc — enforced on every prompt
+  <!-- ============================================================ -->
+  <h3 id="tdd-as-design">TDD as Design, Not Just Testing</h3>
 
-### Test-Driven Development (TDD)
-- E2E tests MUST be written before implementation
-- Tests MUST fail initially (proves they test something)
-- Implementation MUST make tests pass
-- Tests MUST pass before phase transition</code></pre>
+  <p>
+    Most developers think of TDD as a testing strategy. It is actually a design strategy. Writing a test
+    before the implementation forces you to think about the interface before you think about the internals.
+  </p>
 
-        <div class="callout callout-warning">
-          <div class="callout-title">The Golden Rule</div>
-          <p>
-            <strong>Never skip the red step.</strong> If the AI writes implementation code without
-            a failing test first, it&rsquo;s violating the workflow. The rules enforce this &mdash;
-            if you see it happen, the AI isn&rsquo;t reading the rules properly.
-          </p>
-        </div>
+  <ul>
+    <li>
+      <strong>Tests reveal API design problems early.</strong> If your test setup is awkward, your API
+      signature is probably awkward. If naming feels unclear in a test, it will be unclear in production.
+    </li>
+    <li>
+      <strong>TDD + Spec-First (SDD) is a complete loop.</strong> The spec defines <em>what</em> the system
+      does. TDD verifies <em>how</em> it does it. Neither replaces the other — they work in sequence.
+    </li>
+    <li>
+      <strong>TDD at Phase 0 (against mocks):</strong> verifies API shape — correct status codes,
+      correct field names, correct response structure.
+    </li>
+    <li>
+      <strong>TDD at Phase 1+ (against real logic):</strong> verifies business rules — correct data
+      persistence, correct validation, correct error handling.
+    </li>
+  </ul>
 
-        <h3 id="sdd-tdd-combined">SDD + TDD: The Combined Flow</h3>
-        <p>
-          Here&rsquo;s how Schema-Driven Development and TDD work together in practice,
-          from the moment you run <code>@architect</code> to a fully implemented and tested API:
-        </p>
+  <div class="callout callout-info">
+    When a test is hard to write, that is feedback. It usually means the interface is wrong, not that
+    the test is wrong. Fix the design, then write the test.
+  </div>
 
-        <div class="mermaid">
-flowchart TB
-    subgraph SDD["Schema-Driven Development"]
-        A1["@architect 'Build a blog API'"]
-        A2["Design Entities:<br/>Post, Author, Tag"]
-        A3["Define Endpoints:<br/>GET /posts<br/>POST /posts<br/>GET /posts/:id<br/>PUT /posts/:id<br/>DELETE /posts/:id"]
-        A4["Generate OpenAPI Spec"]
-        A1 --> A2 --> A3 --> A4
-    end
+  <!-- ============================================================ -->
+  <h3 id="tdd-phase-0">TDD at Phase 0: Testing the Shape</h3>
 
-    subgraph PH0["Phase 0 — Skeleton"]
-        B1["Create mock endpoints<br/>(all return fake data)"]
-        B2["Write E2E tests<br/>against mocks"]
-        B3["All tests PASS<br/>on mock data"]
-        B4["✅ API shape verified"]
-        A4 --> B1 --> B2 --> B3 --> B4
-    end
+  <p>
+    In Phase 0, every endpoint returns mock (hard-coded) data. There is no database, no service layer,
+    no business logic. The entire purpose of Phase 0 is to verify that the API contract is correct.
+  </p>
 
-    subgraph PH1["Phase 1+ — Implementation (per endpoint)"]
-        C1["Update E2E test with<br/>real assertions 🔴"]
-        C2["Test FAILS<br/>(mock ≠ real)"]
-        C3["Implement real logic:<br/>models, services, repos 🟢"]
-        C4["Test PASSES"]
-        C5["Refactor 🔵"]
-        C6{"More<br/>endpoints?"}
-        B4 --> C1 --> C2 --> C3 --> C4 --> C5 --> C6
-        C6 -->|Yes| C1
-        C6 -->|No| D1
-    end
+  <p>
+    E2E tests written at Phase 0 check:
+  </p>
 
-    subgraph DONE["Complete"]
-        D1["@code-review"]
-        D2["All tests pass<br/>All rules satisfied"]
-        D1 --> D2
-    end
+  <ul>
+    <li>HTTP status codes (201 for create, 200 for read, 404 for missing, 422 for invalid input)</li>
+    <li>Response body shape (correct field names, correct types, no missing fields)</li>
+    <li>Request validation (required fields rejected, malformed input rejected)</li>
+  </ul>
 
-    style A1 fill:#3f51b5,color:#fff
-    style B4 fill:#00897b,color:#fff
-    style C2 fill:#c62828,color:#fff
-    style C4 fill:#2e7d32,color:#fff
-    style C5 fill:#1565c0,color:#fff
-    style D2 fill:#7b1fa2,color:#fff
-        </div>
+  <p>
+    These tests <strong>pass on mock data</strong>. That is intentional — it proves the API contract
+    is correct before any real logic exists. When Phase 1 begins, these same tests become the baseline
+    that the real implementation must satisfy.
+  </p>
 
-        <h4>Concrete Example: Implementing <code>POST /posts</code></h4>
-        <pre><code class="language-python"># Step 1: 🔴 Write the failing test
-# tests/api/test_posts.py
-
-@pytest.mark.asyncio
-async def test_create_post(client: AsyncClient, db_session):
-    """Test creating a blog post with real database persistence."""
-    response = await client.post("/posts/", json={
-        "title": "My First Post",
-        "content": "Hello, world!",
-        "author_id": 1,
-    })
-    assert response.status_code == 201
-    data = response.json()
-    assert data["title"] == "My First Post"
-    assert data["id"] is not None
-
-    # Verify it's actually in the database
-    from_db = await db_session.get(Post, data["id"])
-    assert from_db is not None
-    assert from_db.title == "My First Post"</code></pre>
-
-        <pre><code class="language-python"># Step 2: 🟢 Implement to make test pass
-# app/modules/posts/services/post_service.py
-
-class PostService:
-    def __init__(self, session: AsyncSession):
-        self.repo = PostRepository(session)
-
-    async def create(self, payload: PostCreate) -> Post:
-        """Create a new blog post."""
-        post = Post(
-            title=payload.title,
-            content=payload.content,
-            author_id=payload.author_id,
-            status="draft",
-        )
-        return await self.repo.save(post)</code></pre>
-
-        <pre><code class="language-python"># Step 3: 🔵 Refactor — extract validation
-# app/modules/posts/services/post_service.py
-
-class PostService:
-    def __init__(self, session: AsyncSession):
-        self.repo = PostRepository(session)
-
-    async def create(self, payload: PostCreate) -> Post:
-        """Create a new blog post with validation."""
-        await self._validate_author_exists(payload.author_id)
-        post = Post(**payload.model_dump(), status="draft")
-        return await self.repo.save(post)
-
-    async def _validate_author_exists(self, author_id: int) -> None:
-        """Raise 404 if author doesn't exist."""
-        author = await self.author_repo.get(author_id)
-        if not author:
-            raise HTTPException(404, f"Author {author_id} not found")</code></pre>
-      </section>
-
-      <!-- ==================== SECTION 6: Workflow ==================== -->
-      <section id="workflow">
-        <h2>6. The Workflow</h2>
-        <p>
-          The methodology is built on four core principles:
-          <strong>Phase-Based Development</strong>, <strong>TDD</strong>,
-          <strong>Bounded Sessions</strong>, and <strong>Context-First AI</strong>.
-        </p>
-
-        <h3 id="phase-dev">Phase-Based Development</h3>
-
-        <table>
-          <thead>
-            <tr><th>Phase</th><th>Goal</th><th>Output</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Phase 0 &mdash; Skeleton</strong></td>
-              <td>Build the structure. Mock every endpoint. Verify the &ldquo;shape&rdquo; of the API.</td>
-              <td>All endpoints return mocks, E2E tests pass on stubs</td>
-            </tr>
-            <tr>
-              <td><strong>Phase 1+ &mdash; Implementation</strong></td>
-              <td>Implement one endpoint at a time using TDD.</td>
-              <td>Real logic, passing tests, documented phase transitions</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h4>TDD Cycle</h4>
-        <div class="mermaid">
+  <div class="mermaid">
 flowchart LR
-    R["🔴 Red<br/>Write failing test"] --> G["🟢 Green<br/>Make it pass"]
-    G --> RF["🔵 Refactor<br/>Clean up"]
-    RF --> R
+    subgraph Phase0["Phase 0 - Shape Verification"]
+        M1["Mock endpoint<br/>returns fake data"]
+        M2["E2E test checks<br/>status + shape"]
+        M3["Test PASSES<br/>API shape correct"]
+        M1 --> M2 --> M3
+    end
 
-    style R fill:#c62828,color:#fff
-    style G fill:#2e7d32,color:#fff
-    style RF fill:#1565c0,color:#fff
-        </div>
+    subgraph Phase1["Phase 1 - Logic Verification"]
+        L1["Update test with<br/>real DB assertions"]
+        L2["Test FAILS<br/>mock not equal to real"]
+        L3["Implement real logic<br/>models, services, repos"]
+        L4["Test PASSES<br/>logic correct"]
+        L1 --> L2 --> L3 --> L4
+    end
 
-        <h3>The Command Chain</h3>
-        <p>Development follows a structured chain of commands:</p>
-        <pre><code class="language-text">@setup-stack → @architect → @start-session → (code) → @code-review → @next-session</code></pre>
+    M3 -->|"Start Phase 1"| L1
 
-        <h3 id="three-workflows">Three Workflows</h3>
+    style M3 fill:#ff8f00,color:#fff
+    style L2 fill:#c62828,color:#fff
+    style L4 fill:#2e7d32,color:#fff
+  </div>
 
-        <h4>Workflow 1: Fresh Project with Known Stack</h4>
-        <ol>
-          <li>Clone the template: <code>git clone &lt;repo&gt;</code></li>
-          <li>Open in Cursor: <code>cursor .</code></li>
-          <li>Configure stack: <code>@setup-stack</code> &mdash; choose from <code>python-fastapi</code>, <code>node-express</code>, <code>java-spring</code>, <code>go-gin</code>, <code>devops-terraform</code>, or <code>blank</code></li>
-          <li>Design your feature: <code>@architect "Build a task management API"</code></li>
-          <li>Start coding: <code>@start-session</code></li>
-        </ol>
+  <!-- ============================================================ -->
+  <h3 id="tdd-phase-1">TDD at Phase 1+: Testing the Logic</h3>
 
-        <h4>Workflow 2: Fresh Project with Custom Stack</h4>
-        <ol>
-          <li>Clone the template</li>
-          <li>Create stack structure: <code>stacks/my-stack/rules/</code></li>
-          <li>Define stack context: <code>stacks/my-stack/context.md</code></li>
-          <li>Create rules (<code>.mdc</code> files)</li>
-          <li>Optional: add templates and examples</li>
-          <li>Configure: <code>@setup-stack</code></li>
-          <li>Build: <code>@architect</code> &rarr; <code>@start-session</code></li>
-        </ol>
+  <p>
+    When Phase 1 begins, the test file is updated with real assertions — queries against a real test
+    database, checks for actual persisted data, validation of business rules.
+  </p>
 
-        <h4>Workflow 3: Existing Codebase (Brownfield)</h4>
-        <ol>
-          <li>Copy <code>.cursor/</code> config into your existing repo</li>
-          <li>Open in Cursor</li>
-          <li>Auto-detect: <code>@detect-stack</code></li>
-          <li>Review context, set <code>Strictness: Low</code> for legacy code</li>
-          <li>Start working: <code>@start-session</code></li>
-        </ol>
+  <ol>
+    <li>Update the E2E test to assert against real data (not mock responses).</li>
+    <li>Run the test — it now <strong>fails</strong>. The mock endpoint cannot satisfy real assertions.
+        This is the RED step for Phase 1.</li>
+    <li>Implement the real logic: models, repositories, services, and the endpoint handler.</li>
+    <li>Run the test — it now <strong>passes</strong>. This is the GREEN step.</li>
+    <li>Refactor: extract shared logic, improve structure, clean up names. Run all tests — still green.</li>
+  </ol>
 
-        <div class="mermaid">
+  <p>
+    This pattern repeats for every endpoint in the spec. The cycle never changes — only the complexity
+    of the logic inside it grows.
+  </p>
+
+  <!-- ============================================================ -->
+  <h3 id="tdd-rules">How Rules Enforce TDD</h3>
+
+  <p>
+    The Cursor rules file <code>000-core-workflow.mdc</code> contains an explicit TDD section that
+    instructs the AI to enforce this process automatically. The relevant rule states:
+  </p>
+
+  <pre><code class="language-text">## TDD Enforcement
+
+- E2E tests MUST be written before implementation begins
+- If the user asks to implement an endpoint without an existing test, write the test first
+- Never write implementation code that is not covered by a failing test
+- The test file must be committed before the implementation file</code></pre>
+
+  <p>
+    This means:
+  </p>
+
+  <ul>
+    <li>If you ask the AI to implement an endpoint without a test, it refuses and writes the test first.</li>
+    <li>Every session starts with the test. Every session ends with all tests passing.</li>
+    <li>You do not have to remember to follow TDD — the rules enforce it for you, automatically,
+        every session, without any prompting from you.</li>
+  </ul>
+
+  <div class="callout callout-info">
+    The rules system is what makes this methodology scale. Human discipline fails. Rule-enforced
+    process does not. You configure the rules once, and the AI follows them forever.
+  </div>
+
+  <div class="mermaid">
 flowchart TB
-    subgraph Setup["Setup Phase"]
-        A["Clone Template"] --> B{"Known Stack?"}
-        B -->|Yes| C["@setup-stack<br/>(choose stack)"]
-        B -->|No| D["Create Custom<br/>stacks/my-stack/"]
-        D --> C
+    subgraph Spec["Spec-First Design"]
+        S1["/architect<br/>Design entities and endpoints"]
+        S2["OpenAPI Spec<br/>POST /tasks, GET /tasks, etc."]
+        S1 --> S2
     end
 
-    subgraph Phase0["Phase 0 — Skeleton"]
-        C --> E["@architect<br/>'Design my API'"]
-        E --> F["OpenAPI Spec<br/>Generated"]
-        F --> G["Mock Endpoints<br/>Created"]
-        G --> H["E2E Tests on<br/>Stubs Pass"]
+    subgraph Skel["Phase 0 - Skeleton"]
+        SK1["Mock all endpoints"]
+        SK2["E2E tests on mocks - green"]
+        SK3["API shape verified"]
+        S2 --> SK1 --> SK2 --> SK3
     end
 
-    subgraph PhaseN["Phase 1+ — Implementation"]
-        H --> I["@start-session<br/>'Implement POST /users'"]
-        I --> J["Write Failing<br/>E2E Test 🔴"]
-        J --> K["Implement<br/>Endpoint 🟢"]
-        K --> L["Refactor<br/>& Clean 🔵"]
-        L --> M{"More<br/>endpoints?"}
-        M -->|Yes| J
-        M -->|No| N["@code-review"]
+    subgraph Impl["Phase 1 plus - Implementation"]
+        I1["RED: Update test<br/>real assertions"]
+        I2["GREEN: Implement<br/>real logic"]
+        I3["REFACTOR: Clean up"]
+        I4{"More endpoints?"}
+        SK3 --> I1 --> I2 --> I3 --> I4
+        I4 -->|"Yes"| I1
     end
 
-    subgraph Transition["Session Transition"]
-        N --> O["@next-session<br/>Generate Summary"]
-        O --> P["Hand Off to<br/>Next Session"]
-    end
+    DONE["All tests pass<br/>All rules satisfied<br/>code-review + next-session"]
+    I4 -->|"No"| DONE
 
-    style A fill:#3f51b5,color:#fff
-    style E fill:#00897b,color:#fff
-    style I fill:#ff8f00,color:#fff
-    style N fill:#7b1fa2,color:#fff
-        </div>
-      </section>
+    style S1 fill:#3f51b5,color:#fff
+    style SK3 fill:#ff8f00,color:#fff
+    style I1 fill:#c62828,color:#fff
+    style I2 fill:#2e7d32,color:#fff
+    style DONE fill:#6a1b9a,color:#fff
+  </div>
 
-      <!-- ==================== SECTION 7: Demo ==================== -->
-      <section id="demo">
-        <h2>7. Practical Demo Walkthrough</h2>
-        <p>Let&rsquo;s walk through building a Blog API from zero using the full workflow.</p>
+  <!-- ============================================================ -->
+  <h3 id="tdd-example">Concrete Example: POST /tasks</h3>
 
-        <ol class="steps">
-          <li>
-            <h4>Clone &amp; Open</h4>
-            <pre><code class="language-bash">git clone https://github.com/your-org/cursor-course-templates.git
-cd cursor-course-templates
-cursor .</code></pre>
-            <div class="screenshot-placeholder">[Screenshot: Cursor IDE opens with the template project]</div>
-          </li>
+  <p>
+    Here is the full three-step TDD cycle for a single endpoint. Every step is distinct.
+    Do not collapse them.
+  </p>
 
-          <li>
-            <h4>Run <code>@setup-stack</code></h4>
-            <p>In Cursor&rsquo;s chat, type <code>@setup-stack</code>. The AI will:</p>
-            <ul>
-              <li>Present available stacks (python-fastapi, node-express, etc.)</li>
-              <li>Copy rules from <code>stacks/python-fastapi/rules/</code> to <code>.cursor/rules/</code></li>
-              <li>Generate <code>.cursor/context.md</code> with your stack configuration</li>
-            </ul>
-            <p>After setup, your context file will contain:</p>
-            <pre><code class="language-yaml"># Tech Stack
-- Language: Python 3.11+
-- Framework: FastAPI
-- Database: PostgreSQL (SQLAlchemy 2.0+ AsyncIO)
-- Testing: Pytest (AsyncIO)
-- Linting: Ruff
-- Formatting: Black
+  <h4>Step 1 — RED: Write the Failing Test</h4>
 
-# Active Phase: Phase 0 (Skeleton)
-# Strictness: High</code></pre>
-            <div class="screenshot-placeholder">[Screenshot: @setup-stack output showing stack configured]</div>
-          </li>
+  <p>
+    Write the test before any implementation exists. Run it. Confirm it fails with a
+    <code>404 Not Found</code> or <code>Connection refused</code> — not a false green.
+  </p>
 
-          <li>
-            <h4>Run <code>@architect "Build a blog API"</code></h4>
-            <p>The AI designs your API surface:</p>
-            <ul>
-              <li>Proposes entities: <code>Post</code>, <code>Author</code>, <code>Tag</code></li>
-              <li>Generates OpenAPI spec with all endpoints</li>
-              <li>Creates skeleton files with mock responses</li>
-              <li>Writes initial E2E tests against mocks</li>
-            </ul>
-            <pre><code class="language-python"># app/api/posts.py — Phase 0 Skeleton
-from fastapi import APIRouter
-
-router = APIRouter(prefix="/posts", tags=["Posts"])
-
-@router.get("/")
-async def list_posts():
-    """List all blog posts (mock)."""
-    return [
-        {"id": 1, "title": "Hello World", "status": "draft"},
-        {"id": 2, "title": "Getting Started", "status": "published"},
-    ]
-
-@router.post("/", status_code=201)
-async def create_post():
-    """Create a blog post (mock)."""
-    return {"id": 3, "title": "New Post", "status": "draft"}</code></pre>
-            <div class="screenshot-placeholder">[Screenshot: @architect output showing API design]</div>
-          </li>
-
-          <li>
-            <h4>Run <code>@start-session</code></h4>
-            <p>The AI loads full context and asks for your session goal:</p>
-            <pre><code class="language-text">&gt; Context Loaded: Python / FastAPI
-&gt; Current Phase: Phase 0 (Skeleton)
-&gt; Strictness: High
-&gt;
-&gt; What is the goal for this session?</code></pre>
-            <p>You reply: <em>&ldquo;Implement POST /posts with validation and database persistence.&rdquo;</em></p>
-            <div class="screenshot-placeholder">[Screenshot: @start-session context loading]</div>
-          </li>
-
-          <li>
-            <h4>Implement with TDD</h4>
-            <p>Following the TDD cycle enforced by the rules:</p>
-            <pre><code class="language-python"># tests/api/test_posts.py — Write failing test first 🔴
+  <pre><code class="language-python"># tests/api/test_tasks.py
 import pytest
 from httpx import AsyncClient
 
 @pytest.mark.asyncio
-async def test_create_post(client: AsyncClient):
-    """Test creating a blog post with validation."""
-    response = await client.post("/posts/", json={
-        "title": "My First Post",
-        "content": "Hello, world!",
-        "author_id": 1,
+async def test_create_task(client: AsyncClient, db_session):
+    """Test creating a task with real database persistence."""
+    response = await client.post("/tasks/", json={
+        "title": "Write unit tests",
+        "description": "Cover all edge cases",
+        "user_id": 1,
     })
     assert response.status_code == 201
     data = response.json()
-    assert data["title"] == "My First Post"
-    assert "id" in data
+    assert data["title"] == "Write unit tests"
+    assert data["id"] is not None
+    assert data["status"] == "todo"
 
 @pytest.mark.asyncio
-async def test_create_post_validation_error(client: AsyncClient):
-    """Test that missing title returns 422."""
-    response = await client.post("/posts/", json={
-        "content": "No title here",
+async def test_create_task_missing_title(client: AsyncClient):
+    """Missing title returns 422 Unprocessable Entity."""
+    response = await client.post("/tasks/", json={
+        "description": "No title provided",
     })
     assert response.status_code == 422</code></pre>
 
-            <pre><code class="language-python"># app/api/posts.py — Implement to make tests pass 🟢
+  <div class="callout callout-tip">
+    Run this now: <code>pytest tests/api/test_tasks.py -v</code>. It must fail. If it passes,
+    something is already implemented (or your test is wrong). Do not proceed until you see red.
+  </div>
+
+  <h4>Step 2 — GREEN: Implement the Minimum</h4>
+
+  <p>
+    Write only what is needed to make the test pass. No extra validation, no extra fields,
+    no speculative features. Get to green as fast as possible.
+  </p>
+
+  <pre><code class="language-python"># app/api/tasks.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.database import get_session
-from app.modules.posts.models.post import PostCreate, PostResponse
-from app.modules.posts.services.post_service import PostService
+from app.modules.tasks.models.task import TaskCreate, TaskResponse
+from app.modules.tasks.services.task_service import TaskService
 
-router = APIRouter(prefix="/posts", tags=["Posts"])
+router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
-@router.post("/", response_model=PostResponse, status_code=201)
-async def create_post(
-    payload: PostCreate,
+@router.post("/", response_model=TaskResponse, status_code=201)
+async def create_task(
+    payload: TaskCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    """Create a new blog post."""
-    service = PostService(session)
+    """Create a new task."""
+    service = TaskService(session)
     return await service.create(payload)</code></pre>
-            <div class="screenshot-placeholder">[Screenshot: Tests passing in Cursor's terminal]</div>
-          </li>
 
-          <li>
-            <h4>Review &amp; Transition</h4>
-            <p>When the session&rsquo;s goal is complete:</p>
-            <ul>
-              <li>Run <code>@code-review</code> &mdash; AI audits code against all active rules</li>
-              <li>Fix any issues flagged by the review</li>
-              <li>Run <code>@next-session</code> &mdash; generates a transition summary for the next session</li>
-            </ul>
-            <div class="screenshot-placeholder">[Screenshot: @code-review output with checklist]</div>
-          </li>
-        </ol>
-      </section>
+  <p>
+    Run <code>pytest tests/api/test_tasks.py -v</code> again. Both tests should now pass.
+    Do not move to refactor until you are green.
+  </p>
 
-      <!-- ==================== SECTION 8: Hooks ==================== -->
-      <section id="hooks">
-        <h2>8. Hooks <span class="badge badge-beta">Beta</span></h2>
-        <p>
-          Hooks are lifecycle interceptors defined in <code>.cursor/hooks.json</code>. They let you
-          run shell commands or inject prompts <em>before</em> or <em>after</em> specific AI actions.
-        </p>
+  <h4>Step 3 — REFACTOR: Clean Up Without Breaking</h4>
 
-        <div class="callout callout-warning">
-          <div class="callout-title">Beta Feature</div>
-          <p>
-            Hooks are currently in beta. The API surface may change. Enable them in
-            <strong>Cursor Settings &rarr; Beta &rarr; Hooks</strong>.
-          </p>
-        </div>
+  <p>
+    Now that the tests are green, improve the internal structure. Extract the validation
+    logic into the service layer where it belongs. Run all tests after every change.
+  </p>
 
-        <h3>hooks.json Format</h3>
+  <pre><code class="language-python"># app/modules/tasks/services/task_service.py
+class TaskService:
+    def __init__(self, session: AsyncSession):
+        self.repo = TaskRepository(session)
+
+    async def create(self, payload: TaskCreate) -> Task:
+        """Create a task with validation."""
+        await self._validate_user_exists(payload.user_id)
+        task = Task(**payload.model_dump(), status="todo")
+        return await self.repo.save(task)
+
+    async def _validate_user_exists(self, user_id: int) -> None:
+        user = await self.user_repo.get(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail=f"User {user_id} not found")</code></pre>
+
+  <p>
+    Run <code>pytest</code> (all tests). Everything should still pass. The refactor is complete.
+    Move to the next endpoint and repeat the cycle.
+  </p>
+
+  <!-- ============================================================ -->
+  <div class="callout callout-lab" id="lab-4">
+    <h3>Lab 4 (20 min): Full TDD Cycle</h3>
+
+    <p>
+      <strong>Objective:</strong> Implement a <code>PUT /tasks/{id}</code> endpoint using strict
+      TDD — all three steps in order, no shortcuts.
+    </p>
+
+    <p>
+      <strong>Prerequisites:</strong> Labs 1, 2, and 3 completed. Your project has a working
+      <code>POST /tasks</code> endpoint and passing tests from the previous lab.
+    </p>
+
+    <h4>Steps</h4>
+
+    <ol>
+      <li>
+        <strong>Start the session.</strong> Run <code>/start-session</code> and set the goal:
+        <em>"Implement PUT /tasks/{id} to update a task title and description."</em>
+        The AI will load all rules and confirm the plan before writing any code.
+      </li>
+
+      <li>
+        <strong>RED — Write the failing test.</strong> Ask the AI to write the test for
+        <code>test_update_task</code> before any implementation. Once it writes the test, run:
+        <pre><code class="language-bash">pytest tests/api/test_tasks.py::test_update_task -v</code></pre>
+        The test must <strong>fail</strong>. Do not proceed until you see a failure. If it
+        passes, ask the AI why and investigate before continuing.
+      </li>
+
+      <li>
+        <strong>GREEN — Implement the endpoint.</strong> Ask the AI to implement the
+        <code>PUT /tasks/{id}</code> endpoint to make the test pass. Once implemented, run:
+        <pre><code class="language-bash">pytest tests/api/test_tasks.py::test_update_task -v</code></pre>
+        The test must now <strong>pass</strong>. If it still fails, debug with the AI before
+        moving to the refactor step.
+      </li>
+
+      <li>
+        <strong>REFACTOR — Extract validation to the service layer.</strong> Ask the AI to move
+        any validation logic (e.g., checking that the task exists before updating) into
+        <code>TaskService</code>. The endpoint handler should only call the service.
+        After every change, run all tests:
+        <pre><code class="language-bash">pytest</code></pre>
+        All tests must remain green throughout the refactor.
+      </li>
+
+      <li>
+        <strong>Run the code review.</strong> Run <code>/code-review</code> and review the
+        audit output. Check that TDD compliance, service layer separation, and naming
+        conventions all pass.
+      </li>
+    </ol>
+
+    <h4>Deliverable</h4>
+    <p>
+      A working <code>PUT /tasks/{id}</code> endpoint with:
+    </p>
+    <ul>
+      <li>A test file with <code>test_update_task</code> and at least one negative case</li>
+      <li>A clean endpoint handler that delegates to <code>TaskService</code></li>
+      <li>A passing <code>pytest</code> run (all tests green)</li>
+      <li>A clean <code>/code-review</code> audit with no TDD violations</li>
+    </ul>
+
+    <h4>What to Observe</h4>
+    <p>
+      The AI never jumps directly to the implementation. Because of the TDD rule in
+      <code>000-core-workflow.mdc</code>, it always writes the test first — even if you ask
+      it to skip ahead. This is the rules system working exactly as designed. You configured
+      the rules once; the discipline is now automatic.
+    </p>
+  </div>
+
+</section>
+
+<section id="mcp">
+  <h2>Section 6: MCP Servers <span class="duration">15 min + Lab 5</span></h2>
+
+  <h3 id="what-is-mcp">What is the Model Context Protocol (MCP)?</h3>
+  <p>
+    The Model Context Protocol (MCP) is an open standard created by Anthropic for connecting AI agents to external tools
+    and data sources. MCP servers are lightweight programs that expose tools to the AI through a standardized protocol,
+    dramatically expanding what the AI can do during a session.
+  </p>
+  <p>
+    Without MCP, the AI only knows what you paste into the prompt. With MCP, it gains access to live external data:
+    real databases, APIs, file systems, GitHub repositories, and documentation sites. Think of MCP servers as
+    <strong>plugins that extend what the AI can do</strong> — instead of reasoning from static training data,
+    it can actively query your real systems.
+  </p>
+
+  <h3 id="mcp-cursor">Why MCP Matters for Development</h3>
+  <p>The difference MCP makes in practice:</p>
+  <ul>
+    <li><strong>Without MCP:</strong> AI only knows what you paste into the prompt</li>
+    <li><strong>With MCP:</strong> AI can query your database, check your GitHub issues, look up live docs, call your API</li>
+  </ul>
+  <p>Practical examples of what MCP unlocks:</p>
+  <ul>
+    <li>Query your Postgres database to understand existing data structures and content</li>
+    <li>Fetch GitHub issues to understand what needs to be built next</li>
+    <li>Check live API documentation instead of relying on potentially outdated training data</li>
+    <li>Read and write to your file system in a sandboxed, structured way</li>
+  </ul>
+
+  <div class="diagram-container">
+    <div class="mermaid">
+flowchart LR
+    subgraph Cursor["Cursor Agent"]
+        AI["AI Model"]
+        TOOLS["Available Tools:<br/>edit_file, run_terminal,<br/>MCP tools..."]
+        AI --> TOOLS
+    end
+
+    subgraph MCP["MCP Servers"]
+        FS["filesystem<br/>Read and write files"]
+        GH["github<br/>Issues and PRs"]
+        PG["postgres<br/>Database queries"]
+        FETCH["fetch<br/>HTTP requests"]
+    end
+
+    TOOLS -->|"JSON-RPC"| FS
+    TOOLS -->|"JSON-RPC"| GH
+    TOOLS -->|"JSON-RPC"| PG
+    TOOLS -->|"JSON-RPC"| FETCH
+
+    FS --> DISK["Local Files"]
+    GH --> GITHUB["GitHub API"]
+    PG --> DATABASE["PostgreSQL"]
+    FETCH --> API["Your API"]
+
+    style AI fill:#3f51b5,color:#fff
+    style TOOLS fill:#00897b,color:#fff
+    </div>
+  </div>
+
+  <h3 id="mcp-config">How MCP Works in Cursor</h3>
+  <p>
+    MCP servers are configured in <code>.cursor/mcp.json</code> (project-level) or <code>~/.cursor/mcp.json</code>
+    (global, applies to all projects). Cursor starts the configured MCP servers at launch and makes their tools
+    available throughout Agent mode. The AI agent can call MCP tools just like any other built-in capability —
+    editing files, running terminal commands, etc.
+  </p>
+  <p>Two transport types are supported:</p>
+  <ul>
+    <li><strong>stdio</strong> — runs a local process on your machine (most common)</li>
+    <li><strong>http</strong> — connects to a remote MCP server over HTTP</li>
+  </ul>
+
+  <div class="diagram-container">
+    <div class="mermaid">
+flowchart LR
+    CONFIG[".cursor/mcp.json<br/>Server definitions"] --> STARTUP["Cursor starts<br/>MCP processes"]
+    STARTUP --> REG["Tools registered<br/>in Agent context"]
+    REG --> AVAIL["Agent can call:<br/>read_file, query_db,<br/>list_issues, fetch_url"]
+    AVAIL --> SESSION["Developer runs<br/>/start-session"]
+    SESSION --> USE["AI uses MCP tools<br/>automatically when needed"]
+    style CONFIG fill:#ff8f00,color:#fff
+    style AVAIL fill:#00897b,color:#fff
+    style USE fill:#2e7d32,color:#fff
+    </div>
+  </div>
+
+  <h4>Configuration Format</h4>
+  <p>The <code>.cursor/mcp.json</code> file uses the following structure:</p>
+  <pre><code class="language-json">{
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "package-name"],
+      "env": {
+        "API_KEY": "your_key"
+      }
+    }
+  }
+}</code></pre>
+
+  <div class="callout callout-info">
+    <strong>Important: Restart Cursor after adding MCP servers.</strong> MCP servers are loaded only at startup.
+    After editing <code>.cursor/mcp.json</code>, you must fully quit and relaunch Cursor for the new servers
+    to become available in Agent mode.
+  </div>
+
+  <h3 id="popular-servers">Popular MCP Servers</h3>
+  <p>These MCP servers cover the most common development use cases:</p>
+  <ul>
+    <li>
+      <code>@modelcontextprotocol/server-filesystem</code> — Read and write files in a sandboxed, controlled way
+    </li>
+    <li>
+      <code>@modelcontextprotocol/server-fetch</code> — Make HTTP requests (great for testing your own running API)
+    </li>
+    <li>
+      <code>@modelcontextprotocol/server-github</code> — Read issues, pull requests, and repository data from GitHub
+    </li>
+    <li>
+      <code>@modelcontextprotocol/server-postgres</code> — Query a PostgreSQL database directly from the agent
+    </li>
+  </ul>
+  <p>
+    The <strong>Cursor Marketplace</strong> at <a href="https://cursor.com/marketplace" target="_blank">cursor.com/marketplace</a>
+    (live since February 2026) provides one-click install for a growing library of community and official MCP servers.
+  </p>
+
+  <h3>MCP vs Context Symbols (<code>@</code>)</h3>
+  <p>
+    It is worth understanding the distinction between MCP tools and the <code>@</code> context symbols you have
+    already used:
+  </p>
+  <ul>
+    <li>
+      <strong><code>@web</code> and other <code>@</code> symbols</strong> are passive and read-only — they inject
+      static context into your prompt at the moment you send it.
+    </li>
+    <li>
+      <strong>MCP tools</strong> are active — they can read <em>and</em> write, query live databases, call APIs
+      with authentication, and perform stateful operations during the agent's execution.
+    </li>
+  </ul>
+  <p>
+    Use <code>@</code> symbols for injecting static context (files, docs, web pages). Use MCP when you need
+    dynamic, interactive access to live systems.
+  </p>
+
+  <h4>Important Notes</h4>
+  <ul>
+    <li>
+      <strong>Project vs global config:</strong> <code>.cursor/mcp.json</code> in your project overrides
+      <code>~/.cursor/mcp.json</code> for any server with the same name. This lets you have per-project
+      database connections while keeping global utility servers available everywhere.
+    </li>
+    <li>
+      <strong>Keep secrets safe:</strong> Store API keys in environment variables referenced via the
+      <code>env</code> block — never hardcode sensitive values directly in <code>mcp.json</code>,
+      which may be committed to source control.
+    </li>
+  </ul>
+
+  <div class="callout callout-lab">
+    <h4>Lab 5 (15 min): Connect an MCP Server</h4>
+    <p>
+      <strong>Objective:</strong> Add an MCP server to your project and use it to actively test your API from
+      within Agent mode — no copy-pasting responses required.
+    </p>
+    <p><strong>Prerequisites:</strong> Labs 1–4 completed, app running locally.</p>
+
+    <ol>
+      <li>
+        <p>Create <code>.cursor/mcp.json</code> in your project root:</p>
         <pre><code class="language-json">{
+  "mcpServers": {
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+    }
+  }
+}</code></pre>
+      </li>
+      <li>
+        <strong>Fully quit and restart Cursor.</strong> MCP servers load only at startup — a window reload is
+        not enough. Use Cmd+Q on macOS, then relaunch.
+      </li>
+      <li>
+        Open Agent mode with <kbd>Cmd+I</kbd>.
+      </li>
+      <li>
+        Ask the agent:
+        <blockquote>
+          "Use the fetch MCP tool to call GET http://localhost:8000/tasks and tell me what the response looks like"
+        </blockquote>
+        Observe the agent making a real HTTP request to your running API and reporting the actual response body.
+      </li>
+      <li>
+        Ask the agent:
+        <blockquote>
+          "Now use fetch to POST a new task to http://localhost:8000/tasks/ and verify it returns a 201"
+        </blockquote>
+      </li>
+    </ol>
+
+    <p>
+      <strong>Deliverable:</strong> Agent using the fetch MCP tool to interact with your live API — reading
+      real responses and verifying real status codes.
+    </p>
+    <p>
+      <strong>What to observe:</strong> The AI is no longer limited to static context. It can actively test
+      and interact with your running application in real time, exactly as a developer would from a terminal
+      or API client — but guided by natural language instructions.
+    </p>
+  </div>
+</section>
+
+<section id="hooks">
+  <h2>Section 7: Hooks — Lifecycle Automation <span class="badge badge-beta">Beta</span> <span class="duration">15 min, if time permits</span></h2>
+
+  <div class="callout callout-warning">
+    <strong>Beta Feature:</strong> Hooks are currently in beta. Enable them in <em>Cursor Settings &gt; Beta &gt; Hooks</em>. The API surface may change in future releases.
+  </div>
+
+  <!-- ─── 7.1 What Are Hooks? ─── -->
+  <h3 id="what-are-hooks">7.1 What Are Hooks?</h3>
+  <p>
+    Hooks are <strong>lifecycle interceptors</strong> — shell commands or prompt injections that run automatically
+    <em>before</em> or <em>after</em> specific AI actions. They operate in the background, invisibly, forming
+    the automation layer that sits between the AI agent and the tools it uses.
+  </p>
+  <p>Hooks are defined in <code>.cursor/hooks.json</code> at the project, user, team, or enterprise level.</p>
+
+  <h4>Why Use Hooks?</h4>
+  <ul>
+    <li>Auto-format files on every AI edit (Prettier, Black, gofmt)</li>
+    <li>Block dangerous commands before they execute (<code>rm -rf</code>, <code>DROP TABLE</code>)</li>
+    <li>Run linters or type-checkers after every file change</li>
+    <li>Trigger tests automatically after an edit</li>
+    <li>Send Slack/webhook notifications on agent actions</li>
+    <li>Inject additional context into the LLM before it responds</li>
+  </ul>
+
+  <!-- ─── 7.2 hooks.json Format ─── -->
+  <h3 id="hooks-format">7.2 hooks.json Format</h3>
+  <p>
+    The file lives at <code>.cursor/hooks.json</code> in your project root (or at the user/team/enterprise config
+    path). The top-level key is <code>"hooks"</code>, containing an object keyed by lifecycle event name.
+    Each event maps to an array of hook objects with a <code>matcher</code> and a <code>commands</code> list.
+  </p>
+
+  <pre><code class="language-json">{
   "hooks": {
     "postToolUse": [
       {
@@ -1415,16 +2856,222 @@ async def create_post(
           }
         ]
       }
-    ],
-    "beforeShellExecution": [
+    ]
+  }
+}</code></pre>
+
+  <p>Key fields:</p>
+  <ul>
+    <li><strong><code>matcher</code></strong> — criteria for when this hook fires (tool name, file glob, command pattern)</li>
+    <li><strong><code>commands</code></strong> — ordered list of actions to execute when the matcher hits</li>
+    <li><strong><code>type</code></strong> — either <code>"command"</code> (shell) or <code>"prompt"</code> (LLM context injection)</li>
+    <li><strong><code>command</code></strong> — the shell string to run; environment variables like <code>$FILE_PATH</code> are available</li>
+  </ul>
+
+  <!-- ─── 7.3 Lifecycle Events ─── -->
+  <h3 id="hook-events">7.3 Lifecycle Events</h3>
+  <p>Cursor exposes the following lifecycle events across six categories:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Event</th>
+        <th>When It Fires</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="2"><strong>Session</strong></td>
+        <td><code>sessionStart</code></td>
+        <td>When a new AI session begins</td>
+      </tr>
+      <tr>
+        <td><code>sessionEnd</code></td>
+        <td>When the AI session ends or is closed</td>
+      </tr>
+      <tr>
+        <td rowspan="3"><strong>Tool</strong></td>
+        <td><code>preToolUse</code></td>
+        <td>Before the AI calls any tool (edit, read, shell, etc.)</td>
+      </tr>
+      <tr>
+        <td><code>postToolUse</code></td>
+        <td>After a tool call completes successfully</td>
+      </tr>
+      <tr>
+        <td><code>postToolUseFailure</code></td>
+        <td>After a tool call fails or returns an error</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><strong>Shell</strong></td>
+        <td><code>beforeShellExecution</code></td>
+        <td>Before any shell command is executed by the AI</td>
+      </tr>
+      <tr>
+        <td><code>afterShellExecution</code></td>
+        <td>After a shell command finishes executing</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><strong>File</strong></td>
+        <td><code>beforeReadFile</code></td>
+        <td>Before the AI reads a file (fail-closed by default)</td>
+      </tr>
+      <tr>
+        <td><code>afterFileEdit</code></td>
+        <td>After the AI writes or edits a file</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><strong>MCP</strong></td>
+        <td><code>beforeMCPExecution</code></td>
+        <td>Before an MCP tool is called (fail-closed by default)</td>
+      </tr>
+      <tr>
+        <td><code>afterMCPExecution</code></td>
+        <td>After an MCP tool call completes</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><strong>Agent</strong></td>
+        <td><code>afterAgentResponse</code></td>
+        <td>After the AI agent produces a response</td>
+      </tr>
+      <tr>
+        <td><code>stop</code></td>
+        <td>When the agent stops or is interrupted</td>
+      </tr>
+      <tr>
+        <td><strong>Prompt</strong></td>
+        <td><code>beforeSubmitPrompt</code></td>
+        <td>Before the user's prompt is sent to the LLM</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── 7.4 Hook Types ─── -->
+  <h3 id="hook-types">7.4 Hook Types</h3>
+  <p>Each entry in <code>commands</code> has a <code>type</code> field that determines what happens when the hook fires:</p>
+
+  <dl>
+    <dt><code>"type": "command"</code></dt>
+    <dd>
+      Runs a shell command in the project's working directory. The exit code controls whether the triggering
+      action proceeds (see Exit Codes below). Environment variables such as <code>$FILE_PATH</code>,
+      <code>$TOOL_NAME</code>, and <code>$COMMAND</code> are injected automatically.
+    </dd>
+    <dt><code>"type": "prompt"</code></dt>
+    <dd>
+      Injects additional text directly into the LLM's context. Use this to prepend instructions, warnings,
+      or dynamic data into the model's input — for example, injecting the current git branch name or a
+      security policy reminder before every agent response.
+    </dd>
+  </dl>
+
+  <h4>Exit Codes</h4>
+  <p>When using <code>"type": "command"</code>, the shell exit code determines what happens next:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Exit Code</th>
+        <th>Meaning</th>
+        <th>Effect</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>0</code></td>
+        <td>Success</td>
+        <td>The triggering action proceeds normally (fail-open)</td>
+      </tr>
+      <tr>
+        <td><code>2</code></td>
+        <td>Block</td>
+        <td>The action is <strong>PREVENTED</strong> — fail-closed</td>
+      </tr>
+      <tr>
+        <td>Any other</td>
+        <td>Failure</td>
+        <td>Hook failed, but the action proceeds anyway (fail-open)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-warning">
+    <strong>Fail-Closed Exceptions:</strong> <code>beforeReadFile</code> and <code>beforeMCPExecution</code>
+    are fail-closed by default — if the hook command fails for <em>any</em> reason (not just exit 2), the
+    read or MCP call is blocked. Design hooks for these events with extra care.
+  </div>
+
+  <!-- ─── 7.5 Configuration Levels ─── -->
+  <h3 id="hook-config-levels">7.5 Configuration Levels</h3>
+  <p>
+    Hooks can be defined at four levels. When the same lifecycle event has hooks at multiple levels, they
+    are merged and run in priority order — highest priority first:
+  </p>
+
+  <ol>
+    <li><strong>Enterprise</strong> — highest priority; cannot be overridden by lower levels</li>
+    <li><strong>Team</strong></li>
+    <li><strong>Project</strong> (<code>.cursor/hooks.json</code> in the repo)</li>
+    <li><strong>User</strong> — lowest priority (personal machine settings)</li>
+  </ol>
+
+  <p>
+    Enterprise hooks are locked — team, project, and user hooks cannot override or disable them. This makes
+    enterprise hooks suitable for enforcing security policies across all developers.
+  </p>
+
+  <!-- ─── 7.6 Sequence Diagram ─── -->
+  <h3>7.6 Hook Execution Flow</h3>
+  <p>The following diagram shows how the Hook Engine intercepts a tool call at both the pre- and post-use stages:</p>
+
+  <div class="mermaid">
+sequenceDiagram
+    participant AI as AI Agent
+    participant H as Hook Engine
+    participant S as Shell
+    participant FS as File System
+
+    AI->>H: preToolUse(edit_file, path)
+    H->>H: Check matchers
+    alt Matcher hits, type=command
+        H->>S: Run shell command
+        S-->>H: Exit code
+        alt Exit code = 2
+            H-->>AI: BLOCKED - action prevented
+        else Exit code = 0
+            H-->>AI: PROCEED
+        end
+    else No matcher
+        H-->>AI: PROCEED
+    end
+    AI->>FS: edit_file(path, content)
+    FS-->>AI: File written
+    AI->>H: postToolUse(edit_file, path)
+    H->>S: npx prettier --write path
+    S-->>H: Exit 0
+    H-->>AI: Done
+  </div>
+
+  <!-- ─── 7.7 Real-World Examples ─── -->
+  <h3 id="hook-examples">7.7 Real-World Examples</h3>
+
+  <h4>Example 1: Auto-Format Python Files with Black</h4>
+  <p>
+    Every time the AI edits a <code>.py</code> file, Black automatically reformats it — no manual formatting step needed.
+  </p>
+  <pre><code class="language-json">{
+  "hooks": {
+    "postToolUse": [
       {
         "matcher": {
-          "command_pattern": "rm -rf /"
+          "tool_name": "edit_file",
+          "file_pattern": "*.py"
         },
         "commands": [
           {
             "type": "command",
-            "command": "echo 'BLOCKED: Dangerous command' && exit 2"
+            "command": ".venv/bin/black $FILE_PATH"
           }
         ]
       }
@@ -1432,160 +3079,62 @@ async def create_post(
   }
 }</code></pre>
 
-        <h3 id="hook-events">Lifecycle Events</h3>
-        <table>
-          <thead>
-            <tr><th>Category</th><th>Event</th><th>When It Fires</th></tr>
-          </thead>
-          <tbody>
-            <tr class="lifecycle-category"><td colspan="3">Session</td></tr>
-            <tr><td></td><td><code>sessionStart</code></td><td>New chat session begins</td></tr>
-            <tr><td></td><td><code>sessionEnd</code></td><td>Chat session ends</td></tr>
-            <tr class="lifecycle-category"><td colspan="3">Tool</td></tr>
-            <tr><td></td><td><code>preToolUse</code></td><td>Before AI uses a tool (edit, create, etc.)</td></tr>
-            <tr><td></td><td><code>postToolUse</code></td><td>After a tool completes successfully</td></tr>
-            <tr><td></td><td><code>postToolUseFailure</code></td><td>After a tool fails</td></tr>
-            <tr class="lifecycle-category"><td colspan="3">Shell</td></tr>
-            <tr><td></td><td><code>beforeShellExecution</code></td><td>Before running a shell command</td></tr>
-            <tr><td></td><td><code>afterShellExecution</code></td><td>After a shell command completes</td></tr>
-            <tr class="lifecycle-category"><td colspan="3">File</td></tr>
-            <tr><td></td><td><code>beforeReadFile</code></td><td>Before AI reads a file</td></tr>
-            <tr><td></td><td><code>afterFileEdit</code></td><td>After a file is edited</td></tr>
-            <tr class="lifecycle-category"><td colspan="3">MCP</td></tr>
-            <tr><td></td><td><code>beforeMCPExecution</code></td><td>Before calling an MCP server</td></tr>
-            <tr><td></td><td><code>afterMCPExecution</code></td><td>After MCP call completes</td></tr>
-            <tr class="lifecycle-category"><td colspan="3">Agent</td></tr>
-            <tr><td></td><td><code>afterAgentResponse</code></td><td>After each agent response</td></tr>
-            <tr><td></td><td><code>stop</code></td><td>When agent stops</td></tr>
-            <tr class="lifecycle-category"><td colspan="3">Subagent</td></tr>
-            <tr><td></td><td><code>subagentStart</code></td><td>When a subagent is spawned</td></tr>
-            <tr><td></td><td><code>subagentStop</code></td><td>When a subagent finishes</td></tr>
-            <tr class="lifecycle-category"><td colspan="3">Prompt</td></tr>
-            <tr><td></td><td><code>beforeSubmitPrompt</code></td><td>Before sending prompt to AI</td></tr>
-          </tbody>
-        </table>
-
-        <h3>Hook Types</h3>
-        <table>
-          <thead>
-            <tr><th>Type</th><th>Runs</th><th>Use Case</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Command</strong> (<code>"type": "command"</code>)</td>
-              <td>Shell command</td>
-              <td>Format code, run linters, block dangerous ops</td>
-            </tr>
-            <tr>
-              <td><strong>Prompt</strong> (<code>"type": "prompt"</code>)</td>
-              <td>Injects text into LLM context</td>
-              <td>Add reminders, enforce conventions</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h3>Exit Codes</h3>
-        <table>
-          <thead>
-            <tr><th>Exit Code</th><th>Meaning</th><th>Behavior</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>0</code></td><td>Success</td><td>Action proceeds normally</td></tr>
-            <tr><td><code>2</code></td><td>Block</td><td>Action is prevented</td></tr>
-            <tr><td>Other</td><td>Failure</td><td><strong>Fail-open</strong>: action proceeds anyway</td></tr>
-          </tbody>
-        </table>
-
-        <div class="callout callout-warning">
-          <div class="callout-title">Fail-Closed Exceptions</div>
-          <p>
-            Two events are <strong>fail-closed</strong> by default: <code>beforeReadFile</code> and
-            <code>beforeMCPExecution</code>. If the hook fails (non-zero, non-2), the action is
-            blocked instead of proceeding.
-          </p>
-        </div>
-
-        <h3>Configuration Levels</h3>
-        <p>Hooks are merged in priority order:</p>
-        <pre><code class="language-text">Enterprise → Team → Project → User</code></pre>
-        <p>Higher-priority hooks run first. Enterprise hooks cannot be overridden.</p>
-
-        <h3 id="hook-examples">Real-World Examples</h3>
-
-        <h4>Auto-Format on File Edit</h4>
-        <pre><code class="language-json">{
-  "hooks": {
-    "postToolUse": [
-      {
-        "matcher": { "tool_name": "edit_file" },
-        "commands": [{
-          "type": "command",
-          "command": "npx prettier --write $FILE_PATH"
-        }]
-      }
-    ]
-  }
-}</code></pre>
-
-        <h4>Block Dangerous Shell Commands</h4>
-        <pre><code class="language-json">{
+  <h4>Example 2: Block Dangerous Shell Commands</h4>
+  <p>
+    Prevent the AI from running destructive commands like <code>rm -rf</code>, <code>DROP TABLE</code>,
+    <code>TRUNCATE</code>, or force-pushing to git. The hook exits with code <code>2</code> to block execution.
+  </p>
+  <pre><code class="language-json">{
   "hooks": {
     "beforeShellExecution": [
       {
-        "matcher": { "command_pattern": "(rm -rf|drop table|truncate)" },
-        "commands": [{
-          "type": "command",
-          "command": "echo 'BLOCKED by hook policy' && exit 2"
-        }]
+        "matcher": {
+          "command_pattern": "(rm -rf|DROP TABLE|TRUNCATE|git push --force)"
+        },
+        "commands": [
+          {
+            "type": "command",
+            "command": "echo 'BLOCKED by hook policy: dangerous command' && exit 2"
+          }
+        ]
       }
     ]
   }
 }</code></pre>
 
-        <h4>GitButler Auto-Commit After Edits</h4>
-        <pre><code class="language-json">{
+  <h4>Example 3: Auto-Run Tests After Every Edit</h4>
+  <p>
+    Whenever the AI edits any Python file inside <code>app/</code>, pytest runs automatically and shows
+    the last 5 lines of output — giving instant feedback without leaving the editor.
+  </p>
+  <pre><code class="language-json">{
   "hooks": {
-    "afterFileEdit": [
+    "postToolUse": [
       {
-        "commands": [{
-          "type": "command",
-          "command": "gitbutler-cli upsert-virtual-branch --set-default && sleep 1"
-        }]
+        "matcher": {
+          "tool_name": "edit_file",
+          "file_pattern": "app/**/*.py"
+        },
+        "commands": [
+          {
+            "type": "command",
+            "command": ".venv/bin/pytest tests/ -x -q 2>&1 | tail -5"
+          }
+        ]
       }
     ]
   }
 }</code></pre>
 
-        <div class="mermaid">
-sequenceDiagram
-    participant AI as AI Agent
-    participant H as Hook Engine
-    participant S as Shell / LLM
-    participant FS as File System
+  <div class="callout callout-warning">
+    <strong>Beta Warning:</strong> Hooks are a beta feature. To use them, enable the setting at
+    <em>Cursor Settings &gt; Beta &gt; Hooks</em>. The configuration format, available lifecycle events,
+    and environment variables are subject to change without notice in future Cursor releases. Pin your
+    Cursor version in team environments if you depend heavily on hooks in CI or automation workflows.
+  </div>
 
-    AI->>H: preToolUse("edit_file", {path})
-    H->>H: Check matchers
-    alt Matcher hits & type=command
-        H->>S: Run shell command
-        S-->>H: Exit code
-        alt Exit code = 2
-            H-->>AI: BLOCK — action prevented
-        else Exit code = 0
-            H-->>AI: PROCEED
-        else Other exit code
-            H-->>AI: PROCEED (fail-open)
-        end
-    else No matcher
-        H-->>AI: PROCEED
-    end
-    AI->>FS: edit_file(path, content)
-    FS-->>AI: File written
-    AI->>H: postToolUse("edit_file", {path})
-    H->>S: Run "prettier --write $FILE_PATH"
-    S-->>H: Exit 0
-    H-->>AI: Done
-        </div>
-      </section>
+</section>
+
 
     </main>
   </div>
