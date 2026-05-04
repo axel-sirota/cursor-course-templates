@@ -643,3 +643,107 @@ Copy .cursor/ → @detect-stack → Yes to save stack → @start-session
 ```
 
 **That's it! You're ready to build with AI assistance. 🚀**
+
+---
+
+## Per-Persona Workflows
+
+Run `/set-persona` (Claude Code) or `@set-persona` (Cursor) first, then follow the workflow for your role.
+
+---
+
+### Engineer Workflow
+
+```
+Start: /start-session
+Plan:  /architect "feature description"
+Tasks: /engineer-tasks
+Build: /engineer-implement  (loops per task: red→green→refactor)
+Check: /code-review
+End:   /next-session
+```
+
+**Subagents fired automatically by `/engineer-implement`:**
+- `test-runner` — after each red and green step
+- `security-auditor` — on tasks touching auth/DB/I-O
+- `verifier` — before marking task done
+- `code-reviewer` — before `/code-review`
+
+**Hooks:**
+- Every file edit → `lint.sh` + `type-check.sh` (advisory)
+- Every shell command → `block-destructive.sh` (blocking for dangerous patterns)
+- Session end → `test-runner.sh`
+
+**Capstone output:** working code + passing tests satisfying PM's acceptance criteria
+
+---
+
+### Designer Workflow
+
+```
+Start:   /start-session
+Extract: /designer-extract {figma-url}
+Build:   /designer-compose {figma-context-file}
+Refine:  /designer-iterate  (interactive: click + describe)
+Ship:    /designer-handoff
+End:     /next-session
+```
+
+**Subagents:**
+- `figma-extractor` — invoked by `/designer-extract`
+- `token-validator` — invoked by `/code-review`
+- `responsive-checker` — invoked by `/designer-handoff`
+
+**Hooks:**
+- Every CSS/SCSS/TSX/JSX edit → `token-validator.sh` + `no-inline-styles.sh` (advisory)
+- Session end → `screenshot-compare.sh` (advisory prompt)
+
+**Capstone output:** `PR_DESCRIPTION.md` + responsive screenshots showing prototype matching Figma
+
+---
+
+### PM Workflow
+
+```
+Start:     /start-session
+Draft:     /architect "feature or problem statement"
+Validate:  /pm-validate  (Three Amigos critique)
+Decompose: /pm-decompose
+Track:     /pm-report  (after engineers are working)
+End:       /next-session
+```
+
+**Subagents fired by `/pm-validate`:**
+- `dev-perspective` — technical feasibility
+- `qa-perspective` — edge cases + testability
+- `gap-detector` — structural PRD completeness
+
+**Hooks:**
+- Every PRD/spec markdown edit → `invest-validator.sh` + `ac-format-check.sh` (advisory)
+- Session end → `gap-detector.sh` (advisory prompt)
+
+**Capstone output:** PRD with INVEST stories + Given/When/Then ACs + Jira tickets
+
+---
+
+### Data Scientist Workflow
+
+```
+Start:      /start-session
+Explore:    /ds-explore  (profile data, form hypotheses)
+Experiment: /ds-experiment  (run model, log results)
+Validate:   /ds-validate  (held-out test, bias check)
+Ship:       /ds-handoff  (model card)
+End:        /next-session
+```
+
+**Subagents:**
+- `data-profiler` — invoked by `/ds-explore`
+- `experiment-tracker` — invoked by `/ds-experiment` and `/next-session`
+- `reproducibility-checker` — invoked by `/ds-validate`
+
+**Hooks:**
+- Every `.py`/`.ipynb` edit → `seed-check.sh` + `notebook-lint.sh` (advisory)
+- Session end → `log-experiment.sh` (advisory prompt)
+
+**Capstone output:** model card + validation report + reproducibility confirmation

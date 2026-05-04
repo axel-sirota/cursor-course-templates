@@ -3,7 +3,8 @@
 **Phase:** C (PM persona pack)
 **Goal:** All functional files for PM persona.
 **Depends on:** Session 5 (directory scaffold)
-**Next session:** Session 7 (Data Scientist scaffold)
+**Parallel with:** Sessions 2, 4, 8 — each persona's commands session is independent
+**Next session:** Session 10 (set-persona command, needs all persona packs complete)
 
 ---
 

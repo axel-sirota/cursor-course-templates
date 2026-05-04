@@ -2,7 +2,8 @@
 
 **Phase:** B (Designer persona pack)
 **Goal:** Directory skeleton + persona.md + README + SETUP + .env.example for designer.
-**Depends on:** Session 2 complete (engineer is the reference — copy structure pattern)
+**Depends on:** Session 1 complete (directory layout pattern established)
+**Parallel with:** Sessions 5–6 (PM), 7–8 (DS), 9 (DS stack) — all persona packs are independent
 **Next session:** Session 4 (designer commands + agents + hooks)
 
 ---

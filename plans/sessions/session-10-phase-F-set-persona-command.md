@@ -2,7 +2,8 @@
 
 **Phase:** F
 **Goal:** The single student-facing setup command. Replaces the spec's `setup-persona`. Client-overlay-aware. Writes to both `.cursor/` and `.claude/`.
-**Depends on:** Sessions 1–9 (all 4 persona packs must exist to test against)
+**Depends on:** Sessions 2, 4, 6, 8, 9 complete (all persona packs + DS stack must exist)
+**Parallel with:** nothing — this is the convergence point
 **Next session:** Session 11 (universal commands persona-aware)
 
 ---

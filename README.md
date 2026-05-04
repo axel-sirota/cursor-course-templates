@@ -12,22 +12,32 @@ This repository is a **Context-Aware Development Environment** for AI Assistants
 
 1.  **Clone this repo** (or copy the `.cursor` folder to your project).
 2.  Open **Cursor**.
-3.  Type this in the chat:
+3.  Run `@set-persona` and pick your role:
+     - `engineer` — if you write code
+     - `designer` — if you build prototypes
+     - `pm` — if you write product specs
+     - `data-scientist` — if you run experiments
+4.  (engineer + data-scientist only) Type in the chat:
 
     > **`@setup-stack`**
 
-4.  Follow the instructions to configure your project.
+5.  Follow the instructions to configure your project.
 
 ### Using Claude Code
 
 1.  **Clone this repo** (or copy the `.claude` folder and `CLAUDE.md` to your project).
 2.  Navigate to the directory: `cd cursor-course-templates`
 3.  Run: `claude`
-4.  Type this in the chat:
+4.  Run `/set-persona` and pick your role:
+     - `engineer` — if you write code
+     - `designer` — if you build prototypes
+     - `pm` — if you write product specs
+     - `data-scientist` — if you run experiments
+5.  (engineer + data-scientist only) Type in the chat:
 
     > **/setup-stack**
 
-5.  Follow the instructions to configure your project.
+6.  Follow the instructions to configure your project.
 
 ## 🌟 Features
 
@@ -43,11 +53,25 @@ This repository is a **Context-Aware Development Environment** for AI Assistants
 -   **[Adaptation Guide](ADAPTATION_GUIDE.md)**: How to add new languages or frameworks.
 -   **[Python Stack](stacks/python-fastapi/)**: The reference implementation.
 
+## 🎭 Personas
+
+This repo supports four roles. Run `@set-persona` or `/set-persona` to activate yours.
+
+| Persona | Who it's for | What it installs |
+|---|---|---|
+| **engineer** | Software developers | TDD commands, code-reviewer + security-auditor agents, lint/type-check hooks, GitHub/Postgres/Playwright MCPs |
+| **designer** | UI/UX designers | Figma extract/compose/iterate/handoff commands, token-validator agent, design-token hooks, Figma/Playwright MCPs |
+| **pm** | Product managers | PRD validate/decompose/report commands, Three Amigos agents, INVEST/AC-format hooks, Atlassian/Jira MCPs |
+| **data-scientist** | Data scientists & ML engineers | EDA/experiment/validate/handoff commands, data-profiler agent, seed/reproducibility hooks, filesystem/context7 MCPs |
+
+Client-specific tool configurations (internal GitHub Enterprise, Jira URLs, data platforms) are injected automatically from `client-config/` if your instructor provided one.
+
 ## 🛠️ Commands
 
 | Cursor IDE | Claude Code | Description |
 | :--- | :--- | :--- |
-| **`@setup-stack`** | **`/setup-stack`** | **START HERE.** Configures the project context and rules. |
+| **`@set-persona`** | **`/set-persona`** | **START HERE.** Choose your role. Installs all role-specific tools. |
+| **`@setup-stack`** | **`/setup-stack`** | Configures the project context and rules. (engineer + data-scientist only) |
 | **`@start-session`** | **`/start-session`** | Loads the active context for a coding session. |
 | **`@research`** | **`/research`** | Performs TDD-style research and planning. |
 | **`@architect`** | **`/architect`** | Starts the Phase 0 (Design/Skeleton) workflow. |

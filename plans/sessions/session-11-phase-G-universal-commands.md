@@ -3,6 +3,7 @@
 **Phase:** G
 **Goal:** Add persona-aware branches to 6 universal commands. They read `## Active Persona` from context and adjust behavior. No commands are removed or replaced — only extended.
 **Depends on:** Session 10 (`set-persona` must write Active Persona to context before these branches can be tested)
+**Parallel with:** Session 12 — gitignore and client scaffold are independent of command updates
 **Next session:** Session 12 (gitignore + client scaffold)
 
 ---

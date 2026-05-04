@@ -1,0 +1,15 @@
+{
+  "_instructor_note": "Add your org's data platform MCPs here alongside the default filesystem and context7 servers. Examples below are commented out — uncomment and configure the ones your org uses. This file FULLY REPLACES the base data-scientist mcp.json — include all servers you want active, not just the ones you're adding.",
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./data"],
+      "env": {}
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "env": {}
+    }
+  }
+}

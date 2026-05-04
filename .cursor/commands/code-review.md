@@ -6,6 +6,28 @@ description: Perform comprehensive code review based on active stack rules
 
 Perform a systematic review of the codebase. This command adapts its checks based on the detected language and framework in `.cursor/context.md`.
 
+## Persona Detection (run first)
+
+Read the active persona from context:
+- Cursor: `.cursor/context.md` — look for `## Active Persona`
+- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+
+If section missing or value is empty → treat as `engineer` (backwards compatible default).
+
+Branch to the appropriate preamble below, then continue with the standard execution flow.
+
+### Persona Preambles
+
+**engineer:** Security (secret leaks, injection), style (naming, types), testing (coverage, assertion quality). Use `code-reviewer` and `security-auditor` subagents if available.
+
+**designer:** Token discipline (no hardcoded values), logic preservation (no handler/route/state changes), responsive behavior (breakpoints). Use `token-validator` subagent if available.
+
+**pm:** INVEST compliance (all stories), Given/When/Then format (all ACs), NFR completeness. Use `gap-detector` subagent if available.
+
+**data-scientist:** Reproducibility (seed set, requirements pinned, no absolute paths), experiment logging (all runs tracked), model card completeness. Use `reproducibility-checker` subagent if available.
+
+---
+
 ## Review Checklist
 
 **1. Context Load**

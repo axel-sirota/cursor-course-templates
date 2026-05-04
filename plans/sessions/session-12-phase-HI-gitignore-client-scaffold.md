@@ -3,6 +3,7 @@
 **Phase:** H–I
 **Goal:** Ensure `client-config/` is gitignored. Create a sample `client-config/` with documentation so instructors know exactly what to fill in.
 **Depends on:** Session 10 (set-persona references client-config/)
+**Parallel with:** Session 11 — file changes don't overlap
 **Next session:** Session 13 (docs)
 
 ---

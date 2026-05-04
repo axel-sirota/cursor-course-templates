@@ -3,6 +3,9 @@ teacher_runbook.md
 TEACHER_CHEAT_SHEET.md
 solutions/
 
+# Client overlay config (not for students — provided by instructor/employer)
+client-config/
+
 # Claude Code local files (user-specific)
 CLAUDE.local.md
 .claude/settings.local.json

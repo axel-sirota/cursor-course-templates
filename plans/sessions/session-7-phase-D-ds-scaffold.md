@@ -2,7 +2,8 @@
 
 **Phase:** D (Data Scientist persona pack)
 **Goal:** Directory skeleton + persona.md + README + SETUP + .env.example for data-scientist.
-**Depends on:** Session 6 complete
+**Depends on:** Session 1 complete (directory layout pattern established)
+**Parallel with:** Sessions 3–4 (Designer), 5–6 (PM), 9 (DS stack)
 **Next session:** Session 8 (DS commands + agents + hooks)
 
 ---

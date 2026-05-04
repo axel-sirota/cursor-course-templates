@@ -2,7 +2,8 @@
 
 **Phase:** E
 **Goal:** Create the python-datascience stack pack so DS students have a stack to select after `set-persona data-scientist`.
-**Depends on:** Session 8 complete
+**Depends on:** Session 1 complete (stack pack pattern established — see stacks/python-fastapi/)
+**Parallel with:** Sessions 3–8 — stack pack and persona packs are fully independent
 **Next session:** Session 10 (`set-persona` command)
 
 ---

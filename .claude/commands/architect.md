@@ -10,6 +10,28 @@ This command works in **two modes**: Design Mode (AI designs everything) or Plan
 
 ## Execution Flow
 
+## Persona Detection (run first)
+
+Read the active persona from context:
+- Cursor: `.cursor/context.md` — look for `## Active Persona`
+- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+
+If section missing or value is empty → treat as `engineer` (backwards compatible default).
+
+Branch to the appropriate preamble below, then continue with the standard execution flow.
+
+### Persona Preambles
+
+**engineer:** Design the API surface for a backend feature. Output: OpenAPI spec or route list, data model, skeleton implementation plan.
+
+**designer:** Design the component hierarchy for a visual feature. Output: component tree (which components exist vs need creating), token requirements, layout structure. No API design — assume API already exists or will be provided by engineering.
+
+**pm:** Draft the PRD structure for a product feature. Output: goals + non-goals, user personas affected, list of user stories (INVEST format), NFR categories to address. No implementation detail — that is engineering's job.
+
+**data-scientist:** Design the experiment plan for a data science problem. Output: data sources needed, EDA hypotheses to test, candidate model types, success metrics, validation approach. No code yet — this is the design phase before `/ds-explore`.
+
+---
+
 **0. Check for Plan Document**
 - **Action**: Check if user provided a plan document
 - **Look for**:

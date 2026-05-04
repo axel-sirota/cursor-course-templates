@@ -22,6 +22,43 @@
 
 ---
 
+## Parallel Execution Graph
+
+```
+Session 1  (engineer scaffold)
+    │
+    ├── Session 2  (engineer commands/agents/hooks)  ──┐
+    │                                                   │
+    ├── Session 3  (designer scaffold)                  │
+    │       └── Session 4  (designer commands) ─────────┤
+    │                                                   │
+    ├── Session 5  (pm scaffold)                        │
+    │       └── Session 6  (pm commands) ───────────────┤
+    │                                                   │
+    ├── Session 7  (ds scaffold)                        │
+    │       └── Session 8  (ds commands) ───────────────┤
+    │                                                   │
+    └── Session 9  (python-datascience stack) ──────────┘
+                                                        │
+                                              Session 10 (set-persona command)
+                                                        │
+                                              ┌─────────┴──────────┐
+                                         Session 11           Session 12
+                                    (universal cmds)      (gitignore+client)
+                                              └─────────┬──────────┘
+                                                        │
+                                                  Session 13 (docs pt1)
+                                                        │
+                                                  Session 14 (docs pt2)
+```
+
+**Maximum parallelism:** Sessions 2, 3→4, 5→6, 7→8, 9 can all run simultaneously after Session 1.
+Sessions 11 and 12 can run simultaneously after Session 10.
+
+**Critical path (sequential minimum):** 1 → 2 → 10 → 11 → 13 → 14 (6 sessions)
+
+---
+
 ## Session Index
 
 - [Session 1](session-1-phase-A-engineer-scaffold.md) — Engineer persona: scaffold + persona.md + README + SETUP + env

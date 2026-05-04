@@ -3,7 +3,8 @@
 **Phase:** D (Data Scientist persona pack)
 **Goal:** All functional files for data-scientist persona.
 **Depends on:** Session 7 (directory scaffold)
-**Next session:** Session 9 (python-datascience stack pack)
+**Parallel with:** Sessions 2, 4, 6 — each persona's commands session is independent
+**Next session:** Session 10 (set-persona command, needs all persona packs complete)
 
 ---
 

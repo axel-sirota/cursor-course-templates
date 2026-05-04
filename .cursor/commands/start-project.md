@@ -12,6 +12,28 @@ Initialize the *business logic* for a new feature or project. While `@setup-stac
 
 ## Execution Flow
 
+## Persona Detection (run first)
+
+Read the active persona from context:
+- Cursor: `.cursor/context.md` — look for `## Active Persona`
+- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+
+If section missing or value is empty → treat as `engineer` (backwards compatible default).
+
+Branch to the appropriate preamble below, then continue with the standard execution flow.
+
+### Persona Preambles
+
+**engineer:** Propose data entities, REST API endpoints, and implementation phases for the described domain.
+
+**designer:** Propose a component library inventory for the described UI: which components exist in the codebase, which need building, what tokens they require.
+
+**pm:** Propose an initial user story map: key user roles, their goals, and an ordered list of epics with rough priority.
+
+**data-scientist:** Propose a data pipeline design: input data sources, feature engineering steps, candidate model approaches, evaluation strategy.
+
+---
+
 **1. Context Analysis**
 - Read `.cursor/context.md` to know the language/framework (e.g., Python FastAPI vs Node Express).
 

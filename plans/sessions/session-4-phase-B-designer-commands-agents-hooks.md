@@ -3,7 +3,8 @@
 **Phase:** B (Designer persona pack)
 **Goal:** All functional files for designer persona.
 **Depends on:** Session 3 (directory scaffold)
-**Next session:** Session 5 (PM scaffold)
+**Parallel with:** Sessions 2, 6, 8 — each persona's commands session is independent
+**Next session:** Session 10 (set-persona command, needs all persona packs complete)
 
 ---
 

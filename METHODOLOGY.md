@@ -42,6 +42,43 @@ The AI is only as smart as its context.
 
 ---
 
+## Personas
+
+The Adaptive SDLC runs underneath all four roles. What changes per persona is the *vocabulary*, *deliverable*, and *tooling* — not the phase-based discipline.
+
+### Shared foundation
+
+All personas follow the same session structure:
+1. `/start-session` — load context, state goal
+2. Work (using persona-specific commands)
+3. `/next-session` — document state, log handoffs
+
+All personas use the same quality loop:
+- Universal commands (`/architect`, `/code-review`, etc.) adapt their output per role
+- Subagents handle isolated tasks without polluting the main context
+- Hooks enforce quality guardrails automatically
+
+### What's different per persona
+
+| | Engineer | Designer | PM | Data Scientist |
+|---|---|---|---|---|
+| **Deliverable** | Tested code | Visual prototype | PRD + tickets | Experiment + model card |
+| **Quality gate** | Tests pass + security clean | Tokens used + logic intact | INVEST + AC format | Seed set + reproducible |
+| **Primary MCPs** | GitHub, Postgres | Figma, Playwright | Jira, Confluence | filesystem, context7 |
+| **Handoff artifact** | PR | PR_DESCRIPTION.md | Jira tickets | model card |
+
+### Cross-persona handoff
+
+The capstone exercise passes one feature through all four personas:
+1. PM writes the PRD with acceptance criteria
+2. Designer produces the prototype consuming the PRD
+3. Engineer builds the code satisfying the PRD's acceptance criteria
+4. Data Scientist validates any model or data component
+
+The shared workflow vocabulary (specs, plans, sessions, acceptance criteria) is what makes this handoff clean.
+
+---
+
 ## Command Reference
 
 These commands are available in both Cursor IDE (using `@` prefix) and Claude Code (using `/` prefix). The functionality is identical across both tools.

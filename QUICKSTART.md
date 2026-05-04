@@ -6,6 +6,22 @@ Welcome to the **AI-Assisted Development Template**. This guide will help you st
 
 ---
 
+## Step 0: Choose Your Role
+
+Before anything else, run:
+
+- Cursor: `@set-persona`
+- Claude Code: `/set-persona`
+
+Pick your role: **engineer**, **designer**, **pm**, or **data-scientist**.
+
+- Engineers and data scientists: then run `@setup-stack` / `/setup-stack`
+- Designers and PMs: skip `setup-stack` — your persona is ready immediately
+
+Everything below assumes you've done this first.
+
+---
+
 ## Prerequisites
 
 Before you begin, ensure you have:

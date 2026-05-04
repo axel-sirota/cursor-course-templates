@@ -8,11 +8,33 @@ Initializes the AI context for the current work session. This command ensures th
 
 ## Execution Flow
 
+## Persona Detection (run first)
+
+Read the active persona from context:
+- Cursor: `.cursor/context.md` — look for `## Active Persona`
+- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+
+If section missing or value is empty → treat as `engineer` (backwards compatible default).
+
+Branch to the appropriate preamble below, then continue with the standard execution flow.
+
+### Persona Preambles
+
+**engineer:** Load active stack from context + active rules. Show: current stack, active phase, last session summary if present. Ask for session goal.
+
+**designer:** Load active Figma context file if present (`docs/figma-context-*.md`). Show: active design tokens summary, last session's prototype state. Ask which frame or component to work on today.
+
+**pm:** Load active PRD if present (`prds/` or `docs/`). Show: PRD title, story count, validation status. Ask which epic or story to focus on today.
+
+**data-scientist:** Load active EDA doc + experiment log. Show: dataset in use, last experiment's metrics, next hypothesis to test. Ask for today's experiment goal.
+
+---
+
 **1. Context Check**
 - Read `.cursor/context.md`.
-- **Condition**: If the file contains "No Stack Configured" or is missing:
+- **Condition**: If the file is missing or contains no `## Active Persona`:
   - Stop.
-  - Tell the user: "⚠️ Project is not configured. Please run **`@setup-stack`** first."
+  - Tell the user: "⚠️ Project is not configured. Please run **`@set-persona`** first."
 
 **2. Context Loading**
 - Display a brief summary of the active context:
