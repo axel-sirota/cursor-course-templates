@@ -1,5 +1,8 @@
 # Project Context: Python FastAPI
 
+## Architecture Shape
+REST API — FastAPI async endpoints, SQLAlchemy 2.0 ORM, Alembic migrations, Pydantic v2 schemas. Modular monolith pattern. Use for: Python-first teams, ML-adjacent services, teams wanting auto-generated OpenAPI docs.
+
 ## Tech Stack
 - **Language**: Python 3.11+
 - **Framework**: FastAPI
