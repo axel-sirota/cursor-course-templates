@@ -429,7 +429,112 @@ When you run `@detect-stack` on a codebase:
 
 ## Typical Session Flow
 
-### For Greenfield (New Project)
+> **Which flow is mine?** Run `/set-persona` first. Your persona determines which flow below applies.
+> Engineers and Data Scientists also run `/setup-stack` after setting a persona.
+
+### Engineer Session Flow
+
+```bash
+# 1. First time setup
+@set-persona → pick "engineer"
+@setup-stack → pick your stack (e.g. "python-fastapi")
+
+# 2. Start session
+@start-session → state your goal
+
+# 3. Plan
+@architect "Build a blog API"    # or: @architect plan.md
+
+# 4. Task decomposition
+@engineer-tasks                  # produces docs/tasks-{feature}.md
+
+# 5. Implement (TDD loop, per task)
+@engineer-implement              # red→green→refactor, subagents auto-fire
+
+# 6. Review
+@code-review                     # security-auditor + code-reviewer
+
+# 7. Wrap up
+@next-session                    # summary + transition doc
+git commit -m "feat: ..."
+```
+
+### Designer Session Flow
+
+```bash
+# 1. First time setup
+@set-persona → pick "designer"
+# No setup-stack needed
+
+# 2. Start session
+@start-session → state which screen/component you're building
+
+# 3. Extract Figma context
+@designer-extract https://www.figma.com/file/...
+
+# 4. Assemble prototype
+@designer-compose docs/figma-context-{frame}.md
+
+# 5. Refine interactively
+@designer-iterate   # click elements on the running page, describe changes
+
+# 6. Verify responsiveness
+# (auto-fires in designer-handoff)
+
+# 7. Ship
+@designer-handoff   # generates PR_DESCRIPTION.md + breakpoint screenshots
+@next-session
+```
+
+### PM Session Flow
+
+```bash
+# 1. First time setup
+@set-persona → pick "pm"
+# No setup-stack needed
+
+# 2. Start session
+@start-session → state the feature or problem
+
+# 3. Draft PRD
+@architect "feature description"   # produces PRD draft
+
+# 4. Validate (Three Amigos critique)
+@pm-validate    # dev-perspective + qa-perspective + gap-detector fire
+
+# 5. Decompose into tickets
+@pm-decompose   # produces Jira-ready tickets with dependencies
+
+# 6. Track (once engineers are working)
+@pm-report
+
+# 7. Wrap up
+@next-session
+```
+
+### Data Scientist Session Flow
+
+```bash
+# 1. First time setup
+@set-persona → pick "data-scientist"
+@setup-stack → pick "python-datascience", "python-spark", or "python-dbt-snowflake"
+
+# 2. Start session
+@start-session → state your experiment goal
+
+# 3. Explore + experiment (notebook stacks)
+# Run EDA notebook → form hypothesis → run experiment with MLflow tracking
+
+# 4. Validate
+@code-review   # checks reproducibility, model card, DVC tracking
+
+# 5. Wrap up
+@next-session
+```
+
+---
+
+### For Greenfield Engineer (New Project — detailed)
 
 ```bash
 # 1. Setup
@@ -438,6 +543,7 @@ cd my-project
 cursor .  # or claude
 
 # 2. Configure (Cursor syntax shown, add / for Claude Code)
+@set-persona → "engineer"
 @setup-stack
 → Select "python-fastapi"
 
