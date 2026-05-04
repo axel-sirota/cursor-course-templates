@@ -44,7 +44,7 @@ async def create_comment(
     """
     try:
         comment_service = CommentService(conn)
-        comment = comment_service.create_comment(
+        comment = await comment_service.create_comment(
             post_id=post_id,
             content=request.content,
             author_id=request.authorId
@@ -77,7 +77,7 @@ async def list_comments(post_id: str, conn = Depends(get_db)):
     """
     try:
         comment_service = CommentService(conn)
-        comments = comment_service.list_comments_by_post(post_id)
+        comments = await comment_service.list_comments_by_post(post_id)
         
         return [
             CommentResponse(

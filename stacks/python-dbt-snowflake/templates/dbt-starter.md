@@ -71,7 +71,8 @@ models:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
       user: "{{ env_var('SNOWFLAKE_USER') }}"
-      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE', '') }}"
       role: transformer_dev
       database: analytics_dev
       warehouse: transforming_xs
@@ -81,13 +82,18 @@ models:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
       user: "{{ env_var('SNOWFLAKE_USER') }}"
-      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE', '') }}"
       role: transformer_prod
       database: analytics
       warehouse: transforming_m
       schema: analytics
       threads: 8
 ```
+
+> **Auth note**: Snowflake deprecated password auth for service accounts. Use key-pair auth above. 
+> Generate key: `openssl genrsa -out ~/.ssh/snowflake_key.p8 2048`
+> Set SNOWFLAKE_PRIVATE_KEY_PATH to the path of the key file.
 
 ---
 
@@ -142,23 +148,23 @@ models:
     columns:
       - name: order_id
         description: "Unique order identifier."
-        tests:
+        data_tests:
           - not_null
           - unique
       - name: customer_id
         description: "Foreign key to stg_customers."
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('stg_customers')
               field: customer_id
       - name: order_date
         description: "Date the order was placed, cast from created_at timestamp."
-        tests:
+        data_tests:
           - not_null
       - name: status
         description: "Current order status."
-        tests:
+        data_tests:
           - not_null
           - accepted_values:
               values: ['placed', 'shipped', 'completed', 'cancelled']

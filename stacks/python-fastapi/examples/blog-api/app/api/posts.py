@@ -41,7 +41,7 @@ async def create_post(request: CreatePostRequest, conn = Depends(get_db)):
     """
     try:
         post_service = PostService(conn)
-        post = post_service.create_post(
+        post = await post_service.create_post(
             title=request.title,
             content=request.content,
             author_id=request.authorId
@@ -75,7 +75,7 @@ async def get_post(post_id: str, conn = Depends(get_db)):
     """
     try:
         post_service = PostService(conn)
-        post = post_service.get_post_by_id(post_id)
+        post = await post_service.get_post_by_id(post_id)
         
         if not post:
             raise HTTPException(status_code=404, detail="Post not found")

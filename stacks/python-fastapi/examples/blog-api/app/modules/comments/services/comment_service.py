@@ -19,7 +19,7 @@ class CommentService:
         """
         self.conn = conn
     
-    def create_comment(self, post_id: str, content: str, author_id: str) -> Dict[str, Any]:
+    async def create_comment(self, post_id: str, content: str, author_id: str) -> Dict[str, Any]:
         """
         Create a new comment on a post.
         
@@ -62,7 +62,7 @@ class CommentService:
         
         return dict(comment)
     
-    def list_comments_by_post(self, post_id: str) -> List[Dict[str, Any]]:
+    async def list_comments_by_post(self, post_id: str) -> List[Dict[str, Any]]:
         """
         List all comments for a post.
         

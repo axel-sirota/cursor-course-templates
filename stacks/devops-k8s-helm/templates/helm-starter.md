@@ -74,6 +74,8 @@ podSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
   fsGroup: 2000
+  seccompProfile:
+    type: RuntimeDefault
 
 # Container-level security context
 securityContext:

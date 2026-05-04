@@ -10,7 +10,7 @@ models:
         description: >
           Unique identifier for a placed order, sourced from the id column in the
           transactional orders table. Never reused after cancellation.
-        tests:
+        data_tests:
           - not_null
           - unique
 
@@ -18,7 +18,7 @@ models:
         description: >
           Foreign key referencing the customer who placed this order.
           Sourced from customer_id in the transactional orders table.
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('stg_customers')
@@ -28,21 +28,21 @@ models:
         description: >
           Date the order was placed, cast from the created_at timestamp to DATE.
           Used as the primary date dimension for revenue reporting.
-        tests:
+        data_tests:
           - not_null
 
       - name: updated_at
         description: >
           Timestamp of the last update to this order record in the source system.
           Used as the incremental filter key in downstream fact models.
-        tests:
+        data_tests:
           - not_null
 
       - name: status
         description: >
           Current fulfillment status of the order. Valid values are placed, shipped,
           completed, and cancelled. Sourced from the status column in the transactional orders table.
-        tests:
+        data_tests:
           - not_null
           - accepted_values:
               values: ['placed', 'shipped', 'completed', 'cancelled']
@@ -51,7 +51,7 @@ models:
         description: >
           Total order value in US cents including all items, before discounts.
           Divide by 100 to get dollar value.
-        tests:
+        data_tests:
           - not_null
 
       - name: discount_amount_cents
@@ -63,5 +63,5 @@ models:
         description: >
           Boolean flag indicating whether this order has been soft-deleted in the
           source system. Defaults to FALSE when the source column is null.
-        tests:
+        data_tests:
           - not_null

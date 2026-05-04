@@ -47,7 +47,7 @@ async def register(request: RegisterRequest, conn = Depends(get_db)):
     """
     try:
         user_service = UserService(conn)
-        user = user_service.create_user(request.username, request.password)
+        user = await user_service.create_user(request.username, request.password)
         
         return RegisterResponse(
             userId=str(user["id"]),
@@ -73,7 +73,7 @@ async def login(request: LoginRequest, conn = Depends(get_db)):
     """
     try:
         user_service = UserService(conn)
-        user = user_service.authenticate_user(request.username, request.password)
+        user = await user_service.authenticate_user(request.username, request.password)
         
         if not user:
             raise HTTPException(status_code=401, detail="Invalid credentials")

@@ -82,7 +82,7 @@ buf breaking --against '.git#branch=main'
 ```bash
 go get google.golang.org/grpc@latest
 go get google.golang.org/protobuf@latest
-go get google.golang.org/grpc/health@latest
+go get google.golang.org/grpc@latest  # health package is part of the main grpc module; import as "google.golang.org/grpc/health" and "google.golang.org/grpc/health/grpc_health_v1"
 go get github.com/testify/assert@latest
 go get github.com/testify/require@latest
 go get go.uber.org/mock/gomock@latest

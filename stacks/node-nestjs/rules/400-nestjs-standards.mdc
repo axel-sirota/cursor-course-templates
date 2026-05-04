@@ -1,0 +1,26 @@
+# NestJS Standards
+
+## Module organization
+- One module per domain feature. `UsersModule`, `AuthModule`, `OrdersModule`.
+- Never import services directly across modules — import the module.
+- Export only what other modules need — keep everything else module-private.
+
+## Dependency Injection
+- All services, guards, and interceptors are `@Injectable()`.
+- Constructor injection only — no property injection.
+- `@Optional()` for truly optional deps; don't use `| undefined` workarounds.
+
+## Guards and Interceptors
+- Authentication via `JwtAuthGuard` (extends `AuthGuard('jwt')`) — apply at controller or route level.
+- Global exception filter: `HttpExceptionFilter` implements `ExceptionFilter`.
+- Response envelope via interceptor, not manual wrapping in each controller.
+
+## Validation
+- `ValidationPipe` with `whitelist: true, forbidNonWhitelisted: true, transform: true` globally in `main.ts`.
+- All DTOs use `class-validator` decorators (`@IsString()`, `@IsEmail()`, `@IsOptional()` etc.).
+- Never validate in service — DTOs handle all input shape validation.
+
+## TypeORM
+- Entities in `*.entity.ts` files, one per domain object.
+- Migrations via TypeORM CLI: `npx typeorm migration:generate`, never `synchronize: true` in production.
+- Transactions via `DataSource.transaction()` or `@Transactional()` for multi-repo operations.

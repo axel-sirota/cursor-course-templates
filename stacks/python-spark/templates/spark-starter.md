@@ -25,19 +25,24 @@ Use this scaffold when creating a new Spark pipeline from scratch.
 
 ```python
 import pytest
+from delta import configure_spark_with_delta_pip
 from pyspark.sql import SparkSession
 
-
 @pytest.fixture(scope="session")
-def spark():
-    return (
-        SparkSession.builder
-        .master("local[2]")
+def spark() -> SparkSession:
+    builder = (
+        SparkSession.builder.master("local[*]")
         .appName("test")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-        .getOrCreate()
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        )
     )
+    spark = configure_spark_with_delta_pip(builder).getOrCreate()
+    spark.sparkContext.setLogLevel("ERROR")
+    yield spark
+    spark.stop()
 ```
 
 ## Example Transform Function
@@ -135,3 +140,14 @@ pytest>=8.0.0
 pytest-spark>=0.6.0
 pyyaml>=6.0.0
 ```
+
+## Version Compatibility
+
+| PySpark | Delta Lake | Python |
+|---------|-----------|--------|
+| 3.5.x   | 3.2.x     | 3.9-3.11 |
+| 3.4.x   | 2.4.x     | 3.9-3.11 |
+| 3.3.x   | 2.2.x     | 3.8-3.10 |
+
+> ⚠️ Delta Lake version must match PySpark version. Use delta-spark==3.2.0 with pyspark==3.5.x.
+> Install: `pip install delta-spark==3.2.0 pyspark==3.5.3`

@@ -195,13 +195,16 @@ async def create_post(
 ### Input Validation
 Use Pydantic for automatic validation:
 ```python
+from pydantic import BaseModel, Field, field_validator
+
 class CreatePostRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     content: str = Field(..., min_length=1, max_length=10000)
     author_id: str = Field(alias="authorId")
-    
-    @validator('title')
-    def validate_title(cls, v):
+
+    @field_validator('title')
+    @classmethod
+    def validate_title(cls, v: str) -> str:
         if not v.strip():
             raise ValueError("Title cannot be empty")
         return v.strip()

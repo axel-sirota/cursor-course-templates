@@ -94,29 +94,26 @@ Create in app/modules/{module}/models/domain_models.py:
 
 **Base Model (business fields only):**
 ```python
+from pydantic import BaseModel, Field, ConfigDict
+
 class ResourceBase(BaseModel):
     """Base Resource model with business fields only"""
+    model_config = ConfigDict(from_attributes=True)
+
     name: str = Field(..., description="Resource name")
     description: str = Field(..., description="Resource description")
     owner_id: str = Field(..., description="Owner identifier")
-    
-    class Config:
-        from_attributes = True
 ```
 
 **Full Model (includes database metadata):**
 ```python
 class Resource(ResourceBase):
     """Full Resource model with all database fields"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str = Field(..., description="Unique resource identifier")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
-    
-    class Config:
-        from_attributes = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat(),
-        }
 ```
 
 **Operation Models:**
@@ -127,11 +124,10 @@ class ResourceCreate(ResourceBase):
 
 class ResourceUpdate(BaseModel):
     """Resource update model (only updatable fields)"""
+    model_config = ConfigDict(from_attributes=True)
+
     name: Optional[str] = None
     description: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
 ```
 
 ### 5. Repository Implementation

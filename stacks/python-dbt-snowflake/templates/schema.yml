@@ -8,17 +8,17 @@ models:
     columns:
       - name: {primary_key}_id
         description: "{description}"
-        tests:
+        data_tests:
           - not_null
           - unique
       - name: {foreign_key}_id
         description: "{description}"
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('{referenced_model}')
               field: {foreign_key}_id
       - name: {date_column}_at
         description: "{description}"
-        tests:
+        data_tests:
           - not_null

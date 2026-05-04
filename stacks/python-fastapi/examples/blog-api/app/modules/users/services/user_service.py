@@ -32,7 +32,7 @@ class UserService:
         """
         return hashlib.sha256(password.encode()).hexdigest()
     
-    def create_user(self, username: str, password: str) -> Dict[str, Any]:
+    async def create_user(self, username: str, password: str) -> Dict[str, Any]:
         """
         Create a new user.
         
@@ -74,7 +74,7 @@ class UserService:
         
         return dict(user)
     
-    def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+    async def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
         """
         Authenticate a user.
         
@@ -105,7 +105,7 @@ class UserService:
         
         return None
     
-    def get_user_by_id(self, user_id: str) -> Optional[Dict[str, Any]]:
+    async def get_user_by_id(self, user_id: str) -> Optional[Dict[str, Any]]:
         """
         Get user by ID.
         

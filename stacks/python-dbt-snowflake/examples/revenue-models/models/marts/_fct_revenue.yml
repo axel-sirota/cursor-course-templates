@@ -16,7 +16,7 @@ models:
         description: >
           Surrogate key generated from order_date. Uniquely identifies one row
           in this table (one row per day).
-        tests:
+        data_tests:
           - not_null
           - unique
 
@@ -24,53 +24,53 @@ models:
         description: >
           The calendar date for this revenue row. All completed orders placed on
           this date are included in the aggregated metrics.
-        tests:
+        data_tests:
           - not_null
 
       - name: order_count
         description: >
           Count of distinct completed orders placed on this date.
-        tests:
+        data_tests:
           - not_null
 
       - name: customer_count
         description: >
           Count of distinct customers who placed a completed order on this date.
           A customer who placed multiple orders on the same day is counted once.
-        tests:
+        data_tests:
           - not_null
 
       - name: gross_revenue_cents
         description: >
           Sum of total_amount_cents across all completed orders on this date,
           before discounts. In US cents — divide by 100 for dollar value.
-        tests:
+        data_tests:
           - not_null
 
       - name: total_discounts_cents
         description: >
           Sum of discount_amount_cents across all completed orders on this date.
           In US cents — divide by 100 for dollar value.
-        tests:
+        data_tests:
           - not_null
 
       - name: net_revenue_cents
         description: >
           Gross revenue minus total discounts for this date. This is the primary
           revenue metric used in financial reporting. In US cents — divide by 100.
-        tests:
+        data_tests:
           - not_null
 
       - name: total_items_sold
         description: >
           Total count of individual line items sold across all completed orders
           on this date. Sourced from stg_order_items.
-        tests:
+        data_tests:
           - not_null
 
       - name: _loaded_at
         description: >
           Timestamp when this row was last written by dbt. Used for pipeline
           observability and debugging incremental load issues.
-        tests:
+        data_tests:
           - not_null
