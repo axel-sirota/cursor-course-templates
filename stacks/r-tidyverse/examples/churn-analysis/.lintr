@@ -1,0 +1,9 @@
+linters: linters_with_defaults(
+  line_length_linter(80),
+  assignment_linter(),
+  object_name_linter("snake_case"),
+  pipe_consistency_linter(),
+  trailing_whitespace_linter(),
+  commented_code_linter()
+)
+exclusions: list("renv")

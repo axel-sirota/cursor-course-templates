@@ -1,0 +1,29 @@
+---
+description: R testing with testthat 3rd edition
+alwaysApply: true
+---
+
+# R Testing Rules
+
+## testthat 3rd Edition
+Every test file starts with `local_edition(3)`. Use `withr` package for temporary state (files, options, environment variables).
+
+## Test Organization
+One test file per `R/` source file: `R/features.R` → `tests/testthat/test-features.R`. Function names match: test for `compute_ratio()` is in a block `test_that("compute_ratio handles NA", {...})`.
+
+## Fixture Data
+Test fixtures live in `tests/testthat/fixtures/` or `data/fixtures/`. Use `readr::read_csv(testthat::test_path("fixtures/sample.csv"))`. Never hardcode absolute paths.
+
+## What to Test
+- Happy path: expected transformation with fixture data
+- Edge cases: empty data frame, NA values, zero-row input
+- Error cases: `expect_error(fn(bad_input), class = "my_error_class")`
+- Snapshot tests: `expect_snapshot(print(complex_object))` for outputs that are hard to assert structurally
+
+## What NOT to Test
+- ggplot2 visual output (use snapshot tests only if visual regression matters)
+- Quarto rendering (test the functions, not the document)
+- External API calls (mock with httptest2)
+
+## Coverage Target
+`covr::package_coverage()` on the `R/` directory. Target: > 80% line coverage on `R/` functions.

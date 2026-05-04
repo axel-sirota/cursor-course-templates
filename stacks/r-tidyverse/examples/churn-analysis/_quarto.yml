@@ -1,0 +1,21 @@
+project:
+  title: "Customer Churn Analysis"
+  type: default
+  output-dir: _output
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    embed-resources: true
+  pdf:
+    documentclass: article
+    toc: true

@@ -1,0 +1,37 @@
+---
+description: MLOps code style — typing, naming, experiment hygiene
+alwaysApply: true
+---
+
+# MLOps Style Rules
+
+## Type Hints (mandatory)
+- All public functions: full type hints including return type.
+- DataFrames: `pd.DataFrame` with column names documented in docstring.
+- MLflow run IDs: `str`. Model versions: `int`. Stages: `Literal["Staging", "Production", "Archived"]`.
+
+## Naming Conventions
+- Training scripts: `train_{model_type}.py` (e.g., `train_xgboost.py`)
+- Feature functions: `compute_{feature_group}(df: pd.DataFrame) -> pd.DataFrame`
+- Metric functions: `evaluate_{metric}(y_true, y_pred) -> float`
+- MLflow experiment: `{project_name}/{model_family}` — no spaces, lowercase, hyphens
+- Model registry name: `{project_name}-{target}` (e.g., `churn-30day`, `fraud-transaction`)
+
+## MLflow Logging Discipline
+- Log ALL hyperparameters at run start: `mlflow.log_params(params_dict)`
+- Log metrics at end with step if time-series: `mlflow.log_metric("val_auc", auc, step=epoch)`
+- Log model with signature: always pass `input_example` to `mlflow.sklearn.log_model()` so the registry auto-infers schema
+- Use tags for non-numeric metadata: `mlflow.set_tags({"data_version": "v3", "triggered_by": "ci"})`
+
+## No Magic Numbers
+- All thresholds (accuracy floor, latency SLA, drift threshold) live in `shared/config.py` as pydantic-settings fields with env var overrides.
+- Never hard-code `if accuracy > 0.85` — use `if accuracy > settings.min_accuracy_threshold`.
+
+## Reproducibility Checklist (enforced in pipeline.py)
+```python
+# Every training run must:
+mlflow.log_param("random_seed", SEED)
+mlflow.log_param("data_hash", compute_data_hash(df))
+mlflow.log_artifact("requirements.txt")
+mlflow.set_tag("git_commit", subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip())
+```

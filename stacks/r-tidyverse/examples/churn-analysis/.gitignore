@@ -1,0 +1,26 @@
+# Data — raw and processed data are never committed
+data/raw/
+data/processed/
+
+# Model artifacts — commit only if small (< 5MB)
+models/
+
+# Quarto output
+_output/
+_freeze/
+.quarto/
+
+# renv cache (lockfile IS committed, cache is not)
+renv/library/
+renv/staging/
+renv/sandbox/
+
+# R session artifacts
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# OS
+.DS_Store
+Thumbs.db

@@ -64,10 +64,12 @@ Available stacks for Data Scientist persona:
 
 Analysis & Modeling:
   1. python-datascience     — Notebooks + ML (Jupyter + scikit-learn + MLflow)
+  2. r-tidyverse            — Statistical Computing (R + tidymodels + Quarto + Plumber)
+  3. python-mlops           — MLOps Pipeline (MLflow + FastAPI serving + Pandera)
 
 Data Engineering:
-  2. python-spark           — Distributed Pipelines (PySpark + Delta Lake)
-  3. python-dbt-snowflake   — Analytics Modeling (dbt Core + Snowflake/BigQuery)
+  4. python-spark           — Distributed Pipelines (PySpark + Delta Lake)
+  5. python-dbt-snowflake   — Analytics Modeling (dbt Core + Snowflake/BigQuery)
 ```
 
 ---
@@ -86,7 +88,7 @@ Check that the selected stack is in the allowed list for the active persona:
 
 - **engineer**: `python-fastapi`, `go-gin`, `go-grpc`, `java-spring`, `node-express`, `node-nestjs`
 - **devops**: `devops-terraform`, `devops-ansible`, `devops-k8s-helm`
-- **data-scientist**: `python-datascience`, `python-spark`, `python-dbt-snowflake`
+- **data-scientist**: `python-datascience`, `python-spark`, `python-dbt-snowflake`, `r-tidyverse`, `python-mlops`
 
 If the selection is **not** in the allowed list for the persona, respond:
 
@@ -140,7 +142,7 @@ Respond:
 |---------|---------------|
 | engineer | python-fastapi, go-gin, go-grpc, java-spring, node-express, node-nestjs |
 | devops | devops-terraform, devops-ansible, devops-k8s-helm |
-| data-scientist | python-datascience, python-spark, python-dbt-snowflake |
+| data-scientist | python-datascience, python-spark, python-dbt-snowflake, r-tidyverse, python-mlops |
 | pm | (none — no stack required) |
 
 ---

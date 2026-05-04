@@ -20,6 +20,7 @@
 - **Idempotency**: All scripts must be idempotent (safe to run multiple times).
 - **Validation**: Run `terraform validate` and `tflint` before commit.
 - **Secrets**: No secrets in code. Use `var.TF_VAR_name` or Vault.
+- **No application persistence**: Terraform manages infrastructure state via `terraform.tfstate` (remote backend in S3/GCS) — there is no application database. Do not scaffold a database layer.
 
 ## Active Phase
 - Current: Phase 0 (Planning/Linting)

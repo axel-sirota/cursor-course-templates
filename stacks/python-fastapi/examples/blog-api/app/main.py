@@ -1,16 +1,26 @@
 """
 Blog API - FastAPI Application
 """
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import init_db
 from app.api import auth, posts, comments
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize resources on startup and clean up on shutdown."""
+    init_db()
+    yield
+
+
 app = FastAPI(
     title="Blog API",
     description="Session-based FastAPI blog implementation",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -21,12 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Initialize database on startup
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database tables on startup."""
-    init_db()
 
 # Health check endpoint
 @app.get("/health")

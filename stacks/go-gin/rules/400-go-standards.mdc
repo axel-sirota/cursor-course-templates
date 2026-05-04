@@ -1,6 +1,7 @@
 ---
 description: Go Gin & GORM Standards
 globs: **/*.go
+alwaysApply: true
 ---
 
 # Go Gin Guidelines

@@ -1,0 +1,60 @@
+---
+description: R project architecture — directory structure, function design, Quarto organization
+alwaysApply: true
+---
+
+# R Architecture Rules
+
+## Directory Structure
+```
+R/
+  data_processing.R     # data ingestion + cleaning functions
+  features.R            # feature engineering functions
+  modeling.R            # model fitting + evaluation functions
+  visualization.R       # ggplot2 plot functions
+  utils.R               # shared utilities (type checks, formatters)
+analysis/
+  01_eda.qmd            # exploratory data analysis
+  02_modeling.qmd       # model training + evaluation
+  03_report.qmd         # stakeholder-facing output
+tests/
+  testthat/
+    test_data_processing.R
+    test_features.R
+    test_modeling.R
+data/
+  raw/                  # never modified, gitignored if large
+  processed/            # cleaned data, committed if small
+  fixtures/             # test fixtures, always committed
+plumber/
+  api.R                 # Plumber API (if exposing predictions)
+renv.lock               # committed
+_quarto.yml             # project-level Quarto config
+```
+
+## Function Signatures
+- Input: tidyverse-style (first arg is data frame, returns data frame for pipeline-ability)
+- Output: explicit return type documented in roxygen2 `@return`
+- No global state: functions read from arguments only, never from `Sys.getenv()` inside — pass config as argument
+
+## Tidy Evaluation Pattern
+For functions that take column names as arguments:
+```r
+compute_ratio <- function(df, numerator, denominator) {
+  df |>
+    dplyr::mutate(ratio = {{ numerator }} / {{ denominator }})
+}
+```
+Never use `deparse(substitute())` or `eval(parse(...))`.
+
+## Plumber API Pattern
+Plumber endpoints are thin wrappers around `R/` functions:
+```r
+#* @post /predict
+#* @param features JSON features object
+function(features) {
+  df <- jsonlite::fromJSON(features)
+  result <- predict_model(df)  # from R/modeling.R
+  list(prediction = result)
+}
+```

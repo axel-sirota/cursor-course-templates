@@ -1,0 +1,32 @@
+Package: churnanalysis
+Title: Customer Churn Analysis
+Version: 0.1.0
+Authors@R:
+    person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Description: Reproducible churn analysis using tidyverse and tidymodels.
+  Exposes a Plumber API for inference.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    dplyr,
+    ggplot2,
+    tidyr,
+    purrr,
+    readr,
+    tidymodels,
+    recipes,
+    parsnip,
+    workflows,
+    yardstick,
+    rsample,
+    tune,
+    here,
+    jsonlite,
+    plumber
+Suggests:
+    testthat (>= 3.0.0),
+    withr,
+    covr,
+    httptest2

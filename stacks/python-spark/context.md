@@ -27,5 +27,20 @@ Use python-dbt-snowflake for: SQL-first transformation logic, analytics engineer
 - Test transform logic with chispa — do not test Spark infrastructure.
 - Never collect() large DataFrames in production code.
 
+## Entry Point & Structure
+- **Entry point**: `jobs/{job_name}.py` — each job is a standalone script with `if __name__ == "__main__":`
+- **Directory layout**:
+  ```
+  jobs/               ← job entrypoints (one file per pipeline stage)
+  src/transforms/     ← pure transform functions (tested with chispa)
+  src/schemas/        ← StructType schema definitions
+  tests/unit/         ← chispa DataFrame equality tests
+  tests/integration/  ← full pipeline tests with tmp Delta paths
+  configs/            ← YAML job configs (paths, partition keys, options)
+  data/fixtures/      ← small Parquet/CSV test fixtures
+  ```
+- **Config**: YAML job config loaded via `PyYAML`; Delta paths and options passed as config dict to job functions — never hardcoded
+- **Test command**: `pytest tests/unit/` (fast, local Spark) or `pytest tests/` (full suite)
+
 ## Active Phase
 - Current: Phase 0 (Skeleton)

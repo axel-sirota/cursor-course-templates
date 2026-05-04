@@ -1,0 +1,43 @@
+---
+description: MLOps testing — unit tests for features, integration for pipelines, no live MLflow in unit tests
+alwaysApply: true
+---
+
+# MLOps Testing Rules
+
+## Unit Tests (no MLflow, no network)
+- Test feature engineering functions in isolation — input DataFrame in, output DataFrame out.
+- Mock the MLflow client with `unittest.mock.patch("mlflow.log_metric")` — never call real MLflow in unit tests.
+- Use `pytest.fixture` with small hardcoded DataFrames (5–20 rows). Never read from disk in unit tests.
+- Evaluation metric functions must be tested against known inputs/outputs.
+
+## Integration Tests (local MLflow tracking URI)
+- Set `MLFLOW_TRACKING_URI=sqlite:///tmp/test-mlruns.db` in conftest.py.
+- Run the full pipeline against the committed fixture dataset (data/fixtures/train_sample.csv).
+- Assert: run was created, model artifact was logged, registered model version exists.
+- Clean up: delete the tmp DB in teardown.
+
+## Serving Tests (FastAPI TestClient)
+- Use `httpx.AsyncClient` with `ASGITransport` for async FastAPI serving tests.
+- Load model from a tmp MLflow store seeded with a test model artifact in conftest.py.
+- Assert: /health returns 200 + model name, /predict returns correct schema, /predict with bad input returns 422.
+
+## Data Validation Tests
+- Test Pandera schema against fixture data — both valid (should pass) and invalid (should raise SchemaError).
+- Test distribution checks against known good/bad distributions.
+
+## Performance Baseline Tests
+- One test asserts: training on fixture data completes in < 60 seconds.
+- One test asserts: serving p99 latency < 100ms on 100 sequential requests (using time.perf_counter).
+
+## Test Markers
+```python
+# pytest.ini or pyproject.toml
+[tool.pytest.ini_options]
+markers = [
+    "unit: fast, no external deps",
+    "integration: requires local MLflow",
+    "serving: requires model artifact",
+    "slow: > 10s, skip on CI unless --run-slow",
+]
+```

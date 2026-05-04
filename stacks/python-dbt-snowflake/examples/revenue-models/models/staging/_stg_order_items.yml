@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: stg_order_items
+    description: "Staged order items, 1:1 with raw.ecommerce.order_items. Renamed and typed."
+    config:
+      materialized: view
+    columns:
+      - name: order_item_id
+        description: "Unique identifier for an order line item."
+        data_tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: "Foreign key to stg_orders."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: product_id
+        description: "Identifier of the product ordered."
+        data_tests:
+          - not_null
+      - name: line_amount_cents
+        description: "Total revenue for this line item (quantity * unit_price)."
+        data_tests:
+          - not_null

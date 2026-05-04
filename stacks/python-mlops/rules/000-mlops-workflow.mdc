@@ -1,0 +1,25 @@
+---
+description: MLOps development workflow — experiment → register → serve lifecycle
+alwaysApply: true
+---
+
+# MLOps Workflow Rules
+
+## Experiment-First
+Before writing a training pipeline, define the experiment in MLflow: set experiment name, define metrics to track, define what "better" means. `mlflow.set_experiment("project/experiment-name")` is the first line of every training script.
+
+## Red-Green-Refactor for ML
+Write a failing evaluation test (assert model accuracy > baseline) → train the model → make it green. Use a fixed random seed and a small held-out validation fixture (50–200 rows) committed to the repo. Tests must run in under 30 seconds on CI — no live MLflow server required.
+
+## Registry Promotion Gate
+A model is not "ready" until it passes three gates:
+1. Unit tests green (pytest)
+2. Evaluation test green (metric threshold on validation set)
+3. Data validation green (schema check on training data)
+Only after all three does `mlflow.register_model()` run. Never register a model manually from a notebook.
+
+## Serving Validation Loop
+After every model promotion: hit the serving endpoint with the validation fixture, assert predictions match expected shape and range. This is the smoke test. It runs in CI before any deployment.
+
+## CI Gate
+`ruff check` → `mypy` → `pytest` → data validation → training smoke test → serving smoke test. All must pass. A failed gate blocks promotion.

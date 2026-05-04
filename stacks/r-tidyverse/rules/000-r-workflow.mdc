@@ -1,0 +1,24 @@
+---
+description: R/tidyverse development workflow — notebook-first, function extraction, test loop
+alwaysApply: true
+---
+
+# R Tidyverse Workflow Rules
+
+## Quarto-First
+Every analysis starts as a Quarto document (.qmd). Code lives in named chunks. The document must render cleanly from scratch (`quarto render`) before it is considered done — no relying on objects in the global environment.
+
+## Function Extraction Loop
+Write analysis in a Quarto chunk → extract reusable logic into `R/` function → add testthat test → refactor Quarto to call the function. This keeps the document narrative-focused and the logic testable.
+
+## renv Discipline
+`renv::restore()` at the start of every session. `renv::snapshot()` after every `install.packages()` or `renv::install()`. The lockfile is the source of truth — not your personal library.
+
+## Red-Green-Refactor (testthat)
+Write a failing `test_that()` → implement the `R/` function → make it green. `testthat::test_dir("tests/testthat/")` must pass before committing.
+
+## CI Gate
+`lintr::lint_dir("R/")` → `styler::style_dir("R/", dry = "fail")` → `testthat::test_dir("tests/testthat/")` → `quarto render`. All steps pass on CI.
+
+## Seed Discipline
+Every script and test that uses randomness calls `set.seed(42)` (or project-defined seed from config) at the top. No unseeded random operations.

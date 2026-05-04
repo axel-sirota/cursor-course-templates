@@ -1,0 +1,49 @@
+---
+description: R tidyverse style — pipe, assignment, naming, ggplot2
+alwaysApply: true
+---
+
+# R Style Rules
+
+## Assignment and Pipe
+- Assignment: `<-` always. Never `=` for assignment (only for function arguments).
+- Pipe: `|>` (native pipe, R 4.1+). Never `%>%` (magrittr) in new code.
+- One pipe step per line. Align pipes vertically.
+
+## Naming
+- Objects and functions: `snake_case`
+- Constants: `UPPER_SNAKE_CASE`
+- Files: `snake_case.R`
+- Quarto chunks: named, snake_case (`{r compute-features}`)
+
+## Line Length and Spacing
+- Max line length: 80 characters (lintr default)
+- One blank line between function definitions
+- Space after commas, around `<-`, around `|>` on its own line
+- No trailing whitespace
+
+## ggplot2 Standards
+Every plot in a deliverable document must have:
+```r
+ggplot(data, aes(x = col_a, y = col_b)) +
+  geom_point() +
+  labs(
+    title = "Descriptive title",
+    x = "X-axis label (units)",
+    y = "Y-axis label (units)",
+    caption = "Source: {data source} | Analysis: {author}"
+  ) +
+  theme_minimal()
+```
+No default grey background in deliverables. `theme_grey()` only in exploratory chunks.
+
+## Roxygen2 for Functions in R/
+Every exported function gets roxygen2 docs:
+```r
+#' Compute churn risk features
+#'
+#' @param df A data frame with columns: tenure_days, monthly_spend
+#' @return A data frame with added columns: tenure_months, high_value
+#' @export
+compute_features <- function(df) { ... }
+```

@@ -1,3 +1,8 @@
+---
+description: FastAPI environment setup — Python version, venv, dependencies, database
+alwaysApply: true
+---
+
 # Environment Setup and Dependency Management
 
 ## Purpose

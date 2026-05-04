@@ -1,0 +1,61 @@
+---
+description: MLOps three-layer architecture — training, registry, serving
+alwaysApply: true
+---
+
+# MLOps Architecture Rules
+
+## Three-Layer Separation
+
+### Layer 1 — Training Pipeline (`src/training/`)
+- Data ingestion + validation (Pandera schema check)
+- Feature engineering (pure functions, no side effects)
+- Model training (fit + evaluate)
+- MLflow logging (params, metrics, artifacts)
+- Model registration (only if gates pass)
+
+### Layer 2 — Model Registry (MLflow)
+- Models are registered with `name`, `version`, `stage` (Staging → Production)
+- Every version has a description artifact: training data source, eval metrics, limitations
+- Staging = passed eval gate, not yet A/B tested
+- Production = passed A/B test or manual promotion by ML engineer
+
+### Layer 3 — Serving Layer (`src/serving/`)
+- FastAPI app with single `/predict` endpoint
+- Loads model at startup: `mlflow.pyfunc.load_model(f"models:/{MODEL_NAME}/Production")`
+- No business logic in serving — only schema validation + model.predict() + response formatting
+- Health check endpoint: `/health` returns model name + version currently loaded
+
+## Directory Structure
+```
+src/
+  training/
+    pipeline.py        # orchestrates the full training run
+    features.py        # pure feature engineering functions
+    evaluate.py        # evaluation metrics + threshold checks
+    validate.py        # Pandera schema + distribution checks
+  serving/
+    main.py            # FastAPI app
+    schemas.py         # Pydantic request/response models
+    loader.py          # mlflow.pyfunc.load_model() wrapper
+  shared/
+    config.py          # pydantic-settings config (env vars)
+    logging.py         # structured logging setup
+tests/
+  unit/
+    test_features.py   # pure function tests (no MLflow)
+    test_validate.py   # schema validation tests
+  integration/
+    test_pipeline.py   # full pipeline with tmp MLflow tracking URI
+    test_serving.py    # FastAPI test client
+data/
+  fixtures/
+    train_sample.csv   # small fixed fixture for CI
+    validation.csv     # held-out fixture for eval tests
+mlruns/               # local MLflow tracking (gitignored)
+```
+
+## MLflow Tracking Structure
+- Experiment name: `{project}/{component}` (e.g., `churn/v2-xgboost`)
+- Run tags: `git_commit`, `data_hash`, `triggered_by` (manual/ci/scheduled)
+- Logged artifacts: trained model, feature importance plot, confusion matrix, requirements.txt

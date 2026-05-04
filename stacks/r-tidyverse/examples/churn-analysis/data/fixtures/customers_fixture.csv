@@ -1,0 +1,6 @@
+customer_id,tenure_days,monthly_spend,support_tickets,churned
+c001,365,50.0,1,0
+c002,90,120.0,5,1
+c003,730,200.0,0,0
+c004,180,75.5,2,0
+c005,45,155.0,8,1

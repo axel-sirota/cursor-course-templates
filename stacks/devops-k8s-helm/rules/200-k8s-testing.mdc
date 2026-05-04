@@ -1,7 +1,7 @@
 ---
 description: Kubernetes and Helm testing rules — lint, schema validation, unit tests, integration tests, security scanning
 globs: ["**/Chart.yaml", "**/values*.yaml", "**/templates/*.yaml"]
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Kubernetes & Helm Testing Rules

@@ -25,5 +25,12 @@ Ansible configures what Terraform created.
 - Use handlers for service restarts — never restart in a task directly.
 - Secrets in Ansible Vault — never plaintext in vars files.
 
+## Entry Point & Structure
+- **Entry point**: `site.yml` — top-level playbook that imports all roles; run with `ansible-playbook site.yml -i inventories/dev/hosts.yml`
+- **Role entry**: `roles/{role_name}/tasks/main.yml` — first file executed for a role
+- **Config/env**: `group_vars/{group}/vault.yml` (Ansible Vault encrypted) for secrets; `group_vars/{group}/vars.yml` for non-secret group config; `host_vars/{host}/vars.yml` for host-specific overrides
+- **No persistence**: Ansible configures servers — there is no application database to scaffold
+- **Test command**: `molecule test` (full converge + idempotency + verify cycle)
+
 ## Active Phase
 - Current: Phase 0 (Skeleton)

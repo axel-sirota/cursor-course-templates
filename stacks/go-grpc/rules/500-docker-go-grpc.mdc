@@ -1,6 +1,6 @@
 ---
 description: Multi-stage Docker build patterns for gRPC Go services
-alwaysApply: false
+alwaysApply: true
 globs: ["Dockerfile", "docker-compose*.yml", "*.dockerfile"]
 ---
 

@@ -27,5 +27,11 @@ Use node-express for: small APIs, minimal framework preference, quick prototypes
 - Guards for authentication/authorization. Never check JWT in a controller.
 - Interceptors for cross-cutting: logging, response transformation, caching.
 
+## Entry Point & Structure
+- **Entry point**: `src/main.ts` — bootstraps NestJS app with `NestFactory.create()`, enables `ValidationPipe` globally, starts listening
+- **App module**: `src/app.module.ts` — root module, imports all feature modules
+- **Config**: `@nestjs/config` with `ConfigModule.forRoot({ isGlobal: true })` — reads from `.env` via `ConfigService`
+- **Test command**: `npm test` (Jest unit) or `npm run test:e2e` (supertest)
+
 ## Active Phase
 - Current: Phase 0 (Skeleton)

@@ -1,6 +1,7 @@
 ---
 description: Java Spring Boot Coding Standards & Best Practices
 globs: **/*.java
+alwaysApply: true
 ---
 
 # Java Spring Boot Guidelines

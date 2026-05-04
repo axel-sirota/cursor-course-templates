@@ -33,6 +33,12 @@ that prefer minimal framework overhead.
 - **TypeORM**: class-decorator style entities, mature, familiar to Java/Spring developers.
 - **Drizzle**: SQL-first, zero runtime overhead, fully type-safe. Best when raw SQL control matters.
 
+## Entry Point & Structure
+- **Entry point**: `src/server.ts` — creates the Express app, registers middleware and routes, starts listening
+- **App factory**: `src/app.ts` — creates and configures the Express app (exported for testing without starting server)
+- **Config**: `dotenv` + `process.env` wrapped in a typed config object in `src/config.ts`
+- **Test command**: `npm test` (Jest) or `npm run test:integration`
+
 ## Active Phase
 - Current: Phase 0 (Skeleton)
 

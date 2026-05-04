@@ -21,6 +21,23 @@
 - Log every experiment with params, metrics, seed, and artifact paths
 - Model card required before handoff
 
+## Entry Point & Structure
+- **Entry point**: `notebooks/01_eda.ipynb` → `notebooks/02_features.ipynb` → `notebooks/03_model.ipynb` (sequential)
+- **Reusable logic**: extracted to `src/features.py`, `src/evaluation.py`, `src/data.py` (pure functions, tested)
+- **Directory layout**:
+  ```
+  notebooks/          ← analysis notebooks (numbered sequence)
+  src/                ← reusable functions extracted from notebooks
+  tests/              ← pytest tests for src/ functions
+  data/raw/           ← read-only source data (gitignored if large)
+  data/processed/     ← output of feature pipeline
+  data/fixtures/      ← tiny test samples (always committed)
+  mlruns/             ← MLflow local tracking (gitignored)
+  ```
+- **Config**: environment variables via `python-dotenv` or `os.getenv()` for data paths and API keys; no pydantic-settings (not a service)
+- **Persistence**: local files (Parquet/CSV) + MLflow artifact store; no database
+- **Test command**: `pytest tests/`
+
 ## Active Phase
 - Current: Explore (EDA)
 

@@ -1,0 +1,109 @@
+---
+title: "Customer Churn — Exploratory Data Analysis"
+author: "{Your Name}"
+date: today
+format:
+  html:
+    code-fold: true
+    toc: true
+    embed-resources: true
+---
+
+```{r setup}
+#| include: false
+set.seed(42)
+library(tidyverse)
+library(here)
+source(here::here("R/features.R"))
+```
+
+## Data Loading
+
+```{r load-data}
+df_raw <- readr::read_csv(
+  here::here("data/raw/customers.csv"),
+  show_col_types = FALSE
+)
+dplyr::glimpse(df_raw)
+```
+
+## Feature Engineering
+
+```{r compute-features}
+df <- compute_features(df_raw)
+```
+
+## Summary Statistics
+
+```{r summary-stats}
+df |>
+  dplyr::summarise(
+    n = dplyr::n(),
+    churn_rate = mean(churned),
+    median_tenure_months = median(tenure_months),
+    median_spend = median(monthly_spend),
+    pct_high_value = mean(high_value)
+  )
+```
+
+## Churn Rate by Tenure
+
+```{r plot-tenure-churn}
+df |>
+  dplyr::mutate(
+    churned_label = factor(churned, labels = c("Retained", "Churned"))
+  ) |>
+  ggplot2::ggplot(ggplot2::aes(x = tenure_months, fill = churned_label)) +
+  ggplot2::geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  ggplot2::labs(
+    title = "Tenure Distribution by Churn Status",
+    x = "Tenure (months)",
+    y = "Count",
+    fill = "Status",
+    caption = "Source: customer_churn dataset"
+  ) +
+  ggplot2::theme_minimal()
+```
+
+## Spend vs Churn
+
+```{r plot-spend-churn}
+df |>
+  dplyr::mutate(
+    churned_label = factor(churned, labels = c("Retained", "Churned"))
+  ) |>
+  ggplot2::ggplot(
+    ggplot2::aes(x = churned_label, y = monthly_spend, fill = churned_label)
+  ) +
+  ggplot2::geom_boxplot(alpha = 0.7, show.legend = FALSE) +
+  ggplot2::labs(
+    title = "Monthly Spend by Churn Status",
+    x = "Status",
+    y = "Monthly Spend (USD)",
+    caption = "Source: customer_churn dataset"
+  ) +
+  ggplot2::theme_minimal()
+```
+
+## Support Tickets vs Churn
+
+```{r plot-tickets-churn}
+df |>
+  dplyr::group_by(support_tickets, churned) |>
+  dplyr::summarise(n = dplyr::n(), .groups = "drop") |>
+  dplyr::mutate(
+    churned_label = factor(churned, labels = c("Retained", "Churned"))
+  ) |>
+  ggplot2::ggplot(
+    ggplot2::aes(x = support_tickets, y = n, fill = churned_label)
+  ) +
+  ggplot2::geom_col(position = "fill", alpha = 0.85) +
+  ggplot2::labs(
+    title = "Churn Rate by Support Ticket Volume",
+    x = "Number of Support Tickets",
+    y = "Proportion",
+    fill = "Status",
+    caption = "Source: customer_churn dataset"
+  ) +
+  ggplot2::theme_minimal()
+```

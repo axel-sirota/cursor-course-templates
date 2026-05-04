@@ -1,3 +1,8 @@
+---
+description: NestJS module organization, DI patterns, guards, validation, and TypeORM standards
+alwaysApply: true
+---
+
 # NestJS Standards
 
 ## Module organization
