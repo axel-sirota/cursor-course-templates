@@ -1,0 +1,36 @@
+---
+description: TypeScript style and naming conventions
+alwaysApply: true
+---
+
+# TypeScript Style Guide
+
+## Naming Conventions
+- **camelCase**: variables, functions, method names, file names (e.g., `getUserById`, `usersService.ts`).
+- **PascalCase**: classes, interfaces, types, enums (e.g., `UsersService`, `CreateUserDto`, `UserRole`).
+- **SCREAMING_SNAKE_CASE**: module-level constants that are truly constant (e.g., `MAX_RETRY_COUNT`).
+
+## No `any`
+- `any` is forbidden. Use `unknown` with explicit type narrowing instead.
+- The only acceptable use of `any` is at JSON parse boundaries (e.g., `JSON.parse(body) as unknown`) — immediately narrow the type after.
+- ESLint rule `@typescript-eslint/no-explicit-any` must be set to `error`.
+
+## Import Order
+1. External packages (`express`, `zod`, `pino`)
+2. Internal absolute paths (`@/services/users.service`)
+3. Relative paths (`./users.schema`)
+
+Blank line between each group. Enforced by ESLint `import/order` rule.
+
+## Explicit Return Types
+- All exported functions and methods must have explicit return type annotations.
+- Private/internal helpers may omit return types if the type is obvious from a one-liner.
+
+## `const` Over `let`
+- Default to `const`. Use `let` only when the variable will be reassigned.
+- Never use `var`.
+
+## Interface vs Type
+- `interface`: object shapes that may be extended or implemented by a class.
+- `type`: unions, intersections, mapped types, and utility types (e.g., `type UserId = string`).
+- Do not use `interface` for union types or primitive aliases.

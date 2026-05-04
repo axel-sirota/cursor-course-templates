@@ -1,0 +1,62 @@
+---
+description: dbt testing strategy — schema tests, custom data tests, source freshness, observability
+globs: ["models/**/*.yml", "tests/**/*.sql", "sources.yml"]
+alwaysApply: true
+---
+
+# dbt Testing Rules
+
+## Every Model Has Tests
+- At minimum `not_null` + `unique` on the primary key in the `.yml` file. No exceptions.
+- A model without tests is not considered complete. Do not mark a model done without tests passing.
+- Tests live in the model's co-located `.yml` file under `columns[*].tests`.
+
+## Built-In Test Types — Use These First
+Before writing a custom SQL test, check whether a built-in covers the case:
+
+| Test | When to use |
+|---|---|
+| `not_null` | Every non-nullable column, always on primary key |
+| `unique` | Primary key, any column that should be deduplicated |
+| `accepted_values` | Status columns, type enums, boolean-like strings |
+| `relationships` | Foreign keys — validates referential integrity between models |
+
+Use all four where appropriate before writing custom SQL tests.
+
+## Custom Data Tests (`tests/` directory)
+- SQL files in `tests/` that return rows when the test FAILS.
+- A passing test returns 0 rows. A failing test returns 1+ rows.
+- Use for business logic assertions that built-ins cannot express:
+  - `assert_revenue_positive.sql` — returns rows where `daily_revenue < 0`
+  - `assert_order_total_matches_items.sql` — returns orders where sum of items ≠ order total
+  - `assert_no_future_orders.sql` — returns orders with `order_date > CURRENT_DATE`
+- Name tests `assert_{condition}.sql` — describes what should be TRUE.
+
+## Test Selection in Development
+- Run tests on the current model only during development: `dbt test --select model_name`
+- Run full `dbt test` on CI — all models, all tests.
+- Use `dbt test --select tag:critical` for fast smoke tests on critical models.
+
+## `dbt build` in CI
+- Use `dbt build` (runs + tests together in DAG order) instead of separate `dbt run` then `dbt test`.
+- `dbt build` fails fast on first bad model — downstream models don't run if upstream fails.
+- Use `dbt build --select state:modified+` for incremental CI.
+
+## Source Freshness
+- Define `freshness` in `sources.yml` for all sources that have a `_loaded_at` timestamp:
+  ```yaml
+  freshness:
+    warn_after: {count: 24, period: hour}
+    error_after: {count: 48, period: hour}
+  loaded_at_field: _loaded_at
+  ```
+- Run `dbt source freshness` in CI before transformations — catches stale data before models run.
+- Sources without a timestamp column: document why freshness cannot be checked.
+
+## Observability (Production)
+- Add Elementary or re_data for table-level anomaly detection on production marts:
+  - Row count drops (e.g., today's orders table has 90% fewer rows than yesterday)
+  - Null rate spikes (e.g., `customer_id` suddenly 30% null)
+  - Value distribution shifts
+- Configure alerts to Slack or PagerDuty for critical mart anomalies.
+- Run anomaly detection after each production dbt build completes.

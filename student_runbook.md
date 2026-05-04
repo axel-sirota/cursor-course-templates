@@ -652,6 +652,43 @@ Run `/set-persona` (Claude Code) or `@set-persona` (Cursor) first, then follow t
 
 ---
 
+## Stack Selection
+
+After setting your persona, Engineers, DevOps, and Data Scientists run `/setup-stack` to choose a stack. The command shows only the stacks valid for your persona.
+
+### Engineer Stacks
+
+| Stack | Description | Best For |
+|-------|-------------|----------|
+| `python-fastapi` | Python REST API (FastAPI + SQLAlchemy + Alembic) | General backend, ML-adjacent services |
+| `go-gin` | Go REST API (Gin + sqlx + testify) | High-performance microservices |
+| `go-grpc` | Go gRPC Service (Protocol Buffers + buf) | **Intuit internal services**, high-throughput RPC |
+| `java-spring` | Java REST API (Spring Boot 3 + JPA + Testcontainers) | **Salesforce / Travelers Java** enterprise backend |
+| `node-express` | Node.js REST API (Express + TypeScript + Zod) | Lightweight Node APIs |
+| `node-nestjs` | Node.js Enterprise API (NestJS + TypeORM + Swagger) | **Salesforce / Travelers enterprise Node** |
+
+### DevOps Stacks
+
+| Stack | Description | Best For |
+|-------|-------------|----------|
+| `devops-terraform` | Cloud Infrastructure (Terraform + tflint + checkov) | Cloud provisioning, IaC greenfield |
+| `devops-ansible` | Configuration Management (Ansible + Molecule) | **Server config management post-Terraform** |
+| `devops-k8s-helm` | Kubernetes GitOps (Helm + ArgoCD) | **Kubernetes production deployments** |
+
+### Data Scientist Stacks
+
+| Stack | Description | Best For |
+|-------|-------------|----------|
+| `python-datascience` | Notebooks + ML (Jupyter + scikit-learn + MLflow) | Exploratory analysis, model prototyping |
+| `python-spark` | Distributed Pipelines (PySpark + Delta Lake) | **Databricks / large-scale ML** |
+| `python-dbt-snowflake` | Analytics Modeling (dbt Core + Snowflake/BigQuery) | **Analytics engineering / Snowflake teams** |
+
+### PM Stack
+
+PMs do not run `/setup-stack`. The PM persona works directly with `/start-session` after `/set-persona`.
+
+---
+
 ### Engineer Workflow
 
 ```

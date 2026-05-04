@@ -1,0 +1,17 @@
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - gosimple
+    - ineffassign
+    - gofmt
+    - goimports
+    - revive
+    - exhaustive
+    - wrapcheck
+linters-settings:
+  wrapcheck:
+    ignorePackageGlobs:
+      - "github.com/gin-gonic/gin"

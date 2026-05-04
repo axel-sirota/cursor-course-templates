@@ -1,0 +1,38 @@
+---
+description: Express layered architecture and design patterns
+alwaysApply: true
+---
+
+# Node.js Express Architecture
+
+## Layer Separation
+- **Router**: registers routes and attaches middleware. No business logic.
+- **Controller**: parses the request, calls one service method, sends the response. No business logic.
+- **Service**: owns all business logic. Throws typed errors. Never sends HTTP responses.
+- **Repository**: owns all data access (Prisma calls). Returns typed domain objects. Never throws HTTP errors.
+- No cross-layer logic. A repository never calls a service; a controller never calls a repository directly.
+
+## No Logic in Controllers
+- Controllers call one service method and forward the result. If a controller contains an `if` statement beyond request validation, that logic belongs in the service.
+- Acceptable in a controller: parse body, call `service.doThing(data)`, send `res.json(result)`.
+
+## Zod at the Boundary
+- Validate all request bodies, params, and query strings with Zod schemas.
+- Parse with `schema.parse()` inside a dedicated validation middleware, never inside controllers or services.
+- Once a request passes Zod, trust the inferred types throughout the rest of the stack.
+
+## Global Error Middleware
+- The last `app.use(...)` in `app.ts` is always the error handler with signature `(err: Error, req: Request, res: Response, next: NextFunction)`.
+- Never use `try/catch` in individual route handlers. Propagate errors with `next(err)` or let async errors bubble to the global handler.
+
+## Dependency Injection
+- Pass dependencies as constructor arguments (explicit DI). Example: `new UsersService(new UsersRepository(prisma))`.
+- Avoid module-level singletons for anything that needs to be independently testable.
+- A DI container (e.g., tsyringe, Inversify) is optional; explicit constructor injection is always acceptable.
+
+## When to Choose NestJS Instead
+- Project has 20+ routes and is expected to grow.
+- Team needs built-in guards, interceptors, and pipes pattern.
+- Team prefers class-decorator DI over manual constructor injection.
+- The API is enterprise-scale and module boundaries matter.
+- NestJS is not over-engineering for enterprise; Express is not under-engineering for small APIs. Choose deliberately.

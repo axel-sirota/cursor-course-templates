@@ -1,0 +1,51 @@
+---
+description: GitOps workflow rules — Git as source of truth, PR gates, ArgoCD sync policy
+globs: ["**/*.yaml", "**/*.yml", "**/Chart.yaml", "**/values*.yaml"]
+alwaysApply: true
+---
+
+# GitOps Workflow Rules
+
+## Git is Truth
+
+The Kubernetes cluster state is always derived from Git. Manual `kubectl apply` is an emergency procedure, never a workflow. If a change is not in Git, it does not exist. Drift from Git is a bug that must be corrected by either committing the intent or reverting the cluster.
+
+## PR Gate
+
+Chart changes require all of the following to pass before merge:
+- `helm lint` — zero warnings, zero errors
+- `helm template` — chart renders without errors
+- `kubeconform` — rendered manifests validate against Kubernetes API schemas
+
+No exceptions. These run in CI on every PR that touches `charts/` or `stacks/`.
+
+## ArgoCD Sync Policy
+
+- **Dev/Staging**: auto-sync enabled. ArgoCD automatically deploys on every merge to `main`. Prune and self-heal are both enabled.
+- **Production**: manual sync only. An operator must explicitly approve the sync in the ArgoCD UI or via `argocd app sync <app> --prune`. Auto-sync must NOT be configured for production Applications.
+
+## No `latest` Tag
+
+Values files for staging and prod must specify explicit, immutable image tags (e.g., a git SHA or semver tag). CI builds the image, pushes it with the tag, and opens a PR updating the values file. ArgoCD then syncs the new tag.
+
+The string `latest` is banned in `values-staging.yaml` and `values-prod.yaml`. Lint check must catch it.
+
+## Branch Strategy
+
+Choose ONE of the following and document the choice in `context.md`. Do not mix both:
+
+**Option A — Environment branches**: `main` → dev, `staging` branch → staging, `release` branch → prod.
+
+**Option B — Values-file-per-environment on `main`**: single `main` branch with `values-dev.yaml`, `values-staging.yaml`, `values-prod.yaml`. ArgoCD Application per environment points to different values files.
+
+Option B is preferred for simplicity unless environment-specific chart changes (not just values) are needed.
+
+## Never `kubectl apply` Manually in Production
+
+All changes to production Kubernetes resources go through:
+1. Git commit on a feature branch
+2. PR review + CI passing
+3. Merge to main
+4. ArgoCD sync (manual approval for prod)
+
+Using `kubectl apply`, `kubectl edit`, or `kubectl patch` directly in production bypasses all controls and creates drift. If you must perform emergency remediation with kubectl, immediately open a PR to bring Git back in sync and document the incident.

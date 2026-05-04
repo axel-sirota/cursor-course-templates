@@ -1,0 +1,61 @@
+---
+description: NestJS development workflow — module generation order, TDD loop, CI gate
+globs: ["src/**/*.ts", "test/**/*.ts"]
+alwaysApply: true
+---
+
+# NestJS Workflow Rules
+
+## Module Generation Order
+
+Always generate in this order — NestJS wires the DI graph at module load time and skipping steps leads to unregistered providers:
+
+1. `nest g module <feature>` — creates the module and registers it in `AppModule`
+2. `nest g controller <feature>` — creates controller inside the feature folder
+3. `nest g service <feature>` — creates service and auto-wires into the module
+
+Never hand-write module/controller/service boilerplate from scratch. The CLI generates correct decorators and auto-updates the module's `providers` and `controllers` arrays.
+
+## TDD Loop
+
+### Unit (service layer)
+1. Write a failing Jest unit test for the service method
+2. Implement the service method until the test passes
+3. Refactor under green
+
+### E2E (controller layer)
+1. Write a failing Supertest e2e test for the HTTP route
+2. Implement the controller handler and wire it to the service
+3. Verify green
+
+Never skip to implementation without a failing test first.
+
+## CI Gate
+
+All four steps must pass before merge:
+
+```bash
+npm run lint          # ESLint — no errors
+tsc --noEmit          # TypeScript strict — no type errors
+npm test              # Jest unit tests — all green
+npm run test:e2e      # Supertest e2e tests — all green
+```
+
+A PR that passes only some of these gates does not merge.
+
+## No Circular Imports
+
+NestJS DI fails silently (or with cryptic errors) on circular dependencies. Rules:
+
+- Never create a situation where Module A imports Module B and Module B imports Module A
+- If you think you need `forwardRef()`, stop and redesign the module boundary
+- Use `forwardRef()` only as an absolute last resort for established circular patterns (e.g., auth ↔ users)
+- When a circular dep appears, extract a shared service/module that both can depend on
+
+## Feature Branch Workflow
+
+```
+main → feature/[ticket]-[short-description]
+```
+
+One feature module per branch. Modules are independently reviewable and deployable units.

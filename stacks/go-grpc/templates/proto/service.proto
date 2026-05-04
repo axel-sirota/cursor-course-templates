@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package {service}.v1;
+
+option go_package = "github.com/{org}/{repo}/gen/{service}/v1;{service}v1";
+
+import "google/protobuf/timestamp.proto";
+
+// {Service}Service manages {Resource} resources.
+service {Service}Service {
+  rpc Create{Resource} (Create{Resource}Request) returns (Create{Resource}Response);
+  rpc Get{Resource}    (Get{Resource}Request)    returns (Get{Resource}Response);
+  rpc List{Resources}  (List{Resources}Request)  returns (List{Resources}Response);
+}
+
+// {Resource} is the core domain object.
+message {Resource} {
+  string id    = 1;
+  string name  = 2;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+// Create
+message Create{Resource}Request  { string name = 1; }
+message Create{Resource}Response { {Resource} {resource} = 1; }
+
+// Get
+message Get{Resource}Request  { string id = 1; }
+message Get{Resource}Response { {Resource} {resource} = 1; }
+
+// List (with pagination)
+message List{Resources}Request  {
+  int32  page_size  = 1;
+  string page_token = 2;
+}
+message List{Resources}Response {
+  repeated {Resource} {resources}    = 1;
+  string              next_page_token = 2;
+}

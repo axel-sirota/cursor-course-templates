@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package users.v1;
+
+option go_package = "github.com/example/users-service/gen/users/v1;usersv1";
+
+import "google/protobuf/timestamp.proto";
+
+// UserService manages user accounts.
+service UserService {
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc GetUser    (GetUserRequest)    returns (GetUserResponse);
+  rpc ListUsers  (ListUsersRequest)  returns (ListUsersResponse);
+}
+
+// User is the core domain object.
+message User {
+  string id    = 1;
+  string name  = 2;
+  string email = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+// CreateUser
+message CreateUserRequest {
+  string name  = 1;
+  string email = 2;
+}
+message CreateUserResponse {
+  User user = 1;
+}
+
+// GetUser
+message GetUserRequest {
+  string id = 1;
+}
+message GetUserResponse {
+  User user = 1;
+}
+
+// ListUsers (cursor-based pagination)
+message ListUsersRequest {
+  int32  page_size  = 1;
+  string page_token = 2;
+}
+message ListUsersResponse {
+  repeated User users          = 1;
+  string        next_page_token = 2;
+}

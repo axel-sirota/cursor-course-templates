@@ -1,0 +1,28 @@
+---
+description: Terraform validation and security scanning
+alwaysApply: true
+---
+
+# Terraform Validation and Security Scanning
+
+## CI gate order
+Run checks in this sequence — every step must pass before the next:
+1. `terraform fmt -check` — formatting must be canonical
+2. `terraform validate` — syntax and internal consistency
+3. `tflint` — linting rules and provider-specific checks
+4. `checkov` — security and compliance scanning
+5. `terraform plan -out terraform_plans/{datetime}.tfplan` — final plan saved for review
+
+All five steps must pass before a PR may be merged.
+
+## tflint
+Run tflint with `--recursive` to cover all modules in the repository. Zero warnings are allowed in new modules. Existing modules must not accumulate new warnings — treat the current warning count as a ceiling, not a floor.
+
+## checkov
+Run checkov with `--framework terraform`. HIGH severity findings block merge with no exceptions. MEDIUM severity findings must either be resolved or suppressed inline using a `checkov:skip` comment with a written justification explaining why the check does not apply or why the risk is accepted.
+
+## prevent_destroy
+Set `lifecycle { prevent_destroy = true }` on any resource that holds state or is expensive to recreate: databases (RDS, DynamoDB tables), S3 buckets with versioning enabled, KMS keys, and certificate authorities. This is a safeguard against accidental destroys from plan application.
+
+## Secrets
+No secrets in `.tf` files, `terraform.tfvars`, or any file committed to version control. Pass sensitive values using `TF_VAR_*` environment variables or reference a secrets manager (AWS Secrets Manager, HashiCorp Vault, Azure Key Vault). All variables that accept sensitive values must declare `sensitive = true` to suppress them from plan output and logs.

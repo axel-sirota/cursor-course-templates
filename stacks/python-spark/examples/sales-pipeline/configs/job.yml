@@ -1,0 +1,22 @@
+job:
+  name: "sales-pipeline-silver"
+  description: "Bronze → Silver transformation for sales data. Cleans, types, deduplicates, and enriches raw sales records."
+
+source:
+  path: "s3://{bucket}/bronze/sales/"
+  format: "delta"
+
+destination:
+  path: "s3://{bucket}/silver/sales/"
+  format: "delta"
+  mode: "overwrite"
+
+options:
+  partition_by: ["date"]
+  zorder_by: ["id", "region"]
+  merge_key: ["id", "date"]
+
+maintenance:
+  optimize_schedule: "weekly"
+  vacuum_retention_hours: 168
+  vacuum_schedule: "monthly"

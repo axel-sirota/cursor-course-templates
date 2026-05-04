@@ -1,0 +1,135 @@
+---
+description: NestJS architecture rules — module design, thin controllers, DTOs, guards, interceptors
+globs: ["src/**/*.ts"]
+alwaysApply: true
+---
+
+# NestJS Architecture Rules
+
+## Feature Modules
+
+Every domain concept is a NestJS module. `AppModule` only imports feature modules and global infrastructure modules (database, config, auth).
+
+```
+AppModule
+  ├── ConfigModule (global)
+  ├── TypeOrmModule (global)
+  ├── AuthModule
+  ├── UsersModule
+  ├── OrdersModule
+  └── ProductsModule
+```
+
+If `AppModule` directly imports more than ~10 feature modules, introduce domain-level grouping modules (e.g., `CatalogModule` wrapping `ProductsModule` + `CategoriesModule`). But do not group prematurely.
+
+## Controllers Are Thin
+
+One service call per handler method. No business logic. No `if` statements beyond basic guard delegation.
+
+```typescript
+// CORRECT — thin controller
+@Get(':id')
+async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<UserResponseDto> {
+  return this.usersService.findOne(id);
+}
+
+// WRONG — business logic in controller
+@Get(':id')
+async findOne(@Param('id') id: string) {
+  const user = await this.usersService.findOne(id);
+  if (!user) throw new NotFoundException();   // belongs in service
+  if (user.role === 'admin') { ... }          // business logic — belongs in service
+  return user;
+}
+```
+
+## DTOs for Every Input
+
+Every POST/PUT/PATCH body gets a DTO class with `class-validator` decorators. `ValidationPipe` (configured globally with `whitelist: true, forbidNonWhitelisted: true`) strips unknown fields and throws 400 on invalid input.
+
+```typescript
+export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+```
+
+Never accept `body: any` or `body: Record<string, unknown>` from a request.
+
+## Response DTOs
+
+Transform entities to response DTOs in the service layer. Never return raw TypeORM entities from controllers — they expose unintended relations, lazy-load columns, and sensitive fields.
+
+```typescript
+// Service returns a typed ResponseDto, not the entity
+async findOne(id: string): Promise<UserResponseDto> {
+  const user = await this.usersRepository.findOneOrFail(id);
+  return plainToInstance(UserResponseDto, user, { excludeExtraneousValues: true });
+}
+```
+
+Alternatively, use `@Exclude()` on entity fields + `ClassSerializerInterceptor` globally — but be explicit about what is excluded.
+
+## Guards for Auth
+
+Authentication and authorization live exclusively in guards.
+
+```typescript
+@Controller('users')
+@UseGuards(JwtAuthGuard)          // applies to all routes in this controller
+export class UsersController { ... }
+
+@Get('admin-only')
+@UseGuards(JwtAuthGuard, RolesGuard)   // additional route-level guard
+@Roles('admin')
+async adminRoute() { ... }
+```
+
+Never decode or validate a JWT token inside a controller handler. Never pass `request.user` from the raw request without a guard having already validated it.
+
+## Interceptors for Cross-Cutting Concerns
+
+Register globally in `main.ts`:
+
+```typescript
+app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+```
+
+Custom interceptors for: logging, distributed tracing, response envelope wrapping, caching headers. Keep interceptors focused — one concern per interceptor.
+
+## Pipes for Parameter Transformation
+
+Use built-in pipes on route parameters — never cast manually:
+
+```typescript
+@Get(':id')
+findOne(@Param('id', ParseUUIDPipe) id: string) { ... }
+
+@Get('page/:page')
+findPage(@Param('page', ParseIntPipe) page: number) { ... }
+```
+
+## Exception Filters
+
+Domain errors surface through a custom exception filter registered globally:
+
+```typescript
+@Catch(DomainException)
+export class DomainExceptionFilter implements ExceptionFilter {
+  catch(exception: DomainException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    response.status(exception.httpStatus).json({ message: exception.message });
+  }
+}
+```
+
+Use `NotFoundException`, `BadRequestException`, `ForbiddenException` from `@nestjs/common` for standard HTTP errors. Never throw plain `Error` objects from services.

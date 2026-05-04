@@ -1,0 +1,25 @@
+---
+description: Spark development workflow rules
+globs: ["**/*.py", "**/jobs/**", "**/tests/**"]
+alwaysApply: true
+---
+
+# Spark Workflow Rules
+
+## Medallion-First
+Define Bronze/Silver/Gold layers before writing transforms. Each layer has an explicit schema documented in the job config before any code is written. Layer boundaries are enforced — no skipping from Bronze directly to Gold.
+
+## Local-First Development
+Develop and test with small datasets locally using `SparkSession` with `master("local[2]")`. No cluster is required for unit tests. All transform logic must be verifiable on a laptop before submission to a cluster.
+
+## chispa Test Loop
+Write a failing chispa test → implement the transform → make it green. Do not submit to a cluster to verify transform logic — that is what unit tests are for. If you cannot test it with chispa, refactor the transform until you can.
+
+## CI Gate
+`ruff check` → `mypy` → `pytest` → integration test on sample data. All steps must pass before a PR can be merged. No exceptions. A red CI is a blocker, not a warning.
+
+## Delta Commit Messages
+Use `COMMENT` in Delta operations to describe what each write does. This enables an audit trail and makes time-travel debugging meaningful. Example:
+```python
+df.write.format("delta").option("userMetadata", "silver-load-2024-01-15").save(path)
+```

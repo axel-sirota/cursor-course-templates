@@ -1,0 +1,21 @@
+---
+description: Terraform workflow gates
+alwaysApply: true
+---
+
+# Terraform Workflow Gates
+
+## Plan before apply
+Always run `terraform plan -out terraform_plans/{datetime}.tfplan` before any apply. Never run `terraform apply` without a saved plan file. The plan file is evidence of intent and enables safe, reviewable applies.
+
+## PR gate
+Attach plan output to every pull request. Apply only after the PR has been merged. Never run `terraform apply` on feature branches — branches are for review, not for applying infrastructure changes.
+
+## Destroy protection
+Never run `terraform destroy` yourself. Flag any resource that needs to be removed and document the reason. Let the human operator review and apply the destroy. If a resource block must be removed from code, use `removed {}` blocks or coordinate with the team.
+
+## Drift detection
+Schedule weekly `terraform plan` runs against production without applying. Treat any drift (unexpected differences between state and actual infrastructure) as a bug to be investigated and resolved before it compounds.
+
+## Init every time
+Run `terraform init` for new modules and after any changes to `versions.tf` or `required_providers` blocks. Never assume a previous init is still valid after provider or module version changes.

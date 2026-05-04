@@ -1,0 +1,67 @@
+---
+description: Spark testing patterns with chispa
+globs: ["**/tests/**", "**/conftest.py"]
+alwaysApply: true
+---
+
+# Spark Testing Rules
+
+## chispa for DataFrame Equality
+Use `from chispa import assert_df_equality` for all DataFrame comparisons in tests. This compares both schema and data. Use `ignore_nullable=True` when schema nullability differences are not the focus of the test.
+
+```python
+from chispa import assert_df_equality
+
+def test_clean_sales_removes_nulls(spark):
+    raw = spark.createDataFrame(
+        [(1, 100.0, "2024-01-15"), (2, None, "2024-01-16")],
+        ["id", "amount", "date_str"]
+    )
+    result = clean_sales(spark, raw)
+    expected = spark.createDataFrame(
+        [(1, 100.0, "2024-01-15")],
+        ["id", "amount", "date_str"]
+    )
+    assert_df_equality(result, expected, ignore_nullable=True)
+```
+
+## Spark Test Sessions
+`conftest.py` creates a `SparkSession` fixture scoped to the session with `master("local[2]")` and `enableHiveSupport=False`. Reuse across the entire test file — do not create a new SparkSession per test.
+
+```python
+import pytest
+from pyspark.sql import SparkSession
+
+@pytest.fixture(scope="session")
+def spark():
+    return (
+        SparkSession.builder
+        .master("local[2]")
+        .appName("test")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        .getOrCreate()
+    )
+```
+
+## Test Transform Functions, Not Spark
+Do not test that Spark reads or writes work. Do not test Delta connectivity. Test that your transform logic produces the correct output DataFrame given a controlled input DataFrame. Spark infrastructure is already tested by the Spark project.
+
+## Input Fixtures as DataFrames
+Create test inputs with `spark.createDataFrame(data, schema)`. Keep fixtures small — fewer than 20 rows. Use named schemas (StructType) for Silver/Gold layer tests so schema drift is caught. Do not read from files in unit tests.
+
+## Integration Tests with Sample Data
+Maintain a `tests/fixtures/` directory with small Delta tables or CSV samples. Integration tests run against these. Tag integration tests with `@pytest.mark.integration` so they can be excluded from fast unit test runs.
+
+```python
+@pytest.mark.integration
+def test_ingest_writes_delta(spark, tmp_path):
+    source = "tests/fixtures/sample_raw.csv"
+    dest = str(tmp_path / "bronze")
+    ingest(spark, source, dest)
+    result = spark.read.format("delta").load(dest)
+    assert result.count() > 0
+```
+
+## No Cluster in CI
+Unit tests run locally with `local[2]`. Integration tests may run against Databricks or a local Spark cluster but never require a production cluster. CI pipelines must be runnable on a standard GitHub Actions runner or similar without external Spark infrastructure.

@@ -1,0 +1,68 @@
+---
+description: dbt layer architecture — staging, intermediate, marts, materializations, macros
+globs: ["models/**/*.sql", "macros/**/*.sql", "packages.yml"]
+alwaysApply: true
+---
+
+# dbt Architecture Rules
+
+## Layer Responsibilities
+
+### Staging (`stg_*`)
+- 1:1 with source tables. One staging model per source table.
+- Rename columns to snake_case. Cast types. No joins. No aggregations.
+- Light cleaning only: trim whitespace, handle obvious nulls, parse dates.
+- References `{{ source('raw_schema', 'table') }}` — the ONLY layer that uses `{{ source() }}`.
+- Materialized as `view` (cheap, always fresh).
+
+### Intermediate (`int_*`) — optional
+- Complex multi-source joins, pivots, business logic that is reused by multiple marts.
+- Not exposed to BI tools. Use `ephemeral` or `view` materialization.
+- Use when the same join/logic appears in more than one mart.
+
+### Marts (`fct_*`, `dim_*`)
+- Business-ready. Aggregated facts, conformed dimensions. Exposed to BI tools.
+- Fact tables (`fct_*`): measures at a defined grain (e.g., one row per order per day).
+- Dimension tables (`dim_*`): descriptive attributes (e.g., customers, products).
+- Materialized as `table` (fast for BI) or `incremental` (large tables).
+
+## Source and Ref Discipline
+- `{{ source() }}` in staging only: `{{ source('raw_ecommerce', 'orders') }}`.
+- `{{ ref() }}` everywhere else: `{{ ref('stg_orders') }}`, `{{ ref('dim_customers') }}`.
+- Never hardcode `database.schema.table` in any model. dbt resolves the correct target schema from the profile.
+- Enforced by dbt-checkpoint pre-commit hook: `check-source-refs`.
+
+## Incremental Models
+- Use `{{ config(materialized='incremental') }}` for large fact tables.
+- Always include `is_incremental()` guard to filter only new/updated rows:
+  ```sql
+  {% if is_incremental() %}
+  WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }})
+  {% endif %}
+  ```
+- Define `unique_key` in config to handle late-arriving or duplicate data:
+  ```sql
+  {{ config(materialized='incremental', unique_key='order_id') }}
+  ```
+- Start with `table` materialization; switch to `incremental` only when build time becomes a problem.
+
+## Materializations Reference
+| Materialization | Use case | When to use |
+|---|---|---|
+| `view` | Staging models | Always fresh, no storage cost |
+| `table` | Marts | Fast BI queries, full refresh each run |
+| `incremental` | Large fact tables | Daily growth, slow full refresh |
+| `ephemeral` | Intermediate CTEs | No table needed, embedded in downstream |
+
+## Macros for Reuse
+- Extract repeated SQL patterns into `macros/`. Use `{{ macro_name(args) }}` in models.
+- Do not copy-paste SQL across models. If you copy SQL, extract a macro.
+- Common macros: `cents_to_dollars(column)`, `safe_divide(numerator, denominator)`, `generate_surrogate_key(fields)`.
+- Prefer `dbt_utils` built-in macros before writing custom ones.
+
+## Packages
+- Use `dbt_utils` for: `generate_surrogate_key`, `pivot`, `date_spine`, `get_column_values`.
+- Use `dbt-expectations` for: range tests, regex tests, cardinality checks.
+- Use `dbt-checkpoint` for: pre-commit hooks enforcing source/ref discipline.
+- Pin all package versions in `packages.yml`. Run `dbt deps` after updating.
+- Review package changelogs before upgrading — breaking changes in dbt_utils are common across minor versions.

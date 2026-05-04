@@ -15,10 +15,51 @@ Before anything else, run:
 
 Pick your role: **engineer**, **designer**, **pm**, or **data-scientist**.
 
-- Engineers and data scientists: then run `@setup-stack` / `/setup-stack`
+- Engineers, DevOps, and data scientists: then run `@setup-stack` / `/setup-stack`
 - Designers and PMs: skip `setup-stack` — your persona is ready immediately
 
 Everything below assumes you've done this first.
+
+---
+
+## Step 2: Choose Your Stack (Engineers, DevOps, and Data Scientists only)
+
+Run `/setup-stack` (Claude Code) or `@setup-stack` (Cursor). You'll see options filtered for your persona:
+
+**Engineer** example:
+```
+Available stacks for Engineer persona:
+  1. python-fastapi  — Python REST API
+  2. go-gin          — Go REST API
+  3. go-grpc         — Go gRPC Service
+  4. java-spring     — Java REST API
+  5. node-express    — Node.js REST API
+  6. node-nestjs     — Node.js Enterprise API
+```
+
+**Data Scientist** example:
+```
+Available stacks for Data Scientist persona:
+  1. python-datascience    — Notebooks + ML
+  2. python-spark          — Distributed Pipelines
+  3. python-dbt-snowflake  — Analytics Modeling
+```
+
+**DevOps** example:
+```
+Available stacks for DevOps persona:
+  1. devops-terraform    — Cloud Infrastructure
+  2. devops-ansible      — Configuration Management
+  3. devops-k8s-helm     — Kubernetes GitOps
+```
+
+**PM**: Skip this step. PMs do not configure a stack.
+
+---
+
+## Step 3: Start Your Session
+
+Run `/start-session` (Claude Code) or `@start-session` (Cursor). The AI loads your persona + stack context and asks for your session goal.
 
 ---
 

@@ -1,0 +1,25 @@
+---
+description: Go testing patterns
+alwaysApply: true
+---
+
+# Go Testing Rules
+
+## Table-Driven Tests
+All unit tests use table-driven tests: `[]struct{ name, input, expected }` table format with `t.Run(tc.name, ...)`. Never write individual test functions for variations of the same logic.
+
+## testify Assertions
+Use `github.com/stretchr/testify/assert` for assertions. Never write `if got != want { t.Fatal(...) }` manually.
+
+## Mock Generation
+Use `github.com/vektra/mockery/v2` to generate mocks from interfaces. Never hand-write mocks. Run `mockery --all` to regenerate after interface changes.
+
+## Testcontainers for Integration Tests
+Integration tests that touch Postgres use `github.com/testcontainers/testcontainers-go`. No mocked databases for integration tests — test against a real database instance.
+
+## Test File Placement
+- `handler_test.go` alongside `handler.go` in same package (white-box) for unit tests.
+- `integration/` subdirectory for integration tests — must include `//go:build integration` build tag at top of file.
+
+## Coverage Requirement
+`go test -cover ./...` must show ≥80% on business logic packages (`internal/service/`, `internal/repository/`).

@@ -1,0 +1,76 @@
+---
+description: Ansible architecture rules — role structure, responsibility, defaults vs vars, handlers, become, tags, module selection
+globs: ["roles/**", "playbooks/**", "*.yml"]
+alwaysApply: true
+---
+
+# Ansible Architecture Rules
+
+## Role Structure
+Every role uses the full directory structure. Initialize with `ansible-galaxy role init`:
+```
+roles/{rolename}/
+  tasks/        — main.yml + install.yml + configure.yml
+  handlers/     — main.yml (service restart handlers only)
+  defaults/     — main.yml (user-overridable defaults)
+  vars/         — main.yml (internal non-overridable values)
+  files/        — static files copied as-is
+  templates/    — Jinja2 templates (.j2)
+  meta/         — main.yml (galaxy_info, dependencies)
+  molecule/     — default/ test scenario
+```
+
+## One Responsibility Per Role
+A role that installs AND configures AND deploys is three roles. Examples:
+- `nginx_install` — installs the nginx package
+- `nginx_configure` — writes vhost configs from templates
+- `nginx_tls` — manages TLS certificates
+
+Compose multiple roles in a playbook. Never put everything in one role.
+
+## defaults vs vars
+- `defaults/main.yml` — values users **should** override (port numbers, worker counts, log paths). Lowest precedence.
+- `vars/main.yml` — internal values that **should not** be overridden (package names, internal paths). Higher precedence.
+- Never define configurable values inline in tasks — always reference a variable from defaults.
+
+## Handlers for Restarts
+Use `notify: restart nginx` in tasks. Define handler in `handlers/main.yml`:
+```yaml
+- name: restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+```
+Never use `ansible.builtin.service` with `state: restarted` directly in a task — it runs unconditionally on every play, destroying idempotency.
+
+## Become Discipline
+- Use `become: true` only on individual tasks that require root
+- Do not set `become: true` at the play level unless every single task needs root
+- Always document why become is needed in a task comment when non-obvious
+
+## Tags
+Tag tasks by phase and component to allow targeted runs:
+```yaml
+- name: Install nginx package
+  ansible.builtin.package:
+    name: "{{ nginx_package_name }}"
+  tags: [install, nginx]
+
+- name: Write nginx configuration
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  tags: [configure, nginx]
+```
+
+## No shell/command for Idempotent Work
+Use specific modules: `package`, `file`, `template`, `service`, `copy`, `user`, `group`.
+Use `ansible.builtin.shell` or `ansible.builtin.command` only when no module exists.
+When you must use shell/command, add proper idempotency:
+```yaml
+- name: Run custom script only when needed
+  ansible.builtin.command: /usr/local/bin/setup.sh
+  changed_when: setup_result.rc == 0
+  register: setup_result
+  when: not setup_already_done.stat.exists
+```

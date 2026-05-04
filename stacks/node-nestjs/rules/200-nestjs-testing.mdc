@@ -1,0 +1,167 @@
+---
+description: NestJS testing rules — unit tests with Test.createTestingModule, e2e with Supertest
+globs: ["src/**/*.spec.ts", "test/**/*.e2e-spec.ts"]
+alwaysApply: true
+---
+
+# NestJS Testing Rules
+
+## Unit Tests with `Test.createTestingModule`
+
+Use `@nestjs/testing`'s `Test.createTestingModule` for all unit tests. Never spin up the full application for unit tests — mock all dependencies.
+
+### Controller Unit Tests
+
+```typescript
+describe('UsersController', () => {
+  let controller: UsersController;
+  let usersService: jest.Mocked<UsersService>;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      controllers: [UsersController],
+      providers: [
+        {
+          provide: UsersService,
+          useValue: {
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    controller = module.get(UsersController);
+    usersService = module.get(UsersService);
+  });
+
+  describe('findOne', () => {
+    it('should return a user', async () => {
+      const mockUser = { id: 'uuid-1', name: 'Alice', email: 'alice@example.com' };
+      usersService.findOne.mockResolvedValue(mockUser as any);
+
+      const result = await controller.findOne('uuid-1');
+      expect(result).toEqual(mockUser);
+      expect(usersService.findOne).toHaveBeenCalledWith('uuid-1');
+    });
+  });
+});
+```
+
+### Service Unit Tests
+
+Mock the repository layer with `jest.fn()` implementations. Do not connect to a real database in unit tests.
+
+```typescript
+describe('UsersService', () => {
+  let service: UsersService;
+  let repo: jest.Mocked<UsersRepository>;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        {
+          provide: UsersRepository,
+          useValue: {
+            findById: jest.fn(),
+            save: jest.fn(),
+            findByEmail: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get(UsersService);
+    repo = module.get(UsersRepository);
+  });
+
+  describe('createUser', () => {
+    it('should return the created user', async () => {
+      const dto = { name: 'Alice', email: 'alice@example.com', password: 'secret123' };
+      repo.save.mockResolvedValue({ id: 'uuid-1', ...dto } as any);
+
+      const result = await service.createUser(dto);
+      expect(result.id).toBe('uuid-1');
+      expect(repo.save).toHaveBeenCalledOnce();
+    });
+
+    it('should throw ConflictException if email already exists', async () => {
+      repo.findByEmail.mockResolvedValue({ id: 'existing' } as any);
+      await expect(service.createUser({ email: 'dupe@example.com' } as any))
+        .rejects.toThrow(ConflictException);
+    });
+  });
+});
+```
+
+## E2E Tests with Supertest
+
+E2E tests use a real NestJS `INestApplication` and fire actual HTTP requests. They run against a test database.
+
+```typescript
+// test/users.e2e-spec.ts
+describe('UsersController (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const module = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = module.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('POST /users — creates a user', () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .send({ name: 'Alice', email: 'alice@test.com', password: 'secure123' })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.email).toBe('alice@test.com');
+        expect(res.body.password).toBeUndefined(); // @Exclude() working
+      });
+  });
+});
+```
+
+## Test Database
+
+E2E tests must use an isolated database. Options (in priority order):
+
+1. **Testcontainers** — spin up a real Postgres container per test run (best isolation)
+2. **Dedicated test schema** — `TEST_DATABASE_URL` env var pointing to a separate schema
+3. **SQLite in-memory** — only acceptable for TypeORM unit-style integration tests; not for full e2e
+
+Never run e2e tests against the development or production database.
+
+## Test Naming Convention
+
+```
+describe('{ClassName}')
+  describe('{methodName}')
+    it('should {expected outcome} when {condition}')
+```
+
+Example:
+```
+describe('UsersService')
+  describe('createUser')
+    it('should return created user when input is valid')
+    it('should throw ConflictException when email already exists')
+```
+
+## Coverage Targets
+
+- Services: 90%+ branch coverage
+- Controllers: 80%+ (mostly delegate testing; e2e covers the rest)
+- Repositories: covered by e2e tests against test database
+
+Run with: `jest --coverage`

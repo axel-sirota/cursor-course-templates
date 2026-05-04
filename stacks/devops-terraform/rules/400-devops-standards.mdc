@@ -1,0 +1,27 @@
+---
+description: Terraform & DevOps Scripting Standards
+globs: "**/*.tf, **/*.py"
+alwaysApply: true
+---
+
+# DevOps Guidelines
+
+## Terraform (Infrastructure)
+- **Style**: Use `terraform fmt` before every commit. CI enforces `terraform fmt -check`.
+- **Structure**:
+    - `main.tf`: Root module and resource definitions.
+    - `variables.tf`: Input definitions with types and descriptions (required on all variables).
+    - `outputs.tf`: Explicit outputs for all key resource IDs and ARNs.
+    - `versions.tf`: `required_version` and `required_providers` with pinned versions.
+- **State**: Remote state with locking (S3 + DynamoDB for AWS) required for all shared projects.
+- **Security**: Run `checkov --framework terraform` on commit. No secrets in plain text. Use `sensitive = true` on all secret variables.
+
+## Python Scripts (Automation)
+- **Style**: `snake_case` for all names. Use `click` or `argparse` for CLIs.
+- **Boto3**: Use `boto3` for AWS interactions. Always handle `ClientError` exceptions explicitly.
+- **Type Hints**: Use type annotations for all function signatures. Validate with `mypy`.
+- **Logging**: Use standard `logging` library, not `print`. Set log level via environment variable.
+
+## Testing
+- **Infrastructure**: Run `terraform validate` and `tflint --recursive` before commit.
+- **Scripts**: Write `pytest` unit tests for all logic functions. Mock AWS calls with `moto` or `unittest.mock`.

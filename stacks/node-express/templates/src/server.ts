@@ -1,11 +1,13 @@
 import app from './app';
 import dotenv from 'dotenv';
+import pino from 'pino';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+const logger = pino();
+
+const PORT = process.env.PORT ?? 3000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info({ port: PORT }, 'Server started');
 });
-

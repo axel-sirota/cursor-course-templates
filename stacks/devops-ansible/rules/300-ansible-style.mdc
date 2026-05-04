@@ -1,0 +1,94 @@
+---
+description: Ansible style rules — task naming, YAML formatting, FQCN, no_log, loop syntax, variable naming
+globs: ["roles/**", "playbooks/**", "*.yml", "*.yaml"]
+alwaysApply: true
+---
+
+# Ansible Style Rules
+
+## Task Names are Imperative Sentences
+Every task must have a `name:` field. Names use present-tense imperative:
+- CORRECT: `"Install nginx package"`
+- CORRECT: `"Write nginx virtual host configuration"`
+- CORRECT: `"Enable and start nginx service"`
+- WRONG: `"nginx"` (noun only)
+- WRONG: `"Installing nginx"` (gerund)
+- WRONG: `"nginx package installation"` (passive noun phrase)
+
+## YAML Formatting
+- 2-space indent. No tabs ever.
+- No trailing whitespace.
+- Single blank line between top-level tasks.
+- `ansible-lint` (default profile) enforces all of the above — run it in pre-commit hooks.
+
+## Fully Qualified Collection Names (FQCN)
+Always use FQCN. This is enforced by `ansible-lint` default profile:
+```yaml
+# CORRECT
+ansible.builtin.package:
+ansible.builtin.template:
+ansible.builtin.service:
+ansible.builtin.copy:
+ansible.builtin.file:
+ansible.builtin.user:
+ansible.builtin.group:
+ansible.builtin.command:
+ansible.builtin.shell:
+ansible.builtin.assert:
+ansible.builtin.uri:
+ansible.builtin.service_facts:
+
+# WRONG
+package:
+template:
+service:
+```
+
+## no_log for Sensitive Tasks
+Add `no_log: true` to tasks that handle secrets. Prevents values from appearing in logs:
+```yaml
+- name: Create application user with password
+  ansible.builtin.user:
+    name: "{{ app_user }}"
+    password: "{{ app_user_password | password_hash('sha512') }}"
+  no_log: true
+
+- name: Call API with auth token
+  ansible.builtin.uri:
+    url: "{{ api_endpoint }}"
+    headers:
+      Authorization: "Bearer {{ api_token }}"
+  no_log: true
+```
+
+## loop over with_items
+Use modern `loop:` syntax. `with_items:` is legacy and deprecated:
+```yaml
+# CORRECT
+- name: Install required packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ nginx_packages }}"
+
+# WRONG (legacy)
+- name: Install required packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+  with_items: "{{ nginx_packages }}"
+```
+
+## Variable Naming Convention
+All role variables use `{rolename}_` prefix to avoid collisions across roles:
+```yaml
+# In roles/nginx/defaults/main.yml
+nginx_port: 80
+nginx_worker_processes: auto
+nginx_worker_connections: 1024
+nginx_server_name: "_"
+nginx_document_root: /var/www/html
+nginx_package_name: nginx
+nginx_service_name: nginx
+nginx_config_path: /etc/nginx/nginx.conf
+```
+Never use unprefixed variable names like `port`, `workers`, `config_path` in role defaults.

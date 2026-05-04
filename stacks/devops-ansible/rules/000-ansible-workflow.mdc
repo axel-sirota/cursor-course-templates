@@ -1,0 +1,37 @@
+---
+description: Ansible development workflow — role creation, test loop, CI gate, idempotency, vault
+globs: ["roles/**", "playbooks/**", "*.yml", "molecule/**"]
+alwaysApply: true
+---
+
+# Ansible Workflow Rules
+
+## Role-First Development
+- Create role structure before writing any tasks: `ansible-galaxy role init {rolename}`
+- Initialize `molecule/default/` directory immediately after role init
+- Write Molecule verify assertions before implementing tasks (test-first)
+
+## Molecule Test Loop
+1. Write failing `molecule/default/verify.yml` assertions for the desired end state
+2. Implement tasks in `tasks/main.yml` (and `install.yml`, `configure.yml`)
+3. Run `molecule test` — iterate until green
+4. All phases must pass: create → converge → idempotence → verify → destroy
+
+## CI Gate (required before PR merge)
+- `ansible-lint` must pass with zero warnings (default profile)
+- `molecule test` (Docker driver) must pass for every role changed
+- Idempotence check: second run of role must show `changed=0`
+
+## Idempotency Gate
+Molecule runs the role twice automatically during `molecule idempotence`. The second run must show:
+```
+PLAY RECAP *****
+instance: ok=N changed=0 unreachable=0 failed=0
+```
+Any `changed > 0` on the second run is a failing test — fix the task before merging.
+
+## Vault for Secrets
+- Encrypt all secrets with `ansible-vault encrypt_string '{secret}' --name '{var_name}'`
+- Never commit plaintext passwords, API keys, or tokens in any vars file
+- Keep vault password in a password manager or CI secret — never in the repo
+- Rotate vault secrets on a schedule; re-encrypt and test after rotation

@@ -1,0 +1,30 @@
+---
+- name: Ensure nginx document root directory exists
+  ansible.builtin.file:
+    path: "{{ nginx_document_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+  become: true
+  tags: [configure, nginx]
+
+- name: Write nginx main configuration file
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+    validate: nginx -t -c %s
+  become: true
+  notify: restart nginx
+  tags: [configure, nginx]
+
+- name: Enable and start nginx service
+  ansible.builtin.service:
+    name: "{{ nginx_service_name }}"
+    enabled: true
+    state: started
+  become: true
+  tags: [configure, nginx]

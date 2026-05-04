@@ -1,0 +1,115 @@
+# Number of pod replicas to run
+replicaCount: 1
+
+image:
+  # Container image repository
+  repository: nginx
+  # Image pull policy: IfNotPresent for staging/prod, Always for dev
+  pullPolicy: IfNotPresent
+  # Image tag — must be explicit for staging/prod; never use "latest"
+  tag: "1.25.3"
+
+# Image pull secrets for private container registries
+imagePullSecrets: []
+
+# Override the chart name (affects resource naming)
+nameOverride: ""
+# Override the full resource name prefix (overrides fullname helper entirely)
+fullnameOverride: ""
+
+serviceAccount:
+  # Create a dedicated ServiceAccount for this release
+  create: true
+  # Annotations to add to the ServiceAccount (e.g., for AWS IRSA: eks.amazonaws.com/role-arn)
+  annotations: {}
+  # Name override; if not set, defaults to chart fullname
+  name: ""
+
+# Annotations added to every pod (e.g., for Prometheus scraping or Vault injection)
+podAnnotations: {}
+
+# Pod-level security context — applies to all containers in the pod
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+
+# Container-level security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  # Service type: ClusterIP (internal), NodePort, or LoadBalancer (external)
+  type: ClusterIP
+  # Port the Service exposes to other cluster resources
+  port: 80
+  # Port the container process actually listens on
+  targetPort: 8080
+
+ingress:
+  # Set to true to create an Ingress resource for external access
+  enabled: false
+  # Ingress class name (e.g., nginx, traefik, alb)
+  className: ""
+  # Annotations for the Ingress (e.g., cert-manager.io/cluster-issuer: letsencrypt-prod)
+  annotations: {}
+  hosts:
+    - host: webapp.example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # TLS configuration; set to [] to disable HTTPS
+  tls: []
+
+# Resource requests and limits for the main container
+# Requests: guaranteed resources reserved for this pod
+# Limits: maximum resources the pod may consume
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+# Liveness probe — Kubernetes restarts the container if this fails
+# Use an endpoint that confirms the app is not deadlocked
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Readiness probe — removes pod from Service endpoints if this fails
+# Use an endpoint that confirms the app is ready to handle traffic
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+autoscaling:
+  # Enable HorizontalPodAutoscaler
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+# Node selector constraints for pod scheduling
+nodeSelector: {}
+
+# Tolerations to allow pods to be scheduled on tainted nodes
+tolerations: []
+
+# Affinity rules for advanced pod placement (anti-affinity for HA, etc.)
+affinity: {}

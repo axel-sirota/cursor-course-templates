@@ -1,0 +1,27 @@
+---
+description: Go development workflow and phase discipline
+alwaysApply: true
+---
+
+# Go Development Workflow
+
+## TDD Loop
+Write a failing test first. Then implement until the test is green. Then refactor. Never write implementation without a failing test first.
+
+## Build Tags
+Use `//go:build integration` tag to separate fast unit tests from slow integration tests.
+- `go test ./...` runs only unit tests.
+- `go test -tags integration ./...` runs all tests including integration tests.
+
+## CI Gate
+All of the following must pass before merging:
+1. `go vet ./...`
+2. `golangci-lint run`
+3. `go test ./...`
+4. `go test -tags integration ./...`
+
+## Module Hygiene
+Run `go mod tidy` before every commit. No unused imports or dependencies allowed in committed code.
+
+## Feature Branches
+One branch per feature. PR requires passing CI gate before merge.

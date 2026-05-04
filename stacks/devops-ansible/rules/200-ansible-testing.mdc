@@ -1,0 +1,94 @@
+---
+description: Ansible testing rules — Molecule mandatory, test lifecycle, idempotence, verify strategies, driver selection
+globs: ["roles/**", "molecule/**", "*.yml"]
+alwaysApply: true
+---
+
+# Ansible Testing Rules
+
+## Molecule is Mandatory
+Every role has a `molecule/default/` directory before any task is written.
+No role ships without Molecule tests. No exceptions.
+
+Directory structure required at role init:
+```
+molecule/
+  default/
+    molecule.yml    — driver config, platforms, provisioner
+    converge.yml    — playbook that applies the role
+    verify.yml      — assertions about end state
+```
+
+## Test Lifecycle
+Run the full Molecule lifecycle and ensure all phases pass:
+```
+molecule create       — spin up test container/VM
+molecule converge     — run converge.yml (apply the role)
+molecule idempotence  — run converge.yml again; fail if changed > 0
+molecule verify       — run verify.yml assertions
+molecule destroy      — tear down test container/VM
+molecule test         — run all of the above in sequence
+```
+All phases must pass before merging a role change.
+
+## Idempotence Test
+Molecule's built-in idempotence check (`molecule idempotence`) runs the role a second time.
+The second run must show:
+```
+PLAY RECAP
+instance  :  ok=N  changed=0  unreachable=0  failed=0  skipped=0
+```
+Any `changed > 0` is a test failure. Common fixes:
+- Use `creates:` parameter on `command` tasks
+- Add `when:` conditions based on registered facts
+- Replace `shell`/`command` with idempotent modules
+
+## Verify with Ansible Tasks
+Prefer Ansible verify tasks for simplicity. Use `ansible.builtin.assert` + `ansible.builtin.service_facts` + `ansible.builtin.uri`:
+```yaml
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Assert nginx is running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services['nginx.service'].state == 'running'
+    fail_msg: "nginx service is not running"
+
+- name: Assert nginx responds on configured port
+  ansible.builtin.uri:
+    url: "http://localhost:{{ nginx_port }}"
+    status_code: 200
+```
+Use Testinfra (Python pytest plugin) only for complex assertions not expressible in Ansible.
+
+## Docker Driver for Most Roles
+Fast iteration. Use pre-configured images:
+- Ubuntu 24.04: `geerlingguy/docker-ubuntu2404-ansible`
+- Ubuntu 22.04: `geerlingguy/docker-ubuntu2204-ansible`
+- CentOS/RHEL: `geerlingguy/docker-rockylinux9-ansible`
+
+Standard molecule.yml:
+```yaml
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: geerlingguy/docker-ubuntu2404-ansible
+    pre_build_image: true
+provisioner:
+  name: ansible
+verifier:
+  name: ansible
+```
+
+## Vagrant Driver
+Use only for roles that require:
+- systemd (real init system, not Docker's stub)
+- Kernel modules (`modprobe`, iptables, etc.)
+- Real network interfaces
+- SELinux/AppArmor enforcement
+
+Vagrant tests are slower — run them in a separate CI job, not the default pipeline.

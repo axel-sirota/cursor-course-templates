@@ -1,0 +1,93 @@
+---
+description: Data versioning and raw data hygiene
+alwaysApply: true
+---
+
+# Data Versioning and Raw Data Hygiene
+
+## DVC is the standard
+
+Use DVC to version raw datasets. DVC is required for all projects that involve data files. `dvc push` to the configured remote storage (S3, GCS, or Azure Blob). Commit `.dvc` pointer files — never commit the data files themselves.
+
+```bash
+# Add raw data to DVC tracking
+dvc add data/raw/
+
+# Push to remote storage
+dvc push
+
+# Commit the pointer files (not the data)
+git add data/raw/.gitignore data/raw/train.csv.dvc data/raw/test.csv.dvc
+git commit -m "track raw dataset v1 with DVC"
+```
+
+## No raw data in git
+
+`data/raw/` and `data/processed/` are gitignored. Only `.dvc` pointer files, `data/README.md`, and hash files (`.dvc`) are committed to git.
+
+Add to `.gitignore`:
+```
+data/raw/
+data/processed/
+*.csv
+*.parquet
+*.feather
+```
+
+Keep in git:
+```
+data/raw/*.dvc
+data/processed/*.dvc
+data/README.md
+```
+
+## Hash fallback
+
+When DVC is not available (teaching contexts, restricted environments), log the SHA-256 hash of each raw file as an MLflow tag at the start of the experiment:
+
+```python
+import hashlib
+import mlflow
+
+def sha256_file(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+with mlflow.start_run():
+    mlflow.set_tag("data_hash_train", sha256_file("data/raw/train.csv"))
+    mlflow.set_tag("data_hash_test", sha256_file("data/raw/test.csv"))
+```
+
+This ensures data provenance even when DVC is unavailable.
+
+## Processed data is reproducible
+
+Processed data is never committed to git or DVC. The processing notebook or script MUST be re-runnable from raw data to reproduce the processed dataset exactly.
+
+Requirements for processing code:
+- Deterministic — same input always produces same output
+- Seeded — any randomness (train/test split, sampling) uses the project-level SEED
+- Self-contained — no external state dependencies beyond the raw data files
+
+## Data README
+
+Every project MUST have `data/README.md` documenting each dataset. Required fields:
+
+```markdown
+# Data README
+
+## {Dataset Name}
+
+- **Source**: {URL or description of where data came from}
+- **Date retrieved**: {YYYY-MM-DD}
+- **Schema**: {list of columns with types}
+- **Rows (train / test)**: {N / M}
+- **License**: {license type — e.g., CC BY 4.0, proprietary}
+- **DVC remote**: {remote name and bucket/path}
+- **Notes**: {any known issues, missing values, anomalies}
+```
+
+Do not start a project without creating `data/README.md`.

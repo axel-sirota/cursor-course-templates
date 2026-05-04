@@ -1,0 +1,66 @@
+---
+description: Spark architecture and design rules
+globs: ["**/*.py", "**/jobs/**"]
+alwaysApply: true
+---
+
+# Spark Architecture Rules
+
+## Medallion Layers
+
+### Bronze
+Raw ingestion. No transformations. Schema-on-read or inferred. Append-only. Keep source data forever. Bronze is your audit log — never delete Bronze data. Source system bugs can be replayed from Bronze.
+
+### Silver
+Cleaned, typed, deduplicated. Explicit StructType schema. SCD Type 2 for slowly-changing dimensions. Silver is where bad data is quarantined, not silently dropped. Log rejection counts.
+
+### Gold
+Aggregated, business-ready. Optimized for consumption. Partitioned by query pattern. Gold tables have SLAs — they must be available and correct for downstream consumers (dashboards, ML features, APIs).
+
+## SparkSession Injection
+Transform functions take `spark: SparkSession` as their first argument. Never create a SparkSession inside a transform function. This makes every function independently testable without a cluster.
+
+```python
+# CORRECT
+def clean_sales(spark: SparkSession, df: DataFrame) -> DataFrame:
+    return df.filter(F.col("amount").isNotNull())
+
+# WRONG — untestable, creates hidden dependency
+def clean_sales(df: DataFrame) -> DataFrame:
+    spark = SparkSession.builder.getOrCreate()  # NEVER do this
+    return df.filter(F.col("amount").isNotNull())
+```
+
+## No collect() in Production
+`collect()`, `toPandas()`, and `show()` in production code are bugs. Use `.count()` for size checks. Write to Delta, not to Python variables. Collecting a large DataFrame OOMs the driver.
+
+```python
+# CORRECT
+logger.info("Silver write: %d rows", df.count())
+df.write.format("delta").save(destination_path)
+
+# WRONG
+rows = df.collect()  # kills the driver on large data
+print(df.show())     # never in production
+```
+
+## Schema Enforcement
+- Silver and Gold layers use `mergeSchema=False` — reject unexpected columns from upstream. Schema drift in Silver/Gold is a bug, not a feature.
+- Bronze uses `mergeSchema=True` — tolerate upstream schema changes. Bronze must never fail due to new columns from the source system.
+
+## Partition Strategy
+Partition Gold tables by the most common filter column (date, region, category). Over-partitioning small tables (< 1GB) is worse than under-partitioning — it creates too many small files. Rule of thumb: aim for partition sizes of 100MB–1GB.
+
+## Delta Operations
+Prefer `MERGE INTO` for upserts over full overwrite. Use `OPTIMIZE` + `ZORDER BY` on query columns after large loads. `VACUUM` with a minimum 7-day retention window to allow time-travel queries.
+
+## Job Entrypoints
+All jobs live in the `jobs/` directory. Each file is a standalone job. `if __name__ == "__main__"` creates the SparkSession and calls the orchestration function. No business logic in entrypoints — they wire things together only.
+
+```python
+# jobs/transform.py
+if __name__ == "__main__":
+    spark = SparkSession.builder.appName("sales-transform").getOrCreate()
+    config = load_config("configs/job.yml")
+    run(spark, config)
+```

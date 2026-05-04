@@ -1,0 +1,80 @@
+---
+description: gRPC service testing patterns
+alwaysApply: true
+---
+
+# gRPC Testing Rules
+
+## Unit Test Service Logic Directly
+Test `internal/service/` with plain Go tests. Call service methods directly — no gRPC plumbing, no network, no generated server scaffolding. Inject mock repositories via interfaces.
+
+```go
+func TestGetUser(t *testing.T) {
+    ctrl := gomock.NewController(t)
+    defer ctrl.Finish()
+
+    mockRepo := mocks.NewMockUserRepository(ctrl)
+    svc := service.NewUserService(mockRepo)
+
+    mockRepo.EXPECT().FindByID(gomock.Any(), "123").Return(&domain.User{ID: "123", Name: "Alice"}, nil)
+
+    resp, err := svc.GetUser(context.Background(), &pb.GetUserRequest{Id: "123"})
+    require.NoError(t, err)
+    assert.Equal(t, "Alice", resp.User.Name)
+}
+```
+
+## Integration Tests with bufconn
+Use `google.golang.org/grpc/test/bufconn` to create an in-memory gRPC server. No real network, no ports, fast startup. Tag these `//go:build integration`.
+
+```go
+//go:build integration
+
+func newTestServer(t *testing.T) (pb.UserServiceClient, func()) {
+    lis := bufconn.Listen(1024 * 1024)
+    s := grpc.NewServer()
+    pb.RegisterUserServiceServer(s, service.NewUserService(testRepo))
+    go s.Serve(lis)
+
+    conn, _ := grpc.DialContext(context.Background(), "bufnet",
+        grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
+            return lis.DialContext(ctx)
+        }),
+        grpc.WithTransportCredentials(insecure.NewCredentials()),
+    )
+
+    return pb.NewUserServiceClient(conn), func() {
+        conn.Close()
+        s.Stop()
+    }
+}
+```
+
+## Table-Driven Tests
+All test cases in `[]struct{name, input, wantErr}` format. No single-case test functions when multiple cases exist.
+
+```go
+tests := []struct {
+    name    string
+    input   *pb.GetUserRequest
+    want    *pb.GetUserResponse
+    wantErr codes.Code
+}{
+    {"found", &pb.GetUserRequest{Id: "123"}, &pb.GetUserResponse{...}, codes.OK},
+    {"not found", &pb.GetUserRequest{Id: "999"}, nil, codes.NotFound},
+    {"empty id", &pb.GetUserRequest{Id: ""}, nil, codes.InvalidArgument},
+}
+for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) { ... })
+}
+```
+
+## Mock Dependencies
+Generate mocks with `mockery` for all repository interfaces. Keep mocks in `internal/mocks/`. Never hand-write mocks.
+
+```bash
+mockery --name=UserRepository --dir=internal/repository --output=internal/mocks
+```
+
+## Proto Conformance
+`buf breaking` in CI ensures no backwards-incompatible proto changes. This is a test gate, not just a lint gate — it blocks the merge if proto changes break existing clients.

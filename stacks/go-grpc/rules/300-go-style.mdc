@@ -1,0 +1,30 @@
+---
+description: Go code style and naming conventions
+alwaysApply: true
+---
+
+# Go Style Rules
+
+## Formatting
+`gofmt` is enforced by golangci-lint. Never commit unformatted code. Run `gofmt -w .` before committing.
+
+## Naming Conventions
+- Short, descriptive variable names. Prefer clarity over brevity for non-obvious names.
+- Single-letter receivers: `u *UserService` → receiver is `u`.
+- Acronyms all-caps: `userID`, `httpClient`, `sqlDB`, `apiURL`.
+
+## Error Strings
+Lowercase, no punctuation at end.
+- Correct: `"failed to connect to database"`
+- Wrong: `"Failed to connect to database."`
+
+## Package Names
+Short, lowercase, no underscores. No `util` or `helpers` packages. Name by what it provides, not what it contains.
+- Correct: `config`, `postgres`, `user`
+- Wrong: `utils`, `helpers`, `common`
+
+## No Naked Returns
+Never use named return values with bare `return`. Always return values explicitly.
+
+## Exported vs Unexported
+Only export (capitalize) what callers genuinely need. Default to unexported. Unexported types and functions are not a sign of poor design — they're a sign of good encapsulation.

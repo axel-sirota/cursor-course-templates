@@ -1,0 +1,107 @@
+---
+description: dbt SQL style — CTE structure, naming conventions, column naming, sqlfluff
+globs: ["models/**/*.sql", "tests/**/*.sql", "macros/**/*.sql", ".sqlfluff"]
+alwaysApply: true
+---
+
+# dbt Style Rules
+
+## CTE-First Structure
+Every model is structured as a series of named CTEs, not nested subqueries. Final SELECT is clean and readable.
+
+```sql
+WITH source AS (
+
+    SELECT * FROM {{ source('raw_ecommerce', 'orders') }}
+
+),
+
+renamed AS (
+
+    SELECT
+        id              AS order_id,
+        customer_id,
+        created_at::DATE AS order_date,
+        status,
+        total_amount_cents
+    FROM source
+
+),
+
+final AS (
+
+    SELECT
+        order_id,
+        customer_id,
+        order_date,
+        status,
+        total_amount_cents
+    FROM renamed
+
+)
+
+SELECT * FROM final
+```
+
+Rules:
+- Each CTE is a single logical transformation step.
+- CTEs are named after what they represent: `source`, `renamed`, `joined`, `aggregated`, `final`.
+- The last CTE is always named `final`. The model SELECT is always `SELECT * FROM final`.
+- No nested subqueries. If you need nesting, create another CTE.
+
+## Naming Conventions
+
+### Models
+- All model names: `snake_case`. No camelCase, no PascalCase.
+- Staging: `stg_{source}_{entity}` (e.g., `stg_ecommerce_orders`)
+- Intermediate: `int_{description}` (e.g., `int_orders_with_items`)
+- Facts: `fct_{entity}` (e.g., `fct_revenue`, `fct_orders`)
+- Dimensions: `dim_{entity}` (e.g., `dim_customers`, `dim_products`)
+
+### Columns
+- Primary keys: `{model_name}_id` (e.g., `order_id` in `stg_orders`)
+- Foreign keys: `{referenced_model}_id` (e.g., `customer_id` references `stg_customers`)
+- Booleans: `is_*` or `has_*` prefix (e.g., `is_deleted`, `has_discount`, `is_paid`)
+- Timestamps: `*_at` suffix (e.g., `created_at`, `updated_at`, `shipped_at`)
+- Dates: `*_date` suffix (e.g., `order_date`, `ship_date`, `report_date`)
+- Amounts: include unit in name (e.g., `total_amount_cents`, `revenue_usd`)
+
+### CTEs and Macros
+- CTE names: `snake_case`, descriptive of the transformation (e.g., `orders_with_status`)
+- Macro names: `snake_case`, verb-first (e.g., `cents_to_dollars`, `generate_date_spine`)
+
+## No SELECT * in Final Output
+- Always explicit column list in final SELECT. `SELECT *` acceptable ONLY in the `source` CTE at the top of a staging model.
+- Explicit columns make column lineage trackable in `dbt docs`.
+- Exception: `SELECT * FROM final` as the last line of a model (the final CTE is already explicit).
+
+## SQL Keywords
+- All SQL keywords UPPERCASE: `SELECT`, `FROM`, `WHERE`, `JOIN`, `ON`, `GROUP BY`, `ORDER BY`, `WITH`, `AS`.
+- Function names UPPERCASE: `COALESCE`, `COUNT`, `SUM`, `DATE_TRUNC`, `CAST`, `IFF`.
+- Column aliases lowercase snake_case.
+
+## sqlfluff Configuration
+Run `sqlfluff lint --dialect snowflake` before every commit. Required config in `.sqlfluff`:
+```ini
+[sqlfluff]
+dialect = snowflake
+templater = dbt
+max_line_length = 120
+
+[sqlfluff:rules:layout.indent]
+indent_unit = space
+tab_space_size = 4
+
+[sqlfluff:rules:convention.terminator]
+multiline_newline = true
+
+[sqlfluff:rules:aliasing.table]
+aliasing = explicit
+```
+
+## YAML (.yml) File Standards
+- Every column in `.yml` has a non-empty `description` field.
+- Bad description: `"The order ID"`
+- Good description: `"Unique identifier for a placed order, sourced from the orders table in the transactional database. Never reused after cancellation."`
+- Model-level `description` must state the grain: "One row per order per day" or "One row per customer."
+- Use `config.meta` for ownership and tagging: `owner: analytics-eng`, `tags: [finance, critical]`.

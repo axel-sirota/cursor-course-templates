@@ -1,0 +1,34 @@
+---
+description: gRPC development workflow and CI gate
+alwaysApply: true
+---
+
+# gRPC Workflow Rules
+
+## Proto First
+Write the `.proto` file before any Go code. Get the proto reviewed and approved before starting implementation. The proto is the API contract — treat it like a public interface.
+
+## buf, Not protoc
+Use `buf.yaml` and `buf.gen.yaml` for all code generation. Run `buf generate` not `protoc`. Commit generated files to version control — they are build artifacts the CI must be able to verify without running protoc.
+
+## TDD
+Write a failing test against the service interface first. Then implement until green. This applies to every RPC method — no implementation without a test.
+
+## CI Gate (in order)
+1. `buf lint` — proto style and correctness
+2. `buf breaking --against .git#branch=main` — no backwards-incompatible proto changes
+3. `go vet ./...` — Go correctness
+4. `golangci-lint run` — style and static analysis
+5. `go test ./...` — unit tests
+6. `go test -tags integration ./...` — integration tests (bufconn)
+
+## Breaking Change Policy
+`buf breaking` in CI blocks any backwards-incompatible proto change. After first release, all proto changes must be additive only:
+- Adding new fields: allowed
+- Adding new RPCs: allowed
+- Renaming fields: NOT allowed (use field numbers, not names)
+- Removing fields: NOT allowed
+- Changing field types: NOT allowed
+- Reusing field numbers: NEVER allowed
+
+For breaking changes, create a new major version package (e.g. `v2`).

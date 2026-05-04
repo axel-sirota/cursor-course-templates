@@ -1,0 +1,180 @@
+---
+description: Multi-stage Docker build patterns for gRPC Go services
+alwaysApply: false
+globs: ["Dockerfile", "docker-compose*.yml", "*.dockerfile"]
+---
+
+# Go gRPC Docker Standards
+
+## Base Image Selection
+
+- **Build stage**: Use `golang:1.22-alpine`
+- **Runtime stage**: Use `alpine:3.19` (Go compiles to a static binary — no runtime needed)
+
+## Multi-Stage Dockerfile Pattern
+
+```dockerfile
+# Build stage
+FROM golang:1.22-alpine AS builder
+WORKDIR /app
+
+# Install dependencies first (layer cache)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Build static binary
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/server
+
+# Runtime stage (minimal)
+FROM alpine:3.19
+WORKDIR /app
+
+# CA certs for TLS (gRPC often uses TLS in production)
+RUN apk --no-cache add ca-certificates
+
+# Non-root user
+RUN adduser -D -g '' appuser
+USER appuser
+
+COPY --from=builder /app/server .
+
+# gRPC default port
+EXPOSE 50051
+
+# gRPC health probe (Kubernetes standard for gRPC services)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["/app/server", "-healthcheck"] || exit 1
+
+CMD ["./server"]
+```
+
+## Key gRPC-Specific Settings
+
+### Static Binary (Required for Alpine)
+
+```dockerfile
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/server
+```
+
+- `CGO_ENABLED=0`: no C library dependencies — required for alpine/scratch
+- `GOOS=linux`: cross-compile if building on macOS
+- `-s -w`: strip symbol table and DWARF info (~30% smaller binary)
+
+### gRPC Port Convention
+
+gRPC services default to port `50051`. Document deviations.
+
+## Kubernetes Health Probes for gRPC
+
+Use `grpc-health-probe` (or Kubernetes native gRPC probe, k8s 1.24+):
+
+```yaml
+# Kubernetes 1.24+ native gRPC probe
+livenessProbe:
+  grpc:
+    port: 50051
+  initialDelaySeconds: 10
+  periodSeconds: 15
+
+readinessProbe:
+  grpc:
+    port: 50051
+  initialDelaySeconds: 5
+  periodSeconds: 10
+```
+
+For older clusters, use `grpc-health-probe` binary in the container:
+
+```dockerfile
+# Add grpc-health-probe to image
+RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.19/grpc_health_probe-linux-amd64 \
+    && chmod +x /bin/grpc_health_probe
+```
+
+## docker-compose for Local Development
+
+```yaml
+services:
+  grpc-server:
+    build: .
+    ports:
+      - "50051:50051"
+    environment:
+      - GRPC_REFLECTION=true
+      - DB_URL=postgres://postgres:postgres@db:5432/appdb?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+```
+
+## .dockerignore for Go gRPC Projects
+
+```
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+go.work
+go.work.sum
+gen/
+*.pb.go
+```
+
+Note: if committing generated proto files, remove `gen/` and `*.pb.go` from .dockerignore.
+
+## Development vs Production
+
+### Development (with hot reload via air)
+
+```yaml
+services:
+  grpc-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+    ports:
+      - "50051:50051"
+    environment:
+      - GRPC_REFLECTION=true
+```
+
+**Dockerfile.dev:**
+
+```dockerfile
+FROM golang:1.22-alpine
+WORKDIR /app
+RUN go install github.com/cosmtrek/air@latest
+COPY go.mod go.sum ./
+RUN go mod download
+CMD ["air"]
+```
+
+### Production
+
+```yaml
+services:
+  grpc-server:
+    build: .
+    # No volume mount — static binary, immutable image
+    environment:
+      - GRPC_REFLECTION=false
+```

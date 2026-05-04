@@ -1,0 +1,30 @@
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - gosimple
+    - ineffassign
+    - gofmt
+    - goimports
+    - revive
+    - exhaustive
+    - wrapcheck
+linters-settings:
+  wrapcheck:
+    ignorePackageGlobs:
+      - "google.golang.org/grpc/status"
+      - "google.golang.org/grpc/codes"
+issues:
+  exclude-rules:
+    # Generated proto files — never lint these
+    - path: "gen/"
+      linters:
+        - all
+    - path: ".*\\.pb\\.go$"
+      linters:
+        - all
+    - path: ".*_grpc\\.pb\\.go$"
+      linters:
+        - all

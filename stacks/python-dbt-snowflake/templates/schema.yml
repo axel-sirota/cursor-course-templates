@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: {model_name}
+    description: "{what this model represents and its grain}"
+    config:
+      materialized: {view|table|incremental}
+    columns:
+      - name: {primary_key}_id
+        description: "{description}"
+        tests:
+          - not_null
+          - unique
+      - name: {foreign_key}_id
+        description: "{description}"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('{referenced_model}')
+              field: {foreign_key}_id
+      - name: {date_column}_at
+        description: "{description}"
+        tests:
+          - not_null

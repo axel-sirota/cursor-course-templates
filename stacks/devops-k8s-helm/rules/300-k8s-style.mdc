@@ -1,0 +1,83 @@
+---
+description: Kubernetes and Helm YAML style rules — formatting, whitespace control, security contexts, image pull policy
+globs: ["**/*.yaml", "**/*.yml", "**/*.tpl"]
+alwaysApply: true
+---
+
+# Kubernetes & Helm Style Rules
+
+## YAML Formatting
+
+- 2-space indent. No tabs. Ever.
+- Consistent spacing around `:` — always one space after the colon in key-value pairs.
+- No trailing whitespace.
+- Files end with a newline.
+- Separate logical sections (metadata, spec, containers) with a single blank line for readability.
+- List items (`- `) indented 2 spaces from their parent key.
+
+## Template Comments
+
+Use `{{- /* comment */ -}}` for template logic comments inside `.tpl` files and templates. Document non-obvious decisions.
+
+```yaml
+{{- /* Use fullname to prevent collision when multiple releases in same namespace */ -}}
+name: {{ include "chart.fullname" . }}
+```
+
+Do NOT use `#` comments inside `{{ }}` blocks. Do NOT leave debug comments in committed templates.
+
+## Whitespace Control
+
+Use `{{-` (strip preceding whitespace/newline) and `-}}` (strip following whitespace/newline) to control rendered output. Avoid extra blank lines in rendered YAML — they are valid but add noise.
+
+```yaml
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+{{- end }}
+```
+
+Use `{{- with .Values.someBlock }}` + `{{- end }}` for optional blocks. Always use whitespace stripping on `if`, `with`, `range`, and `end` directives.
+
+## Security Context
+
+Every Deployment (and StatefulSet, DaemonSet) must set `securityContext` at both the pod level and container level:
+
+**Pod-level** (`spec.securityContext`):
+```yaml
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+```
+
+**Container-level** (`spec.containers[*].securityContext`):
+```yaml
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+```
+
+No exceptions without explicit justification in a comment AND a checkov suppress annotation. Privileged containers and containers running as root are banned unless the workload category (e.g., a DaemonSet for node-level monitoring) specifically requires it.
+
+## Image Pull Policy
+
+- **Staging/Prod** (explicit semver or SHA tags): `imagePullPolicy: IfNotPresent`. The image is immutable at that tag; no need to re-pull.
+- **Dev** (floating tags like `dev-latest`): `imagePullPolicy: Always`. Ensures the latest build is always pulled.
+
+Set `imagePullPolicy` via values so it can differ per environment:
+
+```yaml
+# values.yaml
+image:
+  pullPolicy: IfNotPresent
+
+# values-dev.yaml
+image:
+  pullPolicy: Always
+```
+
+Never hardcode `imagePullPolicy: Always` in a template — it forces re-pulls in staging/prod even when the tag hasn't changed, wasting bandwidth and adding latency to pod startup.

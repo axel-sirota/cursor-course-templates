@@ -1,0 +1,86 @@
+---
+description: PySpark code style rules
+globs: ["**/*.py"]
+alwaysApply: true
+---
+
+# Spark Style Rules
+
+## Type Hints on All Transform Functions
+Every transform function must have full type hints. The return type must be `DataFrame`.
+
+```python
+from pyspark.sql import DataFrame, SparkSession
+
+def transform_sales(spark: SparkSession, df: DataFrame) -> DataFrame:
+    ...
+```
+
+## No Wildcard Imports from pyspark
+Use `from pyspark.sql import functions as F`. Reference as `F.col()`, `F.lit()`, `F.when()`, `F.sum()`. Never use `from pyspark.sql.functions import *` — it pollutes the namespace and makes grepping for function usage impossible.
+
+```python
+# CORRECT
+from pyspark.sql import functions as F
+df.withColumn("amount", F.col("amount").cast("double"))
+
+# WRONG
+from pyspark.sql.functions import *
+df.withColumn("amount", col("amount").cast("double"))
+```
+
+## Explicit Column Selection
+Never use `df.select("*")`. Always provide an explicit column list or construct one programmatically from `df.columns`. This makes column lineage trackable.
+
+```python
+# CORRECT
+df.select("id", "amount", "date", "region")
+
+# ALSO CORRECT — drop unwanted columns
+keep_cols = [c for c in df.columns if c not in {"_corrupt_record", "_rescued_data"}]
+df.select(*keep_cols)
+
+# WRONG
+df.select("*")
+```
+
+## Descriptive Column Names in Transforms
+When aliasing a column, use a business-meaningful name. The alias documents intent.
+
+```python
+# CORRECT
+F.sum("revenue").alias("total_revenue")
+F.count("order_id").alias("order_count")
+
+# WRONG
+F.sum("revenue").alias("sum1")
+F.count("order_id").alias("c")
+```
+
+## No Hardcoded Paths
+Job configs use YAML or environment variables for source and destination paths. No literal bucket paths in code.
+
+```python
+# CORRECT — path comes from config
+config = load_config("configs/job.yml")
+df.write.format("delta").save(config["destination"]["path"])
+
+# WRONG — hardcoded path
+df.write.format("delta").save("s3://my-bucket/silver/sales/")
+```
+
+## Logging Over Print
+Use the Python `logging` module. Log row counts at each layer boundary. Never use `print()` or `df.show()` in production jobs.
+
+```python
+import logging
+logger = logging.getLogger(__name__)
+
+# CORRECT
+logger.info("Bronze write: %d rows", bronze_df.count())
+logger.info("Silver write: %d rows", silver_df.count())
+
+# WRONG
+print(f"rows: {df.count()}")
+df.show()
+```

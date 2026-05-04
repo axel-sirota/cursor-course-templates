@@ -24,3 +24,17 @@
 ## Active Phase
 - Current: Phase 0 (Planning/Linting)
 
+## Architecture Shape
+IaC Playbook — Terraform modules provisioning cloud infrastructure. Not an application. No HTTP server.
+
+## Environment Strategy
+Directory-per-environment: `envs/dev/`, `envs/staging/`, `envs/prod/` each call root modules.
+Workspaces: only for simple cases with identical topology across envs.
+Terragrunt: acceptable for DRY multi-env configs; not required.
+
+## Scope
+This stack covers: Terraform/OpenTofu IaC only.
+Ansible (config management): see `devops-ansible` stack.
+Kubernetes/Helm (app deployment): see `devops-k8s-helm` stack.
+Pulumi: out of scope for this stack.
+

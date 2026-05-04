@@ -1,0 +1,30 @@
+---
+description: Node.js TypeScript development workflow
+alwaysApply: true
+---
+
+# Node.js Development Workflow
+
+## TDD Loop
+- Write a failing Jest test first, then implement the code to make it green, then refactor.
+- Never write implementation code without a failing test driving it.
+
+## Type Safety Gate
+- `tsc --noEmit` must pass before every commit. Zero `any` types except at explicit boundaries.
+- Use `unknown` plus type narrowing instead of `any`. If `any` is unavoidable, document why.
+
+## CI Gate
+All four steps must pass in order:
+1. `npm run lint` — ESLint must report zero errors
+2. `tsc --noEmit` — TypeScript must compile with zero errors
+3. `npm test` — all unit tests must pass
+4. `npm run test:integration` — all integration tests must pass
+
+## No `console.log`
+- Use `pino` or `winston` for all logging. `console.log`, `console.error`, `console.warn` are forbidden in production code.
+- Logger instance must be imported from a shared module (`src/lib/logger.ts`).
+
+## Async/Await Everywhere
+- No raw Promise chains (`.then/.catch`). No callbacks.
+- Every async function must have an explicit `Promise<T>` return type.
+- Use `async/await` for all I/O operations including database calls, HTTP requests, and file operations.

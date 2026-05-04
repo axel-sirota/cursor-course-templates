@@ -1,0 +1,8 @@
+---
+- name: Include nginx install tasks
+  ansible.builtin.include_tasks: install.yml
+  tags: [install, nginx]
+
+- name: Include nginx configure tasks
+  ansible.builtin.include_tasks: configure.yml
+  tags: [configure, nginx]

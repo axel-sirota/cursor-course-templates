@@ -1,0 +1,35 @@
+---
+description: HCL naming and formatting conventions
+alwaysApply: true
+---
+
+# HCL Naming and Formatting Conventions
+
+## Formatting
+Run `terraform fmt` before every commit. CI enforces `terraform fmt -check` and will fail the pipeline on any unformatted file. Do not configure your editor to format on save using a non-Terraform formatter — only `terraform fmt` produces canonical HCL formatting.
+
+## Naming
+Use `snake_case` for all Terraform identifiers: resource names, variable names, output names, local names, and module call labels. No hyphens in Terraform identifiers — hyphens are valid in HCL strings but not in identifiers, and mixing conventions causes confusion.
+
+## Resource naming pattern
+Name resources using the pattern `{purpose}_{type}`:
+- `web_security_group` — not `sg_web` or `webSG`
+- `app_db_instance` — not `rds1` or `database`
+- `vpc_flow_log` — not `flowlog` or `FlowLog`
+
+Names should be readable to someone unfamiliar with the module.
+
+## Tagging
+Every cloud resource must carry at minimum these tags:
+- `Environment` — the target environment (dev, staging, prod)
+- `Project` — the project or product name
+- `ManagedBy = "terraform"` — signals that this resource is IaC-managed
+- `Owner` — team or individual responsible
+
+Define a `local.common_tags` map at the top of `main.tf` and merge it into every resource's `tags` argument using `merge(local.common_tags, { ... })`. Never duplicate tag values across resources by hand.
+
+## Comments
+Use `#` comments to explain WHY a resource exists or WHY a non-obvious argument value was chosen. Do not comment what the resource type already makes obvious — a comment saying `# Creates an S3 bucket` above an `aws_s3_bucket` resource adds no value. A comment explaining `# versioning required by compliance policy XYZ-42` does.
+
+## Variable descriptions
+Every variable must have a `description` string that explains what the value controls and any constraints (format, range, allowed values). Type constraints are required on all variables — no bare `type = any` without a justification comment.

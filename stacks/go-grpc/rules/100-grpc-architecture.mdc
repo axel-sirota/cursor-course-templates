@@ -1,0 +1,103 @@
+---
+description: gRPC service architecture and structural rules
+alwaysApply: true
+---
+
+# gRPC Architecture Rules
+
+## Project Structure
+
+```
+proto/                      # .proto source files (source of truth)
+gen/                        # Generated Go code — committed, never hand-edited
+    {package}/v1/
+        {service}.pb.go
+        {service}_grpc.pb.go
+internal/
+    service/                # Business logic — implements generated Server interface
+        {service}.go
+        {service}_test.go
+    repository/             # Data access layer (interfaces + implementations)
+cmd/server/
+    main.go                 # Wire dependencies, register services, start server
+buf.yaml                    # buf module config
+buf.gen.yaml                # buf generation config
+```
+
+## Server Implementation
+Implement the generated `{Service}Server` interface in `internal/service/`. Keep gRPC types out of service business logic — use domain types internally. Map between proto types and domain types at the handler layer (the generated server method implementations in the service file).
+
+## Interceptors for Cross-Cutting Concerns
+Auth, logging, rate limiting, and tracing go in gRPC interceptors (unary + stream interceptors). Never put cross-cutting concerns inside service business logic methods.
+
+```go
+s := grpc.NewServer(
+    grpc.ChainUnaryInterceptor(
+        loggingInterceptor,
+        authInterceptor,
+    ),
+)
+```
+
+## Health Check
+Every gRPC service MUST register the standard gRPC health check:
+
+```go
+import "google.golang.org/grpc/health/grpc_health_v1"
+import "google.golang.org/grpc/health"
+
+healthServer := health.NewServer()
+healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+grpc_health_v1.RegisterHealthServer(s, healthServer)
+```
+
+Required for Kubernetes liveness and readiness probes. Non-negotiable.
+
+## Server Reflection
+Register `reflection.Register(s)` in non-production environments to enable grpcurl debugging. Gate it on an environment variable — never enable in production.
+
+```go
+if os.Getenv("GRPC_REFLECTION") == "true" {
+    reflection.Register(s)
+}
+```
+
+## Error Handling
+Return gRPC status errors. Map domain errors to gRPC status codes consistently. Use a central error mapping function rather than inline `status.Errorf` everywhere.
+
+```go
+// Good: central mapping
+func toGRPCError(err error) error {
+    if errors.Is(err, ErrNotFound) {
+        return status.Errorf(codes.NotFound, err.Error())
+    }
+    if errors.Is(err, ErrInvalidArgument) {
+        return status.Errorf(codes.InvalidArgument, err.Error())
+    }
+    return status.Errorf(codes.Internal, "internal error")
+}
+```
+
+Common mappings:
+- `ErrNotFound` → `codes.NotFound`
+- `ErrInvalidArgument` → `codes.InvalidArgument`
+- `ErrAlreadyExists` → `codes.AlreadyExists`
+- `ErrUnauthenticated` → `codes.Unauthenticated`
+- `ErrPermissionDenied` → `codes.PermissionDenied`
+- unexpected errors → `codes.Internal` (never expose internal details)
+
+## Deadlines and Context
+Always check `ctx.Err()` after long operations. Propagate deadlines — never ignore context cancellation. Context is the first argument to every function that may block or call downstream services.
+
+```go
+func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+    user, err := s.repo.FindByID(ctx, req.Id)
+    if err != nil {
+        if ctx.Err() != nil {
+            return nil, status.FromContextError(ctx.Err()).Err()
+        }
+        return nil, toGRPCError(err)
+    }
+    return &pb.GetUserResponse{User: toProto(user)}, nil
+}
+```

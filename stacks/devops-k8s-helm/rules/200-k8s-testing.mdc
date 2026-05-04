@@ -1,0 +1,106 @@
+---
+description: Kubernetes and Helm testing rules — lint, schema validation, unit tests, integration tests, security scanning
+globs: ["**/Chart.yaml", "**/values*.yaml", "**/templates/*.yaml"]
+alwaysApply: false
+---
+
+# Kubernetes & Helm Testing Rules
+
+## `helm lint`
+
+Runs before every commit. Zero warnings allowed. Zero errors allowed.
+
+```bash
+helm lint ./charts/<chart-name>
+helm lint ./charts/<chart-name> -f values-staging.yaml
+helm lint ./charts/<chart-name> -f values-prod.yaml
+```
+
+Lint all values file combinations in CI. A chart that lints with defaults but fails with staging values is broken.
+
+## `helm template`
+
+Render the chart locally to inspect the full YAML output before pushing. Catches Go template syntax errors and missing value references before CI.
+
+```bash
+helm template my-release ./charts/<chart-name> \
+  -f values.yaml \
+  -f values-staging.yaml \
+  --debug
+```
+
+Pipe the output to a file and inspect it. If the rendered output looks wrong, the chart is wrong — not Kubernetes.
+
+## `kubeconform`
+
+Validate rendered manifests against Kubernetes API schemas. Run in CI on every PR.
+
+```bash
+helm template my-release ./charts/<chart-name> \
+  -f values.yaml \
+  -f values-staging.yaml \
+  | kubeconform -strict -summary
+```
+
+Use `-strict` mode to catch unknown fields. Use `-kubernetes-version` to match the target cluster version. A manifest that doesn't match the API schema will fail to apply.
+
+## `helm unittest`
+
+Unit test chart template logic with the helm-unittest plugin:
+
+```bash
+helm plugin install https://github.com/helm-unittest/helm-unittest
+helm unittest ./charts/<chart-name>
+```
+
+Write unit tests for any non-trivial template logic:
+- Conditional blocks (`{{- if .Values.ingress.enabled }}`)
+- Value overrides that change resource names or labels
+- Optional sidecar containers or init containers
+- Resource limit calculations
+
+Place test files in `charts/<chart-name>/tests/` with `_test.yaml` suffix.
+
+## `kind` or `k3d` for Integration Tests
+
+Spin up a local cluster in CI for PRs that touch chart templates:
+
+```bash
+# Create cluster
+kind create cluster --name ci-test
+
+# Install chart
+helm install my-release ./charts/<chart-name> \
+  -f values.yaml \
+  --wait --timeout 120s
+
+# Run smoke tests (e.g., check pod is running, service responds)
+kubectl get pods -l app.kubernetes.io/name=<chart-name>
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=<chart-name> --timeout=60s
+
+# Cleanup
+kind delete cluster --name ci-test
+```
+
+Integration tests are required for PRs touching Deployment templates, Service templates, or Ingress templates. Skip for changes to values files only (use helm unittest instead).
+
+## checkov for Security Scanning
+
+Run `checkov` in CI to catch missing security contexts, privileged containers, and missing resource limits:
+
+```bash
+# Install: pip install checkov
+checkov -d ./charts/<chart-name> --framework helm
+
+# Or against rendered templates:
+helm template my-release ./charts/<chart-name> | checkov -f - --framework kubernetes
+```
+
+All HIGH severity findings must be resolved before merge. MEDIUM findings require a documented justification in the PR if not fixed. LOW findings are advisory.
+
+Common checkov catches:
+- Missing `securityContext.runAsNonRoot`
+- Missing `securityContext.allowPrivilegeEscalation: false`
+- Missing resource limits
+- Containers running as root
+- Missing read-only root filesystem

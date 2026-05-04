@@ -1,0 +1,22 @@
+---
+# Package and service names — override for different distros if needed
+nginx_package_name: nginx
+nginx_service_name: nginx
+
+# Network settings
+nginx_port: 80
+nginx_bind_address: "0.0.0.0"
+nginx_server_name: "_"
+
+# Performance tuning
+nginx_worker_processes: auto
+nginx_worker_connections: 1024
+
+# File paths
+nginx_config_path: /etc/nginx/nginx.conf
+nginx_document_root: /var/www/html
+
+# Logging
+nginx_log_level: warn
+nginx_access_log: /var/log/nginx/access.log
+nginx_error_log: /var/log/nginx/error.log

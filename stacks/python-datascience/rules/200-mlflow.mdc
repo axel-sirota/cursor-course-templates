@@ -1,0 +1,97 @@
+---
+description: MLflow experiment tracking — mandatory
+alwaysApply: true
+---
+
+# MLflow Experiment Tracking
+
+## MLflow is the standard
+
+Use `mlflow.start_run()` for every experiment. Plain CSV logs are a fallback only when MLflow is explicitly unavailable (e.g., no network access, restricted environment). In all normal circumstances, MLflow is required — not optional.
+
+```python
+import mlflow
+
+with mlflow.start_run():
+    mlflow.log_param("model_type", "RandomForestClassifier")
+    mlflow.log_param("n_estimators", 100)
+    mlflow.log_metric("accuracy", accuracy)
+    mlflow.sklearn.log_model(model, "model")
+```
+
+## Log everything
+
+Log three categories on every run:
+
+- **Params**: all hyperparameters, data path, feature set name, preprocessing flags
+- **Metrics**: train / val / test scores per epoch or per fold — not just final values
+- **Artifacts**: model file, confusion matrix, feature importance plot, classification report
+
+```python
+mlflow.log_param("data_path", "data/raw/train.csv")
+mlflow.log_param("feature_set", "v2_engineered")
+mlflow.log_metric("train_accuracy", train_acc, step=epoch)
+mlflow.log_metric("val_accuracy", val_acc, step=epoch)
+mlflow.log_artifact("outputs/confusion_matrix.png")
+```
+
+## Run naming
+
+Set a human-readable run name using `mlflow.set_tag` so runs are identifiable without opening them:
+
+```python
+from datetime import date
+
+mlflow.set_tag(
+    "mlflow.runName",
+    f"{model_type}_{dataset}_{date.today().isoformat()}"
+)
+```
+
+Format: `{model_type}_{dataset}_{YYYY-MM-DD}` — e.g., `rf_iris_2024-01-15`.
+
+## Model registration
+
+After validation passes, register the winning model in the MLflow Model Registry and mark it as the production version:
+
+```python
+model_uri = f"runs:/{run_id}/model"
+mlflow.register_model(model_uri, "IrisClassifier")
+
+client = mlflow.tracking.MlflowClient()
+client.set_registered_model_alias("IrisClassifier", "champion", version=1)
+```
+
+Set alias `"champion"` on the production version. Never deploy a model that is not registered with this alias.
+
+## Reproducibility
+
+Log the git commit SHA and random seed on every run:
+
+```python
+import subprocess
+
+git_commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+mlflow.set_tag("git_commit", git_commit)
+mlflow.log_param("random_seed", SEED)
+```
+
+This makes every run traceable to the exact code version that produced it.
+
+## No magic numbers
+
+Every hyperparameter MUST be passed to `mlflow.log_param()`. Do not hardcode values inside the training loop without logging them. If a number appears in training code, it must appear in MLflow.
+
+Bad:
+```python
+model = RandomForestClassifier(n_estimators=100, max_depth=5)
+```
+
+Good:
+```python
+N_ESTIMATORS = 100
+MAX_DEPTH = 5
+mlflow.log_param("n_estimators", N_ESTIMATORS)
+mlflow.log_param("max_depth", MAX_DEPTH)
+model = RandomForestClassifier(n_estimators=N_ESTIMATORS, max_depth=MAX_DEPTH)
+```

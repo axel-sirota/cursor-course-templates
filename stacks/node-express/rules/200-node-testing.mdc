@@ -1,0 +1,37 @@
+---
+description: Jest and Supertest testing patterns
+alwaysApply: true
+---
+
+# Node.js Testing Standards
+
+## Unit Tests with Jest
+- Test service and repository logic with plain Jest.
+- Mock dependencies with `jest.fn()` or `jest.mock()`. Do not spin up a server or database for unit tests.
+- One test file per source file. Keep tests colocated with the source or in a `__tests__` sibling directory.
+
+## Integration Tests with Supertest
+- Test the HTTP layer end-to-end using `supertest(app)`.
+- Do not mock HTTP internals, middleware, or routing. Test the full request/response cycle.
+- Import the Express `app` directly; do not start the server with `listen()` in integration tests.
+
+## Test Database
+- Integration tests use a real PostgreSQL database (Testcontainers or a dedicated test database configured via `DATABASE_URL`).
+- Never mock Prisma in integration tests. The point is to test the full stack including SQL.
+- Run `prisma migrate deploy` against the test database before the integration suite.
+
+## Test File Naming
+- Unit tests: `{name}.test.ts`
+- Integration tests: `{name}.integration.test.ts`
+- Files must match their respective `testMatch` pattern so `npm test` runs only unit tests and `npm run test:integration` runs only integration tests.
+
+## Jest Configuration
+- `testEnvironment: 'node'` always.
+- Separate `testMatch` patterns in `jest.config.ts`:
+  - Unit: `['**/*.test.ts']` (excludes `*.integration.test.ts`)
+  - Integration: `['**/*.integration.test.ts']`
+- Use `ts-jest` for TypeScript transformation.
+
+## Zod Error Testing
+- For every validated route, test that an invalid request body returns `400` with a structured error message.
+- Assert on the response shape, not just the status code.

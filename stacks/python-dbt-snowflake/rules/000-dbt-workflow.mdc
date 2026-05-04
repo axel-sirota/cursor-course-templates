@@ -1,0 +1,40 @@
+---
+description: dbt development workflow — model creation, run/test loop, CI gate
+globs: ["models/**/*.sql", "models/**/*.yml", "tests/**/*.sql"]
+alwaysApply: true
+---
+
+# dbt Workflow Rules
+
+## Model-First Development
+- Create the `.sql` file and its `.yml` description file together. Never a model without a yml.
+- Name the yml file `_{model_name}.yml` co-located with the model sql file.
+- Every new model must have at minimum: model-level description, primary key column with `not_null` + `unique` tests.
+
+## Staging Before Marts
+- Build staging models first. No mart can exist without its source staging models.
+- Staging models must exist and pass tests before any mart that references them is created.
+- `{{ source() }}` in staging only — staging is the only layer that touches raw tables.
+
+## Run + Test Loop
+- After each model change, run `dbt run -s model_name` then `dbt test -s model_name`. Both must pass before moving on.
+- Never commit a model that fails `dbt run` or `dbt test`.
+- Use `dbt build -s model_name` as a shorthand for run + test in one command.
+
+## CI Gate
+The following must all pass on every PR:
+1. `sqlfluff lint --dialect snowflake` — zero lint errors
+2. `dbt compile` — no Jinja or ref resolution errors
+3. `dbt run` — all models materialize successfully
+4. `dbt test` — all schema and data tests pass
+5. `dbt docs generate` — lineage graph generates without errors
+
+## Target Discipline
+- No `dbt run` on prod without `--target prod`. Always explicit about target.
+- Default profile target is `dev` — your personal Snowflake schema (`dev_{username}`).
+- Prod runs only happen via CI/CD pipeline, never from a local machine.
+- Use `dbt run --target staging` for pre-prod validation.
+
+## Incremental CI
+- Use `dbt build --select state:modified+` in CI to only rebuild changed models and their downstream dependencies.
+- Always upload `manifest.json` as a CI artifact so subsequent runs can diff state.

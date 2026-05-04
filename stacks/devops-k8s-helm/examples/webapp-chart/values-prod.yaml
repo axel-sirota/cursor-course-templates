@@ -1,0 +1,45 @@
+# Production environment overrides
+# All values not listed here inherit from values.yaml
+
+replicaCount: 3
+
+image:
+  # Explicit semver tag — never use "latest" or a mutable tag in prod
+  tag: "1.2.0"
+  pullPolicy: IfNotPresent
+
+# Higher resource limits for production workload
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: webapp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: webapp-prod-tls
+      hosts:
+        - webapp.example.com
+
+# Spread replicas across availability zones
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: webapp
+          topologyKey: topology.kubernetes.io/zone

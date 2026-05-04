@@ -1,0 +1,30 @@
+---
+description: Terraform module structure and layering
+alwaysApply: true
+---
+
+# Terraform Module Structure and Layering
+
+## Module files
+Every Terraform module must have exactly four files: `main.tf`, `variables.tf`, `outputs.tf`, and `versions.tf`. No single-file modules. This structure makes the module's interface explicit and scannable without reading implementation details.
+
+## Module versioning
+Pin all registry modules with a version constraint: `version = "~> X.Y"`. Pin all git-sourced modules with a ref: `source = "git::https://...?ref=vX.Y.Z"`. Unpinned modules silently break on upstream changes.
+
+## Remote state
+Remote state with locking is mandatory for all shared or team projects:
+- **AWS**: S3 bucket + DynamoDB table for locking
+- **Azure**: Storage Account with blob state locking
+- **GCP**: GCS bucket (built-in object locking)
+- **Terraform Cloud / HCP Terraform**: native remote state
+
+Local state is only acceptable for personal experiments that will never be shared.
+
+## No hardcoded values
+All environment-specific values belong in `variables.tf` with descriptions. No magic strings, CIDR ranges, account IDs, or region names in `main.tf`. If a value differs between environments, it must be a variable.
+
+## Outputs
+Every module exports its key resource IDs, ARNs, and names via `outputs.tf`. Consuming modules and root modules reference these outputs — they never hardcode IDs from other modules. This makes module composition explicit and refactoring safe.
+
+## Least privilege
+IAM roles and policies created by Terraform must follow least-privilege. No `"*"` in action or resource fields without an explicit justification comment explaining why broad permissions are unavoidable. Inline policies are preferable to managed policies when the scope is narrow.

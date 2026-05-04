@@ -1,0 +1,134 @@
+---
+description: NestJS code style — decorators, naming conventions, TypeScript strictness, Swagger
+globs: ["src/**/*.ts"]
+alwaysApply: true
+---
+
+# NestJS Style Rules
+
+## Decorators Are the Language
+
+NestJS is decorator-driven. Use decorators as the primary mechanism for:
+
+- Dependency injection (`@Injectable()`, `@InjectRepository()`)
+- Route registration (`@Get()`, `@Post()`, `@Param()`, `@Body()`)
+- Validation (`@IsString()`, `@IsEmail()`, `@IsNotEmpty()`)
+- Serialization (`@Exclude()`, `@Expose()`)
+- Authorization (`@UseGuards()`, `@Roles()`)
+- OpenAPI documentation (`@ApiProperty()`, `@ApiResponse()`, `@ApiTags()`)
+
+Don't fight NestJS opinions by re-implementing patterns manually. If you're writing imperative auth checks in controllers, you're missing guards.
+
+## `@Exclude()` on Sensitive Fields
+
+Every entity or DTO that holds sensitive data must use `@Exclude()` from `class-transformer`. Pair with `ClassSerializerInterceptor` registered globally.
+
+```typescript
+import { Exclude } from 'class-transformer';
+
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  email: string;
+
+  @Column()
+  @Exclude()                  // never serialized in HTTP responses
+  passwordHash: string;
+
+  @Column({ nullable: true })
+  @Exclude()
+  refreshToken: string;
+}
+```
+
+## `@ApiProperty()` for Swagger
+
+Every DTO field gets `@ApiProperty()` with `description` and `example`. This is non-optional in enterprise context — Swagger is the API contract for consumers.
+
+```typescript
+export class CreateUserDto {
+  @ApiProperty({ description: 'Full display name', example: 'Alice Smith' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({ description: 'Unique email address', example: 'alice@example.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ description: 'Password (min 8 chars)', example: 'secure1234' })
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+```
+
+## Naming Conventions
+
+| Artifact | Convention | Example |
+|---|---|---|
+| Module | `{Resource}Module` | `UsersModule` |
+| Controller | `{Resource}Controller` | `UsersController` |
+| Service | `{Resource}Service` | `UsersService` |
+| Repository | `{Resource}Repository` | `UsersRepository` |
+| Entity | `{Resource}` (singular) | `User` |
+| Create DTO | `Create{Resource}Dto` | `CreateUserDto` |
+| Update DTO | `Update{Resource}Dto` | `UpdateUserDto` |
+| Response DTO | `{Resource}ResponseDto` | `UserResponseDto` |
+| Guard | `{Concern}Guard` | `JwtAuthGuard`, `RolesGuard` |
+| Interceptor | `{Concern}Interceptor` | `LoggingInterceptor` |
+| Filter | `{Concern}Filter` | `HttpExceptionFilter` |
+
+## No `any`
+
+TypeScript `strict` mode is enabled. All providers, return types, and parameters must be typed.
+
+```typescript
+// WRONG
+async findAll(): Promise<any[]> { ... }
+async create(dto: any): Promise<any> { ... }
+
+// CORRECT
+async findAll(): Promise<UserResponseDto[]> { ... }
+async create(dto: CreateUserDto): Promise<UserResponseDto> { ... }
+```
+
+Enable in `tsconfig.json`:
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true
+  }
+}
+```
+
+## File Organization
+
+Each feature module lives in its own folder. The folder contains exactly:
+
+```
+users/
+  users.module.ts
+  users.controller.ts
+  users.controller.spec.ts
+  users.service.ts
+  users.service.spec.ts
+  users.repository.ts
+  dto/
+    create-user.dto.ts
+    update-user.dto.ts
+    user-response.dto.ts
+  entities/
+    user.entity.ts
+```
+
+No mixing of concerns in the same file. One class per file (NestJS convention, matches Angular).
+
+## Async/Await
+
+All service methods that touch the database or external I/O must be `async` and return `Promise<T>`. Never use callbacks. Never use `.then()` chains in service or controller code — `await` only.

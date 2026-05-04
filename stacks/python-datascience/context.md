@@ -24,5 +24,11 @@
 ## Active Phase
 - Current: Explore (EDA)
 
+## Architecture Shape
+Notebook — Jupyter-first for exploration; .py modules for reusable pipelines.
+Not an HTTP service. Deliverable is a model card + reproducible experiment, not a running server.
+See `python-spark` stack for Databricks/PySpark pipelines.
+See `python-dbt-snowflake` stack for SQL analytics engineering.
+
 ## Active Persona
 - (set by /set-persona)

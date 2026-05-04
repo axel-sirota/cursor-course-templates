@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  author: your_name
+  description: Install and configure nginx web server
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+    - name: EL
+      versions:
+        - "9"
+  galaxy_tags:
+    - nginx
+    - web
+    - server
+
+dependencies: []

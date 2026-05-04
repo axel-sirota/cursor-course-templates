@@ -22,6 +22,17 @@
 - **Error Handling**: Use a global Error Middleware. Do not `console.log` errors (use a logger).
 - **Dependency Injection**: Use explicit dependency injection or a container (Inversify) is optional but clean separation is mandatory.
 
+## Architecture Shape
+REST API — Express layered architecture. Router → Controller → Service → Repository.
+Enterprise teams with large codebases should evaluate NestJS (see `node-nestjs` stack) for
+built-in DI, decorators, and module system. Express is right for small-medium APIs or teams
+that prefer minimal framework overhead.
+
+## ORM Alternatives
+- **Prisma** (default): type-safe schema-first ORM with excellent DX and auto-generated client.
+- **TypeORM**: class-decorator style entities, mature, familiar to Java/Spring developers.
+- **Drizzle**: SQL-first, zero runtime overhead, fully type-safe. Best when raw SQL control matters.
+
 ## Active Phase
 - Current: Phase 0 (Skeleton)
 

@@ -1,0 +1,17 @@
+job:
+  name: "{pipeline-name}-{layer}"
+  description: "{what this job does}"
+
+source:
+  path: "s3://{bucket}/raw/{dataset}/"
+  format: "delta"  # or csv, parquet, json
+
+destination:
+  path: "s3://{bucket}/{layer}/{dataset}/"
+  format: "delta"
+  mode: "merge"  # append, overwrite, merge
+
+options:
+  partition_by: ["date"]
+  zorder_by: ["id"]
+  merge_key: ["id", "date"]

@@ -1,0 +1,138 @@
+---
+description: Multi-stage Docker build for NestJS — build, prune, production image
+globs: ["Dockerfile", "docker-compose*.yml", ".dockerignore"]
+alwaysApply: false
+---
+
+# Docker Rules for NestJS
+
+## Multi-Stage Dockerfile
+
+NestJS requires a build step (`nest build` → `dist/`). Use multi-stage builds to keep the production image lean — no dev dependencies, no source TypeScript, no NestJS CLI.
+
+```dockerfile
+# Stage 1: Install all dependencies and build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# Stage 2: Prune to production dependencies only
+FROM node:20-alpine AS deps
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Stage 3: Minimal production image
+FROM node:20-alpine AS production
+
+# Security: run as non-root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy only what's needed to run
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost:3000/health || exit 1
+
+USER appuser
+
+EXPOSE 3000
+CMD ["node", "dist/main"]
+```
+
+## `.dockerignore`
+
+Always include a `.dockerignore` to prevent bloating the build context:
+
+```
+node_modules
+dist
+.git
+.gitignore
+*.md
+*.log
+coverage
+.env*
+!.env.example
+test
+```
+
+## docker-compose for Local Development
+
+```yaml
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      target: builder         # use builder stage for dev (includes devDeps)
+    volumes:
+      - .:/app
+      - /app/node_modules     # prevent host node_modules from overriding
+    ports:
+      - '3000:3000'
+    command: npm run dev      # nest start --watch
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/app_dev
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app_dev
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+```
+
+## Production Deployment Notes
+
+- Pass secrets via environment variables — never bake them into the image
+- Use `NODE_ENV=production` in all production deployments — NestJS optimizes module loading
+- `dist/main.js` is the entrypoint — never run `ts-node` in production
+- Image size target: under 200MB (alpine base + pruned node_modules + compiled JS)
+
+## Health Check Endpoint
+
+Add a `/health` endpoint (NestJS Terminus) for the Docker `HEALTHCHECK` and Kubernetes liveness/readiness probes:
+
+```typescript
+// health.controller.ts
+@Controller('health')
+export class HealthController {
+  @Get()
+  @HealthCheck()
+  check() {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  }
+}
+```
+
+Register in a `HealthModule` and import into `AppModule`. Keep it unauthenticated — load balancers need to reach it without a token.

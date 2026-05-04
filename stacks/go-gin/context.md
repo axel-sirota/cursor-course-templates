@@ -22,6 +22,10 @@
 - **Context**: Always propagate `context.Context` through all layers.
 - **Config**: Use `viper` or standard `os.Getenv` for configuration.
 
+## Architecture Shape
+REST API — Gin HTTP server. Layered: handler → service → repository → model.
+Also applicable to: CLI tools (swap handler layer for cobra commands), gRPC services (see `go-grpc` stack).
+
 ## Active Phase
 - Current: Phase 0 (Skeleton)
 

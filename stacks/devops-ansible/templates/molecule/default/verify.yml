@@ -1,0 +1,11 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Assert service is running
+      ansible.builtin.service_facts:
+    - name: Check {service} is active
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['{service}.service'].state == 'running'

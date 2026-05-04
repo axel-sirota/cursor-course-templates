@@ -1,0 +1,35 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert nginx service is running
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services['nginx.service'].state == 'running'
+        fail_msg: "nginx service is not running"
+        success_msg: "nginx service is running"
+
+    - name: Assert nginx is listening on configured port
+      ansible.builtin.uri:
+        url: "http://localhost:{{ nginx_port | default(80) }}"
+        status_code: 200
+      register: nginx_response
+      failed_when: nginx_response.status != 200
+
+    - name: Assert nginx configuration file exists
+      ansible.builtin.stat:
+        path: "{{ nginx_config_path | default('/etc/nginx/nginx.conf') }}"
+      register: nginx_config_stat
+
+    - name: Assert nginx configuration file is present
+      ansible.builtin.assert:
+        that:
+          - nginx_config_stat.stat.exists
+          - nginx_config_stat.stat.isreg
+        fail_msg: "nginx configuration file does not exist"
+        success_msg: "nginx configuration file exists"
