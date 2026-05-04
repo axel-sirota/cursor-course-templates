@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      { "command": ".cursor/scripts/invest-validator.sh" },
+      { "command": ".cursor/scripts/ac-format-check.sh" }
+    ],
+    "stop": [
+      { "command": ".cursor/scripts/gap-detector.sh" }
+    ]
+  }
+}

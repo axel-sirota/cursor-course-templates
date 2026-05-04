@@ -1,0 +1,61 @@
+---
+description: PM persona workflow rules
+alwaysApply: true
+---
+
+# PM Workflow Rules
+
+## INVEST is mandatory
+
+Every user story must satisfy all six INVEST criteria before it can be decomposed into tickets:
+- **Independent** — the story can be built and shipped without depending on another story in the same sprint.
+- **Negotiable** — the scope is not locked in stone; the PM and team can discuss alternatives.
+- **Valuable** — the story delivers visible value to a named user persona.
+- **Estimable** — the dev team can give a size estimate (S/M/L) without a spike.
+- **Small** — fits in a single sprint; if not, split it.
+- **Testable** — there are specific, observable conditions for "done."
+
+Run `/pm-validate` to enforce INVEST compliance. Do not proceed to `/pm-decompose` until all stories pass.
+
+## Given/When/Then is required
+
+Every user story must have at least one acceptance criterion in Given/When/Then format:
+
+```
+**Given** [a starting context]
+**When** [the user takes an action]
+**Then** [the observable outcome]
+```
+
+AC written as free-form prose ("the system should handle errors gracefully") is not acceptable. Rewrite it in Given/When/Then before decomposing.
+
+## Three Amigos before decompose
+
+Always run `/pm-validate` before `/pm-decompose`. The Three Amigos review ensures:
+- Dev has confirmed feasibility and identified hidden complexity.
+- QA has identified edge cases that belong in the AC.
+- The structural gap check has confirmed the PRD is complete.
+
+Skipping this step means tickets will be built from an incomplete spec. The cost of fixing a gap in production is 10x the cost of fixing it in the PRD.
+
+## Subagent delegation
+
+Delegate to the right subagent at the right moment:
+
+| Trigger | Subagent |
+|---|---|
+| New user story written or revised | `dev-perspective` — check feasibility before writing AC |
+| AC written for a story | `qa-perspective` — hunt for missing edge cases |
+| PRD marked complete | `gap-detector` — structural completeness check before validation |
+
+These subagents are invoked automatically by `/pm-validate`. You may also invoke them directly for a targeted review.
+
+## Ticket perspective
+
+Ticket titles must always be written from the user's perspective:
+
+- **Correct:** "As a registered user, I want to reset my password so that I can regain access to my account."
+- **Wrong:** "Implement password reset endpoint."
+- **Wrong:** "Add forgot-password flow to auth service."
+
+The engineering team derives implementation tasks from the user story. The ticket itself describes the user outcome.

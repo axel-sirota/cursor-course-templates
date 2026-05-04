@@ -1,0 +1,111 @@
+---
+description: Core data science workflow and experiment discipline rules
+alwaysApply: true
+---
+
+# Core Data Science Workflow
+
+## Purpose
+This rule defines the fundamental workflow for data science projects — from exploration through reproducible experiment logging to engineering handoff. Always apply these principles regardless of the specific task.
+
+## Workflow Phases
+
+All DS work follows this structure:
+
+1. **Explore (EDA)**: Understand the data before touching a model
+2. **Experiment**: Define hypothesis, train, log params + metrics + seed
+3. **Validate**: Confirm results are reproducible, metrics are meaningful
+4. **Handoff**: Model card + reproducibility check + engineering handoff doc
+
+## Golden Rules
+
+### Seed Discipline (Mandatory)
+Every experiment MUST set a random seed before any random operation:
+```python
+import random, numpy as np
+SEED = 42
+random.seed(SEED)
+np.random.seed(SEED)
+# if using sklearn:
+# pass random_state=SEED to all estimators
+```
+- Never use default seeds — always set explicitly
+- Log the seed value alongside every experiment run
+- Changing the seed is a new experiment — document it
+
+### No Raw Data in the Repository
+- Raw data files NEVER go in git
+- Store file paths and checksums (md5/sha256) only
+- Add `data/raw/` and `data/processed/` to `.gitignore`
+- Document how to obtain raw data in `README.md` or `DATA.md`
+
+### Notebooks Run Top-to-Bottom
+- Before any handoff, run: Kernel → Restart & Run All
+- No cell can depend on state from a cell that appears later in the notebook
+- If the notebook fails a clean run, it is not ready for review
+- Use `nbval` or a CI notebook runner to enforce this automatically
+
+### Experiment Logging Required
+Every training run MUST log:
+- `params`: all hyperparameters and preprocessing choices
+- `metrics`: at minimum train + val score on the primary metric
+- `seed`: the exact seed used
+- `artifact_paths`: saved model file, feature list, scaler, encoder paths
+
+Acceptable logging tools: MLflow, Weights & Biases, a plain `experiments/` CSV log, or any structured format — but logging is not optional.
+
+### Model Card Required Before Handoff
+Before marking a model ready for engineering integration, produce a model card containing:
+- Model type and library version
+- Training data description (source, date range, row count, feature list)
+- Evaluation metric(s) and scores (train / val / test)
+- Known limitations and failure modes
+- Seed and reproducibility instructions
+
+## Phase Transition Checklist
+Before transitioning out of any DS phase:
+- [ ] Notebook runs clean top-to-bottom on fresh kernel
+- [ ] Seed set and logged
+- [ ] No raw data files staged or committed
+- [ ] Experiment logged (params, metrics, seed, artifacts)
+- [ ] Ruff + nbqa linting passes
+- [ ] Model card written (for Validate → Handoff transition)
+- [ ] Phase summary generated
+
+## Directory Structure
+
+```
+project/
+├── data/
+│   ├── raw/          # gitignored — never commit
+│   └── processed/    # gitignored — never commit
+├── notebooks/
+│   ├── 01-eda.ipynb
+│   ├── 02-experiment.ipynb
+│   └── 03-evaluation.ipynb
+├── src/              # reusable Python modules extracted from notebooks
+│   ├── features.py
+│   ├── train.py
+│   └── evaluate.py
+├── experiments/      # experiment log (CSV or MLflow tracking)
+├── models/           # saved model artifacts (gitignored if large)
+├── reports/
+│   └── model_card.md
+└── tests/            # pytest tests for src/ modules
+```
+
+## Error Handling
+
+When encountering unexpected results:
+1. Document the unexpected finding in the notebook (markdown cell)
+2. Verify data quality before assuming model issues
+3. Check seed and rerun before escalating
+4. Collect sample rows that trigger the failure
+5. Generate a research-export if root cause is unclear
+
+## Secrets and Credentials
+
+NEVER commit credentials or API keys:
+- Use `.env` for local secrets (gitignored)
+- Reference `.env.example` for required variables
+- Data warehouse credentials belong in environment variables, not notebooks

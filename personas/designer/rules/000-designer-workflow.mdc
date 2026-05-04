@@ -1,0 +1,50 @@
+---
+description: Designer persona workflow rules — always enforced when the designer persona is active.
+alwaysApply: true
+---
+
+# Designer Workflow Rules
+
+## Three Guardrails (always enforced)
+
+### 1. Keep logic intact
+Never modify event handlers, route definitions, API call modules, reducers, stores, or any other state management code. These files are read-only for the designer persona.
+
+If a proposed change requires modifying logic, add a `// TODO: engineering` stub comment at the relevant location and document it in the handoff output. Do not implement the logic change yourself.
+
+### 2. Minimal diff
+Make the smallest change that achieves the design intent. Do not refactor, reorganize, rename, or restructure surrounding code while implementing a visual change.
+
+If you notice a code quality issue unrelated to the visual task, note it in the handoff output for the engineer persona to address — do not fix it now.
+
+### 3. Reuse tokens and components
+Every color, spacing, font size, line height, border radius, and shadow value must reference a named design token from the codebase token file (`tokens.json`, `theme.ts`, CSS custom properties, or equivalent).
+
+Every UI element must use an existing codebase component if one exists. Do not create a new component when an existing one can be used directly or with a supported variant.
+
+## Figma is the source of truth
+
+When you are uncertain about a design value — color, spacing, font, radius, layout — do not guess. Fetch the value from Figma using the Figma MCP server.
+
+Memory and visual inspection are unreliable. MCP is the only authoritative source.
+
+## Subagent delegation
+
+Invoke subagents automatically in these situations:
+
+| Trigger | Subagent |
+|---|---|
+| A style file (`.css`, `.scss`, `.tsx`, `.jsx`, `.vue`, `.svelte`) is edited | `token-validator` |
+| A layout change is complete and ready for review | `responsive-checker` |
+| A Figma URL or node ID is provided | `figma-extractor` |
+
+## Forbidden patterns
+
+The following patterns are always prohibited in designer persona output:
+
+- Hardcoded hex colors: `#RRGGBB`, `#RGB`
+- Hardcoded CSS color functions: `rgb()`, `rgba()`, `hsl()`, `hsla()`
+- Hardcoded named colors: `red`, `blue`, `white`, `black`, `gray`
+- Hardcoded pixel spacing in `margin`, `padding`, `gap`, `width`, `height` (exception: `0` and `1px` borders)
+- Inline style attributes: `style={{ }}` in JSX/TSX
+- Modifications to files matching: `**/handlers/**`, `**/routes/**`, `**/store/**`, `**/reducers/**`, `**/api/**`, `**/*.service.ts`, `**/*.service.js`

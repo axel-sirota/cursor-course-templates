@@ -1,0 +1,97 @@
+---
+description: Notebook organization and quality standards
+alwaysApply: true
+---
+
+# Notebook Standards
+
+## Purpose
+These rules define the structural and quality standards every Jupyter notebook in this project must meet. Clean notebooks make review, reproduction, and collaboration possible.
+
+## Cell Organization
+
+Notebooks MUST follow this top-to-bottom section order:
+
+1. **Imports** — all `import` statements at the very top, grouped (stdlib → third-party → local)
+2. **Config / Constants** — seeds, file paths, hyperparameter defaults, display settings
+3. **Data Loading** — read from `data/` using `pathlib.Path`; print shape and dtypes immediately after loading
+4. **EDA** — distributions, missing values, correlations, outliers
+5. **Modeling** — feature engineering, model definition, training
+6. **Evaluation** — metrics, confusion matrices, plots, residuals
+7. **Next Steps** — markdown cell summarizing findings and recommended follow-up
+
+Do NOT put imports in the middle of the notebook. Do NOT run modeling cells before EDA cells.
+
+## Markdown Headers Required
+
+Every major section MUST begin with a markdown cell containing an `##` header:
+
+```markdown
+## 1. Imports
+## 2. Config
+## 3. Data Loading
+## 4. EDA
+## 5. Modeling
+## 6. Evaluation
+## 7. Next Steps
+```
+
+This is not optional — it makes the notebook navigable from the JupyterLab table of contents.
+
+## No Global Mutable State Between Cells
+
+- Each section should be independently re-runnable after the cells above it have been run
+- Do NOT rely on variables defined in a cell that was run manually but appears out of order
+- Avoid in-place mutations of DataFrames across many cells — use intermediate variables
+- Test: Restart kernel, run all cells — if it fails, fix it before committing
+
+## No Hardcoded File Paths
+
+Always use `pathlib.Path` relative to the repo root or an environment variable:
+
+```python
+from pathlib import Path
+
+DATA_DIR = Path(__file__).parent.parent / "data"   # in .py files
+# or in notebooks:
+DATA_DIR = Path.cwd().parent / "data"              # adjust depth as needed
+RAW_PATH = DATA_DIR / "raw" / "dataset.csv"
+```
+
+NEVER write:
+```python
+# BAD
+df = pd.read_csv("/Users/yourname/projects/myproject/data/raw/dataset.csv")
+df = pd.read_csv("C:\\Users\\yourname\\data\\dataset.csv")
+```
+
+## Output Discipline
+
+Large outputs kill notebook readability and slow down code review:
+
+- DataFrames: always use `df.head()` or `display(df.head(10))` — never print the full frame
+- Arrays: use `.shape`, `.describe()`, or slices — not raw `print(array)`
+- Plots: always `plt.show()` or inline display — never leave `plt.savefig()` calls that write to arbitrary paths
+- Training logs: log to MLflow or print a summary line per epoch — not hundreds of raw lines
+
+```python
+# GOOD
+print(df.shape, df.dtypes)
+df.head()
+
+# BAD
+print(df)
+df
+```
+
+## Reproducibility Check Before Commit
+
+Before committing or submitting for review:
+
+1. Clear all outputs: Edit → Clear All Outputs
+2. Restart kernel: Kernel → Restart
+3. Run all cells: Run → Run All Cells
+4. Confirm it runs to completion without errors
+5. Optionally run `nbval` in CI: `pytest --nbval notebooks/01-eda.ipynb`
+
+A notebook that does not pass a clean top-to-bottom run is NOT ready for review.

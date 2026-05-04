@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      { "command": ".cursor/scripts/token-validator.sh" },
+      { "command": ".cursor/scripts/no-inline-styles.sh" }
+    ],
+    "stop": [
+      { "command": ".cursor/scripts/screenshot-compare.sh" }
+    ]
+  }
+}
