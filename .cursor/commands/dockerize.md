@@ -8,6 +8,26 @@ Creates production-ready Docker configuration for the current project. Supports 
 
 ## Execution Flow
 
+**0. Stack Shape Guard**
+
+Read the active stack from `.cursor/context.md`.
+
+**Stacks where Docker is NOT the primary artifact** — if active stack is one of these, warn the user and stop:
+- `devops-terraform` — Terraform runs locally or in CI; the artifact is a `.tfplan`, not a container
+- `devops-ansible` — Ansible runs against remote hosts via SSH; no container needed for the control node
+- `python-dbt-snowflake` — dbt runs as a CLI process connecting to Snowflake/BigQuery; containerizing dbt is unusual and rarely needed
+- `r-tidyverse` — R analysis renders to Quarto documents; Docker is not a primary deliverable
+
+For these stacks, respond:
+> "The active stack ({stack-name}) does not typically produce a Docker image as its primary artifact. If you specifically need to containerize a dbt/Terraform/Ansible runner or R Shiny app, describe your use case and I'll adapt. Otherwise, this command is not applicable."
+
+**Stacks where Docker IS appropriate** — proceed for:
+- `python-fastapi`, `go-gin`, `go-grpc`, `java-spring`, `node-express`, `node-nestjs` — web API servers
+- `python-mlops` — training image + serving image (two Dockerfiles)
+- `python-spark` — job runner image for cluster submission
+- `python-datascience` — optional: Jupyter server container
+- `devops-k8s-helm` — Docker image is the workload being deployed via Helm
+
 **1. Context Check**
 - Read `CLAUDE.md` to identify the **Active Stack**
 - If no stack configured: "⚠️ Run /setup-stack first"
@@ -141,6 +161,8 @@ services:
       retries: 3
     restart: unless-stopped
 
+  # Only include db service if the stack uses a database
+  # Check .cursor/context.md — if it says "No application persistence", remove this service
   db:
     image: postgres:15-alpine
     environment:

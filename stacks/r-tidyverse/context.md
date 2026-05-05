@@ -1,7 +1,7 @@
 # Project Context: R + Tidyverse
 
 ## Architecture Shape
-Statistical Computing / Notebook — reproducible R analysis, statistical modeling, and optional API output via Plumber. Use for: actuarial analysis, statistical hypothesis testing, regulatory reporting, exploratory data analysis with formal write-up.
+Statistical Computing / Notebook — reproducible R analysis, statistical modeling, and optional API output via Plumber (advanced — not required for analysis deliverables). Use for: actuarial analysis, statistical hypothesis testing, regulatory reporting, exploratory data analysis with formal write-up.
 Use python-datascience for: ML-first work, Python-native data teams, sklearn/deep learning models.
 Use python-spark for: distributed data at scale (>1TB), cluster-based processing.
 
@@ -10,7 +10,7 @@ Use python-spark for: distributed data at scale (>1TB), cluster-based processing
 - **Core packages**: tidyverse 2.0+ (dplyr, ggplot2, tidyr, purrr, readr, stringr, forcats, lubridate)
 - **Modeling**: tidymodels 1.2+ (recipes, parsnip, rsample, yardstick, tune, workflows)
 - **Reporting**: Quarto 1.5+ (replaces R Markdown; .qmd files)
-- **API**: Plumber 1.2+ (expose R functions as REST endpoints)
+- **API** (optional): Plumber 1.2+ — expose R analysis functions as REST endpoints when integration with other systems is needed. Not required for analysis-only projects.
 - **Testing**: testthat 3.2+ (3rd edition — use `expect_snapshot()`, `expect_error()`)
 - **Linting/Style**: lintr 3.1+ (tidyverse style guide enforced), styler 1.10+
 - **Reproducibility**: renv 1.0+ (lockfile-based package management, committed to repo)

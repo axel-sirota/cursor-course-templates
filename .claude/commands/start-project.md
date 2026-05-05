@@ -1,5 +1,5 @@
 ---
-description: Scaffold business domain features (Models, API, Service)
+description: "Scaffold the core domain: entities, interface contract, and implementation plan (adapts to active stack shape)"
 ---
 
 # Start Project (Domain) Command
@@ -24,7 +24,11 @@ Branch to the appropriate preamble below, then continue with the standard execut
 
 ### Persona Preambles
 
-**engineer:** Propose data entities, REST API endpoints, and implementation phases for the described domain.
+**engineer:** Propose the domain design for the active stack shape:
+- **Web API stacks**: data entities + REST endpoints + implementation phases
+- **Pipeline stacks** (python-spark, python-mlops): data schemas + job stages + transformation plan
+- **Analytics stacks** (python-dbt-snowflake): staging models + mart models + grain definition
+- **IaC/Platform stacks** (devops-*): resource map + module inputs/outputs + role/chart structure
 
 **designer:** Propose a component library inventory for the described UI: which components exist in the codebase, which need building, what tokens they require.
 
@@ -42,15 +46,23 @@ Branch to the appropriate preamble below, then continue with the standard execut
   - *Python*: Pydantic Models / SQLAlchemy.
   - *Node*: Prisma Schema.
   - *Java*: JPA Entities.
+  - *dbt*: Staging model columns + mart grain definition.
+  - *Terraform*: Variable definitions + resource block structure.
+  - *Ansible*: Role defaults + variable contract (defaults/main.yml).
+  - *Spark*: StructType schema definitions + Delta table structure.
+  - *R*: Data frame column contract + function signatures.
 
-**3. API Surface**
-- Propose the **REST API** endpoints.
-  - `GET /products`, `POST /orders`.
+**3. Interface Contract** (shape depends on active stack):
+- **Web API**: REST endpoints (GET /resource, POST /resource)
+- **Data Pipeline**: Job input/output schemas and stage interfaces
+- **Analytics Model**: dbt model tree (staging → intermediate → mart)
+- **IaC**: Module public interface (inputs, outputs, data sources)
+- **Statistical Computing**: Quarto document sequence + Plumber API (if any)
 
 **4. Implementation Plan**
 - Generate a checklist to build this domain using the **Phase-Based Workflow** (Phase 0 -> Phase 1...).
 
 ## Usage
 `/start-project "Library Management System"`
--> *Generates Book/Author models and API plan in the active language.*
+-> *Generates domain design and interface contract adapted to the active stack shape.*
 

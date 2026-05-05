@@ -44,7 +44,7 @@ Branch to the appropriate preamble below, then continue with the standard execut
 
 **3. Session Goal**
 - Ask: "What is the goal for this session?"
-- If the user provides a goal (e.g., "Implement POST /users"), cross-reference it with the Active Phase in `CLAUDE.md`.
+- If the user provides a goal — e.g., "Implement POST /users" (web API), "Write Silver transform for sales pipeline" (Spark), "Add dim_customers dbt model" (dbt), "Write nginx Ansible role" (Ansible) — cross-reference it with the Active Phase in `CLAUDE.md`.
 
 **4. Rule Enforcement**
 - Remind the user (internally) to adhere to the active rules in `.claude/rules/`.

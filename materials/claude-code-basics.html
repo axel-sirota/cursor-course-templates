@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Basics &mdash; A One-Day Instructor-Led Intro</title>
+
+  <!-- Pico.css v2 classless indigo variant -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.indigo.min.css" />
+
+  <!-- Google Fonts: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js: Tomorrow theme + core languages -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+  <style>
+    /* ===== Base Overrides ===== */
+    :root {
+      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-family-monospace: 'JetBrains Mono', 'Fira Code', monospace;
+      --toc-width: 260px;
+      --header-height: 0px;
+      --callout-tip: #2e7d32;
+      --callout-warning: #e65100;
+      --callout-info: #1565c0;
+      --callout-lab: #6a1b9a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --callout-tip: #66bb6a;
+        --callout-warning: #ff9800;
+        --callout-info: #42a5f5;
+        --callout-lab: #ce93d8;
+      }
+    }
+
+    [data-theme="dark"] {
+      --callout-tip: #66bb6a;
+      --callout-warning: #ff9800;
+      --callout-info: #42a5f5;
+      --callout-lab: #ce93d8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-family);
+      margin: 0;
+      padding: 0;
+    }
+
+    code, pre, kbd, samp {
+      font-family: var(--font-family-monospace);
+    }
+
+    /* ===== Hero Header ===== */
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem 2rem;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #4a1a6b 100%);
+      color: #e0e0e0;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .hero .subtitle {
+      font-size: 1.15rem;
+      opacity: 0.85;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-indigo { background: #7c4dff; color: #fff; }
+    .badge-teal { background: #00897b; color: #fff; }
+    .badge-amber { background: #ff8f00; color: #fff; }
+
+    /* ===== Page Layout ===== */
+    .page-wrapper {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: var(--header-height, 0);
+      align-self: flex-start;
+      width: var(--toc-width);
+      min-width: var(--toc-width);
+      height: calc(100vh - var(--header-height, 0px));
+      overflow-y: auto;
+      padding: 1.5rem 0.75rem 2rem 0;
+      font-size: 0.85rem;
+      border-right: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    .sidebar .sidebar-title {
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--pico-muted-color, #999);
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar li {
+      margin-bottom: 0.35rem;
+    }
+
+    .sidebar li.sub {
+      padding-left: 1rem;
+      font-size: 0.82rem;
+    }
+
+    .sidebar a {
+      text-decoration: none;
+      color: var(--pico-muted-color, #666);
+      display: block;
+      padding: 0.15rem 0;
+      transition: color 0.15s;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      color: var(--pico-primary, #3f51b5);
+      font-weight: 600;
+    }
+
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      padding: 2rem 0 4rem 2.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .page-wrapper { flex-direction: column; }
+      .sidebar { display: none; }
+      .main-content { padding: 1.5rem 0; }
+    }
+
+    /* ===== Mobile TOC ===== */
+    .mobile-toc {
+      display: none;
+      margin: 1rem;
+      padding: 0.75rem;
+      border: 1px solid var(--pico-muted-border-color, #ddd);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .mobile-toc { display: block; }
+    }
+
+    /* ===== Section Styling ===== */
+    section {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    section:last-child {
+      border-bottom: none;
+    }
+
+    /* ===== Callouts ===== */
+    .callout {
+      border-left: 4px solid;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+      background: color-mix(in srgb, var(--pico-card-background-color, #fff) 95%, transparent);
+    }
+
+    .callout-tip { border-color: var(--callout-tip); }
+    .callout-warning { border-color: var(--callout-warning); }
+    .callout-info { border-color: var(--callout-info); }
+    .callout-lab { border-color: var(--callout-lab); }
+
+    .callout-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .callout-tip .callout-title { color: var(--callout-tip); }
+    .callout-warning .callout-title { color: var(--callout-warning); }
+    .callout-info .callout-title { color: var(--callout-info); }
+    .callout-lab .callout-title { color: var(--callout-lab); }
+
+    /* ===== Time-box pill ===== */
+    .timebox {
+      display: inline-block;
+      background: #ede7f6;
+      color: #4527a0;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
+    [data-theme="dark"] .timebox,
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .timebox {
+        background: #311b92;
+        color: #d1c4e9;
+      }
+    }
+
+    /* ===== Keyboard Shortcuts ===== */
+    kbd {
+      background: var(--pico-card-background-color, #f5f5f5);
+      border: 1px solid var(--pico-muted-border-color, #ddd);
+      border-radius: 4px;
+      padding: 0.15rem 0.4rem;
+      font-size: 0.85em;
+      font-family: var(--font-family-monospace);
+      box-shadow: 0 1px 0 var(--pico-muted-border-color, #ddd);
+    }
+
+    /* ===== Philosophy block ===== */
+    blockquote.philosophy {
+      border-left: 4px solid var(--pico-primary, #3f51b5);
+      font-style: italic;
+      font-size: 1.1rem;
+      padding: 1rem 1.5rem;
+    }
+
+    /* ===== Footer ===== */
+    footer.site-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--pico-muted-color, #999);
+      border-top: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    /* ===== Print ===== */
+    @media print {
+      .sidebar, .mobile-toc, .hero .badge-row { display: none; }
+      .page-wrapper { display: block; }
+      .hero { padding: 1rem; }
+      .hero h1 { font-size: 1.5rem; }
+      pre { white-space: pre-wrap; word-wrap: break-word; }
+      section { break-inside: avoid; }
+    }
+
+    /* ===== Code Blocks ===== */
+    pre[class*="language-"] {
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    code:not([class*="language-"]) {
+      background: color-mix(in srgb, var(--pico-muted-color, #999) 12%, transparent);
+      padding: 0.15rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.88em;
+    }
+
+    /* ===== Shortcut table ===== */
+    .shortcut-table td:first-child {
+      white-space: nowrap;
+    }
+
+    /* ===== Before/After table ===== */
+    .ba-table th { width: 50%; }
+    .ba-table td { vertical-align: top; }
+
+    /* Dark mode auto-switch for Pico */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        color-scheme: dark;
+      }
+      .hero {
+        background: linear-gradient(135deg, #0d0520 0%, #1a0e30 50%, #2d0f45 100%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <h1>Claude Code Basics</h1>
+    <p class="subtitle">A one-day, instructor-led introduction to AI-assisted terminal development</p>
+    <div class="badge-row">
+      <span class="badge badge-indigo">Intro Course</span>
+      <span class="badge badge-teal">~6 hours</span>
+      <span class="badge badge-amber">Demo + Labs</span>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE TOC ===== -->
+  <details class="mobile-toc">
+    <summary>Table of Contents</summary>
+    <ul>
+      <li><a href="#how-to-use">0. How to Use This Guide</a></li>
+      <li><a href="#what-is-claude-code">1. What is Claude Code?</a></li>
+      <li><a href="#interaction-patterns">2. The 3 Interaction Patterns</a></li>
+      <li><a href="#context-system">3. The Context System &amp; CLAUDE.md</a></li>
+      <li><a href="#onboarding">4. Persona &amp; Stack Onboarding</a></li>
+      <li><a href="#lab-1">Lab 1 &mdash; Onboarding</a></li>
+      <li><a href="#core-commands">5. Core Commands for Beginners</a></li>
+      <li><a href="#lab-2">Lab 2 &mdash; First Session</a></li>
+      <li><a href="#session-loop">6. The Session Loop</a></li>
+      <li><a href="#lab-3">Lab 3 &mdash; Review Loop</a></li>
+      <li><a href="#claude-md-anatomy">7. CLAUDE.md Anatomy</a></li>
+      <li><a href="#adapt">8. How to Adapt This After Class</a></li>
+    </ul>
+  </details>
+
+  <div class="page-wrapper">
+
+    <!-- ===== SIDEBAR TOC ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">Contents</div>
+      <nav>
+        <ul>
+          <li><a href="#how-to-use">0. How to Use This Guide</a></li>
+          <li><a href="#what-is-claude-code">1. What is Claude Code?</a></li>
+          <li class="sub"><a href="#why-claude-code">CLI vs IDE-AI</a></li>
+          <li class="sub"><a href="#architecture">Under the Hood</a></li>
+          <li><a href="#interaction-patterns">2. 3 Interaction Patterns</a></li>
+          <li class="sub"><a href="#interactive-mode">Interactive Mode</a></li>
+          <li class="sub"><a href="#headless-mode">Headless Mode</a></li>
+          <li class="sub"><a href="#pipe-mode">Pipe Mode</a></li>
+          <li class="sub"><a href="#which-pattern">Which to Use?</a></li>
+          <li><a href="#context-system">3. Context System</a></li>
+          <li class="sub"><a href="#claude-md">CLAUDE.md as the Brain</a></li>
+          <li class="sub"><a href="#context-flow">How Context Flows</a></li>
+          <li><a href="#onboarding">4. Persona &amp; Stack</a></li>
+          <li class="sub"><a href="#three-step-flow">3-Step Flow</a></li>
+          <li class="sub"><a href="#personas-stacks">Personas &amp; Stacks</a></li>
+          <li class="sub"><a href="#arch-shapes">Architecture Shapes</a></li>
+          <li><a href="#lab-1">Lab 1 &mdash; Onboarding</a></li>
+          <li><a href="#core-commands">5. Core Commands</a></li>
+          <li class="sub"><a href="#cmd-set-persona">/set-persona</a></li>
+          <li class="sub"><a href="#cmd-setup-stack">/setup-stack</a></li>
+          <li class="sub"><a href="#cmd-start-session">/start-session</a></li>
+          <li class="sub"><a href="#cmd-architect">/architect</a></li>
+          <li class="sub"><a href="#cmd-code-review">/code-review</a></li>
+          <li class="sub"><a href="#cmd-next-session">/next-session</a></li>
+          <li><a href="#lab-2">Lab 2 &mdash; First Session</a></li>
+          <li><a href="#session-loop">6. The Session Loop</a></li>
+          <li><a href="#lab-3">Lab 3 &mdash; Review Loop</a></li>
+          <li><a href="#claude-md-anatomy">7. CLAUDE.md Anatomy</a></li>
+          <li><a href="#adapt">8. Adapt After Class</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+      <!-- ==================== SECTION 0: How to use this guide ==================== -->
+      <section id="how-to-use">
+        <h2>0. How to Use This Guide</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You walk away knowing the rhythm of the day so you can pace yourself and not get lost.</p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You scroll a 90-page guide and skim, hoping the instructor will tell you when to actually do something.</td>
+              <td>You know exactly: every section has a 10&ndash;15 min demo, a 30&ndash;45 min lab with acceptance criteria, and an extension if you finish early.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <p>This is an <strong>instructor-led, one-day intro course</strong>. It is not a reference doc &mdash; it is the script for the day. Every section follows the same shape:</p>
+
+        <ul>
+          <li><strong>What do I get from this?</strong> &mdash; one sentence + before/after, so you know why you should care.</li>
+          <li><strong>Situation, Task, Action, Result (STAR)</strong> &mdash; the concept, why it exists, and what you do with it.</li>
+          <li><span class="timebox">&#9201; Demo</span> &mdash; the instructor types live; you watch and follow output.</li>
+          <li><span class="timebox">&#9201; Lab</span> &mdash; you do it, with explicit steps and an acceptance check (&ldquo;you&rsquo;re done when&hellip;&rdquo;).</li>
+          <li><span class="timebox">&#9201; Extension</span> &mdash; harder variant for early finishers, no hand-holding.</li>
+        </ul>
+
+        <p><strong>Prereqs:</strong> macOS / Linux / WSL, Node.js 18+, an Anthropic API key or Claude Pro/Max login, Python 3.11+ (for labs), Git, and a terminal you are comfortable with.</p>
+
+        <p><strong>Install Claude Code now</strong> if you have not already:</p>
+        <pre><code class="language-bash">npm install -g @anthropic-ai/claude-code
+claude --version    # should print a version like 1.x.x
+claude /login       # opens browser for OAuth, or paste API key</code></pre>
+      </section>
+
+      <!-- ==================== SECTION 1: What is Claude Code? ==================== -->
+      <section id="what-is-claude-code">
+        <h2>1. What is Claude Code?</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You learn the one distinction that explains every other choice in this course: <strong>Claude Code is a CLI agent, not a chat window.</strong></p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You think of Claude as something you paste code into and copy answers out of.</td>
+              <td>You see Claude as a process running in your terminal that reads your repo, edits files, runs tests, and commits &mdash; while you stay in your editor of choice.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <h3>Situation &mdash; the pain Claude Code solves</h3>
+        <p>You open ChatGPT or Claude.ai. You paste 200 lines of <code>auth.py</code>. You ask &ldquo;refactor this.&rdquo; You copy the answer back. You realize the AI hallucinated an import. You re-paste. Repeat 30 times a day. Your context lives in a chat tab; your code lives in your editor; the two never meet.</p>
+
+        <h3>Task &mdash; what Claude Code is</h3>
+        <p><strong>Claude Code</strong> is Anthropic&rsquo;s official agentic coding CLI. You run <code>claude</code> in any project directory and a conversational agent boots up <em>inside the project</em>. It reads files using its <strong>Read</strong> tool, edits with <strong>Edit</strong>/<strong>Write</strong>, runs shell commands via <strong>Bash</strong>, searches with <strong>Grep</strong>/<strong>Glob</strong>, and follows instructions you give it in plain English.</p>
+
+        <p>Mental model: <em>a senior pair programmer that lives in your terminal, can see your entire project, executes changes autonomously, and never forgets the project rules &mdash; while you keep using Vim, VS Code, JetBrains, or Emacs.</em></p>
+
+        <h3 id="why-claude-code">CLI vs IDE-based AI &mdash; why this distinction matters</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>GitHub Copilot</th>
+              <th>Cursor IDE</th>
+              <th>Claude Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Interface</td>
+              <td>IDE extension</td>
+              <td>Forked VS Code editor</td>
+              <td>Terminal CLI (any editor)</td>
+            </tr>
+            <tr>
+              <td>Editor lock-in</td>
+              <td>VS Code / JetBrains</td>
+              <td>Must use Cursor</td>
+              <td>None &mdash; Vim, VS Code, Emacs, anything</td>
+            </tr>
+            <tr>
+              <td>Multi-file editing</td>
+              <td>Limited</td>
+              <td>Agent mode</td>
+              <td>Native &mdash; always multi-file</td>
+            </tr>
+            <tr>
+              <td>Runs your tests</td>
+              <td>No</td>
+              <td>Yes, in chat</td>
+              <td>Yes &mdash; <em>is</em> the terminal</td>
+            </tr>
+            <tr>
+              <td>Scriptability</td>
+              <td>None</td>
+              <td>Limited</td>
+              <td>Unix pipes, CI, headless</td>
+            </tr>
+            <tr>
+              <td>Project rules</td>
+              <td>Not supported</td>
+              <td><code>.cursor/rules/*.mdc</code></td>
+              <td><code>CLAUDE.md</code> + <code>.claude/rules/</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 id="architecture">Under the hood &mdash; the agentic loop</h3>
+
+        <p>You ask. Claude plans. Claude calls a tool (read a file, run a test, edit code). Claude reads the result. Claude calls another tool. Loop until the goal is reached or it asks you a question. This is <strong>not</strong> autocomplete &mdash; it is a multi-step agent that <em>uses tools</em>.</p>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/claude_code_basics_d1.svg" alt="Claude Code Architecture" style="max-width:100%;height:auto" /></div>
+        <!-- mermaid source preserved:
+flowchart TB
+    subgraph CC["Claude Code CLI"]
+        direction TB
+        TERM["Terminal Interface<br/>Interactive conversation"]
+        TOOLS["Tool System<br/>Read, Edit, Bash, Grep, Glob"]
+        CTX["Context Engine<br/>CLAUDE.md, Rules, Memory"]
+    end
+    DEV["Developer"] --> CC
+    TERM --> TOOLS
+    TOOLS --> CTX
+    CTX --> LLM["Claude Model<br/>Anthropic API"]
+    LLM --> TOOLS
+    -->
+
+        <h3>Result &mdash; what you can now do</h3>
+        <ul>
+          <li>Stay in your editor; let Claude do the cross-file edits.</li>
+          <li>Pipe logs and CSVs into Claude with one command.</li>
+          <li>Script Claude into CI to triage commits or generate release notes.</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Key insight &mdash; Unix philosophy</div>
+          <p>Claude Code is composable, scriptable, editor-agnostic. It integrates with your existing workflow through pipes, flags, and config files &mdash; not by replacing your editor. If you can write a shell pipeline, you can drop Claude into it.</p>
+        </div>
+
+        <h3><span class="timebox">&#9201; 10 min &mdash; Demo</span> &ldquo;Look ma, no IDE&rdquo;</h3>
+        <p>Instructor demo (you watch):</p>
+        <pre><code class="language-bash"># 1. Open a fresh terminal in a small project
+cd ~/scratch/demo-repo
+
+# 2. Boot Claude Code
+claude
+
+# 3. In the prompt, type:
+# > What does this project do? Read main.py and the README.
+
+# 4. Watch the output: Claude calls Read tool twice, then summarises.</code></pre>
+        <p><strong>Annotated output the instructor narrates aloud:</strong></p>
+        <pre><code class="language-text">&bull; Tool call: Read(file_path="README.md")     &larr; Claude decided to read this on its own
+&bull; Tool call: Read(file_path="main.py")
+&bull; Assistant: This project is a tiny FastAPI app exposing /health and /users&hellip;</code></pre>
+        <p>Notice: <em>nobody pasted code</em>. Claude found the files itself. That is the whole pitch.</p>
+      </section>
+
+      <!-- ==================== SECTION 2: 3 Interaction Patterns ==================== -->
+      <section id="interaction-patterns">
+        <h2>2. The 3 Interaction Patterns</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You learn the three ways to invoke Claude Code, and when to pick each one.</p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You only know the chat-style interactive prompt and copy/paste data into it.</td>
+              <td>You know to <code>cat error.log | claude -p</code> for triage, <code>claude -p</code> for one-shot questions in scripts, and <code>claude</code> for real building &mdash; and you stop using the wrong mode for the wrong job.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <h3>Situation</h3>
+        <p>Different tasks need different shapes of conversation. A 6-step refactor needs back-and-forth. Triaging a 5MB log file needs one transformation pass. A CI hook needs a single answer with no follow-up. One tool, three modes.</p>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/claude_code_basics_d2.svg" alt="3 Interaction Patterns" style="max-width:100%;height:auto" /></div>
+        <!-- mermaid source preserved:
+flowchart TB
+    subgraph Modes["3 Interaction Patterns"]
+        direction LR
+        INT["Interactive<br/>claude"]
+        HEAD["Headless<br/>claude -p"]
+        PIPE["Pipe<br/>cat | claude -p"]
+    end
+    INT -->|"Full agentic loop<br/>multi-turn"| L["Complex Tasks<br/>Features, TDD,<br/>multi-file refactors"]
+    HEAD -->|"One-shot query<br/>exits after"| M["Quick Tasks<br/>CI/CD scripts,<br/>code search"]
+    PIPE -->|"Stdin processing<br/>transform data"| S["Data Processing<br/>Explain logs,<br/>add type hints"]
+        -->
+
+        <!-- Interactive Mode -->
+        <h3 id="interactive-mode">2.1 Interactive Mode &mdash; <code>claude</code></h3>
+        <p><strong>Task:</strong> drive a full agentic conversation. Claude reads, edits, runs tests, you correct it, it iterates. Stays alive until you exit.</p>
+
+        <pre><code class="language-bash">cd my-project
+claude</code></pre>
+
+        <p>Inside the session, you can:</p>
+        <ul>
+          <li>Type natural-language requests.</li>
+          <li>Use <strong>slash commands</strong>: <code>/help</code>, <code>/init</code>, <code>/clear</code>, <code>/compact</code>, <code>/cost</code>.</li>
+          <li>Reference files with <code>@path/to/file.py</code>.</li>
+          <li>Approve or deny each tool call (default permission mode).</li>
+        </ul>
+
+        <p><strong>Best for:</strong> building features, TDD cycles, multi-file refactors, debugging complex issues &mdash; anything that needs back-and-forth.</p>
+
+        <!-- Headless Mode -->
+        <h3 id="headless-mode">2.2 Headless Mode &mdash; <code>claude -p</code></h3>
+        <p><strong>Task:</strong> ask one thing, get one answer, exit. No conversation, no follow-up, no TTY. Designed for scripts and CI.</p>
+
+        <pre><code class="language-bash"># Quick question
+claude -p "What testing framework does this project use?"
+
+# Structured output for piping into jq
+claude -p "List all FastAPI endpoints" --output-format json
+
+# CI snippet: comment on PR if tests are missing
+claude -p "Review the last commit. Output PASS or FAIL only."</code></pre>
+
+        <p><strong>Best for:</strong> CI/CD steps, git hooks, scripts, &ldquo;hey, what was&hellip;&rdquo; questions where you do not want to start a session.</p>
+
+        <!-- Pipe Mode -->
+        <h3 id="pipe-mode">2.3 Pipe Mode &mdash; <code>stdin | claude -p</code></h3>
+        <p><strong>Task:</strong> feed data on stdin, get transformed output on stdout. Pure Unix.</p>
+
+        <pre><code class="language-bash"># Explain a file
+cat src/auth.py | claude -p "Explain this authentication flow"
+
+# Add type hints (Claude returns code on stdout)
+cat utils.py | claude -p "Add type hints. Output Python code only." > utils.typed.py
+
+# Triage error logs
+tail -200 /var/log/app.log | claude -p "Top 3 errors and root causes"
+
+# Transform CSV to JSON
+cat data.csv | claude -p "Convert to JSON array, no commentary" > data.json</code></pre>
+
+        <p><strong>Best for:</strong> log analysis, file transformation, batch explanation, format conversion. The <em>output</em> is data, not chat.</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">A 4th option: IDE extensions</div>
+          <p>Claude Code also has <strong>VS Code</strong> and <strong>JetBrains</strong> extensions that surface the same CLI agent in a sidebar with visual diff review. Same engine, same CLAUDE.md, prettier UI. Install from your IDE&rsquo;s marketplace.</p>
+        </div>
+
+        <!-- Decision Guide -->
+        <h3 id="which-pattern">Which pattern should I use?</h3>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/claude_code_basics_d3.svg" alt="Decision Flowchart" style="max-width:100%;height:auto" /></div>
+        <!-- mermaid source preserved:
+flowchart TD
+    START["What do you need?"] --> Q1{"Multi-turn<br/>conversation?"}
+    Q1 -->|"Yes"| INT["Use Interactive<br/>claude"]
+    Q1 -->|"No"| Q2{"Processing<br/>stdin data?"}
+    Q2 -->|"Yes"| PIPE["Use Pipe<br/>cat file | claude -p"]
+    Q2 -->|"No"| HEAD["Use Headless<br/>claude -p 'query'"]
+        -->
+
+        <table>
+          <thead>
+            <tr><th>Pattern</th><th>Command</th><th>Edits files?</th><th>Multi-turn?</th><th>Scriptable?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Interactive</strong></td><td><code>claude</code></td><td>Yes</td><td>Yes</td><td>No</td></tr>
+            <tr><td><strong>Headless</strong></td><td><code>claude -p "&hellip;"</code></td><td>Yes (with flags)</td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>Pipe</strong></td><td><code>cat f | claude -p</code></td><td>No (stdout)</td><td>No</td><td>Yes</td></tr>
+          </tbody>
+        </table>
+
+        <h3><span class="timebox">&#9201; 10 min &mdash; Demo</span> three modes side-by-side</h3>
+        <pre><code class="language-bash"># Mode 1: interactive
+claude
+# > Add a /version endpoint that returns the current git SHA
+
+# Mode 2: headless one-shot
+claude -p "Name the top 3 files I should read to understand this repo"
+
+# Mode 3: pipe
+cat requirements.txt | claude -p "Which of these have known CVEs as of 2025?"</code></pre>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">Permissions matter in the terminal</div>
+          <p>Unlike an IDE where actions are visual, Claude Code runs <em>real</em> commands. By default it asks before editing files or running shell commands. Configure with <code>--permission-mode</code>:</p>
+          <ul>
+            <li><strong>default</strong> &mdash; asks before risky operations (recommended).</li>
+            <li><strong>plan</strong> &mdash; read-only mode. Cannot edit or run commands.</li>
+            <li><strong>full-auto</strong> &mdash; no prompts. Use only on throwaway repos.</li>
+          </ul>
+          <p>Common mistake: enabling full-auto on your main branch and waking up to a force-push.</p>
+        </div>
+
+        <h3>Common mistake</h3>
+        <p>Using interactive mode for a one-shot query, then leaving the session open all day burning context tokens. If your question fits in one prompt and one answer, use <code>-p</code>.</p>
+      </section>
+
+      <!-- ==================== SECTION 3: Context System ==================== -->
+      <section id="context-system">
+        <h2>3. The Context System &mdash; CLAUDE.md is the AI&rsquo;s Brain</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You learn the one file (<code>CLAUDE.md</code>) that turns Claude from a generic assistant into <em>your project&rsquo;s</em> assistant.</p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You paste your project description (&ldquo;we use FastAPI, snake_case, pytest&hellip;&rdquo;) at the top of every conversation.</td>
+              <td>One <code>CLAUDE.md</code> at the repo root loads automatically every session. The AI knows your stack, conventions, and active phase from the first message.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <h3>Situation</h3>
+        <p>The quality of AI output is bounded by context. A model that does not know you use snake_case will write camelCase. A model that does not know you use Pytest will suggest unittest. Re-explaining your project on every prompt is exhausting and brittle.</p>
+
+        <h3 id="claude-md">Task &mdash; CLAUDE.md</h3>
+        <p>A <code>CLAUDE.md</code> at your project root is loaded <strong>automatically</strong> at the start of every session. It tells Claude your stack, standards, build commands, and current phase.</p>
+
+        <pre><code class="language-markdown"># Project Context
+
+## Active Persona
+engineer
+
+## Active Stack
+python-fastapi
+
+## Architecture Shape
+REST API - FastAPI async endpoints, SQLAlchemy 2.0, Alembic, Pydantic v2.
+
+## Active Phase
+Phase 0 (Skeleton)
+
+## Tech Stack
+- Language: Python 3.11+
+- Framework: FastAPI
+- Database: PostgreSQL (SQLAlchemy 2.0+ async)
+- Testing: Pytest
+
+## Build &amp; Run
+- Install: pip install -r requirements.txt
+- Run: uvicorn main:app --reload
+- Test: pytest tests/ -v
+
+## Code Standards
+- snake_case for variables/functions, PascalCase for classes
+- All endpoints must have type hints
+- Use Pydantic models for validation
+- No business logic in route handlers</code></pre>
+
+        <p>Generate one automatically:</p>
+        <pre><code class="language-bash"># Inside an interactive session
+/init</code></pre>
+
+        <div class="callout callout-info">
+          <div class="callout-title">CLAUDE.md is to Claude Code what .cursor/rules is to Cursor</div>
+          <p>If you came from Cursor: <code>CLAUDE.md</code> is the equivalent of <code>.cursor/rules/*.mdc</code> with <code>alwaysApply: true</code>. Always loaded, always enforced. For path-scoped rules, use <code>.claude/rules/*.md</code>.</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr><th>Context source</th><th>How it&rsquo;s loaded</th><th>Cursor equivalent</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>CLAUDE.md</code></td><td>Auto at session start</td><td><code>.cursor/rules/*.mdc</code> (alwaysApply)</td></tr>
+            <tr><td><code>.claude/rules/</code></td><td>Path-scoped, loads when matching files are touched</td><td><code>.cursor/rules/*.mdc</code> (glob-attached)</td></tr>
+            <tr><td><code>.claude/commands/*.md</code></td><td>On-demand via slash commands</td><td><code>.cursor/commands/*.md</code></td></tr>
+            <tr><td>File reads</td><td>Claude uses Read tool autonomously</td><td><code>@file</code> mentions</td></tr>
+            <tr><td>Code search</td><td>Claude uses Grep/Glob autonomously</td><td><code>@codebase</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="context-flow">Action &mdash; how context flows on every message</h3>
+
+        <p>When you type a message, Claude Code assembles a rich package <em>before</em> calling the model. Unlike Cursor where you manually attach files with <code>@</code>, Claude Code <strong>discovers context autonomously</strong>.</p>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/claude_code_basics_d4.svg" alt="Context Flow" style="max-width:100%;height:auto" /></div>
+        <!-- mermaid source preserved:
+flowchart LR
+    subgraph Input["Your Prompt"]
+        P["Create POST /users<br/>with validation"]
+    end
+    subgraph Auto["Auto-Loaded"]
+        R["CLAUDE.md<br/>Project instructions"]
+        RULES[".claude/rules/<br/>Scoped rules"]
+    end
+    subgraph Tools["Claude Discovers"]
+        F["File Contents<br/>via Read tool"]
+        G["Search Results<br/>via Grep/Glob"]
+    end
+    subgraph Assembly["Context Assembly"]
+        LLM["Claude receives ALL:<br/>Instructions + Rules +<br/>Code + Your prompt"]
+    end
+
+    P --> LLM
+    R --> LLM
+    RULES --> LLM
+    F --> LLM
+    G --> LLM
+        -->
+
+        <h3>Result</h3>
+        <p>The model sees: your CLAUDE.md, the matching rules, files Claude has read, and your message &mdash; together, in one shot. That is why CLAUDE.md is so powerful: it is silently injected on every prompt.</p>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Essential built-in slash commands</div>
+          <ul>
+            <li><code>/help</code> &mdash; show available commands</li>
+            <li><code>/init</code> &mdash; generate or improve your CLAUDE.md</li>
+            <li><code>/clear</code> &mdash; clear conversation, reset context</li>
+            <li><code>/compact</code> &mdash; summarise the conversation to free tokens</li>
+            <li><code>/cost</code> &mdash; show token usage and cost so far</li>
+            <li><code>/model</code> &mdash; switch between Sonnet and Opus mid-session</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 4: Persona & Stack Onboarding ==================== -->
+      <section id="onboarding">
+        <h2>4. Persona &amp; Stack Onboarding</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You learn the 3-command flow that turns a fresh repo into a fully-configured AI workspace: persona, stack, session.</p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You write a CLAUDE.md by hand for every project, copy-paste the same standards, and forget to mention testing rules.</td>
+              <td>Three slash commands install a curated persona pack, a stack rules library, and a working CLAUDE.md &mdash; in under 60 seconds.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <h3>Situation &mdash; the pain without it</h3>
+        <p>Every new project: you spend 30 minutes typing out tech stack, naming conventions, testing strategy, build commands. You forget half of them. Two weeks in, the AI is still suggesting <code>npm test</code> in your Python repo because nobody told it. Multiply by every project, every team member.</p>
+
+        <h3 id="three-step-flow">Task &mdash; the three-step flow</h3>
+
+        <pre><code class="language-bash">/set-persona      # Step 1 - pick your role
+/setup-stack      # Step 2 - pick a stack (filtered by persona)
+/start-session    # Step 3 - load context and begin</code></pre>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/claude_code_basics_d5.svg" alt="3-Step Onboarding Flow" style="max-width:100%;height:auto" /></div>
+        <!-- DIAGRAM_PLACEHOLDER: claude_code_basics_d5.svg
+flowchart LR
+    START[Fresh project or new clone] --> P1[set-persona pick your role]
+    P1 --> P2[setup-stack persona filtered stack list]
+    P2 --> P3[start-session load context begin coding]
+    P1 -.->|PM or Designer| P3
+-->
+
+        <p>Personas <strong>pm</strong> and <strong>designer</strong> skip <code>/setup-stack</code> &mdash; they have no tech stack. Engineers, DevOps, and data scientists run all three.</p>
+
+        <h3 id="personas-stacks">Action &mdash; the four personas and their stacks</h3>
+
+        <p><code>/set-persona</code> activates a persona pack: a curated set of slash commands, rules, and skills. <code>/setup-stack</code> is then <strong>persona-filtered</strong>, so you only see stacks that make sense for your role.</p>
+
+        <table>
+          <thead>
+            <tr><th>Persona</th><th>Who it&rsquo;s for</th><th>What it activates</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>engineer</strong></td>
+              <td>Backend / API / platform / DevOps engineers</td>
+              <td>Stack-aware <code>/architect</code>, <code>/code-review</code>, TDD rules, security audits, <code>code-reviewer</code> + <code>security-auditor</code> subagents</td>
+            </tr>
+            <tr>
+              <td><strong>data-scientist</strong></td>
+              <td>DS, ML, MLOps, data &amp; analytics engineers</td>
+              <td>Notebook-first <code>/architect</code>, experiment tracking, model card validation, <code>reproducibility-checker</code> subagent</td>
+            </tr>
+            <tr>
+              <td><strong>pm</strong></td>
+              <td>Product managers</td>
+              <td>PRD scaffolds, INVEST story validation, gap detection &mdash; no stack</td>
+            </tr>
+            <tr>
+              <td><strong>designer</strong></td>
+              <td>UI/UX designers</td>
+              <td>Design token discipline, component handoff specs, responsive checks &mdash; no stack</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Stack catalogue</h3>
+
+        <table>
+          <thead><tr><th>Persona</th><th>Stacks available</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>engineer</strong> (backend)</td>
+              <td><code>python-fastapi</code>, <code>go-gin</code>, <code>go-grpc</code>, <code>java-spring</code>, <code>node-express</code>, <code>node-nestjs</code></td>
+            </tr>
+            <tr>
+              <td><strong>engineer</strong> (devops/infra)</td>
+              <td><code>devops-terraform</code>, <code>devops-ansible</code>, <code>devops-k8s-helm</code></td>
+            </tr>
+            <tr>
+              <td><strong>data-scientist</strong></td>
+              <td><code>python-datascience</code>, <code>python-spark</code>, <code>python-dbt-snowflake</code>, <code>python-mlops</code>, <code>r-tidyverse</code></td>
+            </tr>
+            <tr>
+              <td><strong>pm</strong></td>
+              <td>none</td>
+            </tr>
+            <tr>
+              <td><strong>designer</strong></td>
+              <td>none</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Switching personas is safe</div>
+          <p>Re-run <code>/set-persona</code> at any time to switch roles. The previous persona&rsquo;s files are removed cleanly via the manifest before the new one is installed. <strong>Your code is never touched</strong> &mdash; only the AI context changes.</p>
+        </div>
+
+        <h3 id="arch-shapes">Architecture Shapes &mdash; what each stack produces</h3>
+
+        <p>Every stack declares an <strong>Architecture Shape</strong> in its <code>context.md</code>. <code>/architect</code> reads the shape and adapts its output accordingly.</p>
+
+        <table>
+          <thead><tr><th>Shape</th><th>Stacks</th><th><code>/architect</code> output</th></tr></thead>
+          <tbody>
+            <tr><td>REST API</td><td>python-fastapi, go-gin, java-spring, node-express, node-nestjs</td><td>OpenAPI spec, route list, data model, walking-skeleton stubs</td></tr>
+            <tr><td>gRPC Service</td><td>go-grpc</td><td>Protobuf definitions, service stubs, buf config</td></tr>
+            <tr><td>Data Pipeline</td><td>python-spark, python-mlops</td><td>Job stages, Bronze/Silver/Gold schemas, MLflow runs</td></tr>
+            <tr><td>Analytics Model</td><td>python-dbt-snowflake</td><td>Source/staging/mart tree, grain definitions</td></tr>
+            <tr><td>Statistical Computing</td><td>r-tidyverse</td><td>Notebook sequence, <code>src/</code> function signatures, Quarto report</td></tr>
+            <tr><td>Cloud Infrastructure</td><td>devops-terraform</td><td>Module inputs/outputs, resource map</td></tr>
+            <tr><td>IaC Playbook</td><td>devops-ansible</td><td>Role list, playbook structure, variable contract</td></tr>
+            <tr><td>GitOps Platform</td><td>devops-k8s-helm</td><td>Helm chart, values.yaml contract, ArgoCD app</td></tr>
+          </tbody>
+        </table>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/claude_code_basics_d7.svg" alt="Persona to Stack to Architecture Shape pipeline" style="max-width:100%;height:auto" /></div>
+        <!-- DIAGRAM_PLACEHOLDER: claude_code_basics_d7.svg
+flowchart LR
+    PERSONA[Persona engineer or data scientist] --> STACK[Stack python fastapi go gin python spark]
+    STACK --> SHAPE[Architecture Shape REST API or Data Pipeline]
+    SHAPE --> ARCH[architect output]
+    SHAPE --> RULES[code review rules]
+    SHAPE --> SKEL[skeleton template]
+-->
+
+        <div class="callout callout-info">
+          <div class="callout-title">Slash, not at-sign</div>
+          <p>Claude Code uses <code>/</code> for all commands (e.g. <code>/set-persona</code>). If you see <code>@set-persona</code> in template docs, that is the <em>Cursor IDE</em> equivalent &mdash; same template, different prefix.</p>
+        </div>
+
+        <h3><span class="timebox">&#9201; 12 min &mdash; Demo</span> live onboarding from zero</h3>
+        <p>Instructor demo &mdash; a brand-new repo, three commands, working AI workspace:</p>
+        <pre><code class="language-bash">mkdir ~/scratch/demo-claude &amp;&amp; cd ~/scratch/demo-claude
+git init
+claude
+
+# Inside Claude:
+&gt; /set-persona
+# &rarr; menu shows: 1. engineer  2. designer  3. pm  4. data-scientist
+# &rarr; pick: 1
+# &rarr; output: "Persona active: engineer. Next: run /setup-stack"
+
+&gt; /setup-stack
+# &rarr; menu filtered to engineer stacks
+# &rarr; pick: python-fastapi
+# &rarr; output: "Stack configured: python-fastapi (REST API)."
+
+&gt; /start-session
+# &rarr; output:
+#     Context Loaded: Python / FastAPI
+#     Current Phase: Phase 0 (Skeleton)
+#     What is the goal for this session?</code></pre>
+
+        <p>Now the instructor opens <code>CLAUDE.md</code> in a separate pane. Notice the populated fields: Active Persona, Active Stack, Architecture Shape, Active Phase. <em>Nobody typed those.</em></p>
+      </section>
+
+      <!-- ==================== LAB 1 ==================== -->
+      <section id="lab-1">
+        <h2>Lab 1 &mdash; Onboarding Your First Project</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this lab?</div>
+          <p>By the end you have a real repo with persona + stack + session loaded, verified by Claude printing <code>Context Loaded: Python / FastAPI</code>.</p>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title"><span class="timebox">&#9201; 30 min &mdash; Lab</span> Run the 3-step flow end-to-end</div>
+
+          <p><strong>Prerequisites:</strong> Claude Code installed (<code>claude --version</code> works), Git installed, this template cloned locally.</p>
+
+          <p><strong>Setup</strong></p>
+          <pre><code class="language-bash">git clone https://github.com/your-org/cursor-course-templates ~/lab1-claude
+cd ~/lab1-claude
+claude</code></pre>
+
+          <p><strong>Step 1 &mdash; Set persona</strong></p>
+          <ol>
+            <li>In the Claude prompt, type: <code>/set-persona</code></li>
+            <li>When the menu appears, pick <strong>engineer</strong>.</li>
+            <li>Confirm any overwrite prompts with <kbd>y</kbd>.</li>
+            <li>Read the confirmation summary &mdash; it should list installed commands and agents.</li>
+          </ol>
+
+          <p><strong>Step 2 &mdash; Set up stack</strong></p>
+          <ol>
+            <li>Type: <code>/setup-stack</code></li>
+            <li>From the engineer menu pick <strong>python-fastapi</strong>.</li>
+            <li>Wait for the &ldquo;Stack configured&rdquo; line.</li>
+          </ol>
+
+          <p><strong>Step 3 &mdash; Start session</strong></p>
+          <ol>
+            <li>Type: <code>/start-session</code></li>
+            <li>Read the output. You should see something like:
+              <pre><code class="language-text">Context Loaded: Python / FastAPI
+Current Phase: Phase 0 (Skeleton)
+Strictness: Default
+What is the goal for this session?</code></pre>
+            </li>
+            <li>Open <code>CLAUDE.md</code> in your editor and confirm the four fields exist: <code>## Active Persona</code>, <code>## Active Stack</code>, <code>## Architecture Shape</code>, <code>## Active Phase</code>.</li>
+          </ol>
+
+          <p><strong>Acceptance criteria &mdash; you&rsquo;re done when:</strong></p>
+          <ul>
+            <li>Your terminal shows <code>Context Loaded: Python / FastAPI</code>.</li>
+            <li><code>CLAUDE.md</code> at the repo root contains all four sections, populated.</li>
+            <li><code>.claude/rules/</code> contains stack-specific rule files (run <code>ls .claude/rules</code>).</li>
+          </ul>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title"><span class="timebox">&#9201; 15 min &mdash; Extension</span> Switch personas cleanly</div>
+          <ol>
+            <li>Run <code>/set-persona</code> again. Pick <strong>data-scientist</strong>.</li>
+            <li>Confirm the previous engineer install is removed (read the diff).</li>
+            <li>Run <code>/setup-stack</code> &mdash; the menu must now show <em>data-scientist</em> stacks (no go-gin, no java-spring).</li>
+            <li>Pick <code>python-datascience</code>.</li>
+            <li>Verify <code>CLAUDE.md</code> now reads <code>Active Persona: data-scientist</code> and <code>Active Stack: python-datascience</code>.</li>
+            <li>No hand-holding: switch back to engineer / python-fastapi without instructor help.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 5: Core Commands ==================== -->
+      <section id="core-commands">
+        <h2>5. Core Commands for Beginners</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You learn the six commands that cover 90% of a beginner&rsquo;s day: configuration, design, build, review, wrap-up.</p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You know <code>claude</code> the binary but stare blankly when someone says &ldquo;run /architect.&rdquo;</td>
+              <td>You can describe what each of the 6 core commands does, when to use it, and the most common mistake.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/claude_code_basics_d8.svg" alt="Beginner command reference - which command when" style="max-width:100%;height:auto" /></div>
+        <!-- DIAGRAM_PLACEHOLDER: claude_code_basics_d8.svg
+flowchart TB
+    A[New project] --> B[set-persona]
+    B --> C[setup-stack]
+    C --> D[start-session]
+    D --> E[architect design]
+    E --> F[code]
+    F --> G[code-review]
+    G --> H[next-session]
+    H --> D
+-->
+
+        <h3 id="cmd-set-persona">5.1 <code>/set-persona</code></h3>
+        <p><strong>What:</strong> activate a persona pack (engineer, designer, pm, data-scientist). Installs commands, agents, hooks, rules into <code>.claude/</code>.</p>
+        <p><strong>When:</strong> first thing on a new project, or whenever you change roles.</p>
+        <p><strong>Invocation:</strong></p>
+        <pre><code class="language-bash">/set-persona
+# &rarr; menu, pick number or name</code></pre>
+        <p><strong>Common mistake:</strong> running <code>/setup-stack</code> first &mdash; it will refuse, because no persona is set.</p>
+
+        <h3 id="cmd-setup-stack">5.2 <code>/setup-stack</code></h3>
+        <p><strong>What:</strong> pick a tech stack from a persona-filtered list. Copies stack rules, vibe guides, and templates. Writes <code>Active Stack</code> + <code>Architecture Shape</code> into <code>CLAUDE.md</code>.</p>
+        <p><strong>When:</strong> right after <code>/set-persona</code> (engineers and data scientists only).</p>
+        <p><strong>Invocation:</strong></p>
+        <pre><code class="language-bash">/setup-stack
+# &rarr; persona-filtered menu, pick a stack</code></pre>
+        <p><strong>Expected output:</strong></p>
+        <pre><code class="language-text">Stack configured: python-fastapi (REST API).
+Run /start-session to begin your session.</code></pre>
+        <p><strong>Common mistake:</strong> picking a stack that does not match your real codebase. If you have an existing repo, run <code>/detect-stack</code> instead.</p>
+
+        <h3 id="cmd-start-session">5.3 <code>/start-session</code></h3>
+        <p><strong>What:</strong> load CLAUDE.md, active stack rules, and last-session summary. Asks for the goal of this session.</p>
+        <p><strong>When:</strong> every time you sit down to work.</p>
+        <p><strong>Invocation + expected output:</strong></p>
+        <pre><code class="language-bash">/start-session</code></pre>
+        <pre><code class="language-text">Context Loaded: Python / FastAPI
+Current Phase: Phase 0 (Skeleton)
+Strictness: Default
+What is the goal for this session?</code></pre>
+        <p><strong>Common mistake:</strong> skipping it and just typing &ldquo;build me an API.&rdquo; Claude technically <em>has</em> CLAUDE.md auto-loaded, but <code>/start-session</code> also surfaces the active phase and last-session beacon &mdash; which prevents repeating completed work.</p>
+
+        <h3 id="cmd-architect">5.4 <code>/architect "Build X"</code></h3>
+        <p><strong>What:</strong> Phase 0 design. Produces interface contract (OpenAPI / route list / pipeline stages / module inputs) and a walking skeleton with stub responses, plus session plans in <code>plan/sessions/</code>.</p>
+        <p><strong>When:</strong> at the start of every new feature or project, before you write any real code.</p>
+        <p><strong>Invocation:</strong></p>
+        <pre><code class="language-bash">/architect "Build a task management API with users, tasks, and due dates"
+# or with an existing plan:
+/architect plan.md</code></pre>
+        <p><strong>Annotated expected output:</strong></p>
+        <pre><code class="language-text">[1] Interface designed (8 endpoints):
+    POST /users, GET /users/{id}, POST /tasks, GET /tasks, &hellip;
+[2] 4 phases identified
+[3] Session plans created in plan/sessions/
+    - session-1-phase-0.md  (skeleton)
+    - session-2-phase-1.md  (user CRUD)
+    - session-3-phase-2.md  (task CRUD)
+    - session-4-phase-3.md  (due-date logic)
+[4] Skeleton implemented &mdash; main.py runs, all endpoints return 200 with stub data
+Next: Run /start-session to begin implementation</code></pre>
+        <p><strong>Common mistake:</strong> jumping straight to feature code without <code>/architect</code>, then ending up with no test scaffolding and no phase plan.</p>
+
+        <h3 id="cmd-code-review">5.5 <code>/code-review</code></h3>
+        <p><strong>What:</strong> audit the codebase against the active stack&rsquo;s rules &mdash; security (secrets, injection), style (naming, complexity), type safety, and test gaps. Persona-aware (different checks for designer vs PM vs data scientist).</p>
+        <p><strong>When:</strong> before every commit, and any time you suspect drift.</p>
+        <p><strong>Invocation:</strong></p>
+        <pre><code class="language-bash">/code-review</code></pre>
+        <p><strong>Expected output:</strong> a structured report with severity, file, line, finding, and suggested fix.</p>
+        <p><strong>Common mistake:</strong> running it once and ignoring it. Treat it as a pre-commit hook in your head.</p>
+
+        <h3 id="cmd-next-session">5.6 <code>/next-session</code></h3>
+        <p><strong>What:</strong> wrap up. Summarises what changed, what tests pass, what is pending. Emits a copy-paste &ldquo;Context Beacon&rdquo; for next time.</p>
+        <p><strong>When:</strong> end of every work session, before you close the terminal.</p>
+        <p><strong>Invocation:</strong></p>
+        <pre><code class="language-bash">/next-session</code></pre>
+        <p><strong>Expected output:</strong></p>
+        <pre><code class="language-markdown"># Session Transition
+**Last Status**: Success
+**Stopped At**: app/services/task_service.py::create_task
+**Next Step**: Add validation for due_date &gt; now() and write the failing test first.
+
+**Context to Load**:
+- CLAUDE.md
+- app/services/task_service.py
+- tests/api/test_tasks.py</code></pre>
+        <p><strong>Common mistake:</strong> closing the terminal without running it. Tomorrow&rsquo;s you will have no idea where today&rsquo;s you stopped.</p>
+
+        <h3>Quick reference table</h3>
+        <table>
+          <thead><tr><th>Command</th><th>Purpose</th><th>Run when</th></tr></thead>
+          <tbody>
+            <tr><td><code>/set-persona</code></td><td>Activate role-specific commands and agents</td><td>New project, role change</td></tr>
+            <tr><td><code>/setup-stack</code></td><td>Load stack rules + write CLAUDE.md</td><td>After /set-persona</td></tr>
+            <tr><td><code>/start-session</code></td><td>Load context + ask goal</td><td>Every work session</td></tr>
+            <tr><td><code>/architect</code></td><td>Phase 0 design + skeleton</td><td>New feature/project</td></tr>
+            <tr><td><code>/code-review</code></td><td>Audit vs active rules</td><td>Before commits</td></tr>
+            <tr><td><code>/next-session</code></td><td>Wrap up + transition prompt</td><td>End of session</td></tr>
+            <tr><td><code>/detect-stack</code></td><td>Reverse-engineer existing repo into a stack config</td><td>Brownfield projects</td></tr>
+            <tr><td><code>/research</code></td><td>3-cycle deep investigation with refutation</td><td>Hard unknowns</td></tr>
+            <tr><td><code>/read</code></td><td>Quick context refresh (persona + stack + phase)</td><td>Mid-session sanity check</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ==================== LAB 2 ==================== -->
+      <section id="lab-2">
+        <h2>Lab 2 &mdash; Your First AI-Designed Endpoint</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this lab?</div>
+          <p>You ask Claude to scaffold a real endpoint with <code>/architect</code> and end with a running FastAPI app that responds 200 to a curl request.</p>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title"><span class="timebox">&#9201; 40 min &mdash; Lab</span> Scaffold a /tasks endpoint</div>
+
+          <p><strong>Prerequisites:</strong> Lab 1 done (engineer + python-fastapi configured), Python 3.11+, <code>uv</code> or <code>pip</code> available.</p>
+
+          <p><strong>Step 1 &mdash; Start a session</strong></p>
+          <ol>
+            <li>From the same repo as Lab 1, run <code>claude</code>.</li>
+            <li>Type <code>/start-session</code>.</li>
+            <li>When asked the goal, type: <code>Scaffold a tasks API with create, list, and get-by-id endpoints.</code></li>
+          </ol>
+
+          <p><strong>Step 2 &mdash; Architect</strong></p>
+          <ol>
+            <li>Type: <code>/architect "Build a tasks API with POST /tasks, GET /tasks, GET /tasks/{id}. Each task has id, title, done."</code></li>
+            <li>Watch Claude design the OpenAPI surface, write stub handlers in <code>app/</code>, create <code>plan/sessions/session-1-phase-0.md</code>, and run a sanity-check curl in the terminal.</li>
+            <li>Approve each tool call (default permission mode).</li>
+          </ol>
+
+          <p><strong>Step 3 &mdash; Run the app</strong></p>
+          <ol>
+            <li>In a separate terminal:
+              <pre><code class="language-bash">cd ~/lab1-claude
+python -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload</code></pre>
+            </li>
+            <li>Visit <code>http://localhost:8000/docs</code> &mdash; Swagger UI shows the three endpoints.</li>
+            <li>Test:
+              <pre><code class="language-bash">curl -s -X POST http://localhost:8000/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"hello","done":false}'
+
+curl -s http://localhost:8000/tasks</code></pre>
+            </li>
+          </ol>
+
+          <p><strong>Acceptance criteria &mdash; you&rsquo;re done when:</strong></p>
+          <ul>
+            <li>The two curl calls return HTTP 200.</li>
+            <li><code>plan/sessions/session-1-phase-0.md</code> exists and lists the three endpoints.</li>
+            <li><code>app/</code> contains a router and at least a stub service file.</li>
+            <li>The Swagger UI at <code>/docs</code> renders all three endpoints.</li>
+          </ul>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title"><span class="timebox">&#9201; 20 min &mdash; Extension</span> Add validation and a failing test first</div>
+          <ol>
+            <li>Ask Claude: <em>&ldquo;Write a failing pytest for POST /tasks that asserts a 422 when title is empty. Then make it pass with Pydantic validation.&rdquo;</em></li>
+            <li>Verify the test fails first (red), then passes (green) after the change.</li>
+            <li>No hand-holding: get to a green run of <code>pytest tests/api/test_tasks.py</code>.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 6: Session Loop ==================== -->
+      <section id="session-loop">
+        <h2>6. The Session Loop &mdash; the Daily Rhythm</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You learn the repeatable 6-step cycle that turns Claude Code from &ldquo;cool toy&rdquo; into &ldquo;the way we ship.&rdquo;</p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You open Claude, vibe for 4 hours, lose track of what changed, forget to run tests, commit a mess.</td>
+              <td>You follow start-session &rarr; goal &rarr; code &rarr; code-review &rarr; commit &rarr; next-session every time. Predictable, reviewable, resumable.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <h3>The cycle</h3>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/claude_code_basics_d6.svg" alt="The session loop" style="max-width:100%;height:auto" /></div>
+        <!-- DIAGRAM_PLACEHOLDER: claude_code_basics_d6.svg
+flowchart LR
+    A[start-session] --> B[state goal]
+    B --> C[code with claude]
+    C --> D[code-review]
+    D --> E[commit]
+    E --> F[next-session]
+    F -.-> A
+-->
+
+        <ol>
+          <li><strong><code>/start-session</code></strong> &mdash; load context, see active phase, read last beacon.</li>
+          <li><strong>State the goal</strong> &mdash; one sentence. &ldquo;Add due-date validation to POST /tasks.&rdquo;</li>
+          <li><strong>Code with Claude</strong> &mdash; iterate. Let Claude propose, run tests, correct itself. Approve tool calls.</li>
+          <li><strong><code>/code-review</code></strong> &mdash; before committing, audit. Fix anything red.</li>
+          <li><strong>Commit</strong> &mdash; either via <code>/commit</code> built-in or your own <code>git commit</code>.</li>
+          <li><strong><code>/next-session</code></strong> &mdash; generate the transition beacon. Paste into your notes.</li>
+        </ol>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">The loop is the product</div>
+          <p>The commands are easy to memorise. The <em>discipline</em> of running them in order is what produces a clean repo with reviewable diffs and resumable state. Skip <code>/code-review</code> twice and you accumulate drift; skip <code>/next-session</code> twice and tomorrow you replay yesterday&rsquo;s work.</p>
+        </div>
+
+        <h3><span class="timebox">&#9201; 8 min &mdash; Demo</span> instructor walks one full loop</h3>
+        <pre><code class="language-bash">/start-session
+# &rarr; goal: "Add a /health endpoint that returns 200 OK with version"
+# &hellip; Claude edits app/routers/health.py, runs pytest &hellip;
+/code-review
+# &rarr; report shows missing type hint on return value &mdash; fix it
+git add . &amp;&amp; git commit -m "feat: add /health endpoint"
+/next-session
+# &rarr; copy the transition beacon to plan/last-session.md</code></pre>
+      </section>
+
+      <!-- ==================== LAB 3 ==================== -->
+      <section id="lab-3">
+        <h2>Lab 3 &mdash; The Review Loop</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this lab?</div>
+          <p>You run <code>/code-review</code> on the code from Lab 2, get real findings, and apply at least one fix &mdash; closing the build/review/commit loop.</p>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title"><span class="timebox">&#9201; 35 min &mdash; Lab</span> Audit and fix</div>
+
+          <p><strong>Prerequisites:</strong> Lab 2 done. The tasks API runs and returns 200.</p>
+
+          <p><strong>Step 1 &mdash; Run review</strong></p>
+          <ol>
+            <li>In your active Claude session, type <code>/code-review</code>.</li>
+            <li>Wait for the audit report. Expect findings in at least one of: secret hygiene, type safety, test coverage, naming.</li>
+            <li>Copy the report into <code>plan/lab3-review.md</code> (your evidence for acceptance).</li>
+          </ol>
+
+          <p><strong>Step 2 &mdash; Triage</strong></p>
+          <ol>
+            <li>Pick the highest-severity finding.</li>
+            <li>Ask Claude: <em>&ldquo;Fix only finding #1. Show me the diff before applying.&rdquo;</em></li>
+            <li>Approve the edit.</li>
+            <li>Re-run <code>pytest</code> &mdash; tests must still pass.</li>
+          </ol>
+
+          <p><strong>Step 3 &mdash; Re-review</strong></p>
+          <ol>
+            <li>Run <code>/code-review</code> again.</li>
+            <li>Confirm the fixed finding no longer appears.</li>
+          </ol>
+
+          <p><strong>Step 4 &mdash; Wrap up</strong></p>
+          <ol>
+            <li>Commit: <code>git add . &amp;&amp; git commit -m "fix: address code-review finding"</code></li>
+            <li>Run <code>/next-session</code>. Save the transition beacon to <code>plan/last-session.md</code>.</li>
+          </ol>
+
+          <p><strong>Acceptance criteria &mdash; you&rsquo;re done when:</strong></p>
+          <ul>
+            <li><code>plan/lab3-review.md</code> contains the original audit report.</li>
+            <li>At least one finding is resolved (visible in <code>git log -p</code>).</li>
+            <li>The second <code>/code-review</code> run no longer flags that finding.</li>
+            <li><code>plan/last-session.md</code> contains the transition beacon.</li>
+          </ul>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title"><span class="timebox">&#9201; 20 min &mdash; Extension</span> Make the review fail on purpose</div>
+          <ol>
+            <li>Hardcode a fake API key in <code>app/config.py</code> (e.g. <code>API_KEY = "sk-1234567890abcdef"</code>).</li>
+            <li>Run <code>/code-review</code>. Confirm it flags the secret as Critical.</li>
+            <li>Move it to an environment variable and re-run review. Confirm it goes away.</li>
+            <li>Bonus: add a <code>.env.example</code> with the variable name only.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 7: CLAUDE.md Anatomy ==================== -->
+      <section id="claude-md-anatomy">
+        <h2>7. CLAUDE.md Anatomy &mdash; Section by Section</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You can read any <code>CLAUDE.md</code> and predict what the AI will do, and you can edit yours with confidence.</p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You see CLAUDE.md as a magic file generated by <code>/init</code> that you do not touch.</td>
+              <td>You know which sections drive which behaviors and you tune them on purpose.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <h3>The standard sections</h3>
+
+        <table>
+          <thead><tr><th>Section</th><th>What it does</th><th>Touched by</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>## Active Persona</code></td>
+              <td>Tells every command which preamble branch to follow (engineer / designer / pm / data-scientist). Missing &rarr; defaults to engineer.</td>
+              <td><code>/set-persona</code></td>
+            </tr>
+            <tr>
+              <td><code>## Active Stack</code></td>
+              <td>Names the stack so commands like <code>/architect</code> and <code>/code-review</code> load the right rules.</td>
+              <td><code>/setup-stack</code></td>
+            </tr>
+            <tr>
+              <td><code>## Architecture Shape</code></td>
+              <td>Drives the kind of skeleton <code>/architect</code> produces (REST API vs Data Pipeline vs IaC&hellip;).</td>
+              <td><code>/setup-stack</code></td>
+            </tr>
+            <tr>
+              <td><code>## Active Phase</code></td>
+              <td>Tells <code>/start-session</code> where you are (Phase 0 skeleton, Phase 1 first feature, etc.) so it can advance correctly.</td>
+              <td><code>/setup-stack</code> sets, <code>/next-session</code> advances</td>
+            </tr>
+            <tr>
+              <td><code>## Tech Stack</code></td>
+              <td>Free-form description of language/framework/db/test tooling. Read by the model, not parsed.</td>
+              <td>You, or <code>/init</code></td>
+            </tr>
+            <tr>
+              <td><code>## Build &amp; Run</code></td>
+              <td>Exact shell commands Claude will use when you say &ldquo;run the tests&rdquo; or &ldquo;start the app.&rdquo;</td>
+              <td>You, or <code>/init</code></td>
+            </tr>
+            <tr>
+              <td><code>## Code Standards</code></td>
+              <td>Naming conventions, type-hint rules, architectural pattern. Enforced by <code>/code-review</code>.</td>
+              <td>Stack template, plus your edits</td>
+            </tr>
+            <tr>
+              <td><code>## Strictness</code></td>
+              <td><code>Default</code> / <code>Low</code>. Low is for legacy/brownfield: do not refactor what you do not touch.</td>
+              <td>You</td>
+            </tr>
+            <tr>
+              <td><code>## Active Client</code> (optional)</td>
+              <td>Loads client-config overlays (extra rules, MCP servers, env-var requirements).</td>
+              <td><code>/set-persona</code> if <code>client-config/</code> exists</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Reading a real CLAUDE.md</h3>
+        <pre><code class="language-markdown"># Project Context
+
+## Active Persona
+engineer                       # &larr; engineer preambles for /architect /code-review etc.
+
+## Active Stack
+python-fastapi                 # &larr; loads stacks/python-fastapi/rules into .claude/rules
+
+## Architecture Shape
+REST API - FastAPI async&hellip;     # &larr; /architect produces OpenAPI + walking skeleton
+
+## Active Phase
+Phase 0 (Skeleton)             # &larr; /start-session shows this; advances after Phase 0 AC met
+
+## Strictness
+Default                        # &larr; full standards on all code
+
+## Build &amp; Run
+- Install: pip install -r requirements.txt
+- Run: uvicorn main:app --reload
+- Test: pytest tests/ -v       # &larr; Claude will literally run this when asked to test
+
+## Code Standards
+- snake_case for functions, PascalCase for classes
+- Pydantic models for all request/response bodies
+- No business logic in route handlers</code></pre>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">Things that bite beginners</div>
+          <ul>
+            <li><strong>Out-of-date Build &amp; Run commands</strong> &mdash; Claude will run <em>exactly</em> what is there, even if it is wrong.</li>
+            <li><strong>Two CLAUDE.md files</strong> &mdash; one at repo root, one in <code>~/.claude/CLAUDE.md</code> (your global). Both load. The global wins on conflicts.</li>
+            <li><strong>Standards in prose, not bullets</strong> &mdash; the model reads bullets more reliably than long paragraphs. Be terse.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 8: How to Adapt After Class ==================== -->
+      <section id="adapt">
+        <h2>8. How to Adapt This After Class</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You leave with a concrete plan to apply Claude Code at your day job &mdash; per role, with the most common corporate pitfalls already named.</p>
+          <table class="ba-table">
+            <thead><tr><th>Before</th><th>After</th></tr></thead>
+            <tbody><tr>
+              <td>You go home buzzing but unsure what to do Monday morning beyond &ldquo;install the CLI.&rdquo;</td>
+              <td>You have a 3-step ordered plan, role-specific advice, and a list of things to negotiate with your IT/security team.</td>
+            </tr></tbody>
+          </table>
+        </div>
+
+        <h3>Apply at work &mdash; per role</h3>
+
+        <h4>Software engineers</h4>
+        <ul>
+          <li>Pick one repo you own. Run <code>/detect-stack</code> to bootstrap a CLAUDE.md from existing code.</li>
+          <li>Set <code>## Strictness: Low</code> if it is legacy.</li>
+          <li>Add <code>/code-review</code> to your pre-push muscle memory before adding it to CI.</li>
+          <li>Use <code>claude -p</code> in git hooks for commit-message linting.</li>
+        </ul>
+
+        <h4>Data scientists / ML engineers</h4>
+        <ul>
+          <li>Use <code>python-datascience</code> stack for notebooks, <code>python-mlops</code> for serving, <code>python-spark</code> for pipelines.</li>
+          <li>Pin every package in <code>requirements.txt</code> &mdash; the reproducibility-checker subagent will flag floating versions.</li>
+          <li>Keep <code>seed</code> set explicitly; the persona&rsquo;s rules look for it.</li>
+          <li>Treat experiments like commits: one <code>/start-session</code> per hypothesis, one <code>/next-session</code> when the run finishes.</li>
+        </ul>
+
+        <h4>DevOps / platform engineers</h4>
+        <ul>
+          <li>Pick the right stack: <code>devops-terraform</code> for IaC, <code>devops-ansible</code> for config mgmt, <code>devops-k8s-helm</code> for Kubernetes.</li>
+          <li>Run Claude in <code>--permission-mode plan</code> against production-touching repos. Read-only is your friend.</li>
+          <li>Use pipe mode to triage CloudWatch / Stackdriver logs: <code>aws logs tail &hellip; | claude -p "top errors"</code>.</li>
+          <li>Never put <code>terraform apply</code> in <code>## Build &amp; Run</code> &mdash; only <code>terraform plan</code>.</li>
+        </ul>
+
+        <h4>Product managers</h4>
+        <ul>
+          <li>No stack. Run <code>/set-persona</code> &rarr; pick <strong>pm</strong> &rarr; <code>/start-session</code>.</li>
+          <li>Use <code>/architect</code> on a product brief to get a PRD draft with goals/non-goals/INVEST stories.</li>
+          <li>Use <code>/code-review</code> on your PRD to get gap analysis (the gap-detector subagent flags missing NFRs).</li>
+          <li>Treat the AI as a junior PM that drafts; you edit.</li>
+        </ul>
+
+        <h3>Customise your CLAUDE.md / persona / stack</h3>
+        <ul>
+          <li><strong>Repo-specific rules:</strong> add a <code>## Project Specific</code> section to CLAUDE.md (e.g. &ldquo;all monetary values in USD cents&rdquo;).</li>
+          <li><strong>Team-wide rules:</strong> commit <code>CLAUDE.md</code> and <code>.claude/rules/</code> to git so every teammate gets the same AI behavior.</li>
+          <li><strong>Custom commands:</strong> drop <code>my-cmd.md</code> into <code>.claude/commands/</code> &mdash; it becomes <code>/my-cmd</code> instantly.</li>
+          <li><strong>Custom stack:</strong> if your stack is not in the catalogue, copy <code>stacks/python-fastapi/</code> as a template and adapt.</li>
+        </ul>
+
+        <h3>Common pitfalls in real environments</h3>
+
+        <table>
+          <thead><tr><th>Pitfall</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Corporate proxy blocks <code>api.anthropic.com</code></td>
+              <td>Set <code>HTTPS_PROXY</code> and <code>NO_PROXY</code>. Use <code>ANTHROPIC_BASE_URL</code> if you have a Bedrock or Vertex gateway.</td>
+            </tr>
+            <tr>
+              <td>SSO / OAuth login fails over SSH</td>
+              <td>Use API key auth: <code>export ANTHROPIC_API_KEY=&hellip;</code> in your shell init.</td>
+            </tr>
+            <tr>
+              <td>Team CLAUDE.md drift</td>
+              <td>Commit it. Code-review it. Treat it like a config file, not a sticky note.</td>
+            </tr>
+            <tr>
+              <td>Secrets accidentally added to context</td>
+              <td>Add <code>.env</code>, <code>secrets/</code> to <code>.claudeignore</code>. Set <code>--permission-mode plan</code> when exploring unknown repos.</td>
+            </tr>
+            <tr>
+              <td>Large monorepo, slow context loads</td>
+              <td>Scope CLAUDE.md per package. Use sub-CLAUDE.md files in subdirectories &mdash; Claude picks the nearest one up.</td>
+            </tr>
+            <tr>
+              <td>&ldquo;It works for me&rdquo; on personal laptop, not on shared dev box</td>
+              <td>Pin the Claude Code version: <code>npm install -g @anthropic-ai/claude-code@x.y.z</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Three next steps, ordered by impact</h3>
+        <ol>
+          <li><strong>Today:</strong> install Claude Code on your work laptop, run the 3-step flow on one real repo, commit the resulting CLAUDE.md.</li>
+          <li><strong>This week:</strong> add <code>/code-review</code> to your personal pre-commit ritual. Notice what it catches that you would have missed.</li>
+          <li><strong>This month:</strong> propose committing CLAUDE.md + <code>.claude/</code> to your team&rsquo;s shared repo. Run a 30-minute brown-bag using this guide.</li>
+        </ol>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">What&rsquo;s next?</div>
+          <p>This was the intro. The advanced course covers: the CLAUDE.md hierarchy, custom Skills, Hooks for automation, MCP servers for tool integration, Subagents for parallel work, and Memory for cross-session learning. That guide turns Claude Code from &ldquo;smart terminal assistant&rdquo; into a professional, team-wide development workflow.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <p>
+      Claude Code Basics &mdash; one-day instructor-led intro
+      <br />
+      Built with <a href="https://picocss.com" target="_blank" rel="noopener">Pico.css</a>,
+      <a href="https://mermaid.js.org" target="_blank" rel="noopener">Mermaid.js</a>, and
+      <a href="https://prismjs.com" target="_blank" rel="noopener">Prism.js</a>
+    </p>
+  </footer>
+
+  <!-- ===== Prism.js ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+
+  <!-- ===== Active TOC Highlighting ===== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const sections = document.querySelectorAll('main section[id], main h3[id], main h4[id]');
+      const tocLinks = document.querySelectorAll('.sidebar nav a');
+
+      if (!sections.length || !tocLinks.length) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id = entry.target.id;
+              tocLinks.forEach((link) => {
+                link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+              });
+            }
+          });
+        },
+        { rootMargin: '-10% 0px -80% 0px', threshold: 0 }
+      );
+
+      sections.forEach((section) => observer.observe(section));
+
+      document.documentElement.removeAttribute('data-theme');
+    });
+  </script>
+
+</body>
+</html>

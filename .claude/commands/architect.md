@@ -22,7 +22,14 @@ Branch to the appropriate preamble below, then continue with the standard execut
 
 ### Persona Preambles
 
-**engineer:** Design the API surface for a backend feature. Output: OpenAPI spec or route list, data model, skeleton implementation plan.
+**engineer:** Design the interface contract for the project. Output varies by Architecture Shape:
+- **REST API** (python-fastapi, go-gin, go-grpc, java-spring, node-express, node-nestjs): OpenAPI spec or route list + data model
+- **Data Pipeline** (python-spark, python-mlops): job stages + schema definitions + medallion layers
+- **Analytics Model** (python-dbt-snowflake): staging/mart model tree + source definitions
+- **Statistical Computing** (r-tidyverse): notebook sequence + `src/` function signatures
+- **IaC Playbook** (devops-ansible): role list + playbook structure
+- **GitOps Platform** (devops-k8s-helm): chart structure + values contract
+- **Cloud Infrastructure** (devops-terraform): module inputs/outputs + resource map
 
 **designer:** Design the component hierarchy for a visual feature. Output: component tree (which components exist vs need creating), token requirements, layout structure. No API design — assume API already exists or will be provided by engineering.
 
@@ -57,7 +64,7 @@ Branch to the appropriate preamble below, then continue with the standard execut
 - **Goal**: Use the plan AS-IS, do not re-design or question architectural decisions
 - **Extract**:
   - **Technical Requirements**: What features/endpoints are specified?
-  - **API Surface**: Which routes, methods, request/response formats are defined?
+  - **Interface Contract**: Which routes/endpoints (web API), inputs/outputs (pipeline/IaC), module structure (library/chart), or model tree (dbt) are defined?
   - **Data Model**: Which entities, relationships, fields are mentioned?
   - **Architecture**: What architectural decisions are already specified? (e.g., "use microservices", "layered architecture")
   - **Tech Stack Specifics**: Any specified libraries, frameworks, patterns?
@@ -87,7 +94,7 @@ Branch to the appropriate preamble below, then continue with the standard execut
 **4A. Generate Phase Breakdown**
 - **Goal**: Break the plan into implementation phases
 - **Action**: Based on plan's features, create phase structure:
-  - **Phase 0**: Skeleton (mock all endpoints from plan)
+  - **Phase 0**: Skeleton (create stub implementations for all interfaces/entry points from plan)
   - **Phase 1+**: Implement each feature group from plan
 
 - **Example**:
@@ -120,10 +127,10 @@ Branch to the appropriate preamble below, then continue with the standard execut
 
   ## Implementation
   - Scaffold directory structure per active stack
-  - Create mock endpoints for:
-    - [Endpoint 1 from plan]
-    - [Endpoint 2 from plan]
-  - Return hardcoded 200 OK responses
+  - Create stub implementations for:
+    - [Interface/entry point 1 from plan]
+    - [Interface/entry point 2 from plan]
+  - Return stub/mock responses (hardcoded 200 OK for HTTP, empty DataFrames for pipelines, placeholder resources for IaC)
 
   ## Verification
   - Run app, verify all endpoints respond
@@ -135,7 +142,7 @@ Branch to the appropriate preamble below, then continue with the standard execut
 - **Action**:
   - Scaffold directory structure (per active stack)
   - Create entrypoint (e.g., `main.py`, `server.ts`)
-  - Create **mock endpoints** for ALL features mentioned in plan
+  - Create **stub implementations** for ALL interfaces/entry points mentioned in plan
   - Mock responses match plan's specified response formats
 
 **7A. Final Output**
@@ -165,6 +172,11 @@ Branch to the appropriate preamble below, then continue with the standard execut
   - If **CLI**: Design the Command Arguments
   - If **Terraform**: Design the Root Module inputs/outputs
   - If **Library**: Design the Public API surface
+  - If **Data Pipeline** (Spark/MLOps): Design job stages, input/output schemas, Bronze/Silver/Gold layers
+  - If **Analytics Model** (dbt): Design source definitions, staging models, mart models, grain
+  - If **Statistical Computing** (R): Design notebook sequence, src/ function signatures, Quarto output
+  - If **IaC Playbook** (Ansible): Design role list, playbook structure, variable contract
+  - If **GitOps Platform** (Helm): Design chart structure, values.yaml contract, ArgoCD app
 
 - **Constraint**: Ensure the design matches the **Architecture Pattern** defined in `CLAUDE.md` (e.g., "Layered Monolith", "Modular")
 
@@ -187,7 +199,7 @@ Branch to the appropriate preamble below, then continue with the standard execut
 - **Action**:
   - Scaffold the directory structure (if missing)
   - Create the Entrypoint (e.g., `main.py`, `server.ts`)
-  - Create **Mock Endpoints** (return hardcoded 200 OK)
+  - Create **stub implementations** for all interfaces/entry points (return stub/mock responses: hardcoded 200 OK for HTTP, empty DataFrames for pipelines, placeholder resources for IaC)
   - **Verify**: Can we run the app? Does it respond?
 
 **4B. Planning**
@@ -207,7 +219,7 @@ Branch to the appropriate preamble below, then continue with the standard execut
 **5B. Final Output**
 - Inform user:
   ```
-  ✅ API designed with [N] endpoints
+  ✅ Interface designed ([N] endpoints / pipeline stages / modules — per Architecture Shape)
   ✅ [M] phases identified
   ✅ Session plans created in plan/sessions/
   ✅ Skeleton implemented
@@ -234,6 +246,21 @@ or
 /architect "Build a task management API"
 ```
 → AI designs API → Creates phases → Builds skeleton
+
+```
+/architect plans/pipeline-spec.md
+```
+→ Data pipeline plan extraction
+
+```
+/architect "ETL pipeline for sales data"
+```
+→ Design Mode — Data Pipeline
+
+```
+/architect "Deploy nginx to prod"
+```
+→ Design Mode — Ansible/Helm
 
 ### Example 3: With Pasted Plan
 ```

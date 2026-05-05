@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cursor IDE Basics &mdash; Getting Started with AI-Assisted Editing</title>
+  <title>Cursor IDE Basics &mdash; A One-Day Hands-On Course</title>
 
   <!-- Pico.css v2 classless indigo variant -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.indigo.min.css" />
@@ -290,6 +290,24 @@
         background: linear-gradient(135deg, #0a0f14 0%, #111b26 50%, #1a2e15 100%);
       }
     }
+
+    /* ===== Time-box pill ===== */
+    .timebox {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: #455a64;
+      color: #fff;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    .timebox-demo { background: #1565c0; }
+    .timebox-lab { background: #6a1b9a; }
+    .timebox-ext { background: #ff8f00; }
+    .timebox-debrief { background: #2e7d32; }
   </style>
 </head>
 <body>
@@ -297,11 +315,11 @@
   <!-- ===== HERO ===== -->
   <header class="hero">
     <h1>Cursor IDE Basics</h1>
-    <p class="subtitle">Getting Started with AI-Assisted Editing</p>
+    <p class="subtitle">A one-day, hands-on introduction to AI-assisted development</p>
     <div class="badge-row">
-      <span class="badge badge-green">Prerequisite</span>
-      <span class="badge badge-teal">30 min</span>
-      <span class="badge badge-amber">Hands-On</span>
+      <span class="badge badge-green">Intro Course</span>
+      <span class="badge badge-teal">Full Day</span>
+      <span class="badge badge-amber">Demo + Lab</span>
     </div>
   </header>
 
@@ -309,10 +327,18 @@
   <details class="mobile-toc">
     <summary>Table of Contents</summary>
     <ul>
+      <li><a href="#orientation">0. Orientation &amp; Mental Model</a></li>
       <li><a href="#what-is-cursor">1. What is Cursor?</a></li>
       <li><a href="#ai-interfaces">2. The 4 AI Interfaces</a></li>
-      <li><a href="#context-system">3. The Context System</a></li>
-      <li><a href="#exercise">4. Quick Exercise</a></li>
+      <li><a href="#context-system">3. Context System (@ symbols)</a></li>
+      <li><a href="#onboarding">4. The 3-Step Onboarding</a></li>
+      <li><a href="#lab-onboarding">Lab 1: Onboarding</a></li>
+      <li><a href="#architect-cmd">5. /architect</a></li>
+      <li><a href="#lab-architect">Lab 2: Architect</a></li>
+      <li><a href="#session-loop">6. The Session Loop</a></li>
+      <li><a href="#lab-session-loop">Lab 3: Full Session Cycle</a></li>
+      <li><a href="#command-cheatsheet">7. Command Cheat Sheet</a></li>
+      <li><a href="#adapt-after-class">8. How to Adapt After Class</a></li>
     </ul>
   </details>
 
@@ -323,19 +349,36 @@
       <div class="sidebar-title">Contents</div>
       <nav>
         <ul>
+          <li><a href="#orientation">0. Orientation</a></li>
+          <li class="sub"><a href="#why-now">Why AI-assisted dev now</a></li>
+          <li class="sub"><a href="#mental-model">The mental-model shift</a></li>
           <li><a href="#what-is-cursor">1. What is Cursor?</a></li>
-          <li class="sub"><a href="#why-cursor">Why Not Just VS Code?</a></li>
-          <li class="sub"><a href="#architecture">Under the Hood</a></li>
+          <li class="sub"><a href="#why-cursor">Cursor vs VS Code + Copilot</a></li>
+          <li class="sub"><a href="#architecture">Under the hood</a></li>
           <li><a href="#ai-interfaces">2. The 4 AI Interfaces</a></li>
           <li class="sub"><a href="#tab-completion">Tab Completion</a></li>
           <li class="sub"><a href="#inline-edit">Inline Edit (Cmd+K)</a></li>
-          <li class="sub"><a href="#chat-panel">Chat Panel</a></li>
-          <li class="sub"><a href="#agent-mode">Agent / Composer</a></li>
-          <li class="sub"><a href="#which-interface">Which to Use?</a></li>
+          <li class="sub"><a href="#chat-panel">Chat (Cmd+L)</a></li>
+          <li class="sub"><a href="#agent-mode">Agent / Composer (Cmd+I)</a></li>
+          <li class="sub"><a href="#which-interface">Which to use?</a></li>
           <li><a href="#context-system">3. Context System</a></li>
-          <li class="sub"><a href="#at-symbols">@ Symbols</a></li>
-          <li class="sub"><a href="#context-flow">How Context Flows</a></li>
-          <li><a href="#exercise">4. Quick Exercise</a></li>
+          <li class="sub"><a href="#at-symbols">@ symbols reference</a></li>
+          <li class="sub"><a href="#context-flow">How context flows</a></li>
+          <li><a href="#onboarding">4. The 3-Step Onboarding</a></li>
+          <li class="sub"><a href="#why-onboarding">Why personas + stacks exist</a></li>
+          <li class="sub"><a href="#set-persona">@set-persona</a></li>
+          <li class="sub"><a href="#setup-stack">@setup-stack</a></li>
+          <li class="sub"><a href="#start-session-step">@start-session</a></li>
+          <li class="sub"><a href="#shape-pipeline">Shape pipeline</a></li>
+          <li><a href="#lab-onboarding">Lab 1: Onboarding</a></li>
+          <li><a href="#architect-cmd">5. /architect</a></li>
+          <li><a href="#lab-architect">Lab 2: Architect a feature</a></li>
+          <li><a href="#session-loop">6. The Session Loop</a></li>
+          <li class="sub"><a href="#code-review-cmd">@code-review</a></li>
+          <li class="sub"><a href="#next-session-cmd">@next-session</a></li>
+          <li><a href="#lab-session-loop">Lab 3: Full cycle</a></li>
+          <li><a href="#command-cheatsheet">7. Cheat sheet</a></li>
+          <li><a href="#adapt-after-class">8. Adapt after class</a></li>
         </ul>
       </nav>
     </aside>
@@ -343,23 +386,77 @@
     <!-- ===== MAIN CONTENT ===== -->
     <main class="main-content">
 
+      <!-- ==================== SECTION 0: Orientation ==================== -->
+      <section id="orientation">
+        <h2>0. Orientation &amp; Mental Model</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>By the end of this section you will know <strong>why Cursor exists</strong>, what changes
+            when AI sits inside your editor, and the one mental shift you must make to use it well.</p>
+          <p><strong>Before:</strong> &ldquo;The AI is autocomplete on steroids. I type, it guesses the next few characters.&rdquo;<br/>
+             <strong>After:</strong> &ldquo;The AI is a context-aware pair programmer. The quality of its output is a function of the context I give it. My job is to curate context, not to write prose.&rdquo;</p>
+        </div>
+
+        <p><span class="timebox timebox-demo">&#9201; 10 min &mdash; Instructor framing</span></p>
+
+        <h3 id="why-now">Why AI-assisted development matters now</h3>
+        <p>
+          Three things changed in the last 18 months: long context windows (200k+ tokens) made
+          whole-project reasoning practical; tool-use APIs let models <em>act</em> (read files,
+          run tests, open PRs), not just suggest; and editors like Cursor finally exposed those
+          capabilities in a workflow that respects how engineers actually think. The result is
+          not &ldquo;type less code.&rdquo; It is <strong>change the unit of work</strong> from
+          &ldquo;line of code&rdquo; to &ldquo;intent + acceptance criteria.&rdquo;
+        </p>
+
+        <h3 id="mental-model">The one mental-model shift</h3>
+        <p>
+          Most people fail at AI-assisted development because they treat the model as a magic
+          autocomplete and judge it by its first answer. Strong users treat it as a
+          <strong>context-bound junior engineer</strong>: brilliant when the brief is sharp,
+          mediocre when the brief is vague. Three habits separate the two groups.
+        </p>
+        <ul>
+          <li><strong>Curate context, don&rsquo;t paste it.</strong> Use <code>@</code> symbols and rules so the model sees exactly the right slice of the project.</li>
+          <li><strong>Specify outputs, not steps.</strong> &ldquo;Add tests for the empty list case&rdquo; beats &ldquo;use pytest fixtures and parametrize.&rdquo;</li>
+          <li><strong>Iterate in small loops.</strong> Generate &rarr; review &rarr; correct &rarr; commit. Never accept a 600-line diff blindly.</li>
+        </ul>
+
+        <blockquote class="philosophy">
+          The AI is only as good as the context you give it. The whole rest of this course is
+          about building, loading, and reusing that context.
+        </blockquote>
+      </section>
+
       <!-- ==================== SECTION 1: What is Cursor? ==================== -->
       <section id="what-is-cursor">
         <h2>1. What is Cursor?</h2>
 
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You will be able to explain what Cursor is, why it is not just &ldquo;VS Code with a chatbot,&rdquo; and what
+            architectural pieces (Rules, Commands, MCP) make AI behave consistently across a session.</p>
+          <p><strong>Before:</strong> &ldquo;I have Copilot in VS Code; isn&rsquo;t that the same thing?&rdquo;<br/>
+             <strong>After:</strong> &ldquo;Copilot completes lines. Cursor runs commands across files, reads my project rules, and edits a feature end to end.&rdquo;</p>
+        </div>
+
+        <p><span class="timebox timebox-demo">&#9201; 10 min &mdash; Demo</span></p>
+
         <p>
-          <strong>Cursor</strong> is an AI-first code editor built on top of Visual Studio Code.
-          Unlike traditional editors that bolt on AI as an extension, Cursor integrates large language
-          models into every layer of the editing experience: completions, refactoring, search, debugging,
-          and multi-file orchestration.
+          <strong>Cursor</strong> is an AI-first code editor built as a fork of Visual Studio Code.
+          It is fully VS Code under the hood &mdash; your extensions, keybindings, settings, and
+          terminal all transfer &mdash; and on top of that base it adds first-class AI:
+          completions, an Agent that edits multiple files, a context engine that reads project
+          rules, and a slash-command system you can extend.
         </p>
 
         <p>
-          Think of it as <strong>VS Code + a senior AI pair programmer</strong> that can read your entire
-          project, understand your conventions, and write code that matches your style.
+          Mental shortcut: <strong>VS Code + a senior pair programmer</strong> who has read your
+          whole repo and remembers your team&rsquo;s conventions.
         </p>
 
-        <h3 id="why-cursor">Why Not Just VS Code + Copilot?</h3>
+        <h3 id="why-cursor">Cursor vs &ldquo;VS Code + Copilot&rdquo;</h3>
 
         <table>
           <thead>
@@ -371,49 +468,49 @@
           </thead>
           <tbody>
             <tr>
-              <td>AI Integration</td>
+              <td>AI integration</td>
               <td>Extension (bolt-on)</td>
               <td>Native, first-class</td>
             </tr>
             <tr>
-              <td>Context Awareness</td>
-              <td>Current file + neighbors</td>
-              <td>Full project via Rules, Context files, and @ symbols</td>
+              <td>Context awareness</td>
+              <td>Current file + nearby</td>
+              <td>Whole project via Rules, context files, and <code>@</code> symbols</td>
             </tr>
             <tr>
-              <td>Multi-file Editing</td>
+              <td>Multi-file editing</td>
               <td>One file at a time</td>
-              <td>Agent mode orchestrates across files</td>
+              <td>Agent orchestrates many files in one prompt</td>
             </tr>
             <tr>
-              <td>Custom Rules</td>
+              <td>Custom rules</td>
               <td>Not supported</td>
-              <td>.cursor/rules/*.mdc enforce your standards</td>
+              <td><code>.cursor/rules/*.mdc</code> enforce style/security</td>
             </tr>
             <tr>
-              <td>Slash Commands</td>
-              <td>Limited built-in</td>
-              <td>Custom commands in .cursor/commands/</td>
+              <td>Slash commands</td>
+              <td>None</td>
+              <td>Custom commands in <code>.cursor/commands/</code></td>
             </tr>
             <tr>
-              <td>Terminal Integration</td>
-              <td>Separate</td>
+              <td>Terminal &harr; AI loop</td>
+              <td>Manual copy/paste</td>
               <td>AI reads errors, fixes code, reruns</td>
             </tr>
             <tr>
-              <td>VS Code Extensions</td>
+              <td>VS Code extensions</td>
               <td>Native</td>
-              <td>Full compatibility (same extension ecosystem)</td>
+              <td>Full compatibility</td>
             </tr>
           </tbody>
         </table>
 
-        <h3 id="architecture">Under the Hood</h3>
+        <h3 id="architecture">Under the hood</h3>
 
         <p>
-          Cursor is a fork of VS Code, so everything you know about VS Code works:
-          extensions, keybindings, themes, settings. The AI layer sits on top, intercepting
-          your interactions and enriching them with context.
+          Cursor sits between you and the LLM. Your prompts get enriched with project context
+          (rules, open files, <code>@</code>-attached references) before being sent to the model.
+          The model&rsquo;s response is parsed back into edits, terminal commands, or chat replies.
         </p>
 
         <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d1.svg" alt="Diagram 1" style="max-width:100%;height:auto" /></div>
@@ -440,10 +537,10 @@ flowchart TB
     -->
 
         <div class="callout callout-tip">
-          <div class="callout-title">Key Insight</div>
+          <div class="callout-title">Key insight</div>
           <p>
             Cursor does not replace VS Code &mdash; it <em>is</em> VS Code, with an AI brain
-            grafted on. Your extensions, settings, and muscle memory all transfer.
+            grafted on. Everything you already know transfers.
           </p>
         </div>
       </section>
@@ -452,10 +549,19 @@ flowchart TB
       <section id="ai-interfaces">
         <h2>2. The 4 AI Interfaces</h2>
 
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You will know which of the four AI surfaces to reach for in any given moment, and stop
+            wasting time using the wrong one.</p>
+          <p><strong>Before:</strong> &ldquo;I open Chat for everything &mdash; even renaming a variable.&rdquo;<br/>
+             <strong>After:</strong> &ldquo;Tiny edit &rarr; Tab. Targeted edit &rarr; Cmd+K. Question &rarr; Chat. Whole feature &rarr; Agent.&rdquo;</p>
+        </div>
+
+        <p><span class="timebox timebox-demo">&#9201; 15 min &mdash; Demo (instructor walks all 4)</span></p>
+
         <p>
-          Cursor provides four distinct ways to interact with AI, each suited to different
-          tasks. Understanding when to use each one is the single most important skill
-          for productive AI-assisted development.
+          Cursor exposes four AI interfaces. Each is optimised for a different scope of change.
+          Picking the right one is the single biggest productivity lever in the editor.
         </p>
 
         <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d2.svg" alt="Diagram 2" style="max-width:100%;height:auto" /></div>
@@ -482,104 +588,83 @@ flowchart TB
 
         <!-- Tab Completion -->
         <h3 id="tab-completion">Tab Completion</h3>
-        <p>
-          As you type, Cursor predicts your next edit and shows it as <strong>ghost text</strong>.
-          This goes far beyond simple autocomplete &mdash; it can predict multi-line blocks,
-          suggest the next logical edit location, and even anticipate refactoring patterns
-          based on what you just changed.
-        </p>
+        <p><strong>Situation:</strong> You are mid-flow typing code you already know how to write.</p>
+        <p><strong>Task:</strong> Get the next few lines without breaking concentration.</p>
+        <p><strong>Action:</strong> Start typing. Cursor shows a grey ghost-text prediction. Press <kbd>Tab</kbd> to accept, <kbd>Esc</kbd> to dismiss.</p>
+        <p><strong>Result:</strong> Boilerplate disappears. You spend keystrokes only on intent.</p>
 
         <table class="shortcut-table">
           <thead>
-            <tr><th>Action</th><th>Shortcut</th><th>What Happens</th></tr>
+            <tr><th>Action</th><th>Shortcut</th><th>What happens</th></tr>
           </thead>
           <tbody>
-            <tr><td>Accept full suggestion</td><td><kbd>Tab</kbd></td><td>Inserts the entire ghost-text prediction</td></tr>
-            <tr><td>Accept one word</td><td><kbd>Ctrl+&rarr;</kbd></td><td>Inserts one word at a time for fine control</td></tr>
-            <tr><td>Reject suggestion</td><td><kbd>Esc</kbd></td><td>Dismisses the ghost text</td></tr>
-            <tr><td>Next edit location</td><td><kbd>Tab</kbd> (after accept)</td><td>Jumps to the next predicted edit spot</td></tr>
+            <tr><td>Accept full suggestion</td><td><kbd>Tab</kbd></td><td>Inserts the entire ghost-text block</td></tr>
+            <tr><td>Accept one word</td><td><kbd>Ctrl+&rarr;</kbd></td><td>Walk through the suggestion word by word</td></tr>
+            <tr><td>Reject</td><td><kbd>Esc</kbd></td><td>Dismisses the ghost text</td></tr>
+            <tr><td>Jump to next predicted edit</td><td><kbd>Tab</kbd> after accept</td><td>Cursor moves to the next likely edit spot</td></tr>
           </tbody>
         </table>
 
-        <div class="callout callout-tip">
-          <div class="callout-title">Pro Tip</div>
-          <p>
-            Tab predictions are <strong>context-aware</strong>. They read your open files,
-            recent edits, and active rules. The more rules and context files you have,
-            the more accurate and consistent predictions become.
-          </p>
-        </div>
-
-        <p><strong>Best for:</strong> Writing code you already know how to write, just faster.
-          Variable names, boilerplate, repetitive patterns, completing function bodies.</p>
+        <p><strong>Best for:</strong> variable names, repetitive patterns, finishing a function body you already see in your head.</p>
 
         <!-- Inline Edit -->
         <h3 id="inline-edit">Inline Edit (Cmd+K)</h3>
-        <p>
-          Select a block of code and press <kbd>Cmd+K</kbd> (Mac) or <kbd>Ctrl+K</kbd>
-          (Windows/Linux). A small prompt appears inline where you describe the change you want.
-          The AI edits <em>just that region</em>, leaving everything else untouched.
-        </p>
+        <p><strong>Situation:</strong> You see a block of code that needs a targeted change &mdash; add validation, convert to async, rename for clarity.</p>
+        <p><strong>Task:</strong> Edit just that region without leaving the editor.</p>
+        <p><strong>Action:</strong> Select the lines. Press <kbd>Cmd+K</kbd> (Mac) / <kbd>Ctrl+K</kbd> (Win/Linux). A small prompt opens inline. Describe the change. Hit <kbd>Enter</kbd>. Review the diff. Accept or reject.</p>
+        <p><strong>Result:</strong> The selection is rewritten. Nothing else moves.</p>
 
-        <p><strong>Examples:</strong></p>
+        <p><strong>Good prompts:</strong></p>
         <ul>
-          <li>&ldquo;Add error handling for null input&rdquo;</li>
-          <li>&ldquo;Convert this to async/await&rdquo;</li>
-          <li>&ldquo;Add type annotations&rdquo;</li>
-          <li>&ldquo;Rename variables to be more descriptive&rdquo;</li>
+          <li>&ldquo;Add input validation: reject empty list, reject non-numeric values&rdquo;</li>
+          <li>&ldquo;Convert this function to async/await&rdquo;</li>
+          <li>&ldquo;Add Google-style docstring with Args, Returns, Raises&rdquo;</li>
         </ul>
 
-        <p><strong>Best for:</strong> Targeted refactors, adding error handling, converting patterns,
-          or cleaning up a specific function &mdash; without leaving the editor flow.</p>
+        <p><strong>Common mistake:</strong> using Cmd+K when the change spans multiple files. Use Agent instead.</p>
 
         <!-- Chat Panel -->
         <h3 id="chat-panel">Chat Panel (Cmd+L)</h3>
-        <p>
-          Press <kbd>Cmd+L</kbd> to open the <strong>Chat Panel</strong> on the right side.
-          This is a conversational interface for asking questions, exploring code, debugging,
-          and planning. You can reference files using <code>@</code> symbols.
-        </p>
+        <p><strong>Situation:</strong> You don&rsquo;t want code yet. You want to <em>understand</em> something or <em>plan</em>.</p>
+        <p><strong>Task:</strong> Ask the model a question and reference files for context.</p>
+        <p><strong>Action:</strong> Press <kbd>Cmd+L</kbd> &mdash; the chat panel opens on the right. Type your question, attach files with <code>@filename</code>, send.</p>
+        <p><strong>Result:</strong> An answer in the panel. Your code is never touched.</p>
 
-        <p><strong>Examples:</strong></p>
+        <p><strong>Good prompts:</strong></p>
         <ul>
-          <li>&ldquo;Explain how <code>@app/core/database.py</code> handles connections&rdquo;</li>
-          <li>&ldquo;Why is this test failing?&rdquo; (with error pasted)</li>
-          <li>&ldquo;What would be a good approach to add caching here?&rdquo;</li>
+          <li>&ldquo;Explain how <code>@app/core/database.py</code> manages connection pooling.&rdquo;</li>
+          <li>&ldquo;Why does this test fail? <em>(paste error)</em>&rdquo;</li>
+          <li>&ldquo;What would be the smallest change to add caching to the posts endpoint? Don&rsquo;t write code yet.&rdquo;</li>
         </ul>
-
-        <p><strong>Best for:</strong> Understanding code, asking questions, debugging errors,
-          planning before coding. Does not directly edit files.</p>
 
         <!-- Agent / Composer -->
         <h3 id="agent-mode">Agent / Composer Mode (Cmd+I)</h3>
-        <p>
-          Press <kbd>Cmd+I</kbd> to open <strong>Agent Mode</strong> (also called Composer).
-          This is the powerhouse. The AI becomes an autonomous agent that can:
-        </p>
+        <p><strong>Situation:</strong> You have a feature, refactor, or scaffolding job that touches multiple files.</p>
+        <p><strong>Task:</strong> Let the AI plan, edit, run, and iterate &mdash; with you in the loop reviewing diffs.</p>
+        <p><strong>Action:</strong> Press <kbd>Cmd+I</kbd>. Describe the goal. Watch Agent read files, propose edits, optionally run terminal commands.</p>
+        <p><strong>Result:</strong> A coherent multi-file change you review and accept piece by piece.</p>
+
+        <p>Agent can:</p>
         <ul>
-          <li><strong>Create, edit, and delete</strong> multiple files</li>
-          <li><strong>Run terminal commands</strong> (build, test, lint)</li>
-          <li><strong>Read your rules</strong> and context files automatically</li>
-          <li><strong>Execute slash commands</strong> (<code>/setup-stack</code>, <code>/architect</code>, etc.)</li>
-          <li><strong>Iterate on errors</strong>: if a test fails, it reads the error and fixes the code</li>
-          <li><strong>Use MCP tools</strong>: query databases, call APIs, read docs</li>
+          <li>Create, edit, and delete multiple files</li>
+          <li>Run terminal commands (build, tests, lint) and read the output</li>
+          <li>Read your <code>.cursor/rules/*.mdc</code> automatically and follow them</li>
+          <li>Invoke slash commands (<code>@set-persona</code>, <code>@architect</code>, etc.)</li>
+          <li>Iterate on failures: if a test fails it reads the output and fixes the code</li>
+          <li>Use MCP tools (DBs, APIs, docs) when configured</li>
         </ul>
 
-        <p><strong>Best for:</strong> Building features, running TDD cycles, multi-file refactors,
-          any task that requires creating or editing several files in coordination.</p>
-
         <div class="callout callout-warning">
-          <div class="callout-title">Agent Mode Is Where the Magic Happens</div>
+          <div class="callout-title">Agent is where the structured workflow lives</div>
           <p>
-            For the rest of this course, almost all work happens in Agent Mode.
-            It is the interface that uses Rules, Commands, and Context to produce
-            structured, professional code. Tab and Cmd+K are for quick edits;
-            Agent Mode is for building.
+            For the rest of this course, almost everything happens in Agent mode. Tab and Cmd+K
+            are for tactical edits. Agent is for <em>building</em> &mdash; following rules,
+            running commands, producing reviewable diffs.
           </p>
         </div>
 
         <!-- Decision Guide -->
-        <h3 id="which-interface">Which Interface Should I Use?</h3>
+        <h3 id="which-interface">Which interface should I use?</h3>
 
         <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d3.svg" alt="Diagram 3" style="max-width:100%;height:auto" /></div>
     <!-- mermaid source preserved:
@@ -599,11 +684,11 @@ flowchart TD
 
         <table>
           <thead>
-            <tr><th>Interface</th><th>Shortcut</th><th>Edits Files?</th><th>Multi-file?</th><th>Uses Rules?</th></tr>
+            <tr><th>Interface</th><th>Shortcut</th><th>Edits files?</th><th>Multi-file?</th><th>Uses rules?</th></tr>
           </thead>
           <tbody>
             <tr><td><strong>Tab</strong></td><td><kbd>Tab</kbd></td><td>Yes (inline)</td><td>No</td><td>Reads context</td></tr>
-            <tr><td><strong>Cmd+K</strong></td><td><kbd>Cmd+K</kbd></td><td>Yes (selected region)</td><td>No</td><td>Reads context</td></tr>
+            <tr><td><strong>Cmd+K</strong></td><td><kbd>Cmd+K</kbd></td><td>Yes (selection)</td><td>No</td><td>Reads context</td></tr>
             <tr><td><strong>Chat</strong></td><td><kbd>Cmd+L</kbd></td><td>No (read-only)</td><td>No</td><td>Optional</td></tr>
             <tr><td><strong>Agent</strong></td><td><kbd>Cmd+I</kbd></td><td>Yes (creates/edits)</td><td>Yes</td><td>Full enforcement</td></tr>
           </tbody>
@@ -614,72 +699,53 @@ flowchart TD
       <section id="context-system">
         <h2>3. The Context System</h2>
 
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You will know how to feed the AI <em>exactly</em> the right files and information &mdash;
+            the difference between a vague answer and a precise one.</p>
+          <p><strong>Before:</strong> &ldquo;The AI hallucinated a function name that doesn&rsquo;t exist.&rdquo;<br/>
+             <strong>After:</strong> &ldquo;I attached the actual file with <code>@app/services/user.py</code> &mdash; the AI used the real signature.&rdquo;</p>
+        </div>
+
+        <p><span class="timebox timebox-demo">&#9201; 10 min &mdash; Demo</span></p>
+
         <p>
-          The quality of AI output depends entirely on the <strong>context</strong> it receives.
-          Cursor uses <code>@</code> symbols to let you attach specific context to any prompt.
-          This is how you tell the AI <em>what to look at</em>.
+          The quality of AI output is bounded by the context it sees. Cursor uses
+          <code>@</code> symbols to attach specific context to any prompt. Treat <code>@</code>
+          as the most important keyboard habit you build today.
         </p>
 
-        <h3 id="at-symbols">@ Symbols Reference</h3>
+        <h3 id="at-symbols">@ Symbol Reference</h3>
 
         <table>
           <thead>
-            <tr><th>Symbol</th><th>What It Attaches</th><th>Example</th></tr>
+            <tr><th>Symbol</th><th>What it attaches</th><th>Example</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><code>@file</code></td>
-              <td>Full contents of a specific file</td>
-              <td><code>@app/api/posts.py</code></td>
-            </tr>
-            <tr>
-              <td><code>@folder</code></td>
-              <td>File tree of a directory</td>
-              <td><code>@app/modules/</code></td>
-            </tr>
-            <tr>
-              <td><code>@codebase</code></td>
-              <td>Semantic search across the entire project</td>
-              <td><code>@codebase how is auth handled?</code></td>
-            </tr>
-            <tr>
-              <td><code>@web</code></td>
-              <td>Live web search results</td>
-              <td><code>@web FastAPI dependency injection</code></td>
-            </tr>
-            <tr>
-              <td><code>@docs</code></td>
-              <td>Crawled documentation from a URL</td>
-              <td><code>@docs https://fastapi.tiangolo.com</code></td>
-            </tr>
-            <tr>
-              <td><code>@git</code></td>
-              <td>Git diff, commits, or PR context</td>
-              <td><code>@git diff HEAD~3</code></td>
-            </tr>
+            <tr><td><code>@file</code></td><td>Full contents of a file</td><td><code>@app/api/posts.py</code></td></tr>
+            <tr><td><code>@folder</code></td><td>File tree of a directory</td><td><code>@app/modules/</code></td></tr>
+            <tr><td><code>@codebase</code></td><td>Semantic search over the whole repo</td><td><code>@codebase how is auth handled?</code></td></tr>
+            <tr><td><code>@web</code></td><td>Live web search results</td><td><code>@web FastAPI dependency injection</code></td></tr>
+            <tr><td><code>@docs</code></td><td>Crawled documentation from a URL</td><td><code>@docs https://fastapi.tiangolo.com</code></td></tr>
+            <tr><td><code>@git</code></td><td>Git diff, commits, or PR context</td><td><code>@git diff HEAD~3</code></td></tr>
           </tbody>
         </table>
 
         <div class="callout callout-info">
-          <div class="callout-title">@ is for Context, / is for Commands</div>
+          <div class="callout-title">@ is for context. @command is for commands.</div>
           <p>
-            <strong>Important distinction:</strong> The <code>@</code> symbol attaches <em>context</em>
-            (files, folders, search results). The <code>/</code> prefix <em>invokes commands</em>
-            (slash commands like <code>/setup-stack</code>). These are different mechanisms:
+            <code>@app/api/posts.py</code> &mdash; &ldquo;include this file in context.&rdquo;<br/>
+            <code>@start-session</code> &mdash; &ldquo;run this slash command.&rdquo;
           </p>
-          <p>
-            <code>@app/api/posts.py</code> = &ldquo;Read this file and include it in context&rdquo;<br/>
-            <code>/setup-stack</code> = &ldquo;Execute this command&rdquo;
-          </p>
+          <p>Same key, different meaning depending on whether the target is a file path or a command name.
+            Claude Code uses <code>/start-session</code> for the same thing &mdash; this guide shows both.</p>
         </div>
 
-        <h3 id="context-flow">How Context Flows to the AI</h3>
+        <h3 id="context-flow">How context flows to the AI</h3>
 
-        <p>
-          When you type a message in Chat or Agent, Cursor assembles a rich context
-          package before sending it to the LLM. Understanding this flow helps you
-          write better prompts.
-        </p>
+        <p>When you send a message, Cursor assembles a layered package: project rules, the
+          context file, anything you attached with <code>@</code>, and your prompt itself.
+          That whole package is what the model actually sees.</p>
 
         <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d4.svg" alt="Diagram 4" style="max-width:100%;height:auto" /></div>
     <!-- mermaid source preserved:
@@ -711,85 +777,574 @@ flowchart LR
     style R fill:#00897b,color:#fff
     -->
 
-        <p>The AI sees everything at once: your rules, your project context, any files you
-          referenced with <code>@</code>, and your message. This is why
-          <strong>rules and context files are so powerful</strong> &mdash; they are injected
-          into every prompt automatically.</p>
+        <p>This is why <strong>rules and context files are so powerful</strong> &mdash; they are
+          injected into <em>every</em> prompt, automatically. You set them up once and benefit
+          for the rest of the session.</p>
 
         <div class="callout callout-tip">
-          <div class="callout-title">Pro Tip: Context Budget</div>
+          <div class="callout-title">Context budget</div>
           <p>
-            LLMs have a limited context window. Attaching too many large files with <code>@</code>
-            can dilute the AI's attention. Be selective: attach the 2-3 most relevant files,
-            not the entire project. Use <code>@codebase</code> for broad searches, and
-            <code>@file</code> for specific references.
+            Models have a finite context window. Attaching ten huge files dilutes attention.
+            Pick the 2&ndash;3 most relevant. Use <code>@codebase</code> when you need a
+            project-wide search, <code>@file</code> for surgical references.
           </p>
         </div>
       </section>
 
-      <!-- ==================== SECTION 4: Quick Exercise ==================== -->
-      <section id="exercise">
-        <h2>4. Quick Exercise</h2>
-
-        <p>
-          Let&rsquo;s try each of the four AI interfaces. This exercise takes about
-          <strong>10 minutes</strong> and will give you hands-on experience with Cursor&rsquo;s
-          AI capabilities.
-        </p>
-
-        <div class="callout callout-lab">
-          <div class="callout-title">Exercise: Your First AI-Assisted Edits</div>
-
-          <p><strong>Prerequisites:</strong> Cursor installed, a project open (any project works).</p>
-
-          <p><strong>Step 1: Tab Completion</strong></p>
-          <ol>
-            <li>Open or create a Python file (e.g., <code>hello.py</code>)</li>
-            <li>Start typing: <code>def calculate_average(numbers):</code></li>
-            <li>On the next line, start typing <code>return</code></li>
-            <li>Observe the ghost-text prediction</li>
-            <li>Press <kbd>Tab</kbd> to accept</li>
-          </ol>
-
-          <p><strong>Step 2: Inline Edit (Cmd+K)</strong></p>
-          <ol>
-            <li>Select the function you just wrote</li>
-            <li>Press <kbd>Cmd+K</kbd></li>
-            <li>Type: &ldquo;Add input validation for empty list and non-numeric values&rdquo;</li>
-            <li>Press <kbd>Enter</kbd></li>
-            <li>Review the AI&rsquo;s edit and accept it</li>
-          </ol>
-
-          <p><strong>Step 3: Chat Panel</strong></p>
-          <ol>
-            <li>Press <kbd>Cmd+L</kbd> to open Chat</li>
-            <li>Type: &ldquo;Explain the time complexity of <code>@hello.py</code>&rdquo;</li>
-            <li>Read the AI&rsquo;s explanation</li>
-            <li>Ask a follow-up: &ldquo;How could I make it more efficient?&rdquo;</li>
-          </ol>
-
-          <p><strong>Step 4: Agent Mode</strong></p>
-          <ol>
-            <li>Press <kbd>Cmd+I</kbd> to open Agent/Composer</li>
-            <li>Type: &ldquo;Create a file <code>test_hello.py</code> with pytest tests
-              for the <code>calculate_average</code> function in <code>@hello.py</code>.
-              Include tests for: normal input, empty list, single element, and negative numbers.&rdquo;</li>
-            <li>Watch the Agent create the test file</li>
-            <li>Observe: it reads your function, understands the validation, and writes matching tests</li>
-          </ol>
-
-          <p><strong>Checkpoint:</strong> You should now have two files: <code>hello.py</code>
-            with a validated average function, and <code>test_hello.py</code> with 4+ tests.</p>
-        </div>
+      <!-- ==================== SECTION 4: The 3-Step Onboarding ==================== -->
+      <section id="onboarding">
+        <h2>4. The 3-Step Onboarding</h2>
 
         <div class="callout callout-info">
-          <div class="callout-title">What's Next?</div>
-          <p>
-            Now that you&rsquo;re comfortable with Cursor&rsquo;s interfaces, you&rsquo;re ready
-            for the main course: <strong>Cursor IDE &mdash; The Complete Guide to AI-Assisted Development</strong>.
-            That guide covers the structured methodology (Spec-Driven Development, Rules, Commands, MCP)
-            that turns Cursor from a smart editor into a professional development workflow.
-          </p>
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You will configure your project in three commands so the AI knows your role, your
+            stack, and your conventions for the entire session &mdash; not just one prompt.</p>
+          <p><strong>Before:</strong> Every prompt re-explains: &ldquo;I&rsquo;m a backend engineer using FastAPI with snake_case and pytest&hellip;&rdquo;<br/>
+             <strong>After:</strong> One run of <code>@set-persona</code> &rarr; <code>@setup-stack</code> &rarr; <code>@start-session</code> and the AI already knows everything for the rest of the day.</p>
+        </div>
+
+        <p><span class="timebox timebox-demo">&#9201; 15 min &mdash; Demo</span></p>
+
+        <h3 id="why-onboarding">Why personas and stacks exist</h3>
+        <p>
+          Without onboarding, the AI is a generalist. It might suggest <code>camelCase</code>
+          in a Python project, write Mocha tests for a Pytest codebase, or recommend Express
+          patterns inside a NestJS app. The fix is not longer prompts &mdash; it is
+          <strong>persistent context</strong>: rules and a context file the AI loads automatically.
+        </p>
+        <p>The course pre-builds those rules and context per role + tech, so configuring is three commands instead of writing them yourself.</p>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d5.svg" alt="3-step onboarding flow" style="max-width:100%;height:auto" /></div>
+    <!-- DIAGRAM_PLACEHOLDER: cursor_basics_d5.svg
+flowchart LR
+    START["New project<br/>or fresh clone"] --> P1["Step 1<br/>set-persona"]
+    P1 --> P1D["Pick role:<br/>engineer designer<br/>pm data-scientist"]
+    P1D --> P2["Step 2<br/>setup-stack"]
+    P2 --> P2D["Persona-filtered<br/>stack list"]
+    P2D --> P3["Step 3<br/>start-session"]
+    P3 --> READY["AI loads persona<br/>and stack context.<br/>Ready to build."]
+
+    style P1 fill:#9c27b0,color:#fff
+    style P2 fill:#2196f3,color:#fff
+    style P3 fill:#2e7d32,color:#fff
+    style READY fill:#ff8f00,color:#fff
+    -->
+
+        <!-- ============ Step 1: set-persona ============ -->
+        <h3 id="set-persona">Step 1: <code>@set-persona</code></h3>
+        <p><strong>What it does:</strong> installs the rules, commands, and agents for one role into <code>.cursor/</code> and <code>.claude/</code>.</p>
+        <p><strong>When to use:</strong> first thing in any new project, or any time you switch roles.</p>
+        <p><strong>How to invoke:</strong> in Agent mode (<kbd>Cmd+I</kbd>) type <code>@set-persona</code> and press <kbd>Enter</kbd>.</p>
+
+        <p><strong>The four personas:</strong></p>
+        <table>
+          <thead><tr><th>Persona</th><th>Who</th><th>What it activates</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>engineer</code></td>
+              <td>Software developers</td>
+              <td>Backend stacks, TDD rules, code-review subagent, security-auditor</td>
+            </tr>
+            <tr>
+              <td><code>designer</code></td>
+              <td>UI/UX designers</td>
+              <td>Token validation, component-spec templates, Figma context loader</td>
+            </tr>
+            <tr>
+              <td><code>pm</code></td>
+              <td>Product managers</td>
+              <td>PRD templates, INVEST story checks, gap-detector subagent &mdash; <em>no stack</em></td>
+            </tr>
+            <tr>
+              <td><code>data-scientist</code></td>
+              <td>Data scientists / ML engineers</td>
+              <td>Notebook + pipeline stacks, reproducibility-checker, experiment-tracker</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>Expected output (annotated):</strong></p>
+        <pre><code class="language-bash">&#9989; Persona active: engineer
+   Client overlay: none
+
+&#128203; Commands installed:
+   /architect /start-session /code-review /next-session /read /detect-stack
+   /research /research-export /dockerize /terraform /start-project
+
+&#129302; Agents loaded:
+   code-reviewer, security-auditor, test-runner
+
+&#128274; MCP servers configured:
+   filesystem (no credentials needed)
+
+&#10145;  Next step:
+   Run /setup-stack to choose your tech stack</code></pre>
+
+        <p><strong>Common mistake:</strong> running <code>@setup-stack</code> first. It will refuse with &ldquo;No persona configured.&rdquo; Persona always comes first.</p>
+
+        <!-- ============ Step 2: setup-stack ============ -->
+        <h3 id="setup-stack">Step 2: <code>@setup-stack</code> (persona-filtered)</h3>
+        <p><strong>What it does:</strong> installs the stack-specific rules and a <code>context.md</code> file that pins your language, framework, testing tool, and architecture shape.</p>
+        <p><strong>When to use:</strong> right after <code>@set-persona</code>, unless your persona is <code>pm</code> or <code>designer</code> (skip).</p>
+        <p><strong>How to invoke:</strong> <code>@setup-stack</code> &mdash; you&rsquo;ll see only the stacks valid for your persona.</p>
+
+        <p><strong>Available stacks by persona:</strong></p>
+        <table>
+          <thead><tr><th>Persona</th><th>Stacks</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>engineer</strong></td>
+              <td>
+                <code>python-fastapi</code>, <code>go-gin</code>, <code>go-grpc</code>,
+                <code>java-spring</code>, <code>node-express</code>, <code>node-nestjs</code>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>devops</strong></td>
+              <td><code>devops-terraform</code>, <code>devops-ansible</code>, <code>devops-k8s-helm</code></td>
+            </tr>
+            <tr>
+              <td><strong>data-scientist</strong></td>
+              <td>
+                <code>python-datascience</code>, <code>python-spark</code>,
+                <code>python-dbt-snowflake</code>, <code>python-mlops</code>, <code>r-tidyverse</code>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>pm</strong> / <strong>designer</strong></td>
+              <td>No stack &mdash; skip directly to step 3</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>Expected output (annotated):</strong></p>
+        <pre><code class="language-bash">Available stacks for Engineer persona:
+  1. python-fastapi  &mdash; Python REST API (FastAPI + SQLAlchemy + Alembic)
+  2. go-gin          &mdash; Go REST API (Gin + sqlx + testify)
+  ...
+Which stack? 1
+
+Stack configured: python-fastapi (REST API &mdash; Layered Monolith).
+
+Run /start-session to begin your session.</code></pre>
+
+        <p><strong>What lands on disk:</strong></p>
+        <ul>
+          <li><code>.cursor/rules/style.mdc</code>, <code>testing.mdc</code>, <code>architecture.mdc</code></li>
+          <li><code>.cursor/context.md</code> &mdash; lang, framework, test tool, architecture shape, current phase</li>
+          <li><code>vibe/</code>, <code>templates/</code> if the stack provides them</li>
+        </ul>
+
+        <p><strong>Common mistake:</strong> picking a stack from a different persona. Each stack only appears for compatible personas.</p>
+
+        <!-- ============ Step 3: start-session ============ -->
+        <h3 id="start-session-step">Step 3: <code>@start-session</code></h3>
+        <p><strong>What it does:</strong> reads persona + stack + active phase, prints a status line, and asks for your session goal. From this point every Agent prompt is enriched automatically.</p>
+        <p><strong>When to use:</strong> at the start of every working session &mdash; not just the first one.</p>
+        <p><strong>How to invoke:</strong> <code>@start-session</code>.</p>
+
+        <p><strong>Expected output (annotated):</strong></p>
+        <pre><code class="language-bash">Context Loaded: Python / FastAPI
+Current Phase: Phase 0 (Skeleton)
+Strictness: Standard
+
+What is the goal for this session?</code></pre>
+
+        <p>
+          You answer with a sentence like &ldquo;Implement POST /users with validation and tests.&rdquo;
+          The AI confirms readiness and you start coding.
+        </p>
+
+        <p><strong>Common mistake:</strong> skipping <code>@start-session</code> and going straight to coding. Without it, the rules and context aren&rsquo;t guaranteed to be in scope &mdash; subtle drift creeps back in.</p>
+
+        <!-- ============ Shape pipeline ============ -->
+        <h3 id="shape-pipeline">Persona &rarr; Stack &rarr; Architecture Shape</h3>
+        <p>The three commands are not three independent settings. They form a pipeline: your role determines what stacks make sense, the stack determines the architecture shape, and the shape determines what <code>@architect</code> will produce in section 5.</p>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d6.svg" alt="Persona to stack to architecture shape pipeline" style="max-width:100%;height:auto" /></div>
+    <!-- DIAGRAM_PLACEHOLDER: cursor_basics_d6.svg
+flowchart LR
+    PERSONA["Persona"] --> STACK["Stack"]
+    STACK --> SHAPE["Architecture Shape"]
+    SHAPE --> OUT["What architect produces"]
+
+    PERSONA --> P1["engineer"]
+    PERSONA --> P2["data-scientist"]
+    PERSONA --> P3["devops"]
+
+    P1 --> S1["python-fastapi go-gin<br/>java-spring node-express"]
+    P2 --> S2["python-spark python-mlops<br/>python-dbt-snowflake"]
+    P3 --> S3["devops-terraform<br/>devops-k8s-helm"]
+
+    S1 --> SH1["REST API<br/>routes plus data model"]
+    S2 --> SH2["Data Pipeline<br/>jobs plus schemas"]
+    S3 --> SH3["IaC<br/>modules plus resources"]
+    -->
+      </section>
+
+      <!-- ==================== LAB 1 ==================== -->
+      <section id="lab-onboarding">
+        <h2>Lab 1 &mdash; Onboard a Fresh Project</h2>
+
+        <p><span class="timebox timebox-lab">&#9201; 35 min &mdash; Lab</span> <span class="timebox timebox-debrief">&#9201; 5 min &mdash; Debrief</span></p>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Lab 1: Three commands, working context</div>
+
+          <p><strong>Goal:</strong> end with a project where typing one Agent prompt produces stack-correct code without further explanation.</p>
+
+          <p><strong>Prerequisites:</strong></p>
+          <ul>
+            <li>Cursor installed (<a href="https://cursor.sh" target="_blank" rel="noopener">cursor.sh</a>)</li>
+            <li>The course template cloned: <code>git clone &lt;course-repo&gt; cursor-lab1 &amp;&amp; cd cursor-lab1</code></li>
+            <li>Open the folder: <code>cursor .</code></li>
+          </ul>
+
+          <p><strong>Steps:</strong></p>
+          <ol>
+            <li>Open Agent (<kbd>Cmd+I</kbd>).</li>
+            <li>Type <code>@set-persona</code> &rarr; <kbd>Enter</kbd>. Pick <code>engineer</code> (or your role).</li>
+            <li>When the persona summary prints, run <code>@setup-stack</code>. Pick <code>python-fastapi</code> (or <code>node-express</code> / <code>go-gin</code>).</li>
+            <li>Run <code>@start-session</code>. When asked the goal, answer: <em>&ldquo;Just verifying context is loaded; no code change yet.&rdquo;</em></li>
+            <li>Open <code>.cursor/context.md</code> and read it. Note Active Persona, Active Stack, Architecture Shape, Active Phase.</li>
+            <li>List <code>.cursor/rules/</code>. You should see <code>style.mdc</code>, <code>testing.mdc</code>, etc.</li>
+            <li>In Agent, type: <em>&ldquo;Without writing code, summarise the architecture pattern, naming convention, and test framework you would use for any new feature in this repo.&rdquo;</em></li>
+          </ol>
+
+          <p><strong>Acceptance criteria &mdash; you are done when:</strong></p>
+          <ul>
+            <li>Step 5 shows your stack and persona populated (not placeholders).</li>
+            <li>Step 6 shows at least 2 <code>.mdc</code> rule files installed.</li>
+            <li>Step 7 reply names your stack&rsquo;s exact framework, naming convention, and test tool &mdash; matching <code>context.md</code>. The AI did not ask you what stack you use.</li>
+          </ul>
+
+          <p><strong>If it fails:</strong></p>
+          <ul>
+            <li><em>&ldquo;No persona configured&rdquo;</em> &rarr; you skipped step 2; run <code>@set-persona</code>.</li>
+            <li>AI still asks &ldquo;what language?&rdquo; &rarr; you skipped <code>@start-session</code>; rules aren&rsquo;t loaded.</li>
+            <li>Wrong stack appears in <code>context.md</code> &rarr; rerun <code>@setup-stack</code> and pick again.</li>
+          </ul>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Extension &mdash; switch persona cleanly</div>
+          <p><span class="timebox timebox-ext">&#9201; 20 min &mdash; Extension</span></p>
+          <p>Re-run <code>@set-persona</code> and pick a different role (e.g. <code>data-scientist</code>, then <code>python-datascience</code>). Then switch back to <code>engineer</code>.</p>
+          <p><strong>Acceptance:</strong></p>
+          <ul>
+            <li>Inspect <code>.cursor/.persona-manifest.json</code> &mdash; the file is rewritten each time.</li>
+            <li>The previous persona&rsquo;s commands and rules are removed (no leftover files).</li>
+            <li><code>context.md</code> updates Active Persona and Active Stack to the new selection.</li>
+            <li>No code in your project (e.g. <code>app/</code> or <code>src/</code>) was touched. Only configuration changed.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 5: architect ==================== -->
+      <section id="architect-cmd">
+        <h2>5. <code>@architect</code> &mdash; Phase 0 Scaffolding</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>One command turns a one-line idea (or a plan doc) into a runnable walking skeleton plus a sequence of session plans you can implement one at a time.</p>
+          <p><strong>Before:</strong> &ldquo;I have an idea. Now I spend an afternoon scaffolding folders, routes, models, and stub responses.&rdquo;<br/>
+             <strong>After:</strong> &ldquo;<code>@architect &quot;Build a blog API&quot;</code> &mdash; 90 seconds later I have a runnable skeleton and four numbered session plans in <code>plan/sessions/</code>.&rdquo;</p>
+        </div>
+
+        <p><span class="timebox timebox-demo">&#9201; 10 min &mdash; Demo</span></p>
+
+        <p><strong>What it does:</strong> Phase 0 of the development lifecycle. <code>@architect</code> reads your active stack, designs the interface (routes, pipeline stages, modules &mdash; depending on Architecture Shape), creates stub implementations that run, and writes per-feature session plans.</p>
+
+        <p><strong>Two modes:</strong></p>
+        <ul>
+          <li><strong>Design mode:</strong> <code>@architect &quot;Build a task management API&quot;</code> &mdash; the AI proposes the design.</li>
+          <li><strong>Plan-extraction mode:</strong> <code>@architect plan.md</code> &mdash; the AI uses your plan as-is, no re-design.</li>
+        </ul>
+
+        <p><strong>When to use:</strong> at the very start of a feature, after onboarding, before you write any production code.</p>
+
+        <p><strong>Expected output (annotated):</strong></p>
+        <pre><code class="language-bash">&#9989; Interface designed (7 endpoints &mdash; per Architecture Shape)
+&#9989; 4 phases identified
+&#9989; Session plans created in plan/sessions/
+   - session-1-phase-0.md   # Skeleton
+   - session-2-phase-1.md   # Posts CRUD
+   - session-3-phase-2.md   # Comments
+   - session-4-phase-3.md   # Auth
+&#9989; Skeleton implemented:
+   - app/api/posts.py (stub responses)
+   - app/api/comments.py (stub responses)
+   - app/main.py
+   - tests/api/test_posts.py (smoke test)
+
+Next: Run @start-session to begin implementation</code></pre>
+
+        <p><strong>Common mistake:</strong> running <code>@architect</code> before <code>@setup-stack</code>. The shape is unknown so the output is generic. Always onboard first.</p>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">The shape determines the output</div>
+          <p>Same command, very different deliverables: a REST stack produces routes + models, a Spark stack produces job stages + schemas, a Terraform stack produces modules + resource maps. The Architecture Shape (set during <code>@setup-stack</code>) drives this.</p>
+        </div>
+      </section>
+
+      <!-- ==================== LAB 2 ==================== -->
+      <section id="lab-architect">
+        <h2>Lab 2 &mdash; Architect a Real Feature</h2>
+
+        <p><span class="timebox timebox-lab">&#9201; 40 min &mdash; Lab</span> <span class="timebox timebox-debrief">&#9201; 5 min &mdash; Debrief</span></p>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Lab 2: From idea to runnable skeleton</div>
+          <p><strong>Goal:</strong> turn a one-sentence idea into a running app with stub endpoints and a phase plan.</p>
+
+          <p><strong>Prerequisites:</strong> Lab 1 complete. <code>.cursor/context.md</code> shows engineer + python-fastapi (or your equivalent).</p>
+
+          <p><strong>Steps:</strong></p>
+          <ol>
+            <li>In Agent (<kbd>Cmd+I</kbd>), type:
+              <pre><code class="language-bash">@architect "Build a notes API with notebooks, notes, and tags. A notebook has many notes. A note can have many tags."</code></pre>
+            </li>
+            <li>Read the proposed design before approving anything. Confirm endpoints exist for: list notebooks, create notebook, list notes in notebook, create note, list tags, attach tag to note.</li>
+            <li>Let the AI generate files. Watch the diff for each.</li>
+            <li>Open <code>plan/sessions/</code> and skim every session file.</li>
+            <li>Run the skeleton (Python FastAPI example):
+              <pre><code class="language-bash">python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload</code></pre>
+            </li>
+            <li>Open <a href="http://localhost:8000/docs" target="_blank" rel="noopener">http://localhost:8000/docs</a>. You should see the auto-generated OpenAPI page with all endpoints listed.</li>
+            <li>Hit one stub endpoint with curl: <code>curl http://localhost:8000/notebooks</code>. Expect a 200 with a stub body.</li>
+          </ol>
+
+          <p><strong>Acceptance criteria &mdash; you are done when:</strong></p>
+          <ul>
+            <li>The app starts without errors.</li>
+            <li><code>/docs</code> shows at least 6 endpoints.</li>
+            <li>Each endpoint returns 200 with a stub payload (no real DB yet).</li>
+            <li><code>plan/sessions/</code> has at least 3 session files, numbered, each scoped to one feature.</li>
+          </ul>
+
+          <p><strong>If it fails:</strong></p>
+          <ul>
+            <li><em>ImportError on startup</em> &rarr; check <code>requirements.txt</code> was installed inside the venv.</li>
+            <li><em>404 on /docs</em> &rarr; FastAPI app not mounted; reread <code>app/main.py</code>.</li>
+            <li><em>No <code>plan/sessions/</code> directory</em> &rarr; rerun <code>@architect</code>; it may have stopped at the design step.</li>
+          </ul>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Extension &mdash; plan-extraction mode</div>
+          <p><span class="timebox timebox-ext">&#9201; 20 min &mdash; Extension</span></p>
+          <p>Create <code>plan.md</code> by hand with three sections (Goals, Endpoints, Data Model). Be opinionated &mdash; specify a non-obvious choice (e.g. &ldquo;use UUIDs not auto-incrementing ints&rdquo;).</p>
+          <p>Run <code>@architect plan.md</code>. <strong>Acceptance:</strong></p>
+          <ul>
+            <li>Generated models use UUIDs (the AI honoured your spec).</li>
+            <li>The AI did <em>not</em> invent endpoints you didn&rsquo;t list.</li>
+            <li>If your plan was unclear about something (e.g. auth), the AI asked rather than assumed.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 6: Session loop ==================== -->
+      <section id="session-loop">
+        <h2>6. The Session Loop</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>You will know the full daily rhythm of AI-assisted work &mdash; not just &ldquo;ask the AI to write code,&rdquo; but a repeatable cycle that produces clean, reviewed, committed work.</p>
+          <p><strong>Before:</strong> &ldquo;I prompt, accept the diff, hope it works, paste errors back.&rdquo;<br/>
+             <strong>After:</strong> &ldquo;<code>@start-session</code> &rarr; goal &rarr; code &rarr; <code>@code-review</code> &rarr; commit &rarr; <code>@next-session</code>. Same loop, every day.&rdquo;</p>
+        </div>
+
+        <p><span class="timebox timebox-demo">&#9201; 10 min &mdash; Demo</span></p>
+
+        <p>The loop is six steps. Each one is small. The discipline of running them in order is what turns AI from a toy into a workflow.</p>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d7.svg" alt="Daily session loop" style="max-width:100%;height:auto" /></div>
+    <!-- DIAGRAM_PLACEHOLDER: cursor_basics_d7.svg
+flowchart LR
+    A["start-session"] --> B["state goal"]
+    B --> C["code with Agent"]
+    C --> D["code-review"]
+    D --> E["git commit"]
+    E --> F["next-session"]
+    F --> A
+    -->
+
+        <h3 id="code-review-cmd"><code>@code-review</code></h3>
+        <p><strong>What it does:</strong> runs a security + style + testing audit using your stack&rsquo;s rules. Produces a list of violations with file references.</p>
+        <p><strong>When to use:</strong> after every meaningful change set, before you commit.</p>
+        <p><strong>How to invoke:</strong> <code>@code-review</code> &mdash; no args needed; it reads the diff.</p>
+        <p><strong>Expected output (annotated):</strong></p>
+        <pre><code class="language-bash">Code Review &mdash; python-fastapi (Standard strictness)
+
+&#10060; Security: app/api/posts.py:42 &mdash; raw f-string in SQL query (SQL injection risk)
+&#9888;&#65039; Style: app/services/post.py:18 &mdash; missing type hint on return value
+&#9989; Testing: tests/api/test_posts.py covers create, list, get; missing 404 case
+
+3 issues found.</code></pre>
+        <p><strong>Common mistake:</strong> committing without running <code>@code-review</code>. The model is fast at writing code and slow at thinking about edge cases &mdash; this command catches what was missed.</p>
+
+        <h3 id="next-session-cmd"><code>@next-session</code></h3>
+        <p><strong>What it does:</strong> writes a transition note &mdash; what was done, what&rsquo;s next, which files to load next time. Optionally advances Active Phase in <code>context.md</code>.</p>
+        <p><strong>When to use:</strong> at the very end of every working block, before closing the editor.</p>
+        <p><strong>How to invoke:</strong> <code>@next-session</code>.</p>
+        <p><strong>Expected output (annotated):</strong></p>
+        <pre><code class="language-markdown"># Session Transition
+**Last Status**: Success (12 tests passing)
+**Stopped At**: app/services/post.py &mdash; pagination not yet implemented
+**Next Step**: Add pagination to GET /posts (limit, offset query params)
+
+**Context to Load**:
+- @.cursor/context.md
+- @app/services/post.py
+- @plan/sessions/session-3-phase-2.md</code></pre>
+        <p><strong>Common mistake:</strong> ending a session without running it. Tomorrow you&rsquo;ll re-explain everything to the AI &mdash; defeating the entire point of persistent context.</p>
+      </section>
+
+      <!-- ==================== LAB 3 ==================== -->
+      <section id="lab-session-loop">
+        <h2>Lab 3 &mdash; One Full Session, End to End</h2>
+
+        <p><span class="timebox timebox-lab">&#9201; 45 min &mdash; Lab</span> <span class="timebox timebox-debrief">&#9201; 10 min &mdash; Debrief</span></p>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Lab 3: Implement one feature with the full loop</div>
+          <p><strong>Goal:</strong> take Phase 1 of the skeleton from Lab 2 to a real, tested, reviewed, committed implementation &mdash; using all six loop steps.</p>
+
+          <p><strong>Prerequisites:</strong> Lab 2 complete; skeleton runs; <code>plan/sessions/session-2-phase-1.md</code> exists.</p>
+
+          <p><strong>Steps:</strong></p>
+          <ol>
+            <li><strong>Start.</strong> <code>@start-session</code>. When asked, answer: <em>&ldquo;Implement Phase 1 from session-2-phase-1.md &mdash; full CRUD for notebooks with tests.&rdquo;</em></li>
+            <li><strong>Build.</strong> In Agent: <em>&ldquo;Implement the notebook CRUD per <code>@plan/sessions/session-2-phase-1.md</code>. Write the tests first (TDD), then the implementation. Run pytest after each file.&rdquo;</em></li>
+            <li>Review every diff before accepting. Reject anything you don&rsquo;t understand and ask the AI to explain it.</li>
+            <li><strong>Verify.</strong> Run the tests yourself: <code>pytest -q</code>. Hit the endpoints with curl. Confirm green.</li>
+            <li><strong>Review.</strong> Run <code>@code-review</code>. Read every issue. Fix or justify each one (Cmd+K is great here).</li>
+            <li><strong>Commit.</strong> <code>git add . &amp;&amp; git commit -m &quot;Phase 1: notebooks CRUD with tests&quot;</code>.</li>
+            <li><strong>Wrap.</strong> <code>@next-session</code>. Save the transition block somewhere obvious (top of <code>plan/sessions/session-3-phase-2.md</code>, or a sticky note).</li>
+          </ol>
+
+          <p><strong>Acceptance criteria &mdash; you are done when:</strong></p>
+          <ul>
+            <li><code>pytest</code> is fully green.</li>
+            <li>All four CRUD endpoints work via curl.</li>
+            <li><code>@code-review</code> reports zero high-severity issues.</li>
+            <li>You have one commit on a feature branch.</li>
+            <li>The <code>@next-session</code> transition block exists and clearly names the next step.</li>
+          </ul>
+
+          <p><strong>If it fails:</strong></p>
+          <ul>
+            <li><em>Tests fail in obscure ways</em> &rarr; paste the failure into Chat (<kbd>Cmd+L</kbd>) with <code>@</code> attaching the failing test file. Don&rsquo;t guess.</li>
+            <li><em>code-review flags &ldquo;raw SQL&rdquo;</em> &rarr; let the AI fix it with parameterised queries; never silence security findings.</li>
+            <li><em>Agent makes giant unrelated edits</em> &rarr; reject the diff, scope your prompt to one file with <code>@</code>.</li>
+          </ul>
+        </div>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Extension &mdash; resume from yesterday&rsquo;s transition</div>
+          <p><span class="timebox timebox-ext">&#9201; 20 min &mdash; Extension</span></p>
+          <p>Close Cursor. Reopen the project. Start a brand-new chat (no history).</p>
+          <p>Paste your saved <code>@next-session</code> transition block as the first message and run <code>@start-session</code>. Implement Phase 2 (notes CRUD).</p>
+          <p><strong>Acceptance:</strong> the AI picks up exactly where you left off. You did not re-explain the project to it.</p>
+        </div>
+      </section>
+
+      <!-- ==================== SECTION 7: Cheat sheet ==================== -->
+      <section id="command-cheatsheet">
+        <h2>7. Beginner Command Cheat Sheet</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>One table you keep open. Tells you which command to run at any moment of the day.</p>
+        </div>
+
+        <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_basics_d8.svg" alt="Beginner command reference" style="max-width:100%;height:auto" /></div>
+    <!-- DIAGRAM_PLACEHOLDER: cursor_basics_d8.svg
+flowchart TD
+    Q1{"Where am I?"} --> Q2["Brand new project"]
+    Q1 --> Q3["Starting today's work"]
+    Q1 --> Q4["Mid feature"]
+    Q1 --> Q5["Done for the day"]
+
+    Q2 --> C1["set-persona<br/>setup-stack<br/>architect"]
+    Q3 --> C2["start-session"]
+    Q4 --> C3["code with Agent<br/>code-review<br/>commit"]
+    Q5 --> C4["next-session"]
+    -->
+
+        <table>
+          <thead>
+            <tr><th>Command (Cursor)</th><th>Command (Claude Code)</th><th>When</th><th>One-line purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>@set-persona</code></td><td><code>/set-persona</code></td><td>Once per project (or to switch role)</td><td>Install role-specific rules and commands</td></tr>
+            <tr><td><code>@setup-stack</code></td><td><code>/setup-stack</code></td><td>After persona, for engineer/devops/data-scientist</td><td>Pin language, framework, architecture shape</td></tr>
+            <tr><td><code>@start-session</code></td><td><code>/start-session</code></td><td>Start of every working block</td><td>Load context, state today&rsquo;s goal</td></tr>
+            <tr><td><code>@architect</code></td><td><code>/architect</code></td><td>At feature kickoff (Phase 0)</td><td>Design + scaffold + write session plans</td></tr>
+            <tr><td><code>@code-review</code></td><td><code>/code-review</code></td><td>Before every commit</td><td>Audit security/style/testing against stack rules</td></tr>
+            <tr><td><code>@next-session</code></td><td><code>/next-session</code></td><td>End of every working block</td><td>Write transition note for resuming later</td></tr>
+            <tr><td><code>@read</code></td><td><code>/read</code></td><td>Anytime you forget context</td><td>Print current persona, stack, phase, next step</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ==================== SECTION 8: Adapt After Class ==================== -->
+      <section id="adapt-after-class">
+        <h2>8. How to Adapt This After Class</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-title">What do I get from this section?</div>
+          <p>Concrete instructions to take the workflow from this classroom template into your real day-job repo &mdash; including the corporate-network gotchas nobody warns you about.</p>
+          <p><strong>Before:</strong> &ldquo;That was cool in the class repo. My company codebase is a mess; this won&rsquo;t fit.&rdquo;<br/>
+             <strong>After:</strong> &ldquo;Copy <code>.cursor/</code>, run <code>@detect-stack</code>, set Strictness: Low, ship one small feature with the loop.&rdquo;</p>
+        </div>
+
+        <p><span class="timebox timebox-debrief">&#9201; 15 min &mdash; Discussion</span></p>
+
+        <h3>Apply at work, by role</h3>
+        <ul>
+          <li><strong>Engineer (greenfield):</strong> Copy the template into your new repo, run the 3-step onboarding, kick off with <code>@architect</code>. You will be runnable in a morning.</li>
+          <li><strong>Engineer (brownfield):</strong> Copy <code>.cursor/</code> into the existing repo. Run <code>@detect-stack</code> &mdash; it scans <code>requirements.txt</code> / <code>package.json</code> / <code>go.mod</code> and writes a custom <code>context.md</code>. Crucially, set <code>Strictness: Low</code> so the AI doesn&rsquo;t try to refactor legacy code. Apply full standards only to new features.</li>
+          <li><strong>Data scientist:</strong> Pick <code>python-datascience</code> for notebook work, <code>python-mlops</code> when promoting to production, <code>python-spark</code> for distributed pipelines. Customise <code>context.md</code> with your real datasets&rsquo; locations and your team&rsquo;s experiment-tracking conventions.</li>
+          <li><strong>DevOps:</strong> Use <code>devops-terraform</code> as a starting baseline; replace the included module structure with your org&rsquo;s naming convention. Add a <code>900-client-security.mdc</code> rule for company-specific compliance lines (e.g. mandatory tags).</li>
+          <li><strong>PM:</strong> No stack. Run <code>@set-persona pm</code>, then <code>@start-session</code>. Use <code>@architect</code> on a problem statement to draft a PRD outline; iterate from there.</li>
+        </ul>
+
+        <h3>What to customise</h3>
+        <ul>
+          <li><code>.cursor/context.md</code> &mdash; your real project name, your real architecture pattern, current phase. Edit by hand any time.</li>
+          <li><code>.cursor/rules/*.mdc</code> &mdash; add your company&rsquo;s style rules (e.g. &ldquo;all SQL must use parameterised queries&rdquo;, &ldquo;no console.log in production code&rdquo;). Prefix client-specific rules with <code>900-client-</code> so they sort after the base rules.</li>
+          <li><code>.cursor/commands/</code> &mdash; copy any of the existing <code>.md</code> files and edit. A new file there is a new slash command.</li>
+          <li><code>vibe/</code> &mdash; design or tone documents the AI will respect. Useful for product-voice consistency.</li>
+        </ul>
+
+        <h3>Common pitfalls in real environments</h3>
+        <div class="callout callout-warning">
+          <div class="callout-title">Read this before installing at work</div>
+          <ul>
+            <li><strong>Corporate proxy / TLS interception.</strong> Cursor needs HTTPS to the model provider. If your laptop has a custom root CA, set <code>NODE_EXTRA_CA_CERTS</code> in your shell so requests don&rsquo;t fail with cert errors.</li>
+            <li><strong>SSO / login loop.</strong> Some VPNs block Cursor&rsquo;s login redirect; toggle the VPN off briefly during first sign-in, then back on.</li>
+            <li><strong>Code privacy.</strong> Check your team&rsquo;s policy. Cursor offers a Privacy Mode that doesn&rsquo;t retain your code &mdash; required by many enterprises. Settings &rarr; Privacy.</li>
+            <li><strong>Monorepos.</strong> The context engine indexes the whole repo by default. In huge monorepos, narrow the workspace to one package, or add <code>.cursorignore</code> to exclude vendored or generated code.</li>
+            <li><strong>Team rules drift.</strong> Commit <code>.cursor/rules/</code> and <code>.cursor/context.md</code> to your repo. The whole team benefits from the same context.</li>
+            <li><strong>MCP credentials.</strong> If your persona pulls in MCP servers (Jira, GitHub, DBs), the install prints which env vars to set. Put them in <code>.env</code>, not in shell rc files committed to git.</li>
+          </ul>
+        </div>
+
+        <h3>Three next steps, ordered by impact</h3>
+        <ol>
+          <li><strong>Apply the loop tomorrow on a real ticket.</strong> Pick the smallest open ticket. Run the full 6-step session loop. Don&rsquo;t skip <code>@code-review</code> or <code>@next-session</code>. The habit matters more than the ticket.</li>
+          <li><strong>Commit your <code>.cursor/</code> directory.</strong> Pin your team to the same context. Open a PR titled &ldquo;Add Cursor workspace config&rdquo;; explain in the description what each rule does.</li>
+          <li><strong>Write one custom rule.</strong> Pick the <em>one</em> thing reviewers always flag in your team&rsquo;s PRs. Encode it in <code>.cursor/rules/900-team-{thing}.mdc</code>. Now the AI catches it before review.</li>
+        </ol>
+
+        <p>That&rsquo;s the whole intro. The follow-up course (<em>Cursor IDE: The Complete Guide to AI-Assisted Development</em>) goes deeper into Spec-Driven Development, custom MCP servers, multi-agent workflows, and the rules DSL. The basics you learned today are the foundation everything else builds on.</p>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">One thing to remember</div>
+          <p>The AI is only as good as the context. <em>Onboard once, run the loop daily, commit the configuration.</em> That&rsquo;s the whole job.</p>
         </div>
       </section>
 
@@ -813,6 +1368,7 @@ flowchart LR
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
 
   <!-- ===== Active TOC Highlighting ===== -->
   <script>

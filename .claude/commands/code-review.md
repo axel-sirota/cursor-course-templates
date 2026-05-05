@@ -36,8 +36,8 @@ Branch to the appropriate preamble below, then continue with the standard execut
 
 **2. Security Audit**
 - **Secrets**: Check for hardcoded keys/tokens (Regex search).
-- **Injection**: Check DB queries for raw string concatenation.
-- **Dependencies**: Check if `requirements.txt`/`package.json` has known vulnerable versions (if `npm audit` or `pip-audit` is available).
+- **Injection / Input Trust**: Check DB queries for raw string concatenation (web/DB stacks). Check template injection in Ansible (Jinja2), Helm (Go templates), and Terraform (string interpolation) where applicable.
+- **Dependencies**: Check for known vulnerable or unpinned versions using the stack's tool: pip-audit / pip check (Python), npm audit (Node), govulncheck (Go), tflint + checkov (Terraform), renv::status() (R), dbt parse (dbt). Skip if not applicable to stack.
 
 **3. Style & Standards**
 - **Naming**: Does code match the Active Rule (CamelCase vs Snake_case)?
@@ -46,6 +46,9 @@ Branch to the appropriate preamble below, then continue with the standard execut
   - *Python*: Are type hints used?
   - *TS*: Is `any` used?
   - *Java/Go*: Are interfaces used correctly?
+  - *R*: Are function arguments documented with roxygen2 `@param` type annotations?
+  - *SQL/dbt*: Are column types cast explicitly in staging models (no implicit type coercion)?
+  - *Ansible*: Are variable types and allowed values documented in `defaults/main.yml` comments?
 
 **4. Testing Gaps**
 - Verify critical paths have corresponding tests in `tests/`.

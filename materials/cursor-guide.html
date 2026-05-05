@@ -399,6 +399,7 @@
       <li><a href="#adaptation">5. Adapting to Existing Codebases</a></li>
       <li><a href="#mcp">6. MCP Servers</a></li>
       <li><a href="#hooks">7. Hooks (Beta)</a></li>
+      <li><a href="#adapt-after-class">8. Adapt After Class</a></li>
     </ul>
   </details>
 
@@ -412,6 +413,10 @@
           <li><a href="#introduction">1. Introduction</a></li>
           <li class="sub"><a href="#agentic-philosophy">Agentic Philosophy</a></li>
           <li class="sub"><a href="#course-roadmap">Course Roadmap</a></li>
+          <li><a href="#getting-started">1.5 Getting Started</a></li>
+          <li class="sub"><a href="#three-step-onboarding">3-Step Onboarding</a></li>
+          <li class="sub"><a href="#personas">Personas</a></li>
+          <li class="sub"><a href="#stacks">Stacks</a></li>
           <li><a href="#workflow">2. Workflow: Spec-Driven Dev</a></li>
           <li class="sub"><a href="#what-is-sdd">What is SDD?</a></li>
           <li class="sub"><a href="#spec-first-pattern">Spec-First Pattern</a></li>
@@ -423,6 +428,9 @@
           <li class="sub"><a href="#command-anatomy">Command Anatomy</a></li>
           <li class="sub"><a href="#command-chain">Command Chain</a></li>
           <li class="sub"><a href="#command-reference">Command Reference</a></li>
+          <li class="sub"><a href="#command-walkthroughs">Command Walkthroughs</a></li>
+          <li class="sub"><a href="#verification-agents">Verification Agents</a></li>
+          <li class="sub"><a href="#choose-adventure">Choose Your Adventure</a></li>
           <li class="sub"><a href="#lab-2">Lab 2</a></li>
           <li><a href="#rules">4. Rules System</a></li>
           <li class="sub"><a href="#what-are-rules">What Are Rules?</a></li>
@@ -443,6 +451,10 @@
           <li class="sub"><a href="#hook-events">Lifecycle Events</a></li>
           <li class="sub"><a href="#hook-examples">Hook Examples</a></li>
           <li class="sub"><a href="#lab-6">Lab 6</a></li>
+          <li><a href="#adapt-after-class">8. Adapt After Class</a></li>
+          <li class="sub"><a href="#adapt-by-role">By Role</a></li>
+          <li class="sub"><a href="#adapt-pitfalls">Common Pitfalls</a></li>
+          <li class="sub"><a href="#adapt-next-steps">Next 3 Steps</a></li>
         </ul>
       </nav>
     </aside>
@@ -700,6 +712,200 @@
 
   <p>
     Let us begin with the foundation: workflow and Spec-Driven Development.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- ===== Section 1.5: Getting Started — Personas + Stacks ===== -->
+<!-- ============================================================ -->
+<section id="getting-started">
+  <h2>Section 1.5: Getting Started &mdash; Personas, Stacks, and Onboarding</h2>
+  <p class="section-meta">Estimated time: 10 minutes</p>
+
+  <p>
+    Before you run any of the workflow commands described in the rest of this guide, the project
+    needs to know <em>who you are</em> and <em>what you are building</em>. The template ships with
+    a three-step onboarding flow that configures the AI&rsquo;s entire behaviour &mdash; commands,
+    rules, agents, and hooks &mdash; based on your role and your stack.
+  </p>
+
+  <h3 id="three-step-onboarding">The 3-Step Onboarding Flow</h3>
+
+  <p>
+    Earlier versions of this template only had two steps (<code>/setup-stack</code> &rarr;
+    <code>/start-session</code>). The current template adds a <strong>persona</strong> step in
+    front, because not every role needs a tech stack &mdash; and even when they do, the available
+    stacks should be filtered by role.
+  </p>
+
+  <ol>
+    <li>
+      <strong><code>/set-persona</code></strong> &mdash; pick your role: <code>engineer</code>,
+      <code>designer</code>, <code>pm</code>, or <code>data-scientist</code>. This installs a
+      persona pack: commands, agents, rules, and hooks specific to that role.
+    </li>
+    <li>
+      <strong><code>/setup-stack</code></strong> &mdash; persona-aware stack picker. It reads your
+      active persona and shows only the stacks relevant to that role. Designers and PMs skip this
+      step entirely.
+    </li>
+    <li>
+      <strong><code>/start-session</code></strong> &mdash; load the active persona + stack context
+      and begin a working session.
+    </li>
+  </ol>
+
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d19.svg" alt="[DIAGRAM: Three-step onboarding flow — set-persona → setup-stack (skipped for designer/pm) → start-session, with each step showing what it installs/loads]" style="max-width:100%;height:auto" /></div>
+  <!-- DIAGRAM_PLACEHOLDER: cursor_guide_d19.svg
+  flowchart LR
+      A["/set-persona"] -->|installs commands + agents + rules + hooks| B{Persona needs stack?}
+      B -->|engineer / data-scientist / devops| C["/setup-stack"]
+      B -->|designer / pm| D["/start-session"]
+      C -->|writes Active Stack to context| D
+      D -->|loads persona + stack context| E[Working session]
+  -->
+
+  <div class="callout callout-tip">
+    <strong>Switching mid-course:</strong> Run <code>/set-persona</code> again at any time to
+    switch personas. The previous persona&rsquo;s installed files are removed cleanly before the
+    new one is installed. Your code is never touched &mdash; only the AI context changes.
+  </div>
+
+  <h3 id="personas">Personas</h3>
+
+  <p>
+    A <strong>persona pack</strong> is the unit of role-based configuration. When you run
+    <code>/set-persona</code>, the template copies a curated set of files into <code>.cursor/</code>
+    (and <code>.claude/</code>) tailored to that role:
+  </p>
+
+  <ul>
+    <li><strong>Commands</strong> &mdash; only the slash commands relevant to the persona</li>
+    <li><strong>Agents</strong> &mdash; verification and helper subagents for that role</li>
+    <li><strong>Rules</strong> &mdash; <code>.mdc</code> rule files appropriate to the role</li>
+    <li><strong>Hooks</strong> &mdash; lifecycle automations (e.g. PM-specific notification hooks)</li>
+  </ul>
+
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d20.svg" alt="[DIAGRAM: Persona pack composition — set-persona writes commands, agents, rules, and hooks into .cursor/ and .claude/, scoped per persona]" style="max-width:100%;height:auto" /></div>
+  <!-- DIAGRAM_PLACEHOLDER: cursor_guide_d20.svg
+  flowchart TB
+      P["/set-persona engineer"] --> M[Persona Pack]
+      M --> C[".cursor/commands/<br/>.claude/commands/"]
+      M --> A[".cursor/agents/<br/>.claude/agents/"]
+      M --> R[".cursor/rules/<br/>.claude/rules/"]
+      M --> H[".cursor/hooks/<br/>.claude/hooks/"]
+      C --> O[AI Context]
+      A --> O
+      R --> O
+      H --> O
+  -->
+
+  <p>The four available personas:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Persona</th>
+        <th>Who it&rsquo;s for</th>
+        <th>Needs a stack?</th>
+        <th>Key commands installed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>engineer</strong></td>
+        <td>Software engineers building APIs and services</td>
+        <td>Yes</td>
+        <td><code>/architect</code>, <code>/start-session</code>, <code>/code-review</code>, <code>/dockerize</code></td>
+      </tr>
+      <tr>
+        <td><strong>data-scientist</strong></td>
+        <td>Data scientists, ML engineers, data engineers, analytics engineers</td>
+        <td>Yes</td>
+        <td><code>/architect</code>, <code>/start-session</code>, <code>/research</code>, <code>/code-review</code></td>
+      </tr>
+      <tr>
+        <td><strong>pm</strong></td>
+        <td>Product managers writing PRDs and decomposing stories</td>
+        <td>No</td>
+        <td><code>/start-project</code>, <code>/architect</code>, <code>/read</code></td>
+      </tr>
+      <tr>
+        <td><strong>designer</strong></td>
+        <td>UI/UX designers working alongside engineering</td>
+        <td>No</td>
+        <td><code>/architect</code> (component-tree mode), <code>/start-session</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-info">
+    <strong>Why this matters:</strong> A PM and a backend engineer should not see the same
+    <code>/architect</code> output. Personas let the same command name produce role-appropriate
+    artifacts &mdash; a PRD for the PM, an OpenAPI spec for the engineer, a component tree for the
+    designer, and an experiment plan for the data scientist.
+  </div>
+
+  <h3 id="stacks">Stacks</h3>
+
+  <p>
+    A <strong>stack</strong> is the language + framework + architecture pattern for what you&rsquo;re
+    building. The template ships with 16 stacks, grouped by persona. When you run
+    <code>/setup-stack</code>, only the stacks for your active persona are shown.
+  </p>
+
+  <p>
+    Each stack declares an <strong>Architecture Shape</strong> &mdash; REST API, Data Pipeline,
+    Analytics Model, IaC Playbook, GitOps Platform, Statistical Computing, etc. The shape drives
+    what <code>/architect</code> produces (see Section 3 for details).
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Persona</th>
+        <th>Stack</th>
+        <th>Architecture Shape</th>
+        <th>Best for</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="6"><strong>engineer</strong></td><td><code>python-fastapi</code></td><td>REST API</td><td>Async Python services, ML-adjacent APIs</td></tr>
+      <tr><td><code>go-gin</code></td><td>REST API</td><td>High-throughput Go REST services</td></tr>
+      <tr><td><code>go-grpc</code></td><td>REST API (gRPC)</td><td>Internal gRPC, Protocol Buffers</td></tr>
+      <tr><td><code>java-spring</code></td><td>REST API</td><td>Enterprise Java, Spring Boot 3 + JPA</td></tr>
+      <tr><td><code>node-express</code></td><td>REST API</td><td>TypeScript APIs, rapid prototyping</td></tr>
+      <tr><td><code>node-nestjs</code></td><td>REST API</td><td>Enterprise Node, DI, Swagger-first</td></tr>
+      <tr><td rowspan="3"><strong>devops</strong> <span style="opacity:0.6">(via engineer or dedicated path)</span></td><td><code>devops-terraform</code></td><td>Cloud Infrastructure</td><td>AWS / GCP / Azure IaC modules</td></tr>
+      <tr><td><code>devops-ansible</code></td><td>IaC Playbook</td><td>Server config management, post-Terraform provisioning</td></tr>
+      <tr><td><code>devops-k8s-helm</code></td><td>GitOps Platform</td><td>Kubernetes workloads, ArgoCD</td></tr>
+      <tr><td rowspan="5"><strong>data-scientist</strong></td><td><code>python-datascience</code></td><td>Notebook + Classical ML</td><td>Jupyter, scikit-learn, MLflow tracking</td></tr>
+      <tr><td><code>r-tidyverse</code></td><td>Statistical Computing</td><td>Actuarial / stats analysis, Quarto, Plumber</td></tr>
+      <tr><td><code>python-spark</code></td><td>Data Pipeline</td><td>PySpark, Delta Lake, Databricks ETL</td></tr>
+      <tr><td><code>python-dbt-snowflake</code></td><td>Analytics Model</td><td>SQL-first transforms, Snowflake / BigQuery</td></tr>
+      <tr><td><code>python-mlops</code></td><td>Data Pipeline + REST API</td><td>End-to-end ML: training &rarr; registry &rarr; serving</td></tr>
+      <tr><td><strong>pm</strong></td><td colspan="3"><em>No stack &mdash; persona is ready immediately after <code>/set-persona</code></em></td></tr>
+      <tr><td><strong>designer</strong></td><td colspan="3"><em>No stack &mdash; persona is ready immediately after <code>/set-persona</code></em></td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    For a full breakdown of each path including client-fit recommendations, see
+    <code>CHOOSE_YOUR_ADVENTURE.md</code> at the repo root.
+  </p>
+
+  <div class="callout callout-tip">
+    <strong>Custom stacks:</strong> If your tech doesn&rsquo;t match any built-in stack, create a
+    new directory under <code>stacks/</code> with a <code>context.md</code> and rules. See
+    <code>QUICKSTART.md</code> Workflow 2 (&ldquo;Fresh Project with Custom Stack&rdquo;) for the
+    full procedure. You can also use <code>stacks/shared/</code> for vibe docs that are shared
+    across all stacks of a persona.
+  </div>
+
+  <p>
+    With your persona and stack chosen, the AI now knows your role, your language, your
+    architecture pattern, and your testing strategy. The rest of this guide assumes onboarding
+    is complete.
   </p>
 </section>
 
@@ -1395,8 +1601,9 @@ the AI "knows" the project rules, stack, and current phase before writing any co
   <div style="text-align:center;margin:1.5rem 0"><svg id="mermaid-d9" width="100%" xmlns="http://www.w3.org/2000/svg" class="flowchart" style="max-width: 1525.421875px;" viewBox="0 0 1525.421875 141" role="graphics-document document" aria-roledescription="flowchart-v2" xmlns:xlink="http://www.w3.org/1999/xlink"><style>#mermaid-d9{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mermaid-d9 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mermaid-d9 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mermaid-d9 .error-icon{fill:#552222;}#mermaid-d9 .error-text{fill:#552222;stroke:#552222;}#mermaid-d9 .edge-thickness-normal{stroke-width:1px;}#mermaid-d9 .edge-thickness-thick{stroke-width:3.5px;}#mermaid-d9 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-d9 .edge-thickness-invisible{stroke-width:0;fill:none;}#mermaid-d9 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-d9 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-d9 .marker{fill:#333333;stroke:#333333;}#mermaid-d9 .marker.cross{stroke:#333333;}#mermaid-d9 svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#mermaid-d9 p{margin:0;}#mermaid-d9 .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#mermaid-d9 .cluster-label text{fill:#333;}#mermaid-d9 .cluster-label span{color:#333;}#mermaid-d9 .cluster-label span p{background-color:transparent;}#mermaid-d9 .label text,#mermaid-d9 span{fill:#333;color:#333;}#mermaid-d9 .node rect,#mermaid-d9 .node circle,#mermaid-d9 .node ellipse,#mermaid-d9 .node polygon,#mermaid-d9 .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#mermaid-d9 .rough-node .label text,#mermaid-d9 .node .label text,#mermaid-d9 .image-shape .label,#mermaid-d9 .icon-shape .label{text-anchor:middle;}#mermaid-d9 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-d9 .rough-node .label,#mermaid-d9 .node .label,#mermaid-d9 .image-shape .label,#mermaid-d9 .icon-shape .label{text-align:center;}#mermaid-d9 .node.clickable{cursor:pointer;}#mermaid-d9 .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#mermaid-d9 .arrowheadPath{fill:#333333;}#mermaid-d9 .edgePath .path{stroke:#333333;stroke-width:2.0px;}#mermaid-d9 .flowchart-link{stroke:#333333;fill:none;}#mermaid-d9 .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#mermaid-d9 .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#mermaid-d9 .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#mermaid-d9 .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#mermaid-d9 .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#mermaid-d9 .cluster text{fill:#333;}#mermaid-d9 .cluster span{color:#333;}#mermaid-d9 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-d9 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#mermaid-d9 rect.text{fill:none;stroke-width:0;}#mermaid-d9 .icon-shape,#mermaid-d9 .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#mermaid-d9 .icon-shape p,#mermaid-d9 .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#mermaid-d9 .icon-shape rect,#mermaid-d9 .image-shape rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#mermaid-d9 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mermaid-d9 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mermaid-d9 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="mermaid-d9_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="mermaid-d9_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="mermaid-d9_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="mermaid-d9_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="mermaid-d9_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="mermaid-d9_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M179.172,84L183.339,84C187.505,84,195.839,84,203.505,84C211.172,84,218.172,84,221.672,84L225.172,84" id="L_SS_AR_0" class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SS_AR_0" data-points="W3sieCI6MTc5LjE3MTg3NSwieSI6ODR9LHsieCI6MjA0LjE3MTg3NSwieSI6ODR9LHsieCI6MjI5LjE3MTg3NSwieSI6ODR9XQ==" marker-end="url(#mermaid-d9_flowchart-v2-pointEnd)"/><path d="M455.047,84L459.214,84C463.38,84,471.714,84,479.38,84C487.047,84,494.047,84,497.547,84L501.047,84" id="L_AR_ST_0" class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_AR_ST_0" data-points="W3sieCI6NDU1LjA0Njg3NSwieSI6ODR9LHsieCI6NDgwLjA0Njg3NSwieSI6ODR9LHsieCI6NTA1LjA0Njg3NSwieSI6ODR9XQ==" marker-end="url(#mermaid-d9_flowchart-v2-pointEnd)"/><path d="M705.156,54.397L709.323,53.164C713.49,51.931,721.823,49.466,729.49,48.233C737.156,47,744.156,47,747.656,47L751.156,47" id="L_ST_CODE_0" class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_ST_CODE_0" data-points="W3sieCI6NzA1LjE1NjI1LCJ5Ijo1NC4zOTY3NjM5MTU3ODY4NH0seyJ4Ijo3MzAuMTU2MjUsInkiOjQ3fSx7IngiOjc1NS4xNTYyNSwieSI6NDd9XQ==" marker-end="url(#mermaid-d9_flowchart-v2-pointEnd)"/><path d="M977.891,47L989.469,47C1001.047,47,1024.203,47,1046.693,47C1069.182,47,1091.005,47,1101.917,47L1112.828,47" id="L_CODE_CR_0" class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_CODE_CR_0" data-points="W3sieCI6OTc3Ljg5MDYyNSwieSI6NDd9LHsieCI6MTA0Ny4zNTkzNzUsInkiOjQ3fSx7IngiOjExMTYuODI4MTI1LCJ5Ijo0N31d" marker-end="url(#mermaid-d9_flowchart-v2-pointEnd)"/><path d="M1267.531,47L1271.698,47C1275.865,47,1284.198,47,1291.892,48.045C1299.586,49.089,1306.641,51.178,1310.168,52.223L1313.696,53.267" id="L_CR_NS_0" class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_CR_NS_0" data-points="W3sieCI6MTI2Ny41MzEyNSwieSI6NDd9LHsieCI6MTI5Mi41MzEyNSwieSI6NDd9LHsieCI6MTMxNy41MzEyNSwieSI6NTQuNDAzMjM4OTE3MDI2Mn1d" marker-end="url(#mermaid-d9_flowchart-v2-pointEnd)"/><path d="M1317.531,113.597L1313.365,114.831C1309.198,116.065,1300.865,118.532,1279.973,119.766C1259.081,121,1225.63,121,1184.768,121C1143.906,121,1095.633,121,1041.357,121C987.081,121,926.802,121,873.935,121C821.068,121,775.612,121,749.357,119.956C723.101,118.913,716.047,116.825,712.519,115.782L708.992,114.738" id="L_NS_ST_0" class=" edge-thickness-normal edge-pattern-dotted edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_NS_ST_0" data-points="W3sieCI6MTMxNy41MzEyNSwieSI6MTEzLjU5Njc2MTA4Mjk3Mzh9LHsieCI6MTI5Mi41MzEyNSwieSI6MTIxfSx7IngiOjExOTIuMTc5Njg3NSwieSI6MTIxfSx7IngiOjEwNDcuMzU5Mzc1LCJ5IjoxMjF9LHsieCI6ODY2LjUyMzQzNzUsInkiOjEyMX0seyJ4Ijo3MzAuMTU2MjUsInkiOjEyMX0seyJ4Ijo3MDUuMTU2MjUsInkiOjExMy42MDMyMzYwODQyMTMxN31d" marker-end="url(#mermaid-d9_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_SS_AR_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel "></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_AR_ST_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel "></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_ST_CODE_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel "></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_CODE_CR_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel "></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_CR_NS_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel "></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(1047.359375, 121)"><g class="label" data-id="L_NS_ST_0" transform="translate(-44.46875, -12)"><foreignObject width="88.9375" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel "><p>next session</p></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default  " id="flowchart-SS-0" transform="translate(93.5859375, 84)"><rect class="basic label-container" style="fill:#3f51b5 !important" x="-85.5859375" y="-39" width="171.171875" height="78"/><g class="label" style="color:#fff !important" transform="translate(-55.5859375, -24)"><rect/><foreignObject width="111.171875" height="48"><div style="color: rgb(255, 255, 255) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#fff !important" class="nodeLabel "><p>/setup-stack<br />Configure stack</p></span></div></foreignObject></g></g><g class="node default  " id="flowchart-AR-1" transform="translate(342.109375, 84)"><rect class="basic label-container" style="fill:#00897b !important" x="-112.9375" y="-39" width="225.875" height="78"/><g class="label" style="color:#fff !important" transform="translate(-82.9375, -24)"><rect/><foreignObject width="165.875" height="48"><div style="color: rgb(255, 255, 255) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#fff !important" class="nodeLabel "><p>/architect<br />Design spec + skeleton</p></span></div></foreignObject></g></g><g class="node default  " id="flowchart-ST-3" transform="translate(605.1015625, 84)"><rect class="basic label-container" style="fill:#ff8f00 !important" x="-100.0546875" y="-39" width="200.109375" height="78"/><g class="label" style="color:#fff !important" transform="translate(-70.0546875, -24)"><rect/><foreignObject width="140.109375" height="48"><div style="color: rgb(255, 255, 255) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#fff !important" class="nodeLabel "><p>/start-session<br />Load context + goal</p></span></div></foreignObject></g></g><g class="node default  " id="flowchart-CODE-5" transform="translate(866.5234375, 47)"><rect class="basic label-container" style="fill:#2e7d32 !important" x="-111.3671875" y="-39" width="222.734375" height="78"/><g class="label" style="color:#fff !important" transform="translate(-81.3671875, -24)"><rect/><foreignObject width="162.734375" height="48"><div style="color: rgb(255, 255, 255) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#fff !important" class="nodeLabel "><p>TDD Code<br />Red - Green - Refactor</p></span></div></foreignObject></g></g><g class="node default  " id="flowchart-CR-7" transform="translate(1192.1796875, 47)"><rect class="basic label-container" style="fill:#c62828 !important" x="-75.3515625" y="-39" width="150.703125" height="78"/><g class="label" style="color:#fff !important" transform="translate(-45.3515625, -24)"><rect/><foreignObject width="90.703125" height="48"><div style="color: rgb(255, 255, 255) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#fff !important" class="nodeLabel "><p>/code-review<br />Audit rules</p></span></div></foreignObject></g></g><g class="node default  " id="flowchart-NS-9" transform="translate(1417.4765625, 84)"><rect class="basic label-container" style="fill:#6a1b9a !important" x="-99.9453125" y="-39" width="199.890625" height="78"/><g class="label" style="color:#fff !important" transform="translate(-69.9453125, -24)"><rect/><foreignObject width="139.890625" height="48"><div style="color: rgb(255, 255, 255) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#fff !important" class="nodeLabel "><p>/next-session<br />Transition summary</p></span></div></foreignObject></g></g></g></g></g></svg></div>
 
   <ol>
-    <li><code>/setup-stack</code> &mdash; configure the project stack once</li>
-    <li><code>/architect</code> &mdash; design the API spec and create the skeleton</li>
+    <li><code>/set-persona</code> &mdash; pick your role (engineer / designer / pm / data-scientist) once per project</li>
+    <li><code>/setup-stack</code> &mdash; configure the project stack (skipped for designer / pm personas)</li>
+    <li><code>/architect</code> &mdash; design the contract and create the skeleton (output adapts to your stack&rsquo;s Architecture Shape)</li>
     <li><code>/start-session</code> &mdash; begin every coding session by loading context</li>
     <li>TDD code &mdash; Red &rarr; Green &rarr; Refactor, guided by the active rules</li>
     <li><code>/code-review</code> &mdash; audit the session&rsquo;s output against all rules</li>
@@ -1411,7 +1618,7 @@ the AI "knows" the project rules, stack, and current phase before writing any co
 
   <!-- ===== 3.6 Command Reference Table ===== -->
   <h3 id="command-reference">Command Reference</h3>
-  <p>The project ships with 11 purpose-built commands covering every stage of development:</p>
+  <p>The project ships with 12 purpose-built commands covering every stage of development:</p>
 
   <table>
     <thead>
@@ -1423,9 +1630,14 @@ the AI "knows" the project rules, stack, and current phase before writing any co
     </thead>
     <tbody>
       <tr>
+        <td class="cmd-name">/set-persona</td>
+        <td>Activate a persona pack (engineer / designer / pm / data-scientist). Installs role-specific commands, agents, rules, and hooks. Re-run to switch personas cleanly.</td>
+        <td>Setup &mdash; very first thing on a new project (before <code>/setup-stack</code>)</td>
+      </tr>
+      <tr>
         <td class="cmd-name">/setup-stack</td>
-        <td>Configure project technology stack, rules, and context file</td>
-        <td>Setup &mdash; first thing on a new project</td>
+        <td>Persona-aware stack picker: shows only the stacks for your active persona. Configures rules, context, and Architecture Shape.</td>
+        <td>Setup &mdash; immediately after <code>/set-persona</code> (skipped for designer / pm)</td>
       </tr>
       <tr>
         <td class="cmd-name">/detect-stack</td>
@@ -1434,7 +1646,7 @@ the AI "knows" the project rules, stack, and current phase before writing any co
       </tr>
       <tr>
         <td class="cmd-name">/architect</td>
-        <td>Design the API surface and create a walking skeleton</td>
+        <td>Design the contract and walking skeleton. Output is <strong>persona- and stack-shape-aware</strong>: REST API &rarr; routes + data model, Data Pipeline &rarr; job stages + schemas, Analytics Model &rarr; staging/mart trees, IaC &rarr; module inputs/outputs, PM &rarr; PRD draft, Designer &rarr; component tree, DS &rarr; experiment plan.</td>
         <td>Phase 0 &mdash; before any implementation</td>
       </tr>
       <tr>
@@ -1511,6 +1723,553 @@ the AI "knows" the project rules, stack, and current phase before writing any co
       clones the repo immediately gets the full command suite &mdash; no setup, no sharing
       files manually. The workflow is part of the codebase.
     </p>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ===== 3.8 Detailed Command Walkthroughs ===== -->
+  <!-- ============================================================ -->
+  <h3 id="command-walkthroughs">3.8 Detailed Command Walkthroughs</h3>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this?</div>
+    <p>
+      A command-by-command reference with the exact invocation, an annotated example of what
+      the AI prints, and the gotcha that bites first-time users.
+    </p>
+    <p>
+      <strong>Before:</strong> you know the command names, but you guess the arguments and
+      stare at the output trying to parse what just happened.
+      <strong>After:</strong> you can predict the output, recognise when something went wrong,
+      and recover without re-reading the docs.
+    </p>
+  </div>
+
+  <p class="section-meta"><span style="opacity:0.7">⏱ 25 min &mdash; Demo + reference walkthrough</span></p>
+
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d21.svg" alt="[DIAGRAM: Command-when chart — which command to run at each phase of the loop, from setup through delivery]" style="max-width:100%;height:auto" /></div>
+  <!-- DIAGRAM_PLACEHOLDER: cursor_guide_d21.svg
+  flowchart TB
+      A[Setup] --> A1[set-persona]
+      A1 --> A2[setup-stack or detect-stack]
+      A2 --> B[Phase 0]
+      B --> B1[architect or start-project]
+      B1 --> C[Session Loop]
+      C --> C1[start-session]
+      C1 --> C2[code and test]
+      C2 --> C3[code-review]
+      C3 --> C4[next-session]
+      C4 --> C1
+  -->
+
+  <h4><code>/set-persona</code></h4>
+  <p>
+    <strong>What it does:</strong> Activates a role-specific configuration pack. Copies
+    commands, agents, rules, and hooks for that persona into <code>.cursor/</code> and
+    <code>.claude/</code>, and writes <code>## Active Persona: &lt;role&gt;</code> into your
+    context file. Cleans the previous persona&rsquo;s files first.
+  </p>
+  <p><strong>When to use:</strong> Very first command on a new project. Re-run any time to switch roles.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/set-persona engineer    # or: designer, pm, data-scientist</code></pre>
+  <p><strong>Expected output (annotated):</strong></p>
+  <pre><code class="language-bash">Installing engineer persona pack...
+  + .claude/commands/architect.md           # Phase 0 designer
+  + .claude/commands/start-session.md       # session loader
+  + .claude/commands/code-review.md         # rule-aware audit
+  + .claude/agents/verification-agents/*    # subagents
+  + .claude/rules/000-core-workflow.mdc     # always-loaded rule
+Active Persona: engineer
+Next: run /setup-stack to pick a tech stack.</code></pre>
+  <p>
+    <strong>Gotcha:</strong> if you already had files in <code>.claude/commands/</code> with
+    the same names but custom edits, they will be overwritten. Commit before switching personas.
+  </p>
+
+  <h4><code>/setup-stack</code></h4>
+  <p>
+    <strong>What it does:</strong> Persona-aware stack picker. Reads your active persona,
+    shows only the stacks that apply, and writes the chosen stack&rsquo;s context, rules, and
+    Architecture Shape into your project.
+  </p>
+  <p><strong>When to use:</strong> Right after <code>/set-persona</code>. Skipped for designer / pm.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/setup-stack                 # interactive picker
+/setup-stack python-fastapi  # direct selection</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Available stacks for Engineer persona:
+  1. python-fastapi  — Python REST API
+  2. go-gin          — Go REST API
+  3. go-grpc         — Go gRPC Service
+  4. java-spring     — Java REST API
+  5. node-express    — Node.js REST API
+  6. node-nestjs     — Node.js Enterprise API
+
+Selected: python-fastapi
+Architecture Shape: REST API
++ stacks/python-fastapi/context.md  → CLAUDE.md
++ stacks/python-fastapi/rules/*     → .claude/rules/
+Stack ready. Next: /architect &quot;Build &lt;something&gt;&quot;</code></pre>
+  <p>
+    <strong>Gotcha:</strong> if you change persona later, re-run <code>/setup-stack</code> &mdash;
+    the previous stack&rsquo;s rules may belong to a different shape and will produce conflicting
+    advice during <code>/code-review</code>.
+  </p>
+
+  <h4><code>/start-session</code></h4>
+  <p>
+    <strong>What it does:</strong> Loads stack + phase + strictness, displays the summary, and
+    asks for your session goal. Cross-references the goal against the active phase to catch
+    scope creep early.
+  </p>
+  <p><strong>When to use:</strong> At the start of every coding session, every day.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/start-session</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Context Loaded: Python / FastAPI
+Current Phase: Phase 1 (User Auth)
+Strictness: High
+Last session: implemented POST /users; tests passing
+
+What is the goal for this session?</code></pre>
+  <p>
+    <strong>Gotcha:</strong> if you skip this and just start asking the AI to code, the AI has
+    no phase or rule context loaded &mdash; you&rsquo;ll get generic FastAPI patterns instead of
+    your project&rsquo;s.
+  </p>
+
+  <h4><code>/architect</code></h4>
+  <p>
+    <strong>What it does:</strong> Executes Phase 0. Designs the interface contract and builds
+    the walking skeleton. Output is shape-aware: REST &rarr; routes + data model; Data Pipeline
+    &rarr; job stages + Bronze/Silver/Gold layers; dbt &rarr; staging/mart trees; Terraform
+    &rarr; module inputs/outputs; PM &rarr; PRD draft; Designer &rarr; component tree.
+  </p>
+  <p><strong>When to use:</strong> Phase 0, before any feature implementation. Two modes:</p>
+  <ul>
+    <li><strong>Design Mode</strong> &mdash; you give a goal, AI proposes the architecture.</li>
+    <li><strong>Plan Extraction Mode</strong> &mdash; you give a plan file, AI extracts and scaffolds without re-designing.</li>
+  </ul>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/architect &quot;Build a task management API with auth and tags&quot;
+/architect plan/requirements.md</code></pre>
+  <p><strong>Expected output (Design Mode, REST API):</strong></p>
+  <pre><code class="language-bash">Designed Interface:
+  POST /auth/login
+  GET  /tasks
+  POST /tasks
+  GET  /tasks/{id}
+  PUT  /tasks/{id}
+  DELETE /tasks/{id}
+
+Data Model: User, Task, Tag
+
+Phases:
+  Phase 0: Skeleton (stub all 6 endpoints, return 200)
+  Phase 1: Auth
+  Phase 2: Task CRUD
+  Phase 3: Tags
+
++ app/main.py              (entrypoint, all routes return stubs)
++ app/models/{user,task}.py
++ plan/sessions/session-1-phase-0.md ... session-4-phase-3.md
+
+Next: /start-session</code></pre>
+
+  <div style="text-align:center;margin:1.5rem 0"><img src="diagrams/cursor_guide_d22.svg" alt="[DIAGRAM: Architect output by Architecture Shape — REST API, Data Pipeline, Analytics Model, IaC Playbook, Cloud Infrastructure produce different artifacts]" style="max-width:100%;height:auto" /></div>
+  <!-- DIAGRAM_PLACEHOLDER: cursor_guide_d22.svg
+  flowchart LR
+      A[architect command] --> S{Architecture Shape}
+      S --> R[REST API: routes plus data model]
+      S --> D[Data Pipeline: stages plus schemas]
+      S --> M[Analytics Model: staging plus marts]
+      S --> P[IaC Playbook: roles plus vars]
+      S --> C[Cloud Infrastructure: modules plus outputs]
+      S --> T[Statistical Computing: notebooks plus src]
+  -->
+  <p>
+    <strong>Gotcha:</strong> if your active stack is Python FastAPI but your plan says Node.js,
+    <code>/architect</code> warns and asks you to choose. Don&rsquo;t silently override &mdash;
+    fix one or the other.
+  </p>
+
+  <h4><code>/start-project</code></h4>
+  <p>
+    <strong>What it does:</strong> Domain modeling step before <code>/architect</code>.
+    Proposes entities, relationships, and the Architecture Shape contract for a greenfield
+    domain. Useful when you don&rsquo;t yet know what the API surface should be.
+  </p>
+  <p><strong>When to use:</strong> Phase 0, when you have a problem statement but no contract yet.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/start-project &quot;A platform where teachers grade student essays with AI assistance&quot;</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Domain Entities: Teacher, Student, Essay, Grade, Rubric, Feedback
+Key Relationships:
+  Teacher 1..n Essay (owns)
+  Essay 1..1 Grade
+  Grade n..1 Rubric
+
+Proposed Contract (engineer/REST):
+  POST /essays
+  POST /essays/{id}/grade
+  GET  /essays/{id}/feedback
+  ...
+
+Next: /architect to formalise the contract.</code></pre>
+  <p>
+    <strong>Gotcha:</strong> for PMs this produces a PRD draft, not a contract. If you&rsquo;re
+    on the PM persona and expected an OpenAPI list, you ran the wrong command &mdash; switch
+    persona or use <code>/architect</code> directly.
+  </p>
+
+  <h4><code>/code-review</code></h4>
+  <p>
+    <strong>What it does:</strong> Audits your changes against every rule in
+    <code>.claude/rules/</code> and the stack&rsquo;s standards. Catches style, testing, and
+    architecture violations the model would otherwise let slip.
+  </p>
+  <p><strong>When to use:</strong> After completing a feature, before commit.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/code-review                  # all unstaged changes
+/code-review app/routes/tasks.py</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Reviewing 3 files against active stack rules (python-fastapi, High strictness)...
+
+[BLOCKER] app/routes/tasks.py:42
+  Rule: 020-pep8-types — missing return type annotation on update_task
+
+[WARN] app/routes/tasks.py:88
+  Rule: 030-fastapi-async — using sync DB call inside async route
+
+[INFO] tests/test_tasks.py
+  Rule: 040-pytest — coverage 78%, target 85%
+
+2 issues to address. Run /code-review again after fixes.</code></pre>
+  <p>
+    <strong>Gotcha:</strong> if every file is flagged, your strictness is too high for the
+    legacy code you just inherited. Set <code>Strictness: Low</code> in CLAUDE.md so brownfield
+    code only raises warnings, not blockers.
+  </p>
+
+  <h4><code>/next-session</code></h4>
+  <p>
+    <strong>What it does:</strong> Closes the current session cleanly. Generates a transition
+    summary &mdash; what was done, what&rsquo;s next, what&rsquo;s blocked &mdash; and writes
+    it where the next <code>/start-session</code> will read it.
+  </p>
+  <p><strong>When to use:</strong> End of every session.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/next-session</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Session summary written to plan/sessions/session-3.md:
+
+  Done: POST /tasks, GET /tasks (with pagination)
+  Tests: 12 passing, 1 skipped
+  Next: PUT /tasks/{id}, DELETE /tasks/{id}
+  Blocked: nothing
+  Strictness held: yes
+
+CLAUDE.md updated: Active Phase = Phase 2 (Task CRUD, in progress)</code></pre>
+  <p>
+    <strong>Gotcha:</strong> skipping <code>/next-session</code> means tomorrow&rsquo;s
+    <code>/start-session</code> shows yesterday&rsquo;s summary &mdash; your context drifts
+    by a day every time you forget.
+  </p>
+
+  <h4><code>/read</code></h4>
+  <p>
+    <strong>What it does:</strong> Quick context snapshot. Loads stack, phase, last session,
+    and active persona &mdash; without prompting for a session goal. Useful when you&rsquo;re
+    just orienting yourself in a project mid-day.
+  </p>
+  <p><strong>When to use:</strong> Returning to a project after a break, or jumping into a
+  teammate&rsquo;s repo.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/read</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Active Persona: engineer
+Active Stack: python-fastapi (REST API)
+Active Phase: Phase 2 (Task CRUD, in progress)
+Last session: GET /tasks done, PUT /tasks pending
+Strictness: High</code></pre>
+  <p>
+    <strong>Gotcha:</strong> <code>/read</code> doesn&rsquo;t set up a session &mdash;
+    don&rsquo;t use it as a substitute for <code>/start-session</code> when you&rsquo;re about
+    to write code.
+  </p>
+
+  <h4><code>/dockerize</code></h4>
+  <p>
+    <strong>What it does:</strong> Generates a Dockerfile and <code>docker-compose.yml</code>
+    matching your stack&rsquo;s patterns &mdash; multi-stage builds, non-root user, healthcheck,
+    and the right base image.
+  </p>
+  <p><strong>When to use:</strong> When preparing for staging or production deploy.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/dockerize</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">+ Dockerfile               (multi-stage: builder → runtime)
++ docker-compose.yml       (app + postgres + redis)
++ .dockerignore
+
+Healthcheck: GET /health every 30s
+Non-root user: appuser (uid 1000)
+
+Build:  docker compose build
+Run:    docker compose up</code></pre>
+  <p>
+    <strong>Gotcha:</strong> the generated <code>docker-compose.yml</code> uses the dev
+    database password by default. Replace with secrets before pushing to staging.
+  </p>
+
+  <h4><code>/detect-stack</code></h4>
+  <p>
+    <strong>What it does:</strong> Brownfield analysis. Scans an existing codebase
+    (<code>package.json</code>, <code>requirements.txt</code>, <code>go.mod</code>,
+    <code>pom.xml</code>, etc.) and infers the stack, conventions, and likely Architecture Shape.
+    Optionally generates a custom stack folder under <code>stacks/detected-&lt;name&gt;/</code>.
+  </p>
+  <p><strong>When to use:</strong> First contact with an inherited or legacy project.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/detect-stack</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Detected: Python 3.11 / FastAPI 0.110 / SQLAlchemy 2 / pytest
+Architecture: layered (routes → services → repositories)
+Style: snake_case, type hints partial (62%)
+Tests: pytest, coverage 41% (legacy)
+
+Recommended config:
+  Stack: python-fastapi (closest match)
+  Strictness: Low (legacy coverage)
+
+Write to CLAUDE.md? [y/N]</code></pre>
+  <p>
+    <strong>Gotcha:</strong> for polyglot repos, <code>/detect-stack</code> picks the dominant
+    stack. If you have a Python service plus a Node frontend, run it in each subdirectory
+    separately or use a custom stack.
+  </p>
+
+  <h4><code>/research</code></h4>
+  <p>
+    <strong>What it does:</strong> 3-cycle deep investigation. Hypothesis &rarr; 5 targeted
+    web searches &rarr; refutation &rarr; refinement. Produces a structured findings document
+    instead of a chat-style answer.
+  </p>
+  <p><strong>When to use:</strong> Before making a non-obvious technical decision (auth library,
+  caching strategy, migration approach).</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/research &quot;Best Python ORM for async FastAPI with PostgreSQL in 2025&quot;</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Cycle 1 — Hypothesis: SQLAlchemy 2.0 async is the standard
+  Searches (5): ... → confirms async support stable since 2.0
+Cycle 2 — Hypothesis: SQLModel is a viable lighter alternative
+  Searches (5): ... → SQLModel still on async-experimental in v0.0.x
+Cycle 3 — Refined: SQLAlchemy 2.0 async + Alembic for prod; SQLModel only for prototypes
+
+Recommendation: SQLAlchemy 2.0 + asyncpg + Alembic
+Trade-offs documented: plan/research/orm-choice.md</code></pre>
+  <p>
+    <strong>Gotcha:</strong> <code>/research</code> is slow on purpose &mdash; it&rsquo;s
+    optimised for accuracy, not speed. Don&rsquo;t use it for trivial questions; ask the
+    Agent directly instead.
+  </p>
+
+  <h4><code>/research-export</code></h4>
+  <p>
+    <strong>What it does:</strong> Packages the latest <code>/research</code> findings into a
+    shareable Markdown document with sources, hypotheses, and the refined conclusion.
+  </p>
+  <p><strong>When to use:</strong> When you need to circulate a research outcome to your team
+  or attach it to a decision record.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/research-export</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">+ docs/research/2026-05-05-orm-choice.md  (3.1 KB)
+  Hypotheses, sources, refutations, recommendation. Ready to share.</code></pre>
+  <p>
+    <strong>Gotcha:</strong> if you haven&rsquo;t run <code>/research</code> in this session,
+    export will tell you there&rsquo;s nothing to package. Run the research first.
+  </p>
+
+  <h4><code>/build-diagrams</code></h4>
+  <p>
+    <strong>What it does:</strong> Course-authoring helper. Reads
+    <code>DIAGRAM_PLACEHOLDER</code> comments from <code>materials/*.html</code> and renders
+    each Mermaid block as a static SVG via <code>mmdc</code>. Used to produce the diagrams in
+    this guide itself.
+  </p>
+  <p><strong>When to use:</strong> When editing course materials or writing your own
+  agentic-workflow docs.</p>
+  <p><strong>Invocation:</strong></p>
+  <pre><code class="language-bash">/build-diagrams                       # all materials/*.html
+/build-diagrams materials/cursor-guide.html</code></pre>
+  <p><strong>Expected output:</strong></p>
+  <pre><code class="language-bash">Found 22 placeholders in materials/cursor-guide.html
+Rendering cursor_guide_d1.svg ... done
+...
+Rendered 22 SVGs to materials/diagrams/</code></pre>
+  <p>
+    <strong>Gotcha:</strong> Mermaid is picky about node labels. No quotes, no special chars
+    inside labels, max 10 nodes per diagram &mdash; otherwise the renderer silently drops the
+    diagram. Keep labels plain ASCII.
+  </p>
+
+  <!-- ============================================================ -->
+  <!-- ===== 3.9 Verification Agents ===== -->
+  <!-- ============================================================ -->
+  <h3 id="verification-agents">3.9 Verification Agents</h3>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this?</div>
+    <p>
+      A second pair of eyes that runs automatically. Verification subagents check the AI&rsquo;s
+      work against specific concerns &mdash; security, performance, schema correctness &mdash;
+      so you don&rsquo;t have to remember to.
+    </p>
+    <p>
+      <strong>Before:</strong> you review every AI diff yourself, miss subtle issues, and find
+      them in production. <strong>After:</strong> a focused subagent reviews each diff against
+      one specific rubric and surfaces the issues before commit.
+    </p>
+  </div>
+
+  <p>
+    A <strong>verification agent</strong> is a focused subagent &mdash; a separate AI invocation
+    with a narrow prompt and a single concern. The persona pack ships with several:
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Agent</th><th>Concern</th><th>Triggered by</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>review-pr</code></td>
+        <td>Comprehensive parallel code review across diff</td>
+        <td><code>/code-review</code> on multi-file changes</td>
+      </tr>
+      <tr>
+        <td><code>pre-merge</code></td>
+        <td>Pre-merge checklist: tests pass, docs updated, no TODOs left</td>
+        <td>Manual run before opening a PR</td>
+      </tr>
+      <tr>
+        <td><code>security-review</code></td>
+        <td>Security-only audit of pending changes</td>
+        <td>Manual run on sensitive endpoints (auth, payment, PII)</td>
+      </tr>
+      <tr>
+        <td><code>tdd-plan</code></td>
+        <td>Generates a TDD plan with 3 hypothesis-refinement cycles</td>
+        <td>Before implementing a non-trivial feature</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Verification agents run in parallel where possible (the harness can spawn multiple
+    subagents at once), so a 4-file PR review doesn&rsquo;t cost 4&times; the time. Each
+    agent returns a focused report; the parent agent aggregates them.
+  </p>
+
+  <div class="callout callout-tip">
+    <strong>When to run them:</strong> always before opening a PR
+    (<code>pre-merge</code>), before merging anything that touches auth or payment
+    (<code>security-review</code>), and any time <code>/code-review</code> finds more
+    than 3 issues (<code>review-pr</code> for full coverage).
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ===== 3.10 Choose Your Adventure ===== -->
+  <!-- ============================================================ -->
+  <h3 id="choose-adventure">3.10 Choose Your Adventure &mdash; The 8 Paths</h3>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this?</div>
+    <p>
+      A one-screen view of every path through the course, so you know which persona + stack
+      combination to pick for the work you actually do.
+    </p>
+  </div>
+
+  <p>
+    The repo&rsquo;s <code>CHOOSE_YOUR_ADVENTURE.md</code> defines 8 distinct paths. Each maps
+    a persona and a stack to a real-world job:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Path</th>
+        <th>You are</th>
+        <th>Persona</th>
+        <th>Stack(s)</th>
+        <th>You build</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Backend (REST)</strong></td>
+        <td>Software engineer building HTTP services</td>
+        <td><code>engineer</code></td>
+        <td><code>python-fastapi</code>, <code>go-gin</code>, <code>java-spring</code>, <code>node-express</code>, <code>node-nestjs</code></td>
+        <td>Production REST API with tests, migrations, CI</td>
+      </tr>
+      <tr>
+        <td><strong>2. Backend (gRPC)</strong></td>
+        <td>Backend engineer doing inter-service comms</td>
+        <td><code>engineer</code></td>
+        <td><code>go-grpc</code></td>
+        <td>Proto-defined gRPC service, streaming RPCs</td>
+      </tr>
+      <tr>
+        <td><strong>3. DevOps / Platform</strong></td>
+        <td>Platform engineer, SRE, DevOps</td>
+        <td><code>engineer</code> (devops mode)</td>
+        <td><code>devops-terraform</code>, <code>devops-ansible</code>, <code>devops-k8s-helm</code></td>
+        <td>IaC modules, configuration playbooks, GitOps platform</td>
+      </tr>
+      <tr>
+        <td><strong>4. Data Science (Notebooks)</strong></td>
+        <td>Data scientist doing EDA + ML prototyping</td>
+        <td><code>data-scientist</code></td>
+        <td><code>python-datascience</code>, <code>r-tidyverse</code></td>
+        <td>Reproducible experiments, model cards, MLflow runs</td>
+      </tr>
+      <tr>
+        <td><strong>5. Data Engineering</strong></td>
+        <td>Data / analytics engineer</td>
+        <td><code>data-scientist</code></td>
+        <td><code>python-spark</code>, <code>python-dbt-snowflake</code></td>
+        <td>Distributed pipelines or SQL-first transforms</td>
+      </tr>
+      <tr>
+        <td><strong>6. MLOps</strong></td>
+        <td>ML engineer shipping models to prod</td>
+        <td><code>data-scientist</code></td>
+        <td><code>python-mlops</code></td>
+        <td>Training pipeline + model registry + FastAPI serving</td>
+      </tr>
+      <tr>
+        <td><strong>7. Product Manager</strong></td>
+        <td>PM collaborating with engineering</td>
+        <td><code>pm</code></td>
+        <td>none</td>
+        <td>PRDs, story decomposition, sprint plans</td>
+      </tr>
+      <tr>
+        <td><strong>8. Designer</strong></td>
+        <td>UI/UX designer working in or near code</td>
+        <td><code>designer</code></td>
+        <td>none</td>
+        <td>Design tokens, component specs, Figma handoff docs</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-tip">
+    <strong>How to pick:</strong> match by what you ship, not what your title says. A
+    &ldquo;data scientist&rdquo; who actually ships APIs lives on Path 6 (MLOps), not Path 4
+    (Notebooks). A &ldquo;backend engineer&rdquo; who maintains Terraform belongs on Path 3.
   </div>
 
   <!-- ===== LAB 2 ===== -->
@@ -3344,6 +4103,255 @@ cp .cursor/rules/700-brownfield.mdc stacks/detected-mystack/rules/</code></pre>
     Cursor version in team environments if you depend heavily on hooks in CI or automation workflows.
   </div>
 
+</section>
+
+<!-- ============================================================ -->
+<!-- ===== Section 8: How to Adapt This After Class ===== -->
+<!-- ============================================================ -->
+<section id="adapt-after-class">
+  <h2>Section 8: How to Adapt This After Class</h2>
+  <p class="section-meta">Estimated time: 15 minutes &mdash; reference</p>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this?</div>
+    <p>
+      A concrete, role-specific plan to take this methodology back to your real project on
+      Monday morning &mdash; including the customisations that actually matter, the corporate
+      gotchas that will bite you, and the three highest-impact next steps in order.
+    </p>
+    <p>
+      <strong>Before:</strong> you finish the course, feel inspired, copy <code>.cursor/</code>
+      into your work repo, and discover three days later that nothing fits your team&rsquo;s
+      conventions. <strong>After:</strong> you have a checklist of what to customise, what to
+      remove, and what to add, plus the patterns for adapting it to your team&rsquo;s reality.
+    </p>
+  </div>
+
+  <h3 id="adapt-by-role">8.1 Apply at Work &mdash; By Role</h3>
+
+  <h4>Engineer</h4>
+  <ul>
+    <li>
+      <strong>Step 1:</strong> Run <code>/detect-stack</code> in your work repo. Read the
+      generated context and edit <code>CLAUDE.md</code> until it actually matches your
+      team&rsquo;s conventions (test framework, lint config, naming).
+    </li>
+    <li>
+      <strong>Step 2:</strong> Set <code>Strictness: Low</code> for any legacy code. New
+      features get <code>Strictness: High</code>; the existing codebase gets to keep its
+      warts until you choose to refactor.
+    </li>
+    <li>
+      <strong>Step 3:</strong> Encode your team&rsquo;s top three review-comment patterns as
+      rules in <code>.claude/rules/</code>. The rules you write today eliminate the
+      review-comments you&rsquo;ll write tomorrow.
+    </li>
+  </ul>
+
+  <h4>Data Scientist / ML Engineer</h4>
+  <ul>
+    <li>
+      Customise <code>stacks/python-datascience/context.md</code> (or your equivalent) to point
+      at your actual data sources, MLflow tracking server, and preferred libraries.
+    </li>
+    <li>
+      If you ship models, switch to <code>python-mlops</code> &mdash; the shape includes the
+      serving layer, which Notebooks don&rsquo;t.
+    </li>
+    <li>
+      Use <code>/research</code> for library / framework decisions before you commit to one in
+      a notebook. Three searches now save three weeks of refactor later.
+    </li>
+  </ul>
+
+  <h4>DevOps / Platform Engineer</h4>
+  <ul>
+    <li>
+      In <code>stacks/devops-terraform/context.md</code>, replace the example provider blocks
+      with your actual cloud account / region / state backend. The AI inherits these directly.
+    </li>
+    <li>
+      Add a project-level rule that forbids <code>terraform apply</code> without a saved plan
+      &mdash; mirrors the <code>terraform_plans/</code> pattern in CLAUDE.md.
+    </li>
+    <li>
+      Combine with hooks: a <code>PreToolUse</code> hook that blocks <code>terraform destroy</code>
+      saves you from one very bad afternoon.
+    </li>
+  </ul>
+
+  <h4>Product Manager</h4>
+  <ul>
+    <li>
+      The PM persona has no stack. What you customise instead is <code>CLAUDE.md</code> with
+      your product&rsquo;s glossary, key personas, and the link to your live PRD repository.
+    </li>
+    <li>
+      Use <code>/start-project</code> to draft PRDs, then <code>/architect</code> with your
+      engineer&rsquo;s persona pack to translate the PRD into a technical spec. The handoff is
+      structural, not over-the-wall.
+    </li>
+  </ul>
+
+  <h4>Designer</h4>
+  <ul>
+    <li>
+      Add your design-token JSON to <code>docs/figma-context-*.md</code> so
+      <code>/start-session</code> loads them automatically.
+    </li>
+    <li>
+      Use <code>/architect</code> in component-tree mode before any engineering kickoff &mdash;
+      it forces the &ldquo;what components exist vs need creating&rdquo; question to be answered
+      explicitly.
+    </li>
+  </ul>
+
+  <h3 id="adapt-customise">8.2 What to Customise in CLAUDE.md, Persona, and Stack</h3>
+
+  <p>
+    The template is a starting point. The pieces that almost always need editing for a real
+    project:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>What to change</th>
+        <th>Why</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>CLAUDE.md</code></td>
+        <td>Active phase, strictness, glossary, links to PRD / runbook / on-call docs</td>
+        <td>This is the AI&rsquo;s memory between sessions. Make it accurate.</td>
+      </tr>
+      <tr>
+        <td><code>stacks/&lt;your-stack&gt;/context.md</code></td>
+        <td>Test framework, linter, formatter, key folder layout, naming conventions</td>
+        <td>Drives every <code>/architect</code> and <code>/start-session</code> output.</td>
+      </tr>
+      <tr>
+        <td><code>.claude/rules/*.mdc</code></td>
+        <td>Add 3&ndash;5 rules from your team&rsquo;s most common review comments</td>
+        <td>Rules eliminate classes of error; chat-corrections only fix one at a time.</td>
+      </tr>
+      <tr>
+        <td><code>.claude/commands/code-review.md</code></td>
+        <td>Add your team&rsquo;s checklist (security, accessibility, observability)</td>
+        <td>Per-team review concerns differ. Encode them once, run them every PR.</td>
+      </tr>
+      <tr>
+        <td><code>.claude/hooks/</code></td>
+        <td>Format-on-save, danger blocker, custom context injectors</td>
+        <td>The automation layer. One good hook removes a whole category of mistakes.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="adapt-pitfalls">8.3 Common Pitfalls in Real Environments</h3>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">Corporate proxies and TLS</div>
+    <p>
+      MCP servers, <code>/research</code>, and any external doc fetch will hit your corporate
+      proxy. Set <code>HTTPS_PROXY</code> / <code>NO_PROXY</code> in your shell, and if your
+      org uses an internal CA, configure <code>NODE_EXTRA_CA_CERTS</code> for Cursor and
+      <code>SSL_CERT_FILE</code> for Python tooling. Symptom: silent failures on the first MCP
+      call.
+    </p>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">Auth: SSO, MFA, and short-lived tokens</div>
+    <p>
+      Cursor and Claude Code authenticate independently. SSO works, but MFA prompts can stall
+      a long-running agent. For team environments, configure CLI auth using a refresh-friendly
+      token method (e.g. <code>aws sso login</code> before the session, not during).
+    </p>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">Team CLAUDE.md conventions</div>
+    <p>
+      If your team already commits a <code>CLAUDE.md</code>, do not overwrite it. Append your
+      <code>## Active Persona</code> and <code>## Active Stack</code> sections under the
+      existing header, and put personal preferences in <code>~/.claude/CLAUDE.md</code>
+      (user-global) instead of the project file.
+    </p>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">Strictness mismatch on legacy code</div>
+    <p>
+      The most common &ldquo;the AI fights me&rdquo; complaint comes from running High
+      strictness on a brownfield codebase. Symptom: every <code>/code-review</code> returns
+      30+ blockers. Fix: set <code>Strictness: Low</code> for the legacy paths and
+      <code>Strictness: High</code> only for the <code>app/v2/</code> (or equivalent) new tree.
+    </p>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">Secret leakage</div>
+    <p>
+      Never commit <code>.env</code>, credentials, or live API keys. Add a hook that blocks
+      <code>git add</code> if the staged diff matches secret patterns. The template ships an
+      example under <code>.claude/hooks/</code>.
+    </p>
+  </div>
+
+  <h3 id="adapt-next-steps">8.4 Your Next 3 Steps, In Order of Impact</h3>
+
+  <ol class="steps">
+    <li>
+      <strong>This week &mdash; Run <code>/detect-stack</code> on your real work repo.</strong>
+      Edit the generated <code>CLAUDE.md</code> until it accurately reflects your project.
+      Set strictness honestly. This is the highest-leverage hour you will spend after this
+      course &mdash; everything else builds on it.
+    </li>
+    <li>
+      <strong>This sprint &mdash; Encode your team&rsquo;s top 3 review patterns as rules.</strong>
+      Open your last 10 PRs, look at the recurring review comments, and turn the top three into
+      <code>.claude/rules/*.mdc</code> entries. Commit them. Now every future AI-generated
+      change inherits the lessons your team has already learned.
+    </li>
+    <li>
+      <strong>This quarter &mdash; Build one custom command for your team&rsquo;s biggest
+      recurring workflow.</strong> Common candidates: a release-checklist command, an incident
+      post-mortem template, a PRD-to-tickets translator. Place it in
+      <code>.claude/commands/</code> and commit. The workflow is now part of the codebase, and
+      every new hire inherits it on clone.
+    </li>
+  </ol>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">The compound effect</div>
+    <p>
+      None of these steps require permission, a budget, or a team-wide migration. Each one
+      pays back the time it took inside the same week. The structure compounds: each rule
+      eliminates a class of error, each command turns a 10-step process into one keystroke,
+      each customised context file means the next session starts from a higher baseline.
+    </p>
+  </div>
+
+  <h3 id="adapt-final">8.5 The Final Principle</h3>
+
+  <blockquote class="philosophy">
+    &ldquo;The AI is not the bottleneck. Your context is the bottleneck. Invest in context.&rdquo;
+  </blockquote>
+
+  <p>
+    Everything in this course &mdash; personas, stacks, rules, commands, hooks, MCP &mdash;
+    is one mechanism: it raises the quality of the context the AI receives. You do not need
+    to use every mechanism. You do need to take the methodology seriously: write the spec,
+    encode the rules, commit the commands, end the session cleanly. Do that, and the AI
+    becomes a force multiplier instead of a chat partner.
+  </p>
+
+  <p>
+    Now go and ship.
+  </p>
 </section>
 
 
