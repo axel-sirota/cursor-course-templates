@@ -1,0 +1,130 @@
+---
+description: Python-specific Docker patterns for FastAPI/Flask/Django
+alwaysApply: false
+globs: ["Dockerfile", "docker-compose*.yml", "*.dockerfile"]
+---
+
+# Python Docker Standards
+
+## Base Image Selection
+
+- **Development/Production**: Use `python:3.11-slim` (not `python:latest`)
+- **Alpine alternative**: `python:3.11-alpine` (smaller but may have compatibility issues)
+
+## Multi-Stage Dockerfile Pattern
+
+```dockerfile
+# Build stage
+FROM python:3.11-slim AS builder
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Runtime stage
+FROM python:3.11-slim
+WORKDIR /app
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app
+USER app
+
+# Copy dependencies and app
+COPY --from=builder /root/.local /home/app/.local
+COPY --chown=app:app . .
+
+ENV PATH=/home/app/.local/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+## Key Python-Specific Settings
+
+### Environment Variables
+
+```dockerfile
+# Required for proper output handling
+ENV PYTHONUNBUFFERED=1
+
+# Prevent .pyc files
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Path for user-installed packages
+ENV PATH=/home/app/.local/bin:$PATH
+```
+
+### Health Check (Python-native)
+
+```dockerfile
+# Without curl/wget dependency
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+```
+
+### Framework-Specific CMD
+
+**FastAPI with Uvicorn:**
+
+```dockerfile
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+**Flask with Gunicorn:**
+
+```dockerfile
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:app"]
+```
+
+**Django with Gunicorn:**
+
+```dockerfile
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "project.wsgi:application"]
+```
+
+## Python-Specific .dockerignore Additions
+
+```
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+```
+
+## Development vs Production
+
+### Development (with hot reload)
+
+```yaml
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app  # Mount source for hot reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Production (no volume mount)
+
+```yaml
+services:
+  app:
+    build: .
+    # No volume mount - use built image
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+```

@@ -1,0 +1,66 @@
+---
+description: Engineer persona workflow rules
+alwaysApply: true
+---
+
+# Engineer Persona Workflow Rules
+
+These rules govern all engineering work performed under the engineer persona. They are non-negotiable guardrails, not suggestions.
+
+---
+
+## 1. TDD is Mandatory
+
+Every piece of new logic must follow the Red-Green-Refactor cycle:
+
+1. **Red** — Write a failing test that asserts the acceptance criterion. Confirm it fails for the right reason before writing any implementation.
+2. **Green** — Write the minimum implementation to make the test pass. Do not over-engineer.
+3. **Refactor** — Remove duplication, improve clarity. Re-run tests after every change.
+
+Never write implementation before a failing test exists. If you discover a bug in existing code, write a failing test that reproduces it before fixing it.
+
+---
+
+## 2. Subagent Delegation Table
+
+Use the right agent for the right job. Do not duplicate their responsibilities.
+
+| Situation | Agent to invoke |
+|---|---|
+| Code is written or changed | `code-reviewer` (always after Green) |
+| Task touches auth, DB, file I/O, network, or external APIs | `security-auditor` (in Audit step) |
+| Need to confirm test pass/fail state | `test-runner` (in Red and Green steps) |
+| Task claims to be complete | `verifier` (before marking done) |
+
+Invoke agents at the correct step. Do not skip the security audit for "small" changes to auth or database code.
+
+---
+
+## 3. Hooks are Guardrails
+
+The hooks installed by this persona (`lint.sh`, `type-check.sh`, `test-runner.sh`, `block-destructive.sh`) enforce quality and safety automatically.
+
+- If `block-destructive.sh` denies a command, **do not work around it**. Fix the underlying issue (use a safe alternative, confirm with the user, or restructure the approach).
+- If `lint.sh` or `type-check.sh` report errors after a file edit, address them before continuing to the next step.
+- If `test-runner.sh` reports failures at stop, investigate before considering the session complete.
+
+Do not disable, bypass, or delete hooks.
+
+---
+
+## 4. Phase Discipline
+
+Tasks and features progress through defined phases. Do not advance a phase until all acceptance criteria for the current phase are met and verified.
+
+- A task is not complete until `verifier` returns `Verified` for all criteria.
+- A security `Critical` finding halts all work on dependent tasks until resolved.
+- A task that fails verification 3 times must be escalated to the user — do not silently retry indefinitely.
+- Do not merge or deliver work with open `Critical` or `High` security findings.
+
+---
+
+## 5. Documentation and Traceability
+
+- Update `docs/tasks-{feature}.md` at task completion with status, timestamp, and test count.
+- Record any `security-auditor` findings (even resolved ones) in the task detail section.
+- If you deviate from the plan (e.g., split a task, change touched files), update the tasks file to reflect reality before continuing.

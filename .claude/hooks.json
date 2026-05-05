@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      { "command": ".claude/scripts/lint.sh" },
+      { "command": ".claude/scripts/type-check.sh" }
+    ],
+    "beforeShellExecution": [
+      { "command": ".claude/scripts/block-destructive.sh" }
+    ],
+    "stop": [
+      { "command": ".claude/scripts/test-runner.sh" }
+    ]
+  }
+}

@@ -1,0 +1,300 @@
+---
+description: Session 1: Phase 0 skeleton creation with all endpoints returning mock data
+globs: ["app/api/**", "templates/**", "docker-compose.yml", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session 1: Phase 0 (Skeleton Implementation)
+
+## Purpose
+Execute Session 1 to create a fully functional API skeleton where all endpoints return mock data matching the OpenAPI specification. This establishes project structure, enables E2E test writing, and validates API contracts.
+
+## CRITICAL: This Session Stops After Skeleton - No Endpoint Implementation
+
+DO NOT:
+- Implement real business logic
+- Create database migrations
+- Create domain models beyond API request/response
+- Create repositories or services
+- Proceed to Session 2 automatically
+
+ONLY:
+- Create project structure
+- Implement mock endpoints
+- Set up Docker Compose
+- Configure environment
+- Create basic HTML templates
+
+Session 2 (First real endpoint implementation) is a SEPARATE session that requires explicit user command.
+
+## Session Prerequisites
+- OpenAPI specification complete and validated
+- Plan folder structure created with session plans
+- Session 1 plan reviewed (plan/sessions/session-1-phase-0.md)
+- Development environment ready
+
+## Session Execution Steps
+
+### 1. Review Session Plan
+Before starting implementation:
+- Read plan/sessions/session-1-phase-0.md
+- Confirm session objectives and deliverables
+- Review OpenAPI specification
+- Check prerequisites are met
+
+### 2. Project Structure
+Follow vibe_fastapi_boilerplate.md exactly:
+
+Create complete directory structure:
+```
+app/
+├── core/
+│   ├── config.py
+│   ├── database.py
+│   ├── logging.py
+│   ├── middleware.py
+│   └── dependencies.py
+├── api/
+│   ├── health.py
+│   ├── auth.py
+│   └── [feature].py
+└── main.py
+```
+
+### 3. Configuration Setup
+Reference vibe_fastapi_boilerplate.md for:
+- Environment variable management
+- CORS configuration
+- Middleware setup
+- Logging configuration
+
+Create .env.example with all required variables:
+```
+PORT=8000
+DATABASE_URL=postgresql://user:pass@localhost:5432/dbname
+JWT_SECRET_KEY=change-in-production
+```
+
+### 4. Docker Compose Setup
+Use templates/docker-compose.template.yml.
+
+Include services:
+- PostgreSQL database
+- pgAdmin (optional, for development)
+- Application (optional, for container testing)
+
+Ensure proper networking and volume mounting.
+
+### 5. Mock Endpoint Implementation
+
+For each endpoint in OpenAPI spec, create mock implementation:
+
+**Pattern for POST endpoints:**
+```python
+@router.post("/posts", response_model=PostResponse)
+async def create_post(
+    request: CreatePostRequest,
+    current_user: dict = Depends(require_auth)
+):
+    """Create a new blog post - MOCK IMPLEMENTATION"""
+    return PostResponse(
+        postId="mock-123",
+        title=request.title,
+        content=request.content,
+        authorId=current_user["user_id"],
+        createdAt="2024-01-01T00:00:00Z"
+    )
+```
+
+**Pattern for GET endpoints:**
+```python
+@router.get("/posts/{post_id}", response_model=PostResponse)
+async def get_post(
+    post_id: str,
+    current_user: dict = Depends(require_auth)
+):
+    """Get a blog post by ID - MOCK IMPLEMENTATION"""
+    return PostResponse(
+        postId=post_id,
+        title="Mock Post Title",
+        content="Mock post content here",
+        authorId="mock-author-123",
+        createdAt="2024-01-01T00:00:00Z"
+    )
+```
+
+### 6. Request/Response Models
+Create Pydantic models matching OpenAPI schemas.
+
+Use camelCase aliases for API models (vibe_fastapi_boilerplate.md):
+```python
+class CreatePostRequest(BaseModel):
+    title: str
+    content: str
+    author_id: str = Field(alias="authorId")
+    
+    model_config = {"validate_by_name": True}
+
+class PostResponse(BaseModel):
+    post_id: str = Field(alias="postId")
+    title: str
+    content: str
+    author_id: str = Field(alias="authorId")
+    created_at: str = Field(alias="createdAt")
+    
+    model_config = {"validate_by_name": True}
+```
+
+### 7. Basic HTML Templates
+Create simple HTML templates for each endpoint (optional):
+
+**templates/index.html:**
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Blog</title></head>
+<body>
+    <h1>Create Post</h1>
+    <form action="/api/posts" method="post">
+        <input name="title" placeholder="Title">
+        <textarea name="content" placeholder="Content"></textarea>
+        <button>Create</button>
+    </form>
+</body>
+</html>
+```
+
+### 8. Testing Setup
+Create test structure:
+```
+tests/
+├── api/
+│   ├── test_health.py
+│   └── test_posts.py
+└── conftest.py
+```
+
+Add pytest configuration (pyproject.toml):
+```toml
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+```
+
+### 9. Session Verification
+Before completing Session 1:
+
+**Manual testing:**
+```bash
+# Start services
+docker-compose up -d
+
+# Start application
+python main.py
+
+# Test endpoints
+curl http://localhost:8000/docs
+curl http://localhost:8000/health
+```
+
+**Automated testing:**
+```bash
+# All endpoints should return mock data
+pytest tests/api/test_health.py -v
+```
+
+## Mock Data Guidelines
+
+### Consistency
+Use consistent mock IDs across related endpoints:
+- Post ID: "mock-123"
+- Author ID: "mock-author-123"
+- Comment ID: "mock-comment-456"
+
+### Realistic Structure
+Mock responses should match production structure:
+- Include all required fields
+- Use proper data types
+- Include timestamps in ISO format
+- Return appropriate HTTP status codes
+
+### Error Cases
+Implement mock error responses:
+```python
+@router.get("/posts/{post_id}")
+async def get_post(post_id: str):
+    if post_id == "error":
+        raise HTTPException(
+            status_code=404,
+            detail="Post not found"
+        )
+    return mock_response
+```
+
+## Session 1 Completion Checklist
+
+- [ ] Session plan reviewed and objectives confirmed
+- [ ] All endpoints implemented with mock responses
+- [ ] Request/response models match OpenAPI spec
+- [ ] Docker Compose configuration working
+- [ ] Environment variables documented in .env.example
+- [ ] Health check endpoint responding
+- [ ] API documentation accessible at /docs
+- [ ] Basic HTML templates created (if applicable)
+- [ ] Test structure created
+- [ ] All mock endpoints manually tested
+- [ ] Session 1 summary generated in plan/sessions/
+
+## Session Completion Response
+
+When Session 1 is complete, respond with:
+
+```
+Session 1 Complete: Phase 0 (Skeleton)
+
+Created:
+- Project structure following FastAPI boilerplate
+- [N] mock endpoints matching OpenAPI spec
+- Docker Compose with PostgreSQL
+- Environment configuration
+- Test structure
+
+Verification:
+- Visit http://localhost:8000/docs to test all endpoints
+- All endpoints return mock data
+- Health check: http://localhost:8000/health
+
+Session Summary:
+- Generated plan/sessions/session-1-summary.md
+- Documented all implemented endpoints
+- Listed mock data patterns used
+- Noted dependencies and configuration
+
+Next Session:
+- Review plan/sessions/session-2-phase-1.md for next phase
+- When ready, say "Start Session 2" to begin Phase 1 implementation
+
+DO NOT proceed to Session 2 automatically.
+```
+
+## Session Transition Documentation
+
+Generate plan/sessions/session-1-summary.md including:
+- List of all implemented endpoints
+- Mock data patterns used
+- Dependencies added (requirements.txt)
+- Configuration variables needed
+- Known limitations of mock implementation
+- Prerequisites for Session 2
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Implement real business logic in Session 1
+- Connect to actual database
+- Make external API calls
+- Implement complex validation beyond Pydantic
+- Skip any endpoints from OpenAPI spec
+- Use inconsistent mock data patterns
+- Automatically start Session 2 implementation
+- Skip session summary documentation

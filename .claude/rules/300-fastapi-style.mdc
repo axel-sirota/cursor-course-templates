@@ -1,0 +1,201 @@
+---
+description: FastAPI code style guidelines including Pydantic v2 patterns
+globs: ["app/**/*.py", "tests/**/*.py"]
+alwaysApply: false
+---
+
+# FastAPI Style Guidelines
+
+## Purpose
+Enforce consistent code style and modern Pydantic v2 patterns across all FastAPI projects. These rules apply to all model definitions, validators, and serialization logic.
+
+## Pydantic v2 Migration Patterns
+
+Pydantic v2 introduced breaking changes from v1. Always use v2 patterns in new code and when updating existing code.
+
+### Model Configuration
+
+**v2 (correct):**
+```python
+from pydantic import BaseModel, ConfigDict
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    username: str
+```
+
+**v1 (do NOT use):**
+```python
+class UserResponse(BaseModel):
+    id: str
+    username: str
+
+    class Config:
+        orm_mode = True  # renamed to from_attributes in v2
+```
+
+### ORM Object Serialization
+
+**v2 (correct):**
+```python
+# Validate from an ORM object
+user_response = UserResponse.model_validate(orm_user)
+```
+
+**v1 (do NOT use):**
+```python
+user_response = UserResponse.from_orm(orm_user)
+```
+
+### Dictionary Serialization
+
+**v2 (correct):**
+```python
+data = user_response.model_dump()
+data_json = user_response.model_dump(mode="json")  # serializes datetime etc.
+```
+
+**v1 (do NOT use):**
+```python
+data = user_response.dict()
+```
+
+### Field Validators
+
+**v2 (correct):**
+```python
+from pydantic import BaseModel, field_validator
+
+class CreatePostRequest(BaseModel):
+    title: str
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Title cannot be empty")
+        return v.strip()
+```
+
+**v1 (do NOT use):**
+```python
+from pydantic import validator
+
+class CreatePostRequest(BaseModel):
+    title: str
+
+    @validator("title")
+    def validate_title(cls, v):
+        ...
+```
+
+### Model Validators (cross-field)
+
+**v2 (correct):**
+```python
+from pydantic import BaseModel, model_validator
+from typing import Self
+
+class DateRangeRequest(BaseModel):
+    start_date: str
+    end_date: str
+
+    @model_validator(mode="after")
+    def check_date_order(self) -> Self:
+        if self.start_date >= self.end_date:
+            raise ValueError("start_date must be before end_date")
+        return self
+```
+
+**v1 (do NOT use):**
+```python
+from pydantic import root_validator
+
+class DateRangeRequest(BaseModel):
+    @root_validator
+    def check_date_order(cls, values):
+        ...
+```
+
+### JSON Serialization Config
+
+**v2 (correct):**
+```python
+from pydantic import BaseModel, ConfigDict
+
+class PostResponse(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,   # replaces allow_population_by_field_name
+    )
+
+    post_id: str
+    created_at: datetime
+```
+
+**v1 (do NOT use):**
+```python
+class PostResponse(BaseModel):
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        json_encoders = {datetime: lambda v: v.isoformat()}
+```
+
+## Naming Conventions for API Models
+
+- Use `camelCase` field aliases for JSON request/response bodies
+- Use `snake_case` for Python field names
+- Use `Field(alias="camelCase")` for aliasing
+
+```python
+from pydantic import BaseModel, Field, ConfigDict
+
+class CreatePostRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    title: str
+    author_id: str = Field(alias="authorId")
+
+
+class PostResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    post_id: str = Field(alias="postId")
+    title: str
+    author_id: str = Field(alias="authorId")
+    created_at: str = Field(alias="createdAt")
+```
+
+## Async/Await Consistency
+
+Route handlers and service methods MUST both be `async def` so `await` works correctly:
+
+```python
+# Route handler (async)
+@router.post("/posts", response_model=PostResponse)
+async def create_post(request: CreatePostRequest, conn=Depends(get_db)):
+    service = PostService(conn)
+    post = await service.create_post(request.title, request.content, request.author_id)
+    return PostResponse(...)
+
+
+# Service method (async)
+class PostService:
+    async def create_post(self, title: str, content: str, author_id: str) -> dict:
+        ...
+```
+
+**Do NOT mix sync service methods with async route handlers** — always `await` async service calls.
+
+## Anti-Patterns to Avoid
+
+- `class Config` in Pydantic models — use `model_config = ConfigDict(...)`
+- `orm_mode = True` — use `from_attributes=True`
+- `@validator` — use `@field_validator` with `@classmethod`
+- `@root_validator` — use `@model_validator(mode="after")`
+- `.from_orm(obj)` — use `.model_validate(obj)`
+- `.dict()` — use `.model_dump()`
+- Sync `def` service methods called from `async def` route handlers without `await`

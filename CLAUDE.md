@@ -5,8 +5,14 @@
 ## Active Persona
 engineer
 
+## Active Client
+(none)
+
 ## Active Stack
-(not set — run `/setup-stack` after set-persona)
+python-fastapi
+
+## Architecture Shape
+REST API — FastAPI async endpoints, SQLAlchemy 2.0 ORM, Alembic migrations, Pydantic v2 schemas. Modular monolith pattern.
 
 ## Active Phase
-(not set)
+Phase 0 (Skeleton)

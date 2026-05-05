@@ -1,100 +1,208 @@
-# AI-Assisted Development Template: The Adaptive SDLC
+# Blog API
 
-**One workflow to rule them all.**
+RESTful blog API built with FastAPI, SQLAlchemy 2.0, and PostgreSQL.
 
-This repository is a **Context-Aware Development Environment** for AI Assistants. It defines a rigorous, professional software development lifecycle (SDLC) that adapts to *your* technology stack.
+## Features
 
-**Works with both Cursor IDE and Claude Code CLI.**
+- **Authentication**: User registration, login with JWT tokens
+- **Posts**: CRUD operations for blog posts
+- **Comments**: Add comments to posts
+- **Tags**: Organize posts with tags
+- **Pagination**: Paginated list endpoints
+- **OpenAPI**: Auto-generated API documentation
 
-## 🚀 Getting Started
+## Tech Stack
 
-### Using Cursor IDE
+- **Language**: Python 3.11+
+- **Framework**: FastAPI
+- **Database**: PostgreSQL (SQLAlchemy 2.0 AsyncIO)
+- **Migrations**: Alembic
+- **Testing**: Pytest
+- **Linting**: Ruff
+- **Type Checking**: Mypy
 
-1.  **Clone this repo** (or copy the `.cursor` folder to your project).
-2.  Open **Cursor**.
-3.  Run `@set-persona` and pick your role:
-     - `engineer` — if you write code
-     - `designer` — if you build prototypes
-     - `pm` — if you write product specs
-     - `data-scientist` — if you run experiments
-4.  (engineer + data-scientist only) Type in the chat:
+## Quick Start
 
-    > **`@setup-stack`**
+### Prerequisites
 
-5.  Follow the instructions to configure your project.
+- Python 3.11+
+- Docker and Docker Compose
+- pip
 
-### Using Claude Code
+### 1. Clone and Install
 
-1.  **Clone this repo** (or copy the `.claude` folder and `CLAUDE.md` to your project).
-2.  Navigate to the directory: `cd cursor-course-templates`
-3.  Run: `claude`
-4.  Run `/set-persona` and pick your role:
-     - `engineer` — if you write code
-     - `designer` — if you build prototypes
-     - `pm` — if you write product specs
-     - `data-scientist` — if you run experiments
-5.  (engineer + data-scientist only) Type in the chat:
+```bash
+# Copy environment variables
+cp .env.example .env
 
-    > **/setup-stack**
-
-6.  Follow the instructions to configure your project.
-
-## 🌟 Features
-
--   **Stack Agnostic**: Comes with Python FastAPI, but supports any language via "Stack Packs".
--   **Context-Aware**: The AI knows your stack, style, and rules. It won't suggest Python code in a Node project.
--   **Phase-Based Development**: A structured workflow from "Architect" to "Implementation".
--   **TDD First**: Baked-in rules for Test-Driven Development.
--   **Brownfield Ready**: Can analyze existing codebases and adapt ("Strictness Levels").
-
-## 📚 Documentation
-
--   **[Methodology](METHODOLOGY.md)**: The core philosophy (Phase-based, TDD, Agentic).
--   **[Adaptation Guide](ADAPTATION_GUIDE.md)**: How to add new languages or frameworks.
--   **[Python Stack](stacks/python-fastapi/)**: The reference implementation.
-
-## 🎭 Personas
-
-This repo supports four roles. Run `@set-persona` or `/set-persona` to activate yours.
-
-| Persona | Who it's for | What it installs |
-|---|---|---|
-| **engineer** | Software developers | TDD commands, code-reviewer + security-auditor agents, lint/type-check hooks, GitHub/Postgres/Playwright MCPs |
-| **designer** | UI/UX designers | Figma extract/compose/iterate/handoff commands, token-validator agent, design-token hooks, Figma/Playwright MCPs |
-| **pm** | Product managers | PRD validate/decompose/report commands, Three Amigos agents, INVEST/AC-format hooks, Atlassian/Jira MCPs |
-| **data-scientist** | Data scientists & ML engineers | EDA/experiment/validate/handoff commands, data-profiler agent, seed/reproducibility hooks, filesystem/context7 MCPs |
-
-Client-specific tool configurations (internal GitHub Enterprise, Jira URLs, data platforms) are injected automatically from `client-config/` if your instructor provided one.
-
-## 🛠️ Commands
-
-| Cursor IDE | Claude Code | Description |
-| :--- | :--- | :--- |
-| **`@set-persona`** | **`/set-persona`** | **START HERE.** Choose your role. Installs all role-specific tools. |
-| **`@setup-stack`** | **`/setup-stack`** | Configures the project context and rules. (engineer + data-scientist only) |
-| **`@start-session`** | **`/start-session`** | Loads the active context for a coding session. |
-| **`@research`** | **`/research`** | Performs TDD-style research and planning. |
-| **`@architect`** | **`/architect`** | Starts the Phase 0 (Design/Skeleton) workflow. |
-
-## 🏗️ Architecture
-
-```
-# For Cursor IDE
-.cursor/
-  context.md          # The Brain (Defines your stack)
-  rules/              # The Guardrails (Active rules)
-  commands/           # The Skills (AI Scripts)
-
-# For Claude Code
-CLAUDE.md             # The Brain (Project context)
-.claude/
-  rules/              # The Guardrails (Active rules)
-  commands/           # The Skills (AI Scripts)
-
-# Shared (used by both)
-stacks/               # The Library
-  python-fastapi/     # Reference Stack
-  node-express/       # (Add your own!)
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-Both tools use the same workflow and methodology - just different directory names and command prefixes.
+### 2. Start Database
+
+```bash
+# Start PostgreSQL with Docker Compose
+docker-compose up -d
+
+# Wait for database to be ready
+docker-compose logs -f db
+```
+
+### 3. Run Application
+
+```bash
+# Start FastAPI server
+python app/main.py
+
+# Or with uvicorn directly
+uvicorn app.main:app --reload
+```
+
+The API will be available at:
+- **API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+### 4. Run Tests
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=app --cov-report=html
+```
+
+## Project Structure
+
+```
+.
+├── app/
+│   ├── core/               # Core configuration
+│   │   ├── config.py       # Settings
+│   │   └── dependencies.py # FastAPI dependencies
+│   ├── api/                # API endpoints
+│   │   ├── auth.py         # Authentication endpoints
+│   │   ├── posts.py        # Post endpoints
+│   │   ├── comments.py     # Comment endpoints
+│   │   └── tags.py         # Tag endpoints
+│   ├── schemas/            # Pydantic schemas
+│   ├── models/             # SQLAlchemy models
+│   ├── repositories/       # Data access layer
+│   ├── services/           # Business logic layer
+│   └── main.py             # Application entrypoint
+├── tests/                  # Tests
+│   ├── api/                # API endpoint tests
+│   └── conftest.py         # Pytest fixtures
+├── plan/                   # Development plans
+│   ├── api-design.md       # API design document
+│   └── sessions/           # Session plans
+├── requirements.txt        # Python dependencies
+├── docker-compose.yml      # Docker setup
+├── pyproject.toml          # Tool configuration
+└── README.md               # This file
+```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login and get JWT token
+- `GET /api/auth/me` - Get current user profile
+
+### Posts
+- `POST /api/posts` - Create post (authenticated)
+- `GET /api/posts` - List posts (paginated)
+- `GET /api/posts/{post_id}` - Get single post
+- `PUT /api/posts/{post_id}` - Update post (author only)
+- `DELETE /api/posts/{post_id}` - Delete post (author only)
+
+### Comments
+- `POST /api/posts/{post_id}/comments` - Add comment (authenticated)
+- `GET /api/posts/{post_id}/comments` - List comments
+- `DELETE /api/comments/{comment_id}` - Delete comment (author only)
+
+### Tags
+- `GET /api/tags` - List all tags
+- `GET /api/tags/{tag_name}/posts` - Get posts by tag
+
+### Health
+- `GET /health` - Health check
+
+## Development Phases
+
+### Phase 0: Skeleton ✅
+- Project structure created
+- Mock endpoints implemented
+- All endpoints return mock data
+- Tests passing
+
+### Phase 1: Authentication (Next)
+- Real user authentication
+- Password hashing with bcrypt
+- JWT token generation
+- Database persistence
+
+### Phase 2: Posts CRUD
+- Full CRUD operations for posts
+- Authorization (author-only updates/deletes)
+- Pagination
+
+### Phase 3: Comments
+- Comment functionality
+- Nested resources
+- Authorization
+
+### Phase 4: Tags
+- Many-to-many relationships
+- Tag management
+- Filter posts by tag
+
+### Phase 5: Polish & Deploy
+- Advanced filtering and sorting
+- Search functionality
+- Error handling
+- Production Docker setup
+
+## Development
+
+### Run Linter
+
+```bash
+ruff check app/ tests/
+```
+
+### Run Type Checker
+
+```bash
+mypy app/
+```
+
+### Format Code
+
+```bash
+ruff format app/ tests/
+```
+
+## Environment Variables
+
+See `.env.example` for all required environment variables:
+
+- `PORT` - Application port (default: 8000)
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET_KEY` - Secret key for JWT tokens
+- `JWT_EXPIRATION_DAYS` - Token expiration (default: 7)
+- `CORS_ORIGINS` - Allowed CORS origins
+
+## Current Status
+
+**Phase 0 (Skeleton) - Complete**
+
+All 13 endpoints implemented with mock data. Ready to begin Phase 1 (Authentication).
+
+To continue development, see `plan/sessions/session-2-phase-1.md` for next steps.
+
+## License
+
+MIT
