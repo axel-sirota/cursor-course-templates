@@ -4,294 +4,311 @@ description: Execute Phase 0 (Architecture & Skeleton) using active stack contex
 
 # Architect Phase Command
 
-Initiates **Phase 0** of the development lifecycle. This command guides the Agent to design the API surface, verify the "shape" of the application, and mock the skeleton before implementation.
+Initiates **Phase 0** of the development lifecycle in **three gated phases**:
+1. **Design** — produce all planning docs (session files, interface contract, phase breakdown)
+2. **⛔ Human Review** — student reads and approves before anything is built
+3. **Scaffold** — build the walking skeleton from the approved plan
 
-This command works in **two modes**: Design Mode (AI designs everything) or Plan Extraction Mode (use existing plan).
+---
 
-## Execution Flow
+## Step 0: Acceptance Criteria — Read This First
 
-## Persona Detection (run first)
+This command is NOT complete until ALL of the following exist:
 
-Read the active persona from context:
-- Cursor: `.cursor/context.md` — look for `## Active Persona`
-- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+| Artifact | Required | Notes |
+|----------|----------|-------|
+| `plans/sessions/session-overview.md` | MANDATORY | Phase breakdown + session list |
+| `plans/sessions/session-1-phase-0.md` | MANDATORY | Skeleton session plan |
+| `plans/sessions/session-N-phase-X.md` | MANDATORY | One file per feature phase (N≥2) |
+| `plans/interface-contract.md` | MANDATORY | API/pipeline/IaC interface spec |
+| Walking skeleton code | MANDATORY | Only after human approves plans/ |
 
-If section missing or value is empty → treat as `engineer` (backwards compatible default).
+You may NOT print the final ✅ summary until you have verified all of these exist via `ls`.
 
-Branch to the appropriate preamble below, then continue with the standard execution flow.
+---
 
-### Persona Preambles
+## Step 1: Persona + Context Detection
 
-**engineer:** Design the interface contract for the project. Output varies by Architecture Shape:
-- **REST API** (python-fastapi, go-gin, go-grpc, java-spring, node-express, node-nestjs): OpenAPI spec or route list + data model
+Read the active persona and stack:
+- Claude Code: `CLAUDE.md` — look for `## Active Persona` and `## Active Stack`
+- Cursor: `.cursor/context.md` — same fields
+
+If persona is missing → treat as `engineer` (default).
+
+Read `.claude/rules/*.md` (or `.cursor/rules/*.mdc`) for stack standards.
+
+### Persona preambles (what the interface contract looks like per persona)
+
+**engineer — by Architecture Shape:**
+- **REST API** (python-fastapi, go-gin, go-grpc, java-spring, node-express, node-nestjs): OpenAPI routes + data model
 - **Data Pipeline** (python-spark, python-mlops): job stages + schema definitions + medallion layers
 - **Analytics Model** (python-dbt-snowflake): staging/mart model tree + source definitions
 - **Statistical Computing** (r-tidyverse): notebook sequence + `src/` function signatures
-- **IaC Playbook** (devops-ansible): role list + playbook structure
-- **GitOps Platform** (devops-k8s-helm): chart structure + values contract
+- **IaC Playbook** (devops-ansible): role list + playbook structure + variable contract
+- **GitOps Platform** (devops-k8s-helm): chart structure + values.yaml contract
 - **Cloud Infrastructure** (devops-terraform): module inputs/outputs + resource map
 
-**designer:** Design the component hierarchy for a visual feature. Output: component tree (which components exist vs need creating), token requirements, layout structure. No API design — assume API already exists or will be provided by engineering.
+**designer:** Component tree (what exists vs. needs creating), token requirements, layout structure. No API design.
 
-**pm:** Draft the PRD structure for a product feature. Output: goals + non-goals, user personas affected, list of user stories (INVEST format), NFR categories to address. No implementation detail — that is engineering's job.
+**pm:** PRD structure — goals, non-goals, user personas, INVEST user stories, NFR categories. No implementation detail.
 
-**data-scientist:** Design the experiment plan for a data science problem. Output: data sources needed, EDA hypotheses to test, candidate model types, success metrics, validation approach. No code yet — this is the design phase before `/ds-explore`.
-
----
-
-**0. Check for Plan Document**
-- **Action**: Check if user provided a plan document
-- **Look for**:
-  - User explicitly provided file path: `/architect plan.md` or `/architect path/to/requirements.md`
-  - User pasted plan content in the message
-  - Common plan files in project: `plan.md`, `requirements.md`, `PRD.md`, `design.md`
-  - Plan files in `plan/` directory: `plan/requirements.md`, `plan/design.md`
-
-- **Decision**:
-  - If plan found → **Plan Extraction Mode** (go to step 1A)
-  - If no plan → **Design Mode** (go to step 1B)
+**data-scientist:** Experiment plan — data sources, EDA hypotheses, candidate models, success metrics, validation approach.
 
 ---
 
-### Plan Extraction Mode (When Plan Exists)
+## Step 2: Plan Source Detection
 
-**1A. Context Loading**
-- Read `CLAUDE.md` to identify the **Active Stack**
-- Read the provided plan document
-- Read `.claude/rules/*.md` to understand the **Stack Standards**
+Check if user provided a plan document:
+- User explicitly referenced a file path (`/architect plan.md`, `/architect requirements.md`)
+- User pasted plan content in the message
+- Common plan files exist: `plan.md`, `requirements.md`, `PRD.md`, `design.md`, `plans/requirements.md`
 
-**2A. Extract Requirements from Plan**
-- **Goal**: Use the plan AS-IS, do not re-design or question architectural decisions
-- **Extract**:
-  - **Technical Requirements**: What features/endpoints are specified?
-  - **Interface Contract**: Which routes/endpoints (web API), inputs/outputs (pipeline/IaC), module structure (library/chart), or model tree (dbt) are defined?
-  - **Data Model**: Which entities, relationships, fields are mentioned?
-  - **Architecture**: What architectural decisions are already specified? (e.g., "use microservices", "layered architecture")
-  - **Tech Stack Specifics**: Any specified libraries, frameworks, patterns?
-
-- **Critical Rule**:
-  - **Trust the plan** - if the plan says "use REST API", use REST API
-  - **Do NOT suggest alternatives** - if plan says "MongoDB", don't suggest PostgreSQL
-  - **Do NOT re-design** - if plan has architecture diagram, follow it exactly
-
-- **If Unclear**:
-  - Ask user for clarification: "The plan mentions 'user authentication' but doesn't specify OAuth vs JWT. Which should I use?"
-  - Do NOT assume or make decisions that contradict the plan
-
-**3A. Verify Compatibility with Active Stack**
-- **Check**: Does the plan's tech stack match `CLAUDE.md`?
-  - Example: Plan says "Node.js" but CLAUDE.md says "Python FastAPI"
-
-- **If Mismatch**:
-  - Warn user: "Your plan specifies Node.js but active stack is Python FastAPI. Would you like me to:"
-    - Option 1: "Update context to Node.js (run /setup-stack)"
-    - Option 2: "Adapt plan to Python FastAPI"
-  - Wait for user decision
-
-- **If Match**:
-  - Proceed with plan extraction
-
-**4A. Generate Phase Breakdown**
-- **Goal**: Break the plan into implementation phases
-- **Action**: Based on plan's features, create phase structure:
-  - **Phase 0**: Skeleton (create stub implementations for all interfaces/entry points from plan)
-  - **Phase 1+**: Implement each feature group from plan
-
-- **Example**:
-  ```
-  Plan mentions: User Auth, Product Catalog, Shopping Cart, Checkout
-
-  Phases:
-  - Phase 0: Skeleton (mock all 4 feature areas)
-  - Phase 1: User Auth (as specified in plan)
-  - Phase 2: Product Catalog (as specified in plan)
-  - Phase 3: Shopping Cart (as specified in plan)
-  - Phase 4: Checkout (as specified in plan)
-  ```
-
-**5A. Generate Session Plans**
-- **Goal**: Create detailed session markdown files in `plan/sessions/`
-- **Action**: For each phase, create session file based on plan's specifications
-
-- **Example Session File** (`plan/sessions/session-1-phase-0.md`):
-  ```markdown
-  # Session 1: Phase 0 - Skeleton
-
-  ## Goal
-  Build walking skeleton based on [plan.md] specifications
-
-  ## Requirements (from plan)
-  - [Extract exact requirements from plan]
-  - [List all endpoints mentioned in plan]
-  - [List all data models mentioned in plan]
-
-  ## Implementation
-  - Scaffold directory structure per active stack
-  - Create stub implementations for:
-    - [Interface/entry point 1 from plan]
-    - [Interface/entry point 2 from plan]
-  - Return stub/mock responses (hardcoded 200 OK for HTTP, empty DataFrames for pipelines, placeholder resources for IaC)
-
-  ## Verification
-  - Run app, verify all endpoints respond
-  - Check against plan: all specified endpoints exist
-  ```
-
-**6A. Skeleton Implementation**
-- **Goal**: Build the walking skeleton based on plan specifications
-- **Action**:
-  - Scaffold directory structure (per active stack)
-  - Create entrypoint (e.g., `main.py`, `server.ts`)
-  - Create **stub implementations** for ALL interfaces/entry points mentioned in plan
-  - Mock responses match plan's specified response formats
-
-**7A. Final Output**
-- Inform user:
-  ```
-  ✅ Plan extracted from [plan.md]
-  ✅ [N] phases identified
-  ✅ [M] session plans created in plan/sessions/
-  ✅ Skeleton implemented based on plan specifications
-
-  Next: Run /start-session to begin implementation
-  ```
+**If plan found → Plan Extraction Mode (steps 3A–5A)**
+**If no plan → Design Mode (steps 3B–5B)**
 
 ---
 
-### Design Mode (No Plan - AI Designs Everything)
+## ══════════════════════════════════════
+## PHASE 1: DESIGN DOCS
+## ══════════════════════════════════════
 
-**1B. Context Loading**
-- Read `CLAUDE.md` to identify the **Active Stack**
-- Read `METHODOLOGY.md` to understand the "Phase 0" concept
-- Read `.claude/rules/*.md` to understand the **Stack Standards**
+> **Goal:** Produce all planning artifacts. No code files yet.
 
-**2B. Design Verification**
-- **Goal**: Define the API/Interface Contract (AI designs this)
-- **Action**:
-  - If **Web API**: Design the OpenAPI spec or Routes
-  - If **CLI**: Design the Command Arguments
-  - If **Terraform**: Design the Root Module inputs/outputs
-  - If **Library**: Design the Public API surface
-  - If **Data Pipeline** (Spark/MLOps): Design job stages, input/output schemas, Bronze/Silver/Gold layers
-  - If **Analytics Model** (dbt): Design source definitions, staging models, mart models, grain
-  - If **Statistical Computing** (R): Design notebook sequence, src/ function signatures, Quarto output
-  - If **IaC Playbook** (Ansible): Design role list, playbook structure, variable contract
-  - If **GitOps Platform** (Helm): Design chart structure, values.yaml contract, ArgoCD app
+---
 
-- **Constraint**: Ensure the design matches the **Architecture Pattern** defined in `CLAUDE.md` (e.g., "Layered Monolith", "Modular")
+### Plan Extraction Mode (3A–5A)
 
-- **Example (Web API)**:
-  ```
-  User: /architect "Build a blog API"
+**3A. Extract Requirements**
+- Trust the plan — do not redesign or suggest alternatives
+- Extract: features, interface contract, data model, architectural decisions, tech stack specifics
+- If anything is unclear: ask before proceeding ("The plan mentions auth but doesn't specify OAuth vs JWT — which?")
 
-  AI Designs:
-  - POST /posts (create post)
-  - GET /posts (list posts)
-  - GET /posts/{id} (get single post)
-  - PUT /posts/{id} (update post)
-  - DELETE /posts/{id} (delete post)
-  - POST /posts/{id}/comments (add comment)
-  - GET /posts/{id}/comments (list comments)
-  ```
+**4A. Verify Stack Compatibility**
+- Check: does the plan's tech stack match `CLAUDE.md` / `context.md`?
+- If mismatch: warn user, offer options, wait for decision before continuing
 
-**3B. Skeleton Implementation**
-- **Goal**: Build the "Walking Skeleton" (Input -> Controller -> Service -> Mock -> Output)
-- **Action**:
-  - Scaffold the directory structure (if missing)
-  - Create the Entrypoint (e.g., `main.py`, `server.ts`)
-  - Create **stub implementations** for all interfaces/entry points (return stub/mock responses: hardcoded 200 OK for HTTP, empty DataFrames for pipelines, placeholder resources for IaC)
-  - **Verify**: Can we run the app? Does it respond?
+**5A. Generate Output Manifest**
 
-**4B. Planning**
-- **Goal**: Break down the implementation into Sessions
-- **Action**: Create a `plan/` directory (if relevant)
-- **Output**: A list of "Implementation Sessions" (e.g., "Session 1: User Auth", "Session 2: Products")
+Before creating any files, print this manifest (fill in actual values):
 
-- **Create Session Files**:
-  ```
-  plan/
-  ├── sessions/
-  │   ├── session-1-phase-0.md   # Skeleton
-  │   ├── session-2-phase-1.md   # First feature
-  │   └── session-3-phase-1.md   # Second feature
-  ```
+```
+ARCHITECT OUTPUT MANIFEST
+=========================
+I will create the following files:
 
-**5B. Final Output**
-- Inform user:
-  ```
-  ✅ Interface designed ([N] endpoints / pipeline stages / modules — per Architecture Shape)
-  ✅ [M] phases identified
-  ✅ Session plans created in plan/sessions/
-  ✅ Skeleton implemented
+plans/
+├── interface-contract.md       ← [describe: e.g., "7 REST endpoints for blog API"]
+└── sessions/
+    ├── session-overview.md     ← phase breakdown + session list
+    ├── session-1-phase-0.md    ← skeleton session
+    ├── session-2-phase-1.md    ← [feature name]
+    └── session-N-phase-X.md   ← [feature name]
 
-  Next: Run /start-session to begin implementation
-  ```
+I will create ALL of the above before this command is complete.
+```
+
+Then create each file. Session file format:
+
+```markdown
+# Session N: Phase X — [Feature Name]
+
+## Goal
+[What this session accomplishes]
+
+## Requirements (from plan)
+- [Exact requirement from plan]
+
+## Tasks
+- [ ] [Concrete task]
+- [ ] [Concrete task]
+
+## Acceptance Criteria
+- [ ] [Verifiable outcome — "you are done when..."]
+
+## Verification
+[How to test this session is complete]
+```
+
+📋 **Phase 1 checkpoint:** Print this when all doc files are created:
+```
+📋 PHASE 1 COMPLETE — Design docs written
+   ✅ plans/interface-contract.md
+   ✅ plans/sessions/session-overview.md
+   ✅ plans/sessions/session-1-phase-0.md
+   ✅ plans/sessions/session-N... ([N] total)
+```
+
+---
+
+### Design Mode (3B–5B)
+
+**3B. Design the Interface Contract**
+
+Based on Architecture Shape, design the appropriate interface:
+- **REST API**: design routes (method, path, request body, response)
+- **Data Pipeline**: design job stages, input/output schemas, Bronze/Silver/Gold layers
+- **Analytics Model**: design source definitions, staging models, mart models, grain
+- **Statistical Computing**: design notebook sequence, `src/` function signatures
+- **IaC Playbook**: design role list, playbook structure, variable contract
+- **GitOps Platform**: design chart structure, values.yaml contract, ArgoCD app
+- **Cloud Infrastructure**: design module inputs/outputs, resource map
+
+**4B. Generate Output Manifest**
+
+Before creating any files, print this manifest (fill in actual values):
+
+```
+ARCHITECT OUTPUT MANIFEST
+=========================
+I will create the following files:
+
+plans/
+├── interface-contract.md       ← [describe what's in it]
+└── sessions/
+    ├── session-overview.md     ← phase breakdown + session list
+    ├── session-1-phase-0.md    ← skeleton session
+    ├── session-2-phase-1.md    ← [feature name]
+    └── session-N-phase-X.md   ← [feature name]
+
+I will create ALL of the above before this command is complete.
+```
+
+Then create each file using the session format from 5A above.
+
+📋 **Phase 1 checkpoint:** Print when all doc files are created:
+```
+📋 PHASE 1 COMPLETE — Design docs written
+   ✅ plans/interface-contract.md
+   ✅ plans/sessions/session-overview.md
+   ✅ plans/sessions/session-1-phase-0.md
+   ✅ plans/sessions/session-N... ([N] total)
+```
+
+---
+
+## ══════════════════════════════════════
+## ⛔ PHASE 2: HUMAN REVIEW GATE
+## ══════════════════════════════════════
+
+After Phase 1 is complete, print EXACTLY this and STOP. Do not write any code. Do not scaffold. Do not proceed:
+
+```
+⛔ REVIEW REQUIRED — No code has been written yet. This is intentional.
+
+Please review the planning docs before we build anything:
+
+  📂 plans/interface-contract.md   — the full interface design
+  📂 plans/sessions/               — [N] session files
+
+Questions to ask yourself:
+  • Does the interface match what you want to build?
+  • Are there features missing or features you don't need?
+  • Do the session files break the work into reasonable chunks?
+
+To modify: edit any file in plans/ directly, then tell me what changed.
+
+When you are satisfied with the plan, say: "approved" or "looks good" or "proceed".
+Do NOT proceed until the student explicitly approves.
+```
+
+**Wait for explicit human approval before continuing to Phase 3.**
+
+Acceptable approval signals: "approved", "looks good", "proceed", "ok go ahead", "yes", "lgtm", "build it", or equivalent affirmative.
+
+If the student asks for changes: make them in the plans/ files, re-print the Phase 2 gate message, and wait again.
+
+---
+
+## ══════════════════════════════════════
+## PHASE 3: SCAFFOLD (after approval only)
+## ══════════════════════════════════════
+
+> **Goal:** Build the walking skeleton from the approved plan. Stub implementations only — no business logic.
+
+Read `plans/sessions/session-1-phase-0.md` to understand what to scaffold.
+
+**Scaffold rules by Architecture Shape:**
+
+- **REST API**: scaffold directory structure per stack pattern, create entrypoint, create stub route handlers returning hardcoded 200 OK
+- **Data Pipeline**: scaffold job entry script, create stub Bronze/Silver/Gold stage functions returning empty DataFrames
+- **Analytics Model (dbt)**: scaffold staging + mart model stubs with `select 1 as placeholder`
+- **Statistical Computing (R)**: scaffold analysis/ notebook structure, stub `src/` functions
+- **IaC Playbook**: scaffold role directory structure, stub tasks with `# TODO` comments
+- **GitOps Platform**: scaffold Chart.yaml, values.yaml, stub deployment/service templates
+- **Cloud Infrastructure**: scaffold module structure, stub `main.tf`, `variables.tf`, `outputs.tf`
+
+After scaffolding, verify the skeleton runs:
+- **REST API**: start the server, confirm all stub endpoints respond
+- **Pipeline/IaC/R**: validate syntax (e.g., `terraform validate`, `dbt parse`, `Rscript --parse`)
+
+📋 **Phase 3 checkpoint:** Print when scaffold is complete:
+```
+📋 PHASE 3 COMPLETE — Skeleton built
+   ✅ Directory structure scaffolded
+   ✅ Entrypoint created
+   ✅ Stub implementations created for all interfaces
+   ✅ Skeleton verified (runs/parses without errors)
+```
+
+---
+
+## Mandatory Completion Gate
+
+Before printing the final ✅ summary, run these checks:
+
+```bash
+ls plans/sessions/
+```
+
+Confirm:
+- `session-overview.md` exists
+- At least 2 session files exist (`session-1-phase-0.md` + at least one feature session)
+- `plans/interface-contract.md` exists
+
+If ANY file is missing: create it NOW. Do not print the final summary until all files exist.
+
+Then print:
+
+```
+✅ /architect complete
+
+Phase 1 — Design docs:
+  • plans/interface-contract.md
+  • plans/sessions/session-overview.md
+  • plans/sessions/session-1-phase-0.md
+  [list all session files from ls output]
+
+Phase 3 — Skeleton:
+  [list key files created]
+
+Next: Run /start-session to begin implementing session-2-phase-1.
+```
 
 ---
 
 ## Usage Examples
 
-### Example 1: With Plan (Plan Extraction Mode)
+```
+/architect "Build a blog API"
+```
+→ Design Mode — AI designs interface → writes docs → ⛔ waits for approval → scaffolds
+
 ```
 /architect plan.md
 ```
-or
-```
-/architect path/to/requirements.md
-```
-→ Reads plan → Extracts requirements → Breaks into phases → Builds skeleton based on plan
-
-### Example 2: Without Plan (Design Mode)
-```
-/architect "Build a task management API"
-```
-→ AI designs API → Creates phases → Builds skeleton
+→ Plan Extraction Mode — reads plan.md → extracts requirements → writes docs → ⛔ waits for approval → scaffolds
 
 ```
-/architect plans/pipeline-spec.md
+/architect requirements.md
 ```
-→ Data pipeline plan extraction
-
-```
-/architect "ETL pipeline for sales data"
-```
-→ Design Mode — Data Pipeline
-
-```
-/architect "Deploy nginx to prod"
-```
-→ Design Mode — Ansible/Helm
-
-### Example 3: With Pasted Plan
-```
-/architect
-
-Here's the plan:
-- User authentication with JWT
-- CRUD operations for tasks
-- Task assignment to users
-- Due date tracking
-```
-→ Extracts from pasted plan → Breaks into phases → Builds skeleton
+→ Plan Extraction Mode — data pipeline or IaC plan
 
 ---
 
-## Key Differences Between Modes
+## Key Rules
 
-| Aspect | Plan Extraction Mode | Design Mode |
-|--------|---------------------|-------------|
-| **Input** | Plan document provided | User description only |
-| **AI Role** | Extract & organize | Design & propose |
-| **Architecture** | Use plan's decisions | AI proposes architecture |
-| **Tech Stack** | Follow plan's choices | Use active stack |
-| **Flexibility** | Trust the plan | AI has freedom to design |
-| **Clarifications** | Ask if plan is unclear | Make reasonable assumptions |
-
----
-
-## Notes
-
-- **Plan Extraction Mode is faster**: No design phase needed, just extract and organize
-- **Plan trumps AI suggestions**: If plan specifies something, use it exactly
-- **Ask when unclear**: Better to ask user than assume wrong approach
-- **Verify stack compatibility**: Warn if plan's tech stack differs from active context
+- **Never skip Phase 2.** The student must explicitly approve the plan before code is written.
+- **Never create code files during Phase 1.** Docs only until Phase 2 is cleared.
+- **Never print ✅ summary without running `ls` to verify files exist.**
+- **`plans/` not `plan/`** — always use `plans/` (with s) as the directory name.
+- **Session files are MANDATORY** — at minimum: session-overview.md + session-1-phase-0.md + one feature session.
