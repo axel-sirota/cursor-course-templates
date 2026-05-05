@@ -418,9 +418,9 @@
           <li class="sub"><a href="#personas">Personas</a></li>
           <li class="sub"><a href="#stacks">Stacks</a></li>
           <li><a href="#workflow">2. Workflow: Spec-Driven Dev</a></li>
-          <li class="sub"><a href="#what-is-sdd">What is SDD?</a></li>
-          <li class="sub"><a href="#spec-first-pattern">Spec-First Pattern</a></li>
-          <li class="sub"><a href="#phase-based-dev">Phase-Based Dev</a></li>
+          <li class="sub"><a href="#spec-driven-dev">What is SDD?</a></li>
+          <li class="sub"><a href="#spec-first">Spec-First Pattern</a></li>
+          <li class="sub"><a href="#phase-based">Phase-Based Dev</a></li>
           <li class="sub"><a href="#session-workflow">Session Workflow</a></li>
           <li class="sub"><a href="#lab-1">Lab 1</a></li>
           <li><a href="#commands">3. Skills &mdash; Slash Commands</a></li>
@@ -444,7 +444,7 @@
           <li class="sub"><a href="#lab-4">Lab 4</a></li>
           <li><a href="#mcp">6. MCP Servers</a></li>
           <li class="sub"><a href="#what-is-mcp">What is MCP?</a></li>
-          <li class="sub"><a href="#mcp-configuration">Configuration</a></li>
+          <li class="sub"><a href="#mcp-config">Configuration</a></li>
           <li class="sub"><a href="#popular-servers">Popular Servers</a></li>
           <li class="sub"><a href="#lab-5">Lab 5</a></li>
           <li><a href="#hooks">7. Hooks <span class="badge badge-beta">Beta</span></a></li>
@@ -465,6 +465,15 @@
       <section id="introduction">
   <h2>Section 1: Introduction and Philosophy</h2>
   <p class="section-meta">Estimated time: 10 minutes</p>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this section?</div>
+    <p>After this section you will <strong>understand the Agentic Engineering mindset and the four pillars (SDD, Rules, Commands, TDD) that make AI-assisted development reliable instead of lucky</strong>.</p>
+    <table>
+      <tr><th>Before</th><th>After</th></tr>
+      <tr><td>Treating Cursor like a search engine — vague prompts, generic output, unpredictable results.</td><td>You see AI as a context-processing machine, and you know which four structural levers control output quality.</td></tr>
+    </table>
+  </div>
 
   <p>
     Welcome to this course on structured, agentic development with Cursor IDE. Before diving into
@@ -722,6 +731,15 @@
   <h2>Section 1.5: Getting Started &mdash; Personas, Stacks, and Onboarding</h2>
   <p class="section-meta">Estimated time: 10 minutes</p>
 
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this section?</div>
+    <p>After this section you will <strong>have a configured project that knows your role and stack via the three-step onboarding flow (set-persona, setup-stack, start-session)</strong>.</p>
+    <table>
+      <tr><th>Before</th><th>After</th></tr>
+      <tr><td>An empty Cursor template with no persona, no stack, and no role-specific commands or rules wired up.</td><td>Persona pack installed, stack registered, and start-session loading the right context every time.</td></tr>
+    </table>
+  </div>
+
   <p>
     Before you run any of the workflow commands described in the rest of this guide, the project
     needs to know <em>who you are</em> and <em>what you are building</em>. The template ships with
@@ -911,6 +929,15 @@
 
 <section id="workflow">
   <h2>2. The Workflow &mdash; Spec-Driven Development</h2>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this section?</div>
+    <p>After this section you will <strong>have a Spec-First workflow you can apply to any feature: architect a contract, scaffold a Phase 0 skeleton, then implement endpoint-by-endpoint with TDD</strong>.</p>
+    <table>
+      <tr><th>Before</th><th>After</th></tr>
+      <tr><td>"Vibe coding" — asking the AI for code with no spec, accumulating drift, and losing track of what the system is supposed to do.</td><td>Every feature starts from an OpenAPI spec, runs through a Phase 0 skeleton, and is validated phase-by-phase against the contract.</td></tr>
+    </table>
+  </div>
 
   <p>
     The single most important lesson in this course is not a keyboard shortcut or a clever prompt
@@ -1267,8 +1294,8 @@
   </p>
 
   <!-- ==================== LAB 1 ==================== -->
-  <div class="callout callout-lab">
-    <div class="callout-title">Lab 1: Setup and Architect (15 min)</div>
+  <div class="callout callout-lab" id="lab-1">
+    <div class="callout-title">Lab 1: Setup and Architect <span class="timebox">⏱ 15 min — Lab</span></div>
 
     <p>
       <strong>Objective:</strong> Configure your development stack, produce a formal API specification,
@@ -1347,12 +1374,30 @@ cursor .</code></pre>
       but it is structural code: it proves the shape of the system without implementing
       its behaviour. That is the Spec-First pattern in action.
     </p>
+
+    <p><strong>You are done when:</strong> <code>python main.py</code> serves the app, <code>http://localhost:8000/docs</code> lists every endpoint from the spec with the correct request/response schemas, and <code>pytest</code> exits green against the mock handlers.</p>
+  </div>
+
+  <div class="callout callout-lab">
+    <div class="callout-title">Extension — <span class="timebox">⏱ 20 min</span></div>
+    <p><strong>Goal:</strong> Add a second resource (e.g. <code>tags</code> or <code>comments</code>) to the same API by re-running <code>/architect</code> with an incremental brief, then regenerate the Phase 0 skeleton without breaking the existing endpoints.</p>
+    <p><strong>You are done when:</strong> the OpenAPI spec contains the new resource, all old and new endpoints render in Swagger UI, and <code>pytest</code> still passes.</p>
   </div>
 
 </section>
 
 <section id="commands">
   <h2>3. Skills — Slash Commands <span style="font-size:0.7em;font-weight:400;opacity:0.7">(20 min + Lab 2)</span></h2>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this section?</div>
+    <p>After this section you will <strong>read, run, and write your own slash commands — turning multi-step workflows into a single keystroke and chaining them so each command hands clean context to the next</strong>.</p>
+    <table>
+      <tr><th>Before</th><th>After</th></tr>
+      <tr><td>Re-typing the same multi-step prompts every session and confusing <code>/command</code> with <code>@context</code> attachments.</td><td>You invoke <code>/architect</code>, <code>/phase-plan</code>, <code>/code-review</code> as a deliberate chain and know how to author new commands when a workflow repeats.</td></tr>
+    </table>
+  </div>
+
   <p>
     Commands are the productivity backbone of the Cursor AI workflow. They let you encode
     complex, multi-step workflows into a single keystroke, ensuring every session starts
@@ -2273,8 +2318,8 @@ Rendered 22 SVGs to materials/diagrams/</code></pre>
   </div>
 
   <!-- ===== LAB 2 ===== -->
-  <div class="callout callout-lab" style="--callout-color:#6a1b9a; border-color:#6a1b9a; background:color-mix(in srgb,#6a1b9a 8%,transparent);">
-    <div class="callout-title" style="color:#6a1b9a;">Lab 2 (15 min): The Command Chain</div>
+  <div class="callout callout-lab" id="lab-2" style="--callout-color:#6a1b9a; border-color:#6a1b9a; background:color-mix(in srgb,#6a1b9a 8%,transparent);">
+    <div class="callout-title" style="color:#6a1b9a;">Lab 2: The Command Chain <span class="timebox">⏱ 15 min — Lab</span></div>
 
     <p><strong>Objective:</strong> Run the full development command chain on the skeleton built in Lab 1 and observe how each command hands context to the next.</p>
     <p><strong>Prerequisites:</strong> Lab 1 completed &mdash; your skeleton project is running with stack configured.</p>
@@ -2322,12 +2367,30 @@ Rendered 22 SVGs to materials/diagrams/</code></pre>
       the phase, or the coding rules. Every command loaded that context automatically.
       This is the core value of the command system.
     </p>
+
+    <p><strong>You are done when:</strong> <code>GET /tasks</code> is implemented with a passing test, <code>/code-review</code> produced an audit, and <code>/next-session</code> emitted a transition summary you could paste into a fresh chat.</p>
+  </div>
+
+  <div class="callout callout-lab">
+    <div class="callout-title">Extension — <span class="timebox">⏱ 20 min</span></div>
+    <p><strong>Goal:</strong> Run the same command chain (<code>/start-session</code> → TDD → <code>/code-review</code> → <code>/next-session</code>) for a second endpoint such as <code>POST /tasks</code>, and feed the previous transition summary in as your starting context.</p>
+    <p><strong>You are done when:</strong> the second endpoint passes its test, <code>/code-review</code> reports no rule violations, and the new transition summary references both endpoints accurately.</p>
   </div>
 
 </section>
 
 <section id="rules">
   <h2>Section 4: Rules System <span class="duration">20 min + Lab 3</span></h2>
+
+  <div class="callout callout-info">
+    <div class="callout-title">What do I get from this section?</div>
+    <p>After this section you will <strong>encode your team's standards as <code>.cursor/rules/</code> .mdc files so the AI follows them on every prompt without you re-typing them</strong>.</p>
+    <table>
+      <tr><th>Before</th><th>After</th></tr>
+      <tr><td>Repeating "use snake_case", "follow TDD", "no print statements" in every chat — and watching the AI forget half of them.</td><td>The four rule types (Always, Auto-Attached, Agent-Requested, Manual) inject your standards silently and consistently, freeing tokens for the actual task.</td></tr>
+    </table>
+  </div>
+
   <p class="section-intro">
     Rules are the mechanism that makes Cursor's AI write <em>your</em> style of code instead of generic code.
     Every rule file is injected silently into matching AI prompts — you write the rule once and the AI obeys it on every prompt, forever.
@@ -2681,7 +2744,7 @@ When generating phase summaries or documentation:
 
   <!-- ============================================================ -->
   <div class="callout callout-lab" id="lab-3">
-    <h3>Lab 3 (25 min): Rules in Action</h3>
+    <h3>Lab 3: Rules in Action <span class="timebox">⏱ 25 min — Lab</span></h3>
 
     <p><strong>Objective</strong>: Observe how rules silently constrain AI behavior, design your own custom rule from scratch, then explore glob-scoped and conflicting rules to understand rule precedence and interaction.</p>
 
@@ -2868,6 +2931,14 @@ All public functions in module files MUST have Google-style docstrings with:
       unpredictable behavior — rule hygiene matters as much as code hygiene.
       Scale this to a team: one well-written rule replaces hundreds of code review comments.
     </p>
+
+    <p><strong>You are done when:</strong> your custom 700-*.mdc rule is in place and an endpoint implemented without mentioning it visibly follows the rule, the 800-docstrings.mdc glob fires only inside <code>app/modules/</code>, and you have documented what happened when the conflict rule was active.</p>
+  </div>
+
+  <div class="callout callout-lab">
+    <div class="callout-title">Extension — <span class="timebox">⏱ 20 min</span></div>
+    <p><strong>Goal:</strong> Pick Challenge A (middleware rule for <code>X-Request-ID</code>) <em>or</em> Challenge B (compose two rules on the same endpoint) and run it end-to-end with a fresh <code>/start-session</code>.</p>
+    <p><strong>You are done when:</strong> the new behaviour is observable from outside the code (header visible via <code>curl -I</code>, or both rules clearly enforced on a new endpoint) without you ever naming the rule in the prompt.</p>
   </div>
 
 </section>
@@ -3121,7 +3192,7 @@ cp .cursor/context.md stacks/detected-flask/context.md
 
   <!-- ============================================================ -->
   <div class="callout callout-lab" id="lab-4">
-    <h3>Lab 4 (25 min): Adapt the Workflow to an Existing Codebase</h3>
+    <h3>Lab 4: Adapt the Workflow to an Existing Codebase <span class="timebox">⏱ 25 min — Lab</span></h3>
 
     <p>
       <strong>Objective:</strong> Take the project you built in Labs 1&ndash;3, treat it as a
@@ -3307,6 +3378,14 @@ cp .cursor/rules/700-brownfield.mdc stacks/detected-mystack/rules/</code></pre>
       create a clear boundary between legacy patterns and new standards. Without these three, AI assistance
       on existing codebases creates more problems than it solves.
     </p>
+
+    <p><strong>You are done when:</strong> <code>/detect-stack</code> has produced a corrected <code>.cursor/context.md</code>, a 700-brownfield.mdc rule is in place, the new <code>GET /api/stats</code> endpoint exists without legacy files being modified, and <code>/code-review</code> only audits the new code.</p>
+  </div>
+
+  <div class="callout callout-lab">
+    <div class="callout-title">Extension — <span class="timebox">⏱ 20 min</span></div>
+    <p><strong>Goal:</strong> Pick Challenge A (port to a real project of your own) <em>or</em> Challenge B (extract your config into a reusable <code>stacks/detected-mystack/</code> stack) and run it through.</p>
+    <p><strong>You are done when:</strong> either a small feature is implemented end-to-end on your own real codebase under the same workflow, or a reusable stack folder exists that you could drop into a fresh project to skip detection next time.</p>
   </div>
 
 </section>
@@ -3438,7 +3517,7 @@ cp .cursor/rules/700-brownfield.mdc stacks/detected-mystack/rules/</code></pre>
   </ul>
 
   <div class="callout callout-lab" id="lab-5">
-    <h3>Lab 5 (25 min): MCP-Powered Integration Testing</h3>
+    <h3>Lab 5: MCP-Powered Integration Testing <span class="timebox">⏱ 25 min — Lab</span></h3>
 
     <p>
       <strong>Objective:</strong> Configure multiple MCP servers and use them to run a full CRUD lifecycle
@@ -3618,6 +3697,14 @@ cp .cursor/rules/700-brownfield.mdc stacks/detected-mystack/rules/</code></pre>
       can — like verifying that API behavior matches test coverage, or that error responses match the OpenAPI spec.
       This is the power of MCP: composable tools that extend the AI's reach into live systems.
     </p>
+
+    <p><strong>You are done when:</strong> both <code>fetch</code> and <code>filesystem</code> MCP servers show up in Agent mode after a Cursor restart, you have driven a full CREATE → READ → UPDATE → LIST → DELETE → 404 cycle through the fetch tool against the live app, and you have run at least one cross-server prompt that uses fetch and filesystem together.</p>
+  </div>
+
+  <div class="callout callout-lab">
+    <div class="callout-title">Extension — <span class="timebox">⏱ 20 min</span></div>
+    <p><strong>Goal:</strong> Pick one of the three Challenges (A: error scenarios, B: full contract audit against <code>openapi.yaml</code>, or C: pagination/load exploration) and run it to completion.</p>
+    <p><strong>You are done when:</strong> the agent has produced concrete findings (mismatch list, audit notes in <code>plan/audit-results.md</code>, or pagination behaviour confirmed across multiple pages) that you could share in a code review.</p>
   </div>
 </section>
 
@@ -3915,7 +4002,7 @@ cp .cursor/rules/700-brownfield.mdc stacks/detected-mystack/rules/</code></pre>
 
   <!-- ============================================================ -->
   <div class="callout callout-lab" id="lab-6">
-    <h3>Lab 6 (20 min): Hooks in Action</h3>
+    <h3>Lab 6: Hooks in Action <span class="timebox">⏱ 20 min — Lab</span></h3>
 
     <p>
       <strong>Objective:</strong> Create lifecycle hooks that automate formatting, block dangerous commands,
@@ -4094,6 +4181,14 @@ cp .cursor/rules/700-brownfield.mdc stacks/detected-mystack/rules/</code></pre>
       Context is injected before responses. Together, rules + hooks create a fully automated
       development environment where standards are enforced at every level — generation, execution, and lifecycle.
     </p>
+
+    <p><strong>You are done when:</strong> <code>.cursor/hooks.json</code> contains the auto-format hook (visibly running Black after AI edits), the danger blocker stops an <code>rm -rf</code> attempt with exit code 2, and your custom hook (Option A, B, or C) fires on its lifecycle event without you triggering it manually.</p>
+  </div>
+
+  <div class="callout callout-lab">
+    <div class="callout-title">Extension — <span class="timebox">⏱ 20 min</span></div>
+    <p><strong>Goal:</strong> Implement a second option from Part 3 (so two of A/B/C are running together) and confirm they do not interfere with each other.</p>
+    <p><strong>You are done when:</strong> both hooks fire on their respective lifecycle events during a single Agent session, neither blocks the other, and you can describe in one sentence which lifecycle event each is attached to and why.</p>
   </div>
 
   <div class="callout callout-warning">

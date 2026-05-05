@@ -15,7 +15,7 @@
 > **Step 3:** Run `@start-session` to begin working.
 
 ## Active Persona
-(not set — run @set-persona)
+engineer
 
 ## Active Stack
 (not set — run @setup-stack after set-persona)

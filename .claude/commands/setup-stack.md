@@ -16,8 +16,8 @@ Read the project's `CLAUDE.md` file and extract the value of the `Active Persona
   > "No persona configured. Run `/set-persona` first, then come back to `/setup-stack`."
   > Stop.
 
-- If `Active Persona: pm`, respond:
-  > "The PM persona does not use a tech stack. Stack setup is not required for PM work.
+- If `Active Persona: pm` or `Active Persona: designer`, respond:
+  > "The {persona} persona does not use a tech stack. Stack setup is not required.
   >
   > Run `/start-session` to begin your session."
   > Stop.
@@ -122,9 +122,10 @@ Phase 0 (Skeleton)
 
 Also copy stack assets:
 - Copy `stacks/{selection}/rules/*` to `.claude/rules/` (overwrite existing).
-- Copy `stacks/{selection}/context.md` to `CLAUDE.md` (overwrite).
 - If `stacks/{selection}/vibe/` exists, copy to `vibe/` in project root.
 - If `stacks/{selection}/templates/` exists, copy to `templates/` in project root.
+
+**Do NOT overwrite CLAUDE.md** — the fields written above must be preserved.
 
 ### Step 7: Confirm
 

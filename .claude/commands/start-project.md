@@ -4,7 +4,7 @@ description: "Scaffold the core domain: entities, interface contract, and implem
 
 # Start Project (Domain) Command
 
-Initialize the *business logic* for a new feature or project. While `@setup-stack` handles the tech stack, this command handles the *domain model*.
+Initialize the *business logic* for a new feature or project. While `/setup-stack` handles the tech stack, this command handles the *domain model*.
 
 ## Inputs
 - **Domain**: (e.g., "E-commerce", "Blog", "Task Manager")
