@@ -29,8 +29,8 @@ For these stacks, respond:
 - `devops-k8s-helm` — Docker image is the workload being deployed via Helm
 
 **1. Context Check**
-- Read `CLAUDE.md` to identify the **Active Stack**
-- If no stack configured: "⚠️ Run /setup-stack first"
+- Read `.cursor/context.md` to identify the **Active Stack**
+- If no stack configured: "⚠️ Run @setup-stack first"
 
 **2. Detect Existing Docker Config**
 - Check for existing `Dockerfile`, `docker-compose.yml`

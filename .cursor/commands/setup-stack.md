@@ -4,13 +4,13 @@ description: Configure the project stack, rules, and context (Start Here)
 
 # Setup Stack Command
 
-This command configures the project's technology stack. It is persona-aware: it reads the active persona from CLAUDE.md and shows only the stacks relevant to that persona.
+This command configures the project's technology stack. It is persona-aware: it reads the active persona from `.cursor/context.md` and shows only the stacks relevant to that persona.
 
 ## Execution Flow
 
-### Step 1: Read CLAUDE.md and Detect Active Persona
+### Step 1: Read `.cursor/context.md` and Detect Active Persona
 
-Read the project's `CLAUDE.md` file and extract the value of the `Active Persona:` field.
+Read the project's `.cursor/context.md` file and extract the value of the `Active Persona:` field.
 
 - If no `Active Persona:` field is found, respond:
   > "No persona configured. Run `/set-persona` first, then come back to `/setup-stack`."
@@ -105,9 +105,9 @@ If the context file does not exist or has no architecture field, use the default
 - devops stacks: "Infrastructure as Code"
 - data-scientist stacks: "Notebook / Pipeline"
 
-### Step 6: Write Stack Config to CLAUDE.md
+### Step 6: Write Stack Config to `.cursor/context.md`
 
-Write (or update) the following fields in the project's `CLAUDE.md`. If sections already exist, replace their content. If they do not exist, append them.
+Write (or update) the following fields in the project's `.cursor/context.md`. If sections already exist, replace their content. If they do not exist, append them.
 
 ```markdown
 ## Active Stack
