@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 .claude/hooks/verify_architect_artifacts.py"
+      }
+    ]
+  }
+}
