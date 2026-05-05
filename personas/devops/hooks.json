@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      { "command": ".cursor/scripts/lint-iac.sh" }
+    ],
+    "beforeShellExecution": [
+      { "command": ".cursor/scripts/block-destructive.sh" }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+---
+description: DevOps persona core workflow rules — IaC discipline, plan-before-apply, idempotency
+alwaysApply: true
+---
+
+# DevOps Workflow Rules
+
+- Always run `terraform plan -out=terraform_plans/{datetime}.tfplan` before any apply
+- Never run `terraform destroy` without explicit user confirmation
+- All Ansible roles must be idempotent — test with `molecule test`
+- No secrets in Terraform state, playbooks, or Helm values — use external secret stores
+- Helm releases require `helm lint` and `helm template` dry-run before install/upgrade
+- Every session starts with `/start-session` and ends with `/next-session`
