@@ -18,7 +18,7 @@ Read the active persona from context:
 - Cursor: `.cursor/context.md` — look for `## Active Persona`
 - Claude Code: `CLAUDE.md` — look for `## Active Persona`
 
-If section missing or value is empty → treat as `engineer` (backwards compatible default).
+If section missing or value is empty → **STOP**. Tell the user: "⚠️ No persona configured. Run **/set-persona** first." Do not proceed.
 
 Branch to the appropriate preamble below, then continue with the standard execution flow.
 

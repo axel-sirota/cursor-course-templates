@@ -1,4 +1,0 @@
-{
-  "_instructor_note": "This file applies MCP server overrides to ALL personas. Only use this for servers that every persona needs (e.g., an org-wide proxy). In most cases you will not need this file — configure per-persona overrides in personas/{role}/mcp.json instead.",
-  "mcpServers": {}
-}

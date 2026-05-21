@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
 Stop hook: blocks Claude from finishing if /architect ran but session files are missing.
-Only activates when plans/ directory exists (meaning /architect has started work).
+Only activates when /architect actually ran in this repo — detected by the
+plans/.architect-manifest.json marker that /architect writes (see
+.claude/commands/architect.md). The plans/ directory alone is NOT a reliable
+signal because plans/ is also used for general planning docs (e.g. prep notes,
+research scratch, prior session files unrelated to a current architect run).
 """
 import json, os, sys
 
@@ -13,9 +17,11 @@ if event.get("stop_hook_active", False):
 
 plans_dir = os.path.join(os.getcwd(), "plans")
 sessions_dir = os.path.join(plans_dir, "sessions")
+architect_manifest = os.path.join(plans_dir, ".architect-manifest.json")
 
-# Only enforce if plans/ exists — otherwise /architect hasn't run yet
-if not os.path.isdir(plans_dir):
+# Only enforce when /architect has written its manifest. Without the manifest
+# we have no evidence that /architect ran in this session, so skip.
+if not os.path.isfile(architect_manifest):
     sys.exit(0)
 
 missing = []

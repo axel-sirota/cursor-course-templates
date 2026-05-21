@@ -57,9 +57,26 @@ Available stacks for DevOps persona:
 
 ---
 
-## Step 3: Start Your Session
+## Step 3: Design Your Project with `/architect`
 
-Run `/start-session` (Claude Code) or `@start-session` (Cursor). The AI loads your persona + stack context and asks for your session goal.
+Before you can `/start-session`, you need a plan. Run:
+
+- Cursor: `@architect "Build X"`
+- Claude Code: `/architect "Build X"`
+
+The architect command produces:
+- `plans/interface-contract.md` (your API / pipeline / chart / module surface)
+- `plans/sessions/session-overview.md` (phase + session breakdown)
+- `plans/sessions/session-1-phase-0.md` (skeleton session)
+- `plans/sessions/session-N-phase-X.md` (one per feature)
+
+It runs a self-audit (Phase 1.5) to verify the plan is internally consistent, then waits for your approval before scaffolding code.
+
+## Step 4: Start Your First Session
+
+Run `/start-session` (Claude Code) or `@start-session` (Cursor). The AI loads your persona + stack context, reads the session plan, and asks for your session goal. Then use the persona's in-session commands (e.g. `/engineer-tasks` and `/engineer-implement` for engineer) to make progress. End with `/next-session`.
+
+The full pipeline is: `/set-persona → /setup-stack → /architect → /start-session → /next-session`.
 
 ---
 
@@ -134,7 +151,7 @@ This template supports three distinct workflows depending on your needs. Choose 
     - **Cursor**: `@start-session`
     - **Claude Code**: `/start-session`
 
-    The AI loads your stack context and begins implementation.
+    The AI loads your stack context, reads the architect's session plan, and begins implementation. Use the persona's in-session commands (e.g. `/engineer-tasks` then `/engineer-implement`) to drive progress. End with `/next-session`.
 
 ---
 
@@ -152,12 +169,12 @@ This template supports three distinct workflows depending on your needs. Choose 
 
 2.  **Create Your Stack Structure**
 
-    Create a new directory under `stacks/` with this structure:
+    Easiest: run `/setup-stack`, pick a non-listed stack, and accept the `new` prompt — it scaffolds everything from `stacks/blank/` for you.
+
+    Manual alternative:
     ```bash
-    mkdir -p stacks/my-stack/rules
-    mkdir -p stacks/my-stack/templates  # Optional
-    mkdir -p stacks/my-stack/examples   # Optional
-    mkdir -p stacks/my-stack/vibe       # Optional
+    mkdir -p stacks/my-stack/{rules,templates,examples}
+    cp stacks/blank/context.md stacks/my-stack/context.md
     ```
 
 3.  **Define Stack Context**
@@ -195,9 +212,8 @@ This template supports three distinct workflows depending on your needs. Choose 
 
 5.  **Optional: Add Templates and Examples**
 
-    - `templates/`: Scaffolding files (will be copied to project root)
-    - `examples/`: Reference implementations
-    - `vibe/`: Documentation and guides
+    - `templates/`: Scaffolding files AND walkthrough guides (everything that should be copied to the project root on install — boilerplate code, `vibe_*.md` walkthroughs, phase checklists)
+    - `examples/`: Reference code samples (stay in the stack library — not copied to projects)
 
 6.  **Configure Your Project**
 

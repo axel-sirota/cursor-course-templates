@@ -163,12 +163,15 @@ Print a summary in this format (adapt content to the actual persona and install)
     "Copy personas/{role}/.env.example to .env and fill in the values"}
    {if client env.example exists, also note: "Review client-config/personas/{role}/env.example for additional vars"}
 
-➡️  Next step:
-   engineer:       Run /setup-stack to choose your tech stack
-   designer:       Copy personas/designer/.env.example to .env, set FIGMA_ACCESS_TOKEN
-   pm:             Copy personas/pm/.env.example to .env, set Atlassian credentials
-   data-scientist: Run /setup-stack python-datascience
+➡️  Next step (the SDD pipeline is: /set-persona → /setup-stack → /architect → /start-session → /next-session):
+   engineer:       Run /setup-stack to pick your tech stack, then /architect to design your work.
+   data-scientist: Run /setup-stack to pick your tech stack, then /architect to design your work.
+   devops:         Run /setup-stack to pick your tech stack, then /architect to design your work.
+   designer:       No stack needed. Copy personas/designer/.env.example to .env (set FIGMA_ACCESS_TOKEN), then run /architect to design your work.
+   pm:             No stack needed. Copy personas/pm/.env.example to .env (set Atlassian credentials), then run /architect to design your work.
 ```
+
+The MCPs and rules listed above are ENFORCED for this persona — they are part of what `/set-persona` gives you. The persona-specific slash commands listed under "Commands installed" are the ones you'll use during a `/start-session` (not standalone).
 
 ---
 
@@ -190,4 +193,4 @@ Print a summary in this format (adapt content to the actual persona and install)
 - The hooks.json path rewriting is the only content transformation applied during install. All other files are copied verbatim.
 - Both manifest files (`.cursor/.persona-manifest.json` and `.claude/.persona-manifest.json`) must be written with identical content.
 - This command is idempotent: running it twice with the same persona should produce a clean install without duplicate files (Step 4 removes the previous install before Step 5 copies fresh files).
-- `setup-stack` must continue to work if no persona has been set (backwards compatibility — do not make persona a hard prerequisite in setup-stack).
+- **Persona is MANDATORY.** Every other command (`/setup-stack`, `/architect`, `/start-session`, `/next-session`, `/start-project`) MUST stop with an error if no persona is set, telling the user to run `/set-persona` first. There is no "backwards compatible default" — persona-less is an error state.

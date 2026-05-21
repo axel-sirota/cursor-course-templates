@@ -1,18 +1,20 @@
 # Project Context
 
-> **Default persona: engineer.** Run `/set-persona` to switch to a different role, then `/setup-stack` (engineer / data-scientist / devops only), then `/start-session`.
+> **Persona is MANDATORY.** Start with `/set-persona`. Then the SDD pipeline is:
+> `/set-persona → /setup-stack (engineer / ds / devops only; designer + pm skip) → /architect → /start-session → /next-session`
+> Use `/undo persona | stack | all` to roll back installs.
 
 ## Active Persona
-engineer
+(none)
 
 ## Active Client
 (none)
 
 ## Active Stack
-python-fastapi
+(unset)
 
 ## Architecture Shape
-REST API — FastAPI async endpoints, SQLAlchemy 2.0 ORM, Alembic migrations, Pydantic v2 schemas. Modular monolith pattern.
+(unset — run /setup-stack)
 
 ## Active Phase
-Phase 0 (Skeleton)
+(unset)
