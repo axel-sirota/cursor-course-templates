@@ -8,14 +8,20 @@ This course has multiple paths. Pick the one that matches what you're building �
 
 Answer two questions:
 1. **What is your role?** → Pick a persona
-2. **What are you building?** → Pick a stack
+2. **What are you building?** → Pick a stack (engineer / data-scientist / devops only — designer + pm skip this)
 
-Then run:
+Then run the full SDD pipeline in order:
 ```
-/set-persona   (pick your role)
-/setup-stack   (pick your stack)
-/start-session (begin)
+/set-persona     (pick your role — MANDATORY first step)
+/setup-stack     (pick your stack; designer + pm skip)
+/architect "..."  (design the phases + session plan for what you want to build)
+/start-session   (execute the first session)
+/next-session    (wrap up and hand off to next time)
 ```
+
+Use `/undo persona` / `/undo stack` / `/undo all` to roll back installs cleanly when experimenting.
+
+For brownfield (existing repo), substitute `/detect-stack` for `/setup-stack` — it scans your code and generates the stack from observed patterns.
 
 ---
 

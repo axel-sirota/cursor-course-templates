@@ -50,8 +50,18 @@ The Adaptive SDLC runs underneath all four roles. What changes per persona is th
 
 All personas follow the same session structure:
 1. `/start-session` — load context, state goal
-2. Work (using persona-specific commands)
+2. Work using the persona's in-session commands (see table below)
 3. `/next-session` — document state, log handoffs
+
+| Persona | In-session commands (run during a `/start-session`) |
+|---|---|
+| **engineer** | `/engineer-tasks` → `/engineer-implement` (TDD red/green/refactor); plus `/code-review`, `/research` |
+| **designer** | `/designer-extract` → `/designer-compose` → `/designer-iterate` → `/designer-handoff` |
+| **pm** | `/pm-decompose` → `/pm-validate` → `/pm-report` |
+| **data-scientist** | `/ds-explore` → `/ds-experiment` → `/ds-validate` → `/ds-handoff` |
+| **devops** | Direct shell tools (terraform plan/apply, ansible-playbook, helm); universal `/code-review` for IaC |
+
+These commands are spokes of the session loop — they only make sense inside an active session. Don't call them standalone.
 
 All personas use the same quality loop:
 - Universal commands (`/architect`, `/code-review`, etc.) adapt their output per role
@@ -86,16 +96,19 @@ These commands are available in both Cursor IDE (using `@` prefix) and Claude Co
 ### Setup Commands
 
 #### `setup-stack` (or `@setup-stack` / `/setup-stack`)
-**Purpose**: Entry point for configuring your project's technology stack.
+**Purpose**: Configure the project's technology stack from the built-in library. Runs AFTER `/set-persona`.
 
 **What it does:**
-1. Presents three setup paths:
-   - **Standard Stack**: Select from built-in library (Python, Node, Go, Java, Terraform)
-   - **From Plan**: Analyze a requirements document to generate a stack
-   - **Analyze Code**: Scan existing codebase (brownfield)
-2. Copies rules from `stacks/{selection}/rules/` to `.cursor/rules/` or `.claude/rules/`
-3. Copies `stacks/{selection}/context.md` to `.cursor/context.md` or `CLAUDE.md`
-4. Optionally copies templates, examples, and vibe guides
+1. Reads `## Active Persona` from CLAUDE.md (mandatory — fails if unset).
+2. Shows the persona-filtered stack menu (engineer / data-scientist / devops only — designer + pm have no stack and are routed straight to `/architect`).
+3. If you pick a stack that's not in the list, offers `new` to scaffold a custom one from `stacks/blank/`.
+4. **Reconciles with existing code** (Step 5.5): scans the project for existing files matching the stack's language and prompts before overwriting (overwrite / skip / merge).
+5. Writes `## Active Stack`, `## Architecture Shape`, `## Active Phase` to CLAUDE.md.
+6. Copies `stacks/{selection}/rules/*` to `.claude/rules/`, copies `stacks/{selection}/templates/*` to `templates/` in the project root, copies `stacks/{selection}/examples/*` to `examples/`.
+7. Writes `.claude/.stack-manifest.json` listing every file installed (used by `/undo stack`).
+8. Recommends `/architect` as the next command.
+
+**For brownfield projects**, use `/detect-stack` instead — it scans your existing repo and generates a stack config from observed patterns.
 
 **When to use:** First step when starting any project or adopting the template.
 
