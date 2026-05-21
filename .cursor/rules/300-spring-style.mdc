@@ -1,0 +1,88 @@
+---
+description: Java/Spring code style
+alwaysApply: true
+---
+
+# Java/Spring Code Style Rules
+
+## Formatting
+Google Java Format is the single source of truth. The Spotless Maven plugin enforces it in CI:
+
+```xml
+<plugin>
+    <groupId>com.diffplug.spotless</groupId>
+    <artifactId>spotless-maven-plugin</artifactId>
+    <configuration>
+        <java>
+            <googleJavaFormat/>
+        </java>
+    </configuration>
+</plugin>
+```
+
+Run `mvn spotless:apply` to auto-format locally. CI runs `mvn spotless:check` and fails on violations. Never submit a PR with formatting errors.
+
+## Records for DTOs
+In Java 21+, prefer records over POJO classes for DTOs:
+
+```java
+// Preferred
+public record UserDto(
+    @NotBlank String name,
+    @Email String email
+) {}
+
+// Avoid — unnecessary boilerplate
+public class UserDto {
+    private String name;
+    private String email;
+    // getters, setters, equals, hashCode, toString...
+}
+```
+
+Records are immutable, have built-in `equals`/`hashCode`/`toString`, and express intent clearly.
+
+## Lombok Restrictions
+Allowed Lombok annotations:
+- `@RequiredArgsConstructor` — constructor injection
+- `@Getter` — on entities/non-record classes
+- `@Setter` — on entities when needed
+- `@Builder` — for complex object construction
+- `@Slf4j` — logging
+
+Forbidden on `@Entity` classes:
+- `@Data` — causes Hibernate issues (infinite recursion in `hashCode`/`equals` via bidirectional relationships)
+- `@EqualsAndHashCode` — use natural key or `@Id` for entity equality instead
+
+## No `Optional` as Method Parameters
+`Optional` is a return type only. Never use it as a parameter:
+
+```java
+// Correct
+Optional<User> findByEmail(String email);
+
+// Forbidden
+void update(Optional<String> name); // callers should not pass Optional
+```
+
+## Package Structure by Feature
+Group code by feature/domain, not by layer. This makes the codebase navigable and makes extracting a feature into its own service trivial:
+
+```
+src/main/java/com/example/app/
+    users/                         ← everything related to users
+        UserController.java
+        UserService.java
+        UserRepository.java
+        User.java
+        UserDto.java
+        UserMapper.java
+    orders/                        ← everything related to orders
+        OrderController.java
+        ...
+    shared/                        ← cross-cutting concerns
+        GlobalExceptionHandler.java
+        ErrorResponse.java
+```
+
+Do not use `controllers/`, `services/`, `repositories/` as top-level packages.

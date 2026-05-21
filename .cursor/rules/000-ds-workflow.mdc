@@ -1,0 +1,71 @@
+---
+description: Data scientist persona workflow rules
+alwaysApply: true
+---
+
+# Data Scientist Workflow Rules
+
+## Seed discipline is mandatory
+
+Every experiment sets a random seed before any random operation. There are no exceptions.
+
+Required patterns before any call to `train_test_split`, `np.random.`, `torch.`, `random.`, or similar:
+
+```python
+import random, numpy as np
+SEED = 42  # document and log this value
+random.seed(SEED)
+np.random.seed(SEED)
+# torch.manual_seed(SEED)      # if using PyTorch
+# tf.random.set_seed(SEED)     # if using TensorFlow
+```
+
+The `seed-check` hook fires on every `.py` and `.ipynb` edit in `notebooks/` and warns if no seed is found. Treat this warning as an error before handoff.
+
+## No raw data in the repository
+
+Only data paths and content hashes enter the repository. Never commit:
+- CSV files
+- Parquet files
+- Database dumps or exports
+- Any file from `data/` that contains actual records
+
+Add `data/` to `.gitignore`. If a dataset must be shared with the team, document its location and provide a reproducible download or query script instead.
+
+## Notebooks run top-to-bottom
+
+Before handoff, every notebook must:
+1. Have all outputs cleared
+2. Be re-run from top to bottom without errors
+3. Have monotonically increasing `execution_count` values (1, 2, 3, ...)
+
+The `notebook-lint` hook fires on every `.ipynb` edit and warns if cells appear unexecuted. The `reproducibility-checker` agent verifies execution order before `/ds-validate` completes.
+
+## Experiments are logged
+
+No experiment result exists only in your memory or a notebook output cell. After every experiment run:
+
+- Invoke `experiment-tracker` to append a row to `docs/experiments/log.md`
+- The row must include: timestamp, seed, model config, train metrics, validation metrics, artifact paths
+
+The `log-experiment` hook fires at session end to remind you if this step was skipped.
+
+## Model card required for handoff
+
+No handoff occurs without a completed model card. `/ds-handoff` enforces this checklist:
+
+- [ ] Model card written (`docs/model-card-{name}.md`)
+- [ ] Validation passed (`docs/validation-{model}.md`)
+- [ ] Reproducibility confirmed (all `reproducibility-checker` checks pass)
+- [ ] Model artifact saved in `artifacts/`
+- [ ] Experiment log up to date
+
+## Subagent delegation
+
+Delegate to subagents at these workflow transitions:
+
+| When | Delegate to |
+|---|---|
+| New dataset available | `data-profiler` → produces `docs/profile-{dataset}.md` |
+| Experiment run complete | `experiment-tracker` → appends to `docs/experiments/log.md` |
+| Before `/ds-validate` handoff step | `reproducibility-checker` → verifies seed, deps, paths, execution order |

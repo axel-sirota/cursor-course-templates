@@ -1,1 +1,8 @@
-/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/blogapi/BlogApiApplicationTests.java
+/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/broker/BrokerApplicationTests.java
+/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/broker/TestcontainersConfig.java
+/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/broker/messages/MessageServiceTest.java
+/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/broker/messages/PublishControllerTest.java
+/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/broker/messages/PublishIntegrationTest.java
+/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/broker/topics/TopicControllerTest.java
+/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/broker/topics/TopicRepositoryTest.java
+/Users/axelsirota/repos/cursor-course-templates/src/test/java/com/example/broker/topics/TopicServiceTest.java

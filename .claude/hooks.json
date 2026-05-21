@@ -2,14 +2,11 @@
   "version": 1,
   "hooks": {
     "afterFileEdit": [
-      { "command": ".claude/scripts/lint.sh" },
-      { "command": ".claude/scripts/type-check.sh" }
-    ],
-    "beforeShellExecution": [
-      { "command": ".claude/scripts/block-destructive.sh" }
+      { "command": ".claude/scripts/seed-check.sh" },
+      { "command": ".claude/scripts/notebook-lint.sh" }
     ],
     "stop": [
-      { "command": ".claude/scripts/test-runner.sh" }
+      { "command": ".claude/scripts/log-experiment.sh" }
     ]
   }
 }

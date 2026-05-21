@@ -2,14 +2,11 @@
   "version": 1,
   "hooks": {
     "afterFileEdit": [
-      { "command": ".cursor/scripts/lint.sh" },
-      { "command": ".cursor/scripts/type-check.sh" }
-    ],
-    "beforeShellExecution": [
-      { "command": ".cursor/scripts/block-destructive.sh" }
+      { "command": ".cursor/scripts/seed-check.sh" },
+      { "command": ".cursor/scripts/notebook-lint.sh" }
     ],
     "stop": [
-      { "command": ".cursor/scripts/test-runner.sh" }
+      { "command": ".cursor/scripts/log-experiment.sh" }
     ]
   }
 }
