@@ -1,0 +1,32 @@
+flowchart LR
+  subgraph Without["Without a workflow"]
+    direction TB
+    U1[Developer]
+    AI1[AI chat]
+    U1 -->|vague ask| AI1
+    AI1 -->|guess code| U1
+    U1 -->|fix &amp; re-ask| AI1
+    AI1 -->|new guess| U1
+    note1["No memory<br/>No stack<br/>No phase<br/>No yesterday"]
+  end
+
+  subgraph With["With a workflow"]
+    direction TB
+    U2[Developer]
+    CTX[(Project context<br/>persona + stack + phase)]
+    AI2[AI chat]
+    U2 -->|slash command| CTX
+    CTX -->|grounded prompt| AI2
+    AI2 -->|stack-aware code| U2
+    U2 -->|/next-session| CTX
+    note2["Persistent state<br/>Stack rules loaded<br/>Knows the phase<br/>Knows yesterday"]
+  end
+
+  Without ~~~ With
+
+  classDef bad fill:#ffebee,stroke:#c62828,color:#000;
+  classDef good fill:#e8f5e9,stroke:#2e7d32,color:#000;
+  classDef ctx fill:#e3f2fd,stroke:#1565c0,color:#000;
+  class Without bad;
+  class With good;
+  class CTX ctx;

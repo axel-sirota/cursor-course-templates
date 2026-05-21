@@ -1,0 +1,24 @@
+flowchart LR
+  ST(["/start-session<br/><i>load + ask goal</i>"])
+
+  subgraph SPOKES["In-session spokes (persona-specific)"]
+    direction TB
+    SK1[/"decompose"/]
+    SK2[/"implement / extract / experiment"/]
+    SK3[/"review / validate"/]
+    SK1 --> SK2 --> SK3
+  end
+
+  NS(["/next-session<br/><i>wrap + hand off</i>"])
+
+  ST --> SPOKES --> NS
+  NS -.->|tomorrow| ST
+
+  NOTE["spine = universal<br/>spokes = per persona"]
+
+  classDef spine fill:#00897b,stroke:#004d40,color:#fff,font-weight:bold;
+  classDef spoke fill:#ff8f00,stroke:#bf360c,color:#fff;
+  classDef note fill:#fffde7,stroke:#f9a825,color:#000,font-style:italic;
+  class ST,NS spine;
+  class SK1,SK2,SK3 spoke;
+  class NOTE note;

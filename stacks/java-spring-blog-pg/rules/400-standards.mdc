@@ -1,0 +1,38 @@
+---
+description: Operational standards (blog flavor)
+alwaysApply: true
+---
+
+# Standards
+
+## Configuration
+- All configuration in `application.yml`. Profiles: `default`, `test`, `docker`.
+- Secrets via environment variables, **never** committed. `.env.example` documents the shape.
+- Datasource URL/user/password via `SPRING_DATASOURCE_*` env vars in compose and prod.
+
+## Migrations
+- Flyway. Migrations under `src/main/resources/db/migration/V<n>__<description>.sql`.
+- Forward-only. No `flyway clean` in any environment beyond local.
+- Every new entity ships with a migration in the same PR.
+
+## Logging
+- SLF4J via Lombok `@Slf4j` where logging is actually needed.
+- Levels: `error` (operator must act), `warn` (anomaly, system recovers), `info` (lifecycle + key business events), `debug` (developer detail). No `info` in tight loops.
+- Never log request bodies, tokens, or PII.
+
+## API Contract
+- Base path: `/api/<resource>` (plural).
+- IDs in URLs are UUIDs.
+- Timestamps are ISO-8601 UTC (`Instant`).
+- Error responses always shaped as `ErrorResponse(timestamp, status, error, message)`.
+
+## Build & CI
+- `mvn verify` is the single CI command. It must:
+  - Compile (annotation processors: Lombok then MapStruct, in that order).
+  - Run all tests.
+  - Run Spotless check.
+- Java target: 17. Do not bump without updating the Dockerfile base image and the CI matrix.
+
+## Dependencies
+- Add new dependencies through `pom.xml` only, with explicit version (or via the Spring Boot BOM).
+- No `SNAPSHOT` dependencies in `main`.

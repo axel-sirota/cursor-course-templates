@@ -1,0 +1,47 @@
+---
+description: Code style (blog flavor)
+alwaysApply: true
+---
+
+# Style Rules
+
+## Formatting
+- 4-space indent, no tabs.
+- Imports: `java.*`, then `javax.*`/`jakarta.*`, then third-party, then `com.example.*`. No wildcards except for static imports of test matchers.
+- Trailing newline at EOF.
+- Spotless + Google Java Format enforced by `mvn verify`.
+
+## Naming
+- Classes: `PascalCase`. Methods/fields: `camelCase`. Constants: `UPPER_SNAKE_CASE`.
+- Tests: `methodName_whenCondition_thenOutcome`.
+- Packages: lower-case, singular feature name (`posts`, `comments`, not `post`, `Posts`).
+
+## Records vs Classes
+- DTOs → **records** with validation annotations on components:
+  ```java
+  public record PostDto(
+      UUID id,
+      @NotBlank @Size(max = 200) String title,
+      @NotBlank String body,
+      @NotBlank String author,
+      Instant createdAt
+  ) {}
+  ```
+- Entities → **mutable classes** (JPA limitation). Use Lombok `@Getter`, `@Setter`, `@NoArgsConstructor(access = PROTECTED)`, `@AllArgsConstructor`.
+
+## Lombok Usage
+- Allowed: `@RequiredArgsConstructor`, `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder` (sparingly).
+- Forbidden: `@Data` on entities (generates `equals`/`hashCode` from all fields → breaks JPA), `@Slf4j` cargo-culted everywhere (only where you actually log).
+
+## Imports & Visibility
+- Default to **package-private**. Public is opt-in: controllers, DTOs, the `BlogApplication` class, `shared/` types. Everything else stays package-private until something outside the package needs it.
+- Repository interfaces and JPA impls are package-private.
+
+## Null Discipline
+- Optional<T> for "may be absent" return types from repositories.
+- Service throws `NotFoundException` rather than returning `null` or empty `Optional` to controllers.
+- Never return `null` from a controller method. Use `ResponseEntity.noContent()` for 204.
+
+## Comments
+- Default: no comments. Names carry the meaning.
+- Exception: a single short line when the *why* is non-obvious (a JPA quirk, a workaround).

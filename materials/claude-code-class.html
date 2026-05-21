@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Class &mdash; The 3-Hour Workflow Class</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.indigo.min.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-family-monospace: 'JetBrains Mono', 'Fira Code', monospace;
+      --toc-width: 260px;
+      --header-height: 0px;
+      --callout-tip: #2e7d32;
+      --callout-warning: #e65100;
+      --callout-info: #1565c0;
+      --callout-lab: #6a1b9a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --callout-tip: #66bb6a;
+        --callout-warning: #ff9800;
+        --callout-info: #42a5f5;
+        --callout-lab: #ce93d8;
+      }
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-family); margin: 0; padding: 0; }
+    code, pre, kbd, samp { font-family: var(--font-family-monospace); }
+
+    /* ===== Hero ===== */
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem 2rem;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #4a1a6b 100%);
+      color: #e0e0e0;
+    }
+    .hero h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff; }
+    .hero .subtitle { font-size: 1.15rem; opacity: 0.85; margin-bottom: 1.5rem; }
+    .hero .badge-row { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+    .badge {
+      display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em;
+    }
+    .badge-indigo { background: #7c4dff; color: #fff; }
+    .badge-teal { background: #00897b; color: #fff; }
+    .badge-amber { background: #ff8f00; color: #fff; }
+
+    /* ===== Page Layout — fixed left TOC ===== */
+    .page-wrapper {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    .sidebar {
+      position: sticky;
+      top: var(--header-height, 0);
+      align-self: flex-start;
+      width: var(--toc-width);
+      min-width: var(--toc-width);
+      height: calc(100vh - var(--header-height, 0px));
+      overflow-y: auto;
+      padding: 1.5rem 0.75rem 2rem 0;
+      font-size: 0.85rem;
+      border-right: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+    .sidebar .sidebar-title {
+      font-weight: 700; margin-bottom: 0.75rem;
+      text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em;
+      color: var(--pico-muted-color, #999);
+    }
+    .sidebar ul { list-style: none; padding: 0; margin: 0; }
+    .sidebar li { margin-bottom: 0.35rem; }
+    .sidebar li.sub { padding-left: 1rem; font-size: 0.82rem; }
+    .sidebar a {
+      text-decoration: none; color: var(--pico-muted-color, #666);
+      display: block; padding: 0.15rem 0; transition: color 0.15s;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      color: var(--pico-primary, #3f51b5); font-weight: 600;
+    }
+
+    .main-content { flex: 1; min-width: 0; padding: 2rem 0 4rem 2.5rem; }
+
+    @media (max-width: 900px) {
+      .page-wrapper { flex-direction: column; }
+      .sidebar { display: none; }
+      .main-content { padding: 1.5rem 0; }
+    }
+
+    .mobile-toc {
+      display: none; margin: 1rem; padding: 0.75rem;
+      border: 1px solid var(--pico-muted-border-color, #ddd); border-radius: 8px;
+    }
+    @media (max-width: 900px) { .mobile-toc { display: block; } }
+
+    /* ===== Sections ===== */
+    section {
+      margin-bottom: 3rem; padding-bottom: 2rem;
+      border-bottom: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+    section:last-child { border-bottom: none; }
+
+    /* ===== Callouts ===== */
+    .callout {
+      border-left: 4px solid; padding: 1rem 1.25rem; margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+      background: color-mix(in srgb, var(--pico-card-background-color, #fff) 95%, transparent);
+    }
+    .callout-tip { border-color: var(--callout-tip); }
+    .callout-warning { border-color: var(--callout-warning); }
+    .callout-info { border-color: var(--callout-info); }
+    .callout-lab { border-color: var(--callout-lab); }
+    .callout-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .callout-tip .callout-title { color: var(--callout-tip); }
+    .callout-warning .callout-title { color: var(--callout-warning); }
+    .callout-info .callout-title { color: var(--callout-info); }
+    .callout-lab .callout-title { color: var(--callout-lab); }
+
+    /* ===== Time-box ===== */
+    .timebox {
+      display: inline-block; background: #ede7f6; color: #4527a0;
+      padding: 0.15rem 0.6rem; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em;
+      margin-right: 0.5rem; vertical-align: middle;
+    }
+
+    /* ===== Diagram placeholder box ===== */
+    .diagram-placeholder {
+      border: 2px dashed var(--pico-muted-border-color, #bbb);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      background: color-mix(in srgb, var(--callout-info) 4%, transparent);
+      font-family: var(--font-family-monospace);
+      font-size: 0.85rem;
+      color: var(--pico-muted-color, #666);
+    }
+    .diagram-placeholder strong { color: var(--callout-info); }
+    .diagram-placeholder .slug {
+      display: inline-block;
+      background: #fff;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      border: 1px solid var(--pico-muted-border-color, #ddd);
+      color: #333;
+    }
+
+    /* ===== Code ===== */
+    pre[class*="language-"] { border-radius: 6px; font-size: 0.85rem; }
+    code:not([class*="language-"]) {
+      background: color-mix(in srgb, var(--pico-muted-color, #999) 12%, transparent);
+      padding: 0.15rem 0.35rem; border-radius: 3px; font-size: 0.88em;
+    }
+
+    /* ===== Tables ===== */
+    table { font-size: 0.9rem; }
+    th { text-align: left; }
+    .pipeline-table td:nth-child(1) { white-space: nowrap; font-family: var(--font-family-monospace); }
+    .adapt-table td:first-child { white-space: nowrap; font-weight: 600; }
+
+    /* ===== Keyboard ===== */
+    kbd {
+      background: var(--pico-card-background-color, #f5f5f5);
+      border: 1px solid var(--pico-muted-border-color, #ddd);
+      border-radius: 4px; padding: 0.15rem 0.4rem; font-size: 0.85em;
+      font-family: var(--font-family-monospace);
+    }
+
+    footer.site-footer {
+      text-align: center; padding: 2rem 1rem; font-size: 0.85rem;
+      color: var(--pico-muted-color, #999);
+      border-top: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    @media print {
+      .sidebar, .mobile-toc, .hero .badge-row { display: none; }
+      .page-wrapper { display: block; }
+      .hero { padding: 1rem; }
+      pre { white-space: pre-wrap; word-wrap: break-word; }
+      section { break-inside: avoid; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) { color-scheme: dark; }
+      .hero { background: linear-gradient(135deg, #0d0520 0%, #1a0e30 50%, #2d0f45 100%); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <h1>Claude Code Class</h1>
+    <p class="subtitle">The 3-hour workflow class &mdash; persona, stack, architect, sessions, adapt</p>
+    <div class="badge-row">
+      <span class="badge badge-indigo">Workflow class</span>
+      <span class="badge badge-teal">~3 hours</span>
+      <span class="badge badge-amber">3 hands-on labs</span>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE TOC ===== -->
+  <details class="mobile-toc">
+    <summary>Table of Contents</summary>
+    <ul>
+      <li><a href="#how-to-use">0. How to use this guide</a></li>
+      <li><a href="#what-is">1. What is Claude Code?</a></li>
+      <li><a href="#sdd-pipeline">2. The SDD pipeline</a></li>
+      <li><a href="#personas-stacks">3. Personas, stacks, and architecture shapes</a></li>
+      <li><a href="#lab-1">Lab 1 &mdash; Onboarding</a></li>
+      <li><a href="#commands">4. The 6 commands you need</a></li>
+      <li><a href="#architect-deep">5. /architect &mdash; the gated 3-phase flow</a></li>
+      <li><a href="#session-loop">6. The session loop</a></li>
+      <li><a href="#lab-2">Lab 2 &mdash; Architect + two sessions</a></li>
+      <li><a href="#brownfield">7. Adapting to an existing repo</a></li>
+      <li><a href="#lab-3">Lab 3 &mdash; Adapt to your real repo</a></li>
+      <li><a href="#undo">8. /undo &mdash; the safety valve</a></li>
+      <li><a href="#adapt-table">9. What you learned &mdash; adapt at work</a></li>
+    </ul>
+  </details>
+
+  <div class="page-wrapper">
+
+    <!-- ===== SIDEBAR TOC (fixed left column) ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">Contents</div>
+      <nav>
+        <ul>
+          <li><a href="#how-to-use">0. How to use this guide</a></li>
+          <li><a href="#what-is">1. What is Claude Code?</a></li>
+          <li class="sub"><a href="#what-is-pain">The pain it solves</a></li>
+          <li class="sub"><a href="#what-is-not">What it is not</a></li>
+          <li><a href="#sdd-pipeline">2. The SDD pipeline</a></li>
+          <li class="sub"><a href="#pipeline-spine">The spine</a></li>
+          <li class="sub"><a href="#pipeline-rules">Two enforcement rules</a></li>
+          <li><a href="#personas-stacks">3. Personas, stacks, shapes</a></li>
+          <li class="sub"><a href="#personas">The 5 personas</a></li>
+          <li class="sub"><a href="#stacks">The stack library</a></li>
+          <li class="sub"><a href="#shapes">Architecture shapes</a></li>
+          <li><a href="#lab-1">Lab 1 &mdash; Onboarding</a></li>
+          <li><a href="#commands">4. The 6 commands</a></li>
+          <li class="sub"><a href="#cmd-set-persona">/set-persona</a></li>
+          <li class="sub"><a href="#cmd-setup-stack">/setup-stack</a></li>
+          <li class="sub"><a href="#cmd-architect">/architect</a></li>
+          <li class="sub"><a href="#cmd-start-session">/start-session</a></li>
+          <li class="sub"><a href="#cmd-next-session">/next-session</a></li>
+          <li class="sub"><a href="#cmd-detect-stack">/detect-stack</a></li>
+          <li><a href="#architect-deep">5. /architect deep dive</a></li>
+          <li><a href="#session-loop">6. The session loop</a></li>
+          <li class="sub"><a href="#persona-spokes">Persona spokes</a></li>
+          <li><a href="#lab-2">Lab 2 &mdash; Architect + 2 sessions</a></li>
+          <li><a href="#brownfield">7. Adapting to existing repos</a></li>
+          <li><a href="#lab-3">Lab 3 &mdash; Adapt your repo</a></li>
+          <li><a href="#undo">8. /undo &mdash; safety valve</a></li>
+          <li><a href="#adapt-table">9. Adapt at work</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+
+      <!-- ===== 0. How to use this guide ===== -->
+      <section id="how-to-use">
+        <h2>0. How to use this guide</h2>
+        <p>This is a <strong>3-hour, hands-on class</strong> on the AI-assisted development workflow. You bring your own laptop, your own project (or one you want to start), and the persona that matches your job. We do three labs:</p>
+        <ul>
+          <li><strong>Lab 1 &mdash; Onboarding.</strong> Run <code>/set-persona</code> and <code>/setup-stack</code> on the project you brought.</li>
+          <li><strong>Lab 2 &mdash; Architect + two sessions.</strong> Run <code>/architect</code> on something you actually want to build, then drive two <code>/start-session</code> &rarr; <code>/next-session</code> cycles.</li>
+          <li><strong>Lab 3 &mdash; Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
+        </ul>
+        <p>This class teaches the <strong>workflow only</strong>. It does <em>not</em> cover hooks, MCP servers, sub-agents, or automation &mdash; those are advanced topics for a later session. If you came expecting MCP server configuration today, look in <code>materials/_old/</code> for the older deep-dive guides &mdash; they cover that material.</p>
+        <div class="callout callout-info">
+          <div class="callout-title">How to follow along</div>
+          <p>Each section has a short concept, a small diagram, and either a demo block (instructor runs it) or a lab block (you run it). When you see <span class="timebox">&#9201; Lab</span>, stop reading and do it on your laptop.</p>
+        </div>
+      </section>
+
+      <!-- ===== 1. What is Claude Code? ===== -->
+      <section id="what-is">
+        <h2>1. What is Claude Code?</h2>
+
+        <h3 id="what-is-pain">The pain it solves</h3>
+        <p>Without a workflow, AI-assisted coding looks like this: you open a chat, type a vague request, paste back the code, fix what didn&rsquo;t compile, ask again. Every conversation starts from zero. The AI does not know your stack, your conventions, your phase of work, or what you did yesterday.</p>
+        <p>Claude Code is a CLI tool that fixes this by giving the AI a <strong>project context</strong> (a file called <code>CLAUDE.md</code>) and a <strong>workflow of slash commands</strong> that move you through stages: pick a role, pick a stack, design the work, execute it in sessions, review, adapt.</p>
+
+        <figure>
+          <img src="diagrams/d01-without-vs-with-workflow.svg" alt="Without a workflow vs With Claude Code &mdash; two-column flow showing chaotic AI chat on the left and stateful pipeline on the right">
+        </figure>
+
+        <h3 id="what-is-not">What it is not (in this class)</h3>
+        <p>Claude Code has many advanced features &mdash; hooks, MCP servers, sub-agents, automation. <strong>We do not teach any of those today.</strong> The workflow alone is enough value for one class, and the workflow is the foundation on which the advanced features rest. Build the foundation first.</p>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">One sentence summary</div>
+          <p>Claude Code turns ad-hoc AI chats into a disciplined, repeatable software-development workflow by remembering who you are, what you&rsquo;re building, and where you stopped.</p>
+        </div>
+      </section>
+
+      <!-- ===== 2. The SDD pipeline ===== -->
+      <section id="sdd-pipeline">
+        <h2>2. The SDD pipeline</h2>
+        <p>Everything in this class hangs on one diagram: the Spec-Driven Development (SDD) pipeline. Memorize it now &mdash; every command you learn is a station on this line.</p>
+
+        <figure>
+          <img src="diagrams/d02-sdd-pipeline-spine.svg" alt="SDD pipeline spine &mdash; /set-persona &rarr; /setup-stack &rarr; /architect &rarr; /start-session &harr; /next-session, with /undo as the safety valve">
+        </figure>
+
+        <h3 id="pipeline-spine">The spine</h3>
+        <pre><code>/set-persona  →  /setup-stack  →  /architect  →  /start-session ⇄ /next-session</code></pre>
+        <p>Designers and PMs skip <code>/setup-stack</code> (they don&rsquo;t have a tech stack &mdash; designers have Figma, PMs have PRDs). Everyone else runs the full spine.</p>
+
+        <h3 id="pipeline-rules">Two enforcement rules</h3>
+        <p>The pipeline is enforced by two rules baked into every command. This is not advice &mdash; the commands literally stop if these rules are violated.</p>
+
+        <table class="pipeline-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Rule A &mdash; persona gate</th>
+              <th>Rule B &mdash; next pointer</th>
+              <th>What it produces</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>/set-persona</td>
+              <td>(writes the persona)</td>
+              <td>&rarr; <code>/setup-stack</code> (or <code>/architect</code> for designer/pm)</td>
+              <td><code>CLAUDE.md</code> + persona pack installed</td>
+            </tr>
+            <tr>
+              <td>/setup-stack</td>
+              <td>Stops if no persona</td>
+              <td>&rarr; <code>/architect</code></td>
+              <td>Stack rules + <code>.stack-manifest.json</code></td>
+            </tr>
+            <tr>
+              <td>/architect</td>
+              <td>Stops if no persona</td>
+              <td>&rarr; <code>/start-session</code></td>
+              <td><code>plans/sessions/*.md</code> + <code>interface-contract.md</code> + skeleton code</td>
+            </tr>
+            <tr>
+              <td>/start-session</td>
+              <td>Stops if no persona</td>
+              <td>&rarr; (use persona spokes, then <code>/next-session</code>)</td>
+              <td>Code, tests, commits</td>
+            </tr>
+            <tr>
+              <td>/next-session</td>
+              <td>Stops if no persona</td>
+              <td>&rarr; <code>/start-session</code> (or <code>/architect</code> at phase boundary)</td>
+              <td>Transition doc for next time</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">Persona is mandatory</div>
+          <p>Every command on the spine refuses to run without a persona. There is no &ldquo;default engineer&rdquo; fallback. If you skip <code>/set-persona</code>, everything else stops with <code>&#9888;&#65039; No persona configured. Run /set-persona first.</code></p>
+        </div>
+      </section>
+
+      <!-- ===== 3. Personas, stacks, shapes ===== -->
+      <section id="personas-stacks">
+        <h2>3. Personas, stacks, and architecture shapes</h2>
+        <p>The pipeline is parametric. The same five commands work for very different jobs because three knobs configure them: <strong>persona</strong> (who you are), <strong>stack</strong> (what tech you use), and <strong>architecture shape</strong> (what the output looks like).</p>
+
+        <figure>
+          <img src="diagrams/d03-persona-stack-shape.svg" alt="Three lanes: Persona &rarr; Stack &rarr; Architecture Shape, showing how the same pipeline produces different outputs per role">
+        </figure>
+
+        <h3 id="personas">The 5 personas</h3>
+        <table>
+          <thead>
+            <tr><th>Persona</th><th>For</th><th>Has a stack?</th><th>In-session spokes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>engineer</code></td><td>Backend / API / service developers</td><td>Yes</td><td><code>/engineer-tasks</code>, <code>/engineer-implement</code></td></tr>
+            <tr><td><code>designer</code></td><td>UI / Figma designers</td><td>No</td><td><code>/designer-extract</code>, <code>/designer-compose</code>, <code>/designer-iterate</code>, <code>/designer-handoff</code></td></tr>
+            <tr><td><code>pm</code></td><td>Product managers writing PRDs</td><td>No</td><td><code>/pm-decompose</code>, <code>/pm-validate</code>, <code>/pm-report</code></td></tr>
+            <tr><td><code>data-scientist</code></td><td>Notebook + experiment + MLOps</td><td>Yes</td><td><code>/ds-explore</code>, <code>/ds-experiment</code>, <code>/ds-validate</code>, <code>/ds-handoff</code></td></tr>
+            <tr><td><code>devops</code></td><td>Infra-as-code, K8s, config mgmt</td><td>Yes</td><td>(shell tools &mdash; <code>terraform plan</code>, <code>ansible-lint</code>, &hellip;)</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="stacks">The stack library</h3>
+        <p>Each persona that has a stack picks from a curated library. You don&rsquo;t have to use the library &mdash; if your language isn&rsquo;t there, <code>/setup-stack</code> offers a <code>new</code> option that scaffolds a custom stack from <code>stacks/blank/</code>.</p>
+        <ul>
+          <li><strong>Engineer:</strong> <code>python-fastapi</code>, <code>go-gin</code>, <code>go-grpc</code>, <code>java-spring</code>, <code>node-express</code>, <code>node-nestjs</code></li>
+          <li><strong>Data scientist:</strong> <code>python-datascience</code>, <code>python-spark</code>, <code>python-dbt-snowflake</code>, <code>r-tidyverse</code>, <code>python-mlops</code></li>
+          <li><strong>DevOps:</strong> <code>devops-terraform</code>, <code>devops-ansible</code>, <code>devops-k8s-helm</code></li>
+        </ul>
+
+        <h3 id="shapes">Architecture shapes</h3>
+        <p>The stack determines the <em>shape</em> of what <code>/architect</code> produces. This is why the same <code>/architect</code> command can plan a REST API today and a Spark pipeline tomorrow.</p>
+        <table>
+          <thead><tr><th>Stack family</th><th>Architecture shape</th><th>Interface contract is&hellip;</th></tr></thead>
+          <tbody>
+            <tr><td>python-fastapi, go-gin, java-spring, &hellip;</td><td>REST API</td><td>OpenAPI routes + data model</td></tr>
+            <tr><td>go-grpc</td><td>gRPC Service</td><td><code>.proto</code> service + message types</td></tr>
+            <tr><td>python-spark, python-mlops</td><td>Data Pipeline</td><td>Job stages + schema + medallion layers</td></tr>
+            <tr><td>python-dbt-snowflake</td><td>Analytics Model</td><td>Staging/mart tree + source defs</td></tr>
+            <tr><td>r-tidyverse, python-datascience</td><td>Notebook / Experiment</td><td>EDA sequence + models + metrics</td></tr>
+            <tr><td>devops-terraform</td><td>Cloud Infrastructure</td><td>Module inputs/outputs + resource map</td></tr>
+            <tr><td>devops-ansible</td><td>IaC Playbook</td><td>Roles + playbooks + variable contract</td></tr>
+            <tr><td>devops-k8s-helm</td><td>GitOps Platform</td><td>Chart structure + <code>values.yaml</code> contract</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ===== LAB 1 ===== -->
+      <section id="lab-1">
+        <h2>Lab 1 &mdash; Onboarding <span class="timebox">&#9201; 25 min</span></h2>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Goal</div>
+          <p>Pick the persona and stack that match your real job. Run them against the project you brought (or a fresh empty folder). End with a configured <code>CLAUDE.md</code> and a stack pack installed.</p>
+        </div>
+
+        <h3>Steps</h3>
+        <ol>
+          <li>Open a terminal in your project folder. If you don&rsquo;t have one, <code>mkdir my-class && cd my-class && git init</code>.</li>
+          <li>Copy this repo&rsquo;s <code>.claude/</code> directory and <code>CLAUDE.md</code> into your project: <code>cp -r /path/to/cursor-course-templates/.claude . && cp /path/to/cursor-course-templates/CLAUDE.md .</code></li>
+          <li>Start Claude Code: <code>claude</code></li>
+          <li>Run <code>/set-persona</code>. Pick the persona for your job (engineer, designer, pm, data-scientist, devops).</li>
+          <li>If your persona has a stack, run <code>/setup-stack</code>. Pick the matching stack &mdash; or pick <code>new</code> if your language isn&rsquo;t listed.</li>
+          <li>If you already had code in your folder, <code>/setup-stack</code> will detect it and ask: <strong>overwrite</strong>, <strong>skip templates</strong>, or <strong>merge per-file</strong>. Pick &ldquo;skip templates&rdquo; if you just want rules; pick &ldquo;merge&rdquo; if you want to see each conflict.</li>
+          <li>Open <code>CLAUDE.md</code>. Confirm the <code>## Active Persona</code> and <code>## Active Stack</code> fields are filled in.</li>
+        </ol>
+
+        <h3>Checkpoint</h3>
+        <ul>
+          <li>✅ <code>cat CLAUDE.md | grep "Active Persona"</code> shows your persona</li>
+          <li>✅ <code>cat CLAUDE.md | grep "Active Stack"</code> shows your stack (or is absent for designer/pm)</li>
+          <li>✅ <code>ls .claude/.persona-manifest.json</code> exists</li>
+          <li>✅ (if stack chosen) <code>ls .claude/.stack-manifest.json</code> exists</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">If you mess up</div>
+          <p>Run <code>/undo all</code>. It reads the manifests and removes every file that <code>/set-persona</code> and <code>/setup-stack</code> wrote. Then start over.</p>
+        </div>
+      </section>
+
+      <!-- ===== 4. The 6 commands ===== -->
+      <section id="commands">
+        <h2>4. The 6 commands you need</h2>
+        <p>Six commands. Five on the spine + <code>/detect-stack</code> for brownfield. That&rsquo;s the whole class. Everything else is optional or persona-specific.</p>
+
+        <figure>
+          <img src="diagrams/d04-six-commands-overview.svg" alt="The 6 commands radiating from the project context file: the 5 spine commands plus /detect-stack as brownfield entry">
+        </figure>
+
+        <h3 id="cmd-set-persona">/set-persona</h3>
+        <p><strong>What it does:</strong> installs a persona pack (commands, agents, rules, MCP config) for the role you pick, into <code>.claude/</code> and <code>.cursor/</code>. Writes <code>## Active Persona</code> into <code>CLAUDE.md</code>.</p>
+        <p><strong>When:</strong> first thing. Always. There is no escape hatch.</p>
+        <p><strong>Output:</strong> persona files installed; <code>.persona-manifest.json</code> written so <code>/undo</code> can reverse it.</p>
+
+        <h3 id="cmd-setup-stack">/setup-stack</h3>
+        <p><strong>What it does:</strong> shows you the stacks available for your persona, lets you pick one (or create a new one from <code>stacks/blank/</code>), copies the stack&rsquo;s rules and templates into your project, and writes <code>## Active Stack</code> + <code>## Architecture Shape</code> to <code>CLAUDE.md</code>.</p>
+        <p><strong>Smart bit:</strong> if your folder already has code in the stack&rsquo;s language, it detects that and asks how to reconcile &mdash; overwrite, skip templates, or merge per-file. Your existing code is never blindly overwritten.</p>
+        <p><strong>Designer / PM:</strong> this command is skipped &mdash; those personas have no tech stack.</p>
+
+        <h3 id="cmd-architect">/architect</h3>
+        <p><strong>What it does:</strong> turns a one-line idea into a full plan &mdash; <code>plans/sessions/session-overview.md</code>, one session file per phase, an <code>interface-contract.md</code> (OpenAPI / proto / DAG / PRD depending on shape), and a walking skeleton of code in the right places.</p>
+        <p><strong>Gated 3-phase flow:</strong>
+          <ol>
+            <li><strong>Design</strong> &mdash; produce all planning docs, no code.</li>
+            <li><strong>&#9940; Human review gate</strong> &mdash; you read the plan and approve before any code is written.</li>
+            <li><strong>Scaffold</strong> &mdash; only then does the skeleton get built.</li>
+          </ol>
+        </p>
+        <p>This means <code>/architect</code> never ships code you haven&rsquo;t signed off on. We&rsquo;ll go deeper in Section 5.</p>
+
+        <h3 id="cmd-start-session">/start-session</h3>
+        <p><strong>What it does:</strong> loads the active stack, rules, and last session&rsquo;s state. Asks for today&rsquo;s session goal. Tells you which <em>in-session spokes</em> you have for your persona.</p>
+        <p><strong>Spokes are persona-specific.</strong> An engineer gets <code>/engineer-tasks</code> and <code>/engineer-implement</code>. A PM gets <code>/pm-decompose</code>, <code>/pm-validate</code>, <code>/pm-report</code>. See Section 6 for the full map.</p>
+
+        <h3 id="cmd-next-session">/next-session</h3>
+        <p><strong>What it does:</strong> wraps up today. Runs the persona&rsquo;s quality gate (tests for engineer, screenshot comparison for designer, gap-detector for PM, experiment validator for data-scientist). Writes a transition doc you can paste into tomorrow&rsquo;s session, including the exact spokes to call next time.</p>
+        <p><strong>It points you back to <code>/start-session</code>.</strong> The loop is closed.</p>
+
+        <h3 id="cmd-detect-stack">/detect-stack</h3>
+        <p><strong>What it does:</strong> the brownfield entry point. Scans your existing repo, figures out the language and framework, matches against the stack library, and generates a context file that mirrors what&rsquo;s actually there &mdash; not what you wish were there.</p>
+        <p><strong>When to use:</strong> instead of <code>/setup-stack</code>, when you already have code and you want the AI to learn <em>your</em> patterns rather than impose a template.</p>
+      </section>
+
+      <!-- ===== 5. /architect deep dive ===== -->
+      <section id="architect-deep">
+        <h2>5. /architect &mdash; the gated 3-phase flow</h2>
+        <p>This is the most important command in the class. It is also the easiest to misuse, so it has guardrails.</p>
+
+        <figure>
+          <img src="diagrams/d05-architect-gated-flow.svg" alt="/architect gated 3-phase flow: Design &rarr; Human review gate &rarr; Scaffold, with a reject-and-revise loop back to Design">
+        </figure>
+
+        <h3>Why three phases?</h3>
+        <p>The old failure mode of AI architects: ask &ldquo;build me a task tracker,&rdquo; receive 40 files of code in 30 seconds, discover three days later that the data model is wrong. By that point, refactoring is more expensive than starting over.</p>
+        <p>Gating the design phase forces a moment where you, the human, read what the AI plans to build <em>before</em> it builds it. Catching a bad design in a markdown file is free; catching it in code is not.</p>
+
+        <h3>Phase 1 &mdash; Design</h3>
+        <p>The AI produces:</p>
+        <ul>
+          <li><code>plans/sessions/session-overview.md</code> &mdash; the phase breakdown and session list</li>
+          <li><code>plans/sessions/session-1-phase-0.md</code> &mdash; the skeleton session plan</li>
+          <li><code>plans/sessions/session-N-phase-X.md</code> &mdash; one file per feature phase</li>
+          <li><code>plans/interface-contract.md</code> &mdash; the contract appropriate to your stack&rsquo;s shape (OpenAPI, proto, DAG, PRD, model card&hellip;)</li>
+        </ul>
+        <p>It also runs a <strong>self-audit</strong> step: re-reads its own output, diffs the manifest, checks that every promised file actually exists, and lists the architectural risks it sees. You see this audit before the gate.</p>
+
+        <h3>Phase 2 &mdash; Human review gate</h3>
+        <p>Nothing else happens until you say yes. Read the plan, push back if anything is wrong, ask for revisions. <strong>The AI cannot proceed to scaffold without your approval.</strong></p>
+
+        <h3>Phase 3 &mdash; Scaffold</h3>
+        <p>After approval, the AI writes the walking skeleton &mdash; the minimum runnable code that matches the interface contract. Tests are stubbed but failing on purpose; the first <code>/start-session</code> turns red tests green.</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">Plan-extraction mode</div>
+          <p>If you already have a written plan (<code>plan.md</code>, <code>PRD.md</code>, <code>requirements.md</code>), point <code>/architect</code> at it: <code>/architect plan.md</code>. It will extract requirements instead of inventing them. Use this when you already know what you want &mdash; you skip the &ldquo;ask 10 clarifying questions&rdquo; back-and-forth.</p>
+        </div>
+      </section>
+
+      <!-- ===== 6. The session loop ===== -->
+      <section id="session-loop">
+        <h2>6. The session loop</h2>
+        <p>Once <code>/architect</code> has produced a plan, you live in a loop:</p>
+
+        <figure>
+          <img src="diagrams/d06-session-loop.svg" alt="Session loop: /start-session &rarr; persona spokes &rarr; /next-session, looping back tomorrow. Spine is universal; spokes are per-persona">
+        </figure>
+
+        <h3 id="persona-spokes">Persona spokes</h3>
+        <p>Inside one session, you use the spokes installed by <code>/set-persona</code>. These are <em>not</em> new spine commands &mdash; they are tools you call <strong>while inside</strong> a <code>/start-session</code> &rarr; <code>/next-session</code> cycle.</p>
+
+        <table>
+          <thead><tr><th>Persona</th><th>In-session spokes</th><th>What each does</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>engineer</td>
+              <td><code>/engineer-tasks</code><br><code>/engineer-implement</code></td>
+              <td>Decompose session goal into TDD-ordered tasks; then drive red &rarr; green &rarr; refactor on one task at a time</td>
+            </tr>
+            <tr>
+              <td>designer</td>
+              <td><code>/designer-extract</code><br><code>/designer-compose</code><br><code>/designer-iterate</code><br><code>/designer-handoff</code></td>
+              <td>Pull tokens from Figma; assemble components; apply review feedback; produce dev-ready spec</td>
+            </tr>
+            <tr>
+              <td>pm</td>
+              <td><code>/pm-decompose</code><br><code>/pm-validate</code><br><code>/pm-report</code></td>
+              <td>Split a PRD epic into INVEST stories; verify ACs; produce sprint status summary</td>
+            </tr>
+            <tr>
+              <td>data-scientist</td>
+              <td><code>/ds-explore</code><br><code>/ds-experiment</code><br><code>/ds-validate</code><br><code>/ds-handoff</code></td>
+              <td>EDA on a dataset; tracked-metrics experiment run; check seeds/leakage/baselines; model card + serving spec</td>
+            </tr>
+            <tr>
+              <td>devops</td>
+              <td>(no slash-spokes yet &mdash; uses shell)</td>
+              <td><code>terraform plan</code>, <code>ansible-lint</code>, <code>helm lint</code> directly</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Why &ldquo;spokes&rdquo;?</div>
+          <p>Spine = the line of stations (set-persona &rarr; setup-stack &rarr; architect &rarr; sessions). Spokes = tools that come out of one station. You walk down the spine once per project. You use spokes many times per day inside the session loop.</p>
+        </div>
+      </section>
+
+      <!-- ===== LAB 2 ===== -->
+      <section id="lab-2">
+        <h2>Lab 2 &mdash; Architect + two sessions <span class="timebox">&#9201; 60 min</span></h2>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Goal</div>
+          <p>Take an idea you actually want to build, run it through <code>/architect</code>, approve the plan, then drive two <code>/start-session</code> &rarr; <code>/next-session</code> cycles. End with a walking skeleton + at least one passing feature.</p>
+        </div>
+
+        <h3>Pick an idea</h3>
+        <p>Use something real but small. Examples by persona:</p>
+        <ul>
+          <li><strong>Engineer:</strong> a small REST API (e.g. a tasks tracker, a URL shortener, a webhook receiver), a CLI tool, a gRPC service.</li>
+          <li><strong>Designer:</strong> a component set for an existing Figma file you have access to.</li>
+          <li><strong>PM:</strong> a one-page PRD for a feature your team is actually considering.</li>
+          <li><strong>Data scientist:</strong> a small EDA + one model on a public dataset (Titanic, Iris, anything you&rsquo;ve seen before).</li>
+          <li><strong>DevOps:</strong> a small Terraform module (e.g. one S3 bucket + IAM) or one Ansible role (e.g. nginx).</li>
+        </ul>
+
+        <h3>Steps</h3>
+        <ol>
+          <li><strong>Run /architect.</strong> Either with a one-liner (<code>/architect &quot;Tasks REST API with auth&quot;</code>) or pointing at a written plan file (<code>/architect my-plan.md</code>).</li>
+          <li><strong>Wait for Phase 1 to finish.</strong> The AI produces <code>plans/sessions/*.md</code>, <code>plans/interface-contract.md</code>, and a self-audit. <strong>No code yet.</strong></li>
+          <li><strong>READ THE PLAN.</strong> Open <code>plans/sessions/session-overview.md</code> and the interface contract. Does the data model make sense? Are the phases in the right order? Is anything obvious missing?</li>
+          <li><strong>Approve or push back.</strong> Say &ldquo;approved&rdquo; (or specifically what to change). Only after approval will Phase 3 write code.</li>
+          <li><strong>Session 1.</strong> Run <code>/start-session</code>. State your goal (usually: &ldquo;make Phase 0 tests green&rdquo;). Use your persona&rsquo;s spokes (<code>/engineer-tasks</code> + <code>/engineer-implement</code>, or the equivalent). Stop when you have one working feature or you&rsquo;re out of time.</li>
+          <li><strong>Wrap.</strong> Run <code>/next-session</code>. Save the transition doc it outputs.</li>
+          <li><strong>Session 2.</strong> Run <code>/start-session</code> again. Paste the transition doc&rsquo;s &ldquo;Next step&rdquo; line as today&rsquo;s goal. Drive another feature.</li>
+          <li><strong>Wrap again</strong> with <code>/next-session</code>.</li>
+        </ol>
+
+        <h3>Checkpoint</h3>
+        <ul>
+          <li>✅ <code>ls plans/sessions/</code> shows session-overview.md + at least one session file</li>
+          <li>✅ <code>ls plans/interface-contract.md</code> exists</li>
+          <li>✅ At least one feature works end-to-end (test passes, endpoint returns 200, notebook runs, terraform plan succeeds &mdash; whatever &ldquo;works&rdquo; means in your shape)</li>
+          <li>✅ You have two transition docs from two <code>/next-session</code> calls</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">Common Lab 2 mistake</div>
+          <p>Skipping the human-review gate by saying &ldquo;ok&rdquo; without reading. Don&rsquo;t. The whole point of the gate is to catch design problems while they&rsquo;re still cheap. Spend a real five minutes reading the plan.</p>
+        </div>
+      </section>
+
+      <!-- ===== 7. Brownfield ===== -->
+      <section id="brownfield">
+        <h2>7. Adapting to an existing repo</h2>
+        <p>Real engineers spend more time on existing codebases than greenfield ones. Claude Code has a separate entry point for that: <code>/detect-stack</code>.</p>
+
+        <figure>
+          <img src="diagrams/d07-greenfield-vs-brownfield.svg" alt="Greenfield vs brownfield: two parallel pipelines that diverge only at step 2 (/setup-stack vs /detect-stack), then converge at /architect">
+        </figure>
+
+        <h3>What changes</h3>
+        <ul>
+          <li><code>/setup-stack</code> &rarr; <code>/detect-stack</code>. The AI reads your code and infers the stack instead of you picking from a list.</li>
+          <li>The detected stack may match an existing library entry (great &mdash; you get the prebuilt rules) or it may be custom (you get a fresh stack scaffolded under <code>stacks/detected-{name}/</code>).</li>
+          <li>Everything downstream is the same. <code>/architect</code> still produces session files, the session loop still applies, persona spokes still work.</li>
+        </ul>
+
+        <h3>When to use which</h3>
+        <table>
+          <thead><tr><th>Use&hellip;</th><th>When&hellip;</th></tr></thead>
+          <tbody>
+            <tr><td><code>/setup-stack</code></td><td>Empty folder, fresh project. You know the stack you want.</td></tr>
+            <tr><td><code>/detect-stack</code></td><td>Existing repo with code. You want the AI to learn <em>your</em> patterns.</td></tr>
+            <tr><td><code>/setup-stack</code> with merge mode</td><td>Existing repo, but you want to also apply library rules and reconcile per-file.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ===== LAB 3 ===== -->
+      <section id="lab-3">
+        <h2>Lab 3 &mdash; Adapt to your real repo <span class="timebox">&#9201; 40 min</span></h2>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Goal</div>
+          <p>Take a real codebase you already work on, install the workflow, run <code>/detect-stack</code>, and confirm the AI now &ldquo;understands&rdquo; your repo&rsquo;s conventions.</p>
+        </div>
+
+        <h3>Steps</h3>
+        <ol>
+          <li>Pick a repo from your real work. Anything with at least a few files of source code in one primary language.</li>
+          <li><code>cp -r /path/to/cursor-course-templates/.claude .</code> into that repo. (Don&rsquo;t commit it yet &mdash; you may want to <code>.gitignore</code> the local config or move it to a branch.)</li>
+          <li>Start Claude Code in the repo: <code>claude</code>.</li>
+          <li>Run <code>/set-persona</code>. Pick the persona that matches what you do in that repo.</li>
+          <li>Run <code>/detect-stack</code>. Let it scan. Read what it reports.</li>
+          <li>Open the generated context file. Does it correctly identify your framework, your testing tool, your conventions? If not, edit it &mdash; the file is yours.</li>
+          <li>Ask Claude a question about your real code: &ldquo;What does <code>UserService.create</code> do?&rdquo; or &ldquo;Where are tests for the auth flow?&rdquo; Confirm the answers reference your actual files, not generic guesses.</li>
+        </ol>
+
+        <h3>Checkpoint</h3>
+        <ul>
+          <li>✅ <code>/detect-stack</code> ran without errors and identified at least the language and framework</li>
+          <li>✅ The generated context file references real files / patterns from your repo</li>
+          <li>✅ Claude can answer a specific question about real code in your repo</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">If the detection is wrong</div>
+          <p>Don&rsquo;t fight it &mdash; just edit the generated context file. <code>/detect-stack</code> is a starting point, not a verdict. The file is markdown; rewriting it takes five minutes.</p>
+        </div>
+      </section>
+
+      <!-- ===== 8. /undo ===== -->
+      <section id="undo">
+        <h2>8. /undo &mdash; the safety valve</h2>
+        <p>The pipeline writes files. Lots of files &mdash; rules, templates, manifests, context. If you want to switch personas, switch stacks, or just start over, you need a clean way to remove everything you installed.</p>
+        <p><code>/undo</code> reads the manifests that <code>/set-persona</code> and <code>/setup-stack</code> wrote and deletes exactly those files. Nothing more, nothing less.</p>
+
+        <figure>
+          <img src="diagrams/d08-undo-manifest-flow.svg" alt="Undo flow: /set-persona and /setup-stack each write a manifest; /undo reads the manifests and removes exactly those files">
+        </figure>
+
+        <h3>Three modes</h3>
+        <table>
+          <thead><tr><th>Command</th><th>Reverses&hellip;</th><th>Use when&hellip;</th></tr></thead>
+          <tbody>
+            <tr><td><code>/undo persona</code></td><td>Persona pack install</td><td>You want to switch from engineer to data-scientist</td></tr>
+            <tr><td><code>/undo stack</code></td><td>Stack rules + templates install</td><td>You want to swap python-fastapi for go-gin</td></tr>
+            <tr><td><code>/undo all</code></td><td>Both</td><td>Start completely over</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <div class="callout-title">Why this matters</div>
+          <p>Without <code>/undo</code>, switching personas or stacks leaves stale files behind &mdash; old rules that contradict new ones, old commands that don&rsquo;t fit. Manifest-based undo means experimentation is safe. Try engineer + python-fastapi, then <code>/undo all</code> and try data-scientist + python-spark. No residue.</p>
+        </div>
+      </section>
+
+      <!-- ===== 9. Adapt at work ===== -->
+      <section id="adapt-table">
+        <h2>9. What you learned &mdash; adapt it at work</h2>
+        <p>You now know enough to take this workflow back to your real job. Here&rsquo;s the one-page conversion table.</p>
+
+        <table class="adapt-table">
+          <thead>
+            <tr><th>You learned to&hellip;</th><th>At work, this means&hellip;</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pick a persona</td>
+              <td>Be explicit about <em>which job</em> you&rsquo;re doing right now. The same person can wear engineer hat in the morning, designer hat in the afternoon &mdash; but never both in one session. Switch with <code>/undo persona</code> + <code>/set-persona</code>.</td>
+            </tr>
+            <tr>
+              <td>Pick a stack (or detect one)</td>
+              <td>Make the AI&rsquo;s assumptions match your codebase. Greenfield: pick from the library or scaffold a new stack from <code>stacks/blank/</code>. Brownfield: <code>/detect-stack</code> and then edit the generated context to match reality.</td>
+            </tr>
+            <tr>
+              <td>Run <code>/architect</code> with a human gate</td>
+              <td>Never let the AI ship code from a one-line idea. Always read the plan first. The gate is the cheapest place to catch design problems.</td>
+            </tr>
+            <tr>
+              <td>Drive sessions with persona spokes</td>
+              <td>Inside a session, use the spokes for your role &mdash; don&rsquo;t freestyle. Engineer: <code>/engineer-tasks</code> then <code>/engineer-implement</code>. The spokes are what give the AI structure within a session.</td>
+            </tr>
+            <tr>
+              <td>End each session with <code>/next-session</code></td>
+              <td>Always close the loop. The transition doc is what makes tomorrow productive instead of confused. Paste it as the goal for the next <code>/start-session</code>.</td>
+            </tr>
+            <tr>
+              <td>Use <code>/undo</code> when things drift</td>
+              <td>If your config feels stale, don&rsquo;t debug it &mdash; reset it. <code>/undo all</code>, <code>/set-persona</code>, <code>/setup-stack</code>. Two minutes, clean slate.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">First thing to do Monday</div>
+          <p>Pick one real repo at work. Copy <code>.claude/</code> + <code>CLAUDE.md</code> into it. Run <code>/set-persona</code> + <code>/detect-stack</code>. Ask Claude one question about your actual code. If the answer is grounded in real files, you&rsquo;ve adopted the workflow. The rest follows from there.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <p>Claude Code Class &mdash; 3-hour workflow class. Materials in <code>materials/</code>; advanced reference in <code>materials/_old/</code>.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+</body>
+</html>
+

@@ -1,0 +1,23 @@
+flowchart TB
+  CTX(["CLAUDE.md /<br/>.cursor/context.md<br/>(project brain)"])
+
+  SP["/set-persona<br/><i>writes persona</i>"]
+  SS["/setup-stack<br/><i>writes stack</i>"]
+  AR["/architect<br/><i>writes plan</i>"]
+  ST["/start-session<br/><i>loads + executes</i>"]
+  NS["/next-session<br/><i>wraps + hands off</i>"]
+  DS["/detect-stack<br/><i>brownfield entry</i>"]
+
+  SP --> CTX
+  SS --> CTX
+  AR --> CTX
+  ST --> CTX
+  NS --> CTX
+  DS --> CTX
+
+  classDef ctx fill:#ede7f6,stroke:#4527a0,color:#000,font-weight:bold;
+  classDef spine fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef side fill:#00897b,stroke:#004d40,color:#fff;
+  class CTX ctx;
+  class SP,SS,AR,ST,NS spine;
+  class DS side;

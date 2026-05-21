@@ -1,0 +1,40 @@
+flowchart LR
+  subgraph P["Persona (who you are)"]
+    direction TB
+    P1[engineer]
+    P2[designer]
+    P3[pm]
+    P4[data-scientist]
+    P5[devops]
+  end
+
+  subgraph S["Stack (your tech)"]
+    direction TB
+    S1[python-fastapi<br/>go-gin<br/>node-express<br/>...]
+    S2["(none — Figma)"]
+    S3["(none — PRDs)"]
+    S4[python-datascience<br/>python-spark<br/>r-tidyverse<br/>...]
+    S5[devops-terraform<br/>devops-ansible<br/>devops-k8s-helm]
+  end
+
+  subgraph A["Architecture Shape (what /architect produces)"]
+    direction TB
+    A1[REST API / gRPC]
+    A2[Component tree]
+    A3[PRD]
+    A4[Notebook / Pipeline]
+    A5[IaC Playbook / Modules]
+  end
+
+  P1 --> S1 --> A1
+  P2 --> S2 --> A2
+  P3 --> S3 --> A3
+  P4 --> S4 --> A4
+  P5 --> S5 --> A5
+
+  classDef persona fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef stack fill:#00897b,stroke:#004d40,color:#fff;
+  classDef shape fill:#ff8f00,stroke:#bf360c,color:#fff;
+  class P1,P2,P3,P4,P5 persona;
+  class S1,S2,S3,S4,S5 stack;
+  class A1,A2,A3,A4,A5 shape;

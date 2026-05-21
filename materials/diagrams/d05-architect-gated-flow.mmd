@@ -1,0 +1,31 @@
+flowchart TB
+  IDEA["One-line idea<br/>or plan.md"]
+
+  subgraph P1["Phase 1 — Design"]
+    direction TB
+    D1[Read persona + stack]
+    D2["Produce plans/sessions/*.md<br/>+ interface-contract.md"]
+    D3[Self-audit:<br/>manifest diff, coverage diff,<br/>structured critique]
+    D1 --> D2 --> D3
+  end
+
+  GATE{{"⛔ Phase 2 — Human review gate<br/>Read &amp; approve"}}
+
+  subgraph P3["Phase 3 — Scaffold"]
+    direction TB
+    S1[Walking skeleton code]
+    S2[Stubbed failing tests]
+    S1 --- S2
+  end
+
+  IDEA --> P1
+  P1 --> GATE
+  GATE -->|approve| P3
+  GATE -->|reject &amp; revise| P1
+
+  classDef phase fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef gate fill:#e65100,stroke:#bf360c,color:#fff,font-weight:bold;
+  classDef idea fill:#ede7f6,stroke:#4527a0,color:#000;
+  class P1,P3 phase;
+  class GATE gate;
+  class IDEA idea;

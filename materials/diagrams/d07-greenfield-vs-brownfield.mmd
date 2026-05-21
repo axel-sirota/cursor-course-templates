@@ -1,0 +1,23 @@
+flowchart LR
+  subgraph G["Greenfield (empty folder)"]
+    direction LR
+    G1["/set-persona"] --> G2["/setup-stack<br/><i>pick from library</i>"]
+    G2 --> G3["/architect"] --> G4["/start-session<br/>&harr; /next-session"]
+  end
+
+  subgraph B["Brownfield (existing repo)"]
+    direction LR
+    B1["/set-persona"] --> B2["/detect-stack<br/><i>scan &amp; infer</i>"]
+    B2 --> B3["/architect"] --> B4["/start-session<br/>&harr; /next-session"]
+  end
+
+  G ~~~ B
+
+  classDef green fill:#e8f5e9,stroke:#2e7d32,color:#000;
+  classDef brown fill:#efebe9,stroke:#5d4037,color:#000;
+  classDef spine fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef diff fill:#ff8f00,stroke:#bf360c,color:#fff,font-weight:bold;
+  class G green;
+  class B brown;
+  class G1,G3,G4,B1,B3,B4 spine;
+  class G2,B2 diff;

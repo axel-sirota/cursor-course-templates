@@ -1,0 +1,98 @@
+---
+description: Testing strategy (blog flavor)
+alwaysApply: true
+---
+
+# Testing Strategy
+
+## Slice Selection
+| Slice | Annotation | Loads | Use For |
+|---|---|---|---|
+| Controller | `@WebMvcTest(XxxController.class)` | Web layer only | HTTP mapping, validation, serialization |
+| Service | none (plain JUnit + Mockito) | Nothing | Business logic |
+| Repository | `@DataJpaTest` + `@Testcontainers` | JPA + Postgres | Queries, custom finders, constraints |
+| Full | `@SpringBootTest` | Everything | Cross-layer integration, rare |
+
+## Test Naming
+`methodName_whenCondition_thenExpectedOutcome`. Examples from this repo:
+- `list_whenServiceReturnsPosts_thenReturns200WithBody`
+- `create_whenBlankFields_thenReturns400`
+- `get_whenMissing_thenReturns404`
+- `update_whenFound_thenReturns200WithUpdated`
+
+## Controller Tests — `@WebMvcTest` + `@MockBean`
+```java
+@WebMvcTest(PostController.class)
+class PostControllerTest {
+    @Autowired MockMvc mvc;
+    @Autowired ObjectMapper json;
+    @MockBean PostService service;
+
+    @Test
+    void create_whenValidRequest_thenReturns201() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(service.create(any(PostDto.class))).thenReturn(new PostDto(id, "T", "B", "A", Instant.now()));
+
+        mvc.perform(post("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(new PostDto(null, "T", "B", "A", null))))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").value(id.toString()));
+    }
+}
+```
+
+## Service Tests — Pure Mockito, No Spring
+```java
+@ExtendWith(MockitoExtension.class)
+class PostServiceTest {
+    @Mock PostRepository repo;
+    @Mock PostMapper mapper;
+    @InjectMocks PostService service;
+
+    @Test
+    void get_whenMissing_thenThrowsNotFoundException() {
+        UUID id = UUID.randomUUID();
+        when(repo.findById(id)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.get(id)).isInstanceOf(NotFoundException.class);
+    }
+}
+```
+
+## Repository Tests — `@DataJpaTest` + Testcontainers (Postgres, not H2)
+```java
+@DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+class JpaPostRepositoryTest {
+
+    @Container
+    static PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+
+    @DynamicPropertySource
+    static void props(DynamicPropertyRegistry r) {
+        r.add("spring.datasource.url", pg::getJdbcUrl);
+        r.add("spring.datasource.username", pg::getUsername);
+        r.add("spring.datasource.password", pg::getPassword);
+    }
+
+    @Autowired JpaPostRepository repo;
+
+    @Test
+    void save_whenNewPost_thenFindByIdReturnsIt() {
+        UUID id = UUID.randomUUID();
+        repo.save(new Post(id, "T", "B", "A", Instant.now()));
+        assertThat(repo.findById(id)).isPresent();
+    }
+}
+```
+
+`@AutoConfigureTestDatabase(replace = Replace.NONE)` is mandatory — otherwise Spring swaps in H2 and the test lies.
+
+## Reuse Containers
+Declare `PostgreSQLContainer` as `static` to start once per class. For repo-wide reuse, use the Testcontainers singleton pattern.
+
+## What NOT to Test
+- Getters/setters/constructors on entities
+- MapStruct mappers (the generated impl is tested by the controller/service tests that round-trip through it)
+- Spring framework internals

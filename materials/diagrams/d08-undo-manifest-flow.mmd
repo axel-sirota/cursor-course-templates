@@ -1,0 +1,17 @@
+flowchart LR
+  SP["/set-persona"] --> M1[(".persona-manifest.json<br/><i>tracks every file written</i>")]
+  SS["/setup-stack"] --> M2[(".stack-manifest.json<br/><i>tracks every file written</i>")]
+
+  M1 --> U[/"/undo<br/>persona | stack | all"/]
+  M2 --> U
+
+  U --> R[["Remove exactly<br/>those files.<br/>Nothing more,<br/>nothing less."]]
+
+  classDef install fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef manifest fill:#ede7f6,stroke:#4527a0,color:#000;
+  classDef undo fill:#e65100,stroke:#bf360c,color:#fff,font-weight:bold;
+  classDef result fill:#e8f5e9,stroke:#2e7d32,color:#000;
+  class SP,SS install;
+  class M1,M2 manifest;
+  class U undo;
+  class R result;

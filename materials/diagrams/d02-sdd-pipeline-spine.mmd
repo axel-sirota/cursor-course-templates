@@ -1,0 +1,19 @@
+flowchart LR
+  SP["/set-persona"] --> SS["/setup-stack<br/><i>(engineer / ds / devops only)</i>"]
+  SS --> AR["/architect"]
+  AR --> ST["/start-session"]
+  ST --> NS["/next-session"]
+  NS -->|next day| ST
+
+  SP -.->|designer / pm<br/>skip stack| AR
+
+  UN(["/undo persona | stack | all"])
+  SP -. safety valve .-> UN
+  SS -. safety valve .-> UN
+
+  classDef spine fill:#7c4dff,stroke:#4527a0,color:#fff,font-weight:bold;
+  classDef loop fill:#00897b,stroke:#004d40,color:#fff,font-weight:bold;
+  classDef undo fill:#e65100,stroke:#bf360c,color:#fff;
+  class SP,SS,AR spine;
+  class ST,NS loop;
+  class UN undo;

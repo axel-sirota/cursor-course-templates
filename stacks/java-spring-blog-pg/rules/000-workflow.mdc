@@ -1,0 +1,35 @@
+---
+description: Spring Boot + Postgres TDD workflow (blog flavor)
+alwaysApply: true
+---
+
+# Workflow Rules
+
+## TDD Loop
+Red → Green → Refactor:
+1. Write a failing `@WebMvcTest` (controller), service unit test (Mockito), or `@DataJpaTest` + Testcontainers (repository).
+2. Implement the minimum code to make it pass.
+3. Refactor with tests green.
+
+Never write production code without a failing test first.
+
+## Test Slice First
+Default to the narrowest slice. Reach for `@SpringBootTest` only when you must verify cross-layer wiring (e.g. transactional boundaries across services). One per feature, max.
+
+## Postgres in Tests
+Repository tests run against **real Postgres via Testcontainers**, never H2. The in-memory dialect lies about constraints, JSON, and `RETURNING`.
+
+## Branch + CI
+- Feature branch per ticket.
+- `mvn verify` green (tests + Spotless) before opening a PR.
+- Merge only after CI passes.
+
+## No Logic in `@SpringBootApplication`
+`BlogApplication.java` only bootstraps the context. All beans go in dedicated `@Configuration` classes or are component-scanned.
+
+## Health Endpoint
+Expose `/actuator/health` for compose/k8s probes:
+```properties
+management.endpoints.web.exposure.include=health
+management.endpoint.health.show-details=when_authorized
+```

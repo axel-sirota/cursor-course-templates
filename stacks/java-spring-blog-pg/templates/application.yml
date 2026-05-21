@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: blog
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/blog}
+    username: ${SPRING_DATASOURCE_USERNAME:blog}
+    password: ${SPRING_DATASOURCE_PASSWORD:blog}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when_authorized
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
