@@ -3,7 +3,7 @@
 > **Default persona: engineer.** Run `@set-persona` to switch to a different role, then `@setup-stack` (engineer / data-scientist / devops only), then `@start-session`.
 
 ## Active Persona
-data-scientist
+(none)
 
 ## Active Client
 (none)
