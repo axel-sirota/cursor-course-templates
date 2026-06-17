@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerable Blog API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        .vulnerable { background-color: #ffe6e6; border-color: #ff9999; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vulnerable Blog API - Security Testing Interface</h1>
+        
+        <div class="section vulnerable">
+            <h2>⚠️ Security Vulnerabilities Present</h2>
+            <p>This application contains intentional security vulnerabilities for educational purposes:</p>
+            <ul>
+                <li>SQL Injection vulnerabilities</li>
+                <li>No input validation</li>
+                <li>Weak password hashing (MD5)</li>
+                <li>Hardcoded JWT secret</li>
+                <li>No authentication on sensitive endpoints</li>
+                <li>Information disclosure</li>
+                <li>Potential XSS vulnerabilities</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>User Registration</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="reg_username">Username:</label>
+                    <input type="text" id="reg_username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg_email">Email:</label>
+                    <input type="email" id="reg_email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg_password">Password:</label>
+                    <input type="password" id="reg_password" name="password" required>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <div id="registerResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>User Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="login_username">Username:</label>
+                    <input type="text" id="login_username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login_password">Password:</label>
+                    <input type="password" id="login_password" name="password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div id="loginResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>Create Post</h2>
+            <form id="postForm">
+                <div class="form-group">
+                    <label for="post_title">Title:</label>
+                    <input type="text" id="post_title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="post_content">Content:</label>
+                    <textarea id="post_content" name="content" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="post_author_id">Author ID:</label>
+                    <input type="number" id="post_author_id" name="author_id" required>
+                </div>
+                <button type="submit">Create Post</button>
+            </form>
+            <div id="postResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>Search Posts</h2>
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="search_query">Search Query:</label>
+                    <input type="text" id="search_query" name="q" placeholder="Try: ' OR 1=1 --" required>
+                </div>
+                <button type="submit">Search</button>
+            </form>
+            <div id="searchResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>API Endpoints</h2>
+            <button onclick="loadUsers()">Load All Users</button>
+            <button onclick="loadPosts()">Load All Posts</button>
+            <button onclick="loadAdmin()">Access Admin Panel</button>
+            <button onclick="loadDebug()">Debug Information</button>
+            <div id="apiResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Registration
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResult('registerResult', result);
+            } catch (error) {
+                showResult('registerResult', { error: error.message }, 'error');
+            }
+        });
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                showResult('loginResult', result);
+            } catch (error) {
+                showResult('loginResult', { error: error.message }, 'error');
+            }
+        });
+
+        // Create Post
+        document.getElementById('postForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            data.author_id = parseInt(data.author_id);
+            
+            try {
+                const response = await fetch('/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResult('postResult', result);
+            } catch (error) {
+                showResult('postResult', { error: error.message }, 'error');
+            }
+        });
+
+        // Search
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const query = formData.get('q');
+            
+            try {
+                const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+                const result = await response.json();
+                showResult('searchResult', result);
+            } catch (error) {
+                showResult('searchResult', { error: error.message }, 'error');
+            }
+        });
+
+        // API Functions
+        async function loadUsers() {
+            try {
+                const response = await fetch('/users');
+                const result = await response.json();
+                showResult('apiResult', result);
+            } catch (error) {
+                showResult('apiResult', { error: error.message }, 'error');
+            }
+        }
+
+        async function loadPosts() {
+            try {
+                const response = await fetch('/posts');
+                const result = await response.json();
+                showResult('apiResult', result);
+            } catch (error) {
+                showResult('apiResult', { error: error.message }, 'error');
+            }
+        }
+
+        async function loadAdmin() {
+            try {
+                const response = await fetch('/admin');
+                const result = await response.json();
+                showResult('apiResult', result);
+            } catch (error) {
+                showResult('apiResult', { error: error.message }, 'error');
+            }
+        }
+
+        async function loadDebug() {
+            try {
+                const response = await fetch('/debug');
+                const result = await response.json();
+                showResult('apiResult', result);
+            } catch (error) {
+                showResult('apiResult', { error: error.message }, 'error');
+            }
+        }
+
+        function showResult(elementId, data, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${type}`;
+            element.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+    </script>
+</body>
+</html>
