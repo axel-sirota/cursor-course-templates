@@ -403,6 +403,7 @@
       <li><a href="#agents">10. Subagents &amp; Worktrees</a></li>
       <li><a href="#settings">11. Settings &amp; Permissions</a></li>
       <li><a href="#memory">12. Memory System</a></li>
+      <li><a href="#references">13. References</a></li>
     </ul>
   </details>
 
@@ -451,6 +452,7 @@
           <li class="sub"><a href="#permissions">Permissions</a></li>
           <li class="sub"><a href="#keybindings">Keybindings</a></li>
           <li><a href="#memory">12. Memory</a></li>
+          <li><a href="#references">13. References</a></li>
         </ul>
       </nav>
     </aside>
@@ -465,9 +467,9 @@
         <h3 id="what-is-claude-code">What is Claude Code?</h3>
         <p>
           <strong>Claude Code</strong> is Anthropic&rsquo;s official agentic coding CLI. Unlike IDE-based
-          AI tools, Claude Code runs in your terminal and works with <em>any</em> editor. It reads your
-          codebase, edits files, runs commands, manages git, and integrates with external tools &mdash;
-          all through natural language conversation.
+          AI tools, Claude Code runs in your terminal and works with <em>any</em> editor. You describe
+          what you want in natural language, and it reads your codebase, edits files, runs commands,
+          manages git, and calls external tools to get it done.
         </p>
 
         <table class="comparison-table">
@@ -524,29 +526,24 @@
 
         <h3 id="agentic-engineering">The Agentic Engineering Philosophy</h3>
         <p>
-          Claude Code embodies the same fundamental truth as Cursor: <strong>AI is context-hungry</strong>.
-          Generic prompts produce generic code. But when you give the AI:
-        </p>
-        <ul>
-          <li>A clear technology stack (<code>CLAUDE.md</code>)</li>
-          <li>Explicit rules (<code>.claude/rules/</code>)</li>
-          <li>A structured workflow (Phase-Based Development)</li>
-          <li>Bounded sessions (<code>/start-session</code> &rarr; code &rarr; <code>/next-session</code>)</li>
-        </ul>
-        <p>
-          &hellip;you get consistent, professional, maintainable code that follows your standards.
+          Claude Code, like Cursor, is only as good as the context you give it &mdash;
+          <strong>AI is context-hungry</strong>, and generic prompts produce generic code. Give it a
+          clear technology stack (<code>CLAUDE.md</code>), explicit rules (<code>.claude/rules/</code>),
+          a structured workflow (Phase-Based Development), and bounded sessions
+          (<code>/start-session</code> &rarr; code &rarr; <code>/next-session</code>), and the code it
+          produces follows your standards.
         </p>
 
         <blockquote class="philosophy">
-          &ldquo;Explicit is better than implicit. Consistency is better than cleverness.&rdquo;
+          Write rules that are explicit and consistent, not clever.
         </blockquote>
 
         <div class="callout callout-tip">
           <div class="callout-title">Key Insight</div>
           <p>
-            Claude Code follows the Unix philosophy: composable, scriptable, and integrates with your
-            existing tools through pipes, flags, and configuration files. The more context you provide
-            via CLAUDE.md and rules, the better it performs.
+            Claude Code follows the Unix philosophy: it's a composable CLI tool that scripts into your
+            existing pipes, flags, and configuration files. The more context you provide via CLAUDE.md
+            and rules, the better it performs.
           </p>
         </div>
       </section>
@@ -555,9 +552,8 @@
       <section id="core-features">
         <h2>2. Core Features &amp; Tools</h2>
         <p>
-          Claude Code provides an agentic loop: you ask a question, Claude uses tools to gather context
-          and make changes, reports results, and waits for feedback. Understanding the tools is key to
-          productive AI-assisted development.
+          Claude Code runs an agentic loop: you ask a question, Claude uses tools to gather context
+          and make changes, reports results, and waits for feedback. Here's what each tool does.
         </p>
 
         <div class="mermaid">
@@ -607,7 +603,7 @@ flowchart TB
 
         <div class="callout callout-info">
           <div class="callout-title">When to Use Which Interface</div>
-          <p><strong>Interactive (<code>claude</code>)</strong>: Full agentic coding &mdash; features, TDD, multi-file changes</p>
+          <p><strong>Interactive (<code>claude</code>)</strong>: full agentic coding for features, TDD, multi-file changes</p>
           <p><strong>Headless (<code>claude -p</code>)</strong>: Quick queries, CI/CD integration, scripting</p>
           <p><strong>Pipe (<code>cat file | claude -p</code>)</strong>: Process data, explain logs, transform content</p>
           <p><strong>IDE Extension</strong>: Visual diff review, inline context, file navigation</p>
@@ -844,10 +840,10 @@ paths:
 
         <div class="callout callout-tip">
           <div class="callout-title">Best Practices (same as Cursor rules)</div>
-          <p><strong>Keep files under 200 lines</strong> &mdash; Large files dilute attention. Split into composable rules.</p>
-          <p><strong>Be specific</strong> &mdash; &ldquo;Use snake_case for variables&rdquo; beats &ldquo;follow Python conventions.&rdquo;</p>
-          <p><strong>Path-scope when possible</strong> &mdash; API rules shouldn&rsquo;t load when editing Docker configs.</p>
-          <p><strong>Composable over monolithic</strong> &mdash; Many focused files beat one giant CLAUDE.md.</p>
+          <p><strong>Keep files under 200 lines.</strong> Large files dilute attention, so split into composable rules.</p>
+          <p><strong>Be specific.</strong> &ldquo;Use snake_case for variables&rdquo; beats &ldquo;follow Python conventions.&rdquo;</p>
+          <p><strong>Path-scope when possible.</strong> API rules shouldn&rsquo;t load when editing Docker configs.</p>
+          <p><strong>Composable over monolithic.</strong> Many focused files beat one giant CLAUDE.md.</p>
         </div>
       </section>
 
@@ -898,7 +894,7 @@ paths:
             <tr><th>Skill</th><th>Purpose</th></tr>
           </thead>
           <tbody>
-            <tr><td class="cmd-name">/batch</td><td>Decompose large changes into 5&ndash;30 parallel tasks across git worktrees</td></tr>
+            <tr><td class="cmd-name">/batch</td><td>Decompose large changes into parallel tasks across git worktrees<sup><a href="#ref-1">[1]</a></sup></td></tr>
             <tr><td class="cmd-name">/claude-api</td><td>Load Claude API reference (Python, TypeScript, etc.)</td></tr>
             <tr><td class="cmd-name">/debug</td><td>Troubleshoot current session by reading debug logs</td></tr>
             <tr><td class="cmd-name">/loop</td><td>Run a prompt repeatedly on an interval (e.g., <code>/loop 5m check deploy</code>)</td></tr>
@@ -1001,10 +997,10 @@ sequenceDiagram
       <section id="sdd-tdd">
         <h2>5. Schema-Driven Development &amp; TDD</h2>
         <p>
-          This methodology combines <strong>Schema-Driven Development (SDD)</strong>
-          &mdash; designing the API contract first &mdash; and <strong>Test-Driven Development (TDD)</strong>
-          &mdash; writing tests before implementation. The approach is identical whether you use
-          Cursor or Claude Code &mdash; only the invocation syntax changes.
+          This methodology combines <strong>Schema-Driven Development (SDD)</strong>, designing the API
+          contract first, and <strong>Test-Driven Development (TDD)</strong>, writing tests before
+          implementation. The steps are the same in Cursor and Claude Code; only the invocation syntax
+          changes.
         </p>
 
         <h3 id="schema-driven">Schema-Driven Development (SDD)</h3>
@@ -1046,7 +1042,8 @@ sequenceDiagram
           <p>
             When you tell the AI &ldquo;build a blog API,&rdquo; you might get 10 different designs.
             With SDD, you <em>lock in the contract</em> during <code>/architect</code>, and the AI
-            follows that contract exactly during implementation. No surprises, no drift.
+            follows that contract exactly during implementation, so the design doesn't drift between
+            sessions.
           </p>
         </div>
 
@@ -1112,10 +1109,10 @@ flowchart TB
 - Tests MUST pass before phase transition</code></pre>
 
         <div class="callout callout-warning">
-          <div class="callout-title">The Golden Rule</div>
+          <div class="callout-title">Don't Skip the Red Step</div>
           <p>
-            <strong>Never skip the red step.</strong> If the AI writes implementation code without
-            a failing test first, it&rsquo;s violating the workflow. The CLAUDE.md rules enforce this.
+            If the AI writes implementation code without a failing test first, it&rsquo;s violating
+            the workflow. The CLAUDE.md rules enforce this.
           </p>
         </div>
 
@@ -1228,8 +1225,7 @@ class PostService:
       <section id="workflow">
         <h2>6. The Workflow</h2>
         <p>
-          The methodology is built on four core principles:
-          <strong>Phase-Based Development</strong>, <strong>TDD</strong>,
+          The workflow combines <strong>Phase-Based Development</strong>, <strong>TDD</strong>,
           <strong>Bounded Sessions</strong>, and <strong>Context-First AI</strong>.
         </p>
 
@@ -1355,6 +1351,7 @@ claude auth login
 git clone https://github.com/your-org/cursor-course-templates.git
 cd cursor-course-templates
 claude</code></pre>
+            <p class="citation-note">Installation command shown above.<sup><a href="#ref-2">[2]</a></sup></p>
             <div class="screenshot-placeholder">[Screenshot: Claude Code CLI opens with welcome message]</div>
           </li>
 
@@ -1469,9 +1466,9 @@ async def test_create_post(client: AsyncClient):
       <section id="hooks">
         <h2>8. Hooks System</h2>
         <p>
-          Hooks are lifecycle interceptors defined in <code>.claude/settings.json</code>. They let you
-          run shell commands <em>before</em> or <em>after</em> specific AI actions &mdash; format code,
-          block dangerous operations, inject context, and more.
+          Hooks are lifecycle interceptors defined in <code>.claude/settings.json</code>. They run shell
+          commands <em>before</em> or <em>after</em> specific AI actions, for example to format code,
+          block dangerous operations, or inject context.
         </p>
 
         <h3>Configuration Format</h3>
@@ -1503,7 +1500,7 @@ async def test_create_post(client: AsyncClient):
   }
 }</code></pre>
 
-        <h3 id="hook-events">Lifecycle Events</h3>
+        <h3 id="hook-events">Lifecycle Events<sup><a href="#ref-3">[3]</a></sup></h3>
         <table>
           <thead>
             <tr><th>Category</th><th>Event</th><th>When It Fires</th></tr>
@@ -1555,7 +1552,7 @@ async def test_create_post(client: AsyncClient):
             </tr>
             <tr>
               <td><strong>Prompt</strong> (<code>"type": "prompt"</code>)</td>
-              <td>Single LLM call (Haiku)</td>
+              <td>Single LLM call<sup><a href="#ref-4">[4]</a></sup></td>
               <td>Quick validation, content checks</td>
             </tr>
             <tr>
@@ -1574,9 +1571,14 @@ async def test_create_post(client: AsyncClient):
           <tbody>
             <tr><td><code>0</code></td><td>Success</td><td>Action proceeds normally</td></tr>
             <tr><td><code>2</code></td><td>Block</td><td>Action is prevented (write reason to stderr)</td></tr>
-            <tr><td>Other</td><td>Failure</td><td><strong>Fail-open</strong>: action proceeds anyway</td></tr>
+            <tr><td>Other</td><td>Failure</td><td><strong>Fail-open</strong>: action proceeds anyway<sup><a href="#ref-5">[5]</a></sup></td></tr>
           </tbody>
         </table>
+        <p class="citation-note">
+          Any exit code other than 0 or 2 is treated as a non-blocking error and the action
+          proceeds anyway (fails open) &mdash; except <code>WorktreeCreate</code>, where any
+          non-zero exit code fails the worktree creation.
+        </p>
 
         <h3>Configuration Levels</h3>
         <p>Hooks are merged in priority order:</p>
@@ -1665,9 +1667,9 @@ sequenceDiagram
       <section id="mcp">
         <h2>9. MCP Servers (Model Context Protocol)</h2>
         <p>
-          MCP is Claude Code&rsquo;s extension system &mdash; the equivalent of VS Code extensions for
-          Cursor. MCP servers provide external tools that Claude can use: databases, APIs, browsers,
-          web scrapers, and more.
+          MCP is Claude Code&rsquo;s extension system, roughly equivalent to VS Code extensions for
+          Cursor. MCP servers give Claude access to external tools such as databases, APIs, browsers,
+          and web scrapers.
         </p>
 
         <h3 id="mcp-config">Configuration</h3>
@@ -1698,15 +1700,15 @@ sequenceDiagram
   }
 }</code></pre>
 
-        <h4>Configuration Scopes</h4>
+        <h4>Configuration Scopes<sup><a href="#ref-6">[6]</a></sup></h4>
         <table>
           <thead>
             <tr><th>Scope</th><th>Location</th><th>Shared?</th></tr>
           </thead>
           <tbody>
-            <tr><td>User</td><td><code>~/.claude/mcp.json</code></td><td>No &mdash; personal, all projects</td></tr>
-            <tr><td>Project</td><td><code>.mcp.json</code> or <code>.claude/mcp.json</code></td><td>Yes &mdash; team-shared</td></tr>
-            <tr><td>Local</td><td><code>.claude/mcp-local.json</code></td><td>No &mdash; personal, this project</td></tr>
+            <tr><td>Local</td><td><code>~/.claude.json</code> (keyed to the project path)</td><td>No &mdash; personal, current project only (default)</td></tr>
+            <tr><td>Project</td><td><code>.mcp.json</code> at the project root</td><td>Yes &mdash; team-shared via version control</td></tr>
+            <tr><td>User</td><td><code>~/.claude.json</code></td><td>No &mdash; personal, all projects</td></tr>
           </tbody>
         </table>
 
@@ -1767,11 +1769,18 @@ sequenceDiagram
             <tr><th>Agent</th><th>Purpose</th><th>Model</th><th>Tools</th></tr>
           </thead>
           <tbody>
-            <tr><td><strong>Explore</strong></td><td>Fast read-only codebase research</td><td>Haiku</td><td>Read, Grep, Glob (no edits)</td></tr>
+            <tr><td><strong>Explore</strong></td><td>Fast read-only codebase research</td><td>Inherited (capped at Opus)<sup><a href="#ref-7">[7]</a></sup></td><td>Read, Grep, Glob (no edits)</td></tr>
             <tr><td><strong>Plan</strong></td><td>Pre-implementation design &amp; architecture</td><td>Inherited</td><td>Read, Grep, Glob (no edits)</td></tr>
             <tr><td><strong>general-purpose</strong></td><td>Complex multi-step tasks</td><td>Inherited</td><td>All tools</td></tr>
           </tbody>
         </table>
+        <p class="citation-note">
+          As of Claude Code v2.1.198, the built-in Explore subagent no longer runs on a fixed
+          Haiku model &mdash; it inherits the main conversation&rsquo;s model (capped at Opus on
+          the Claude API). Prior versions defaulted Explore to Haiku; a user/project subagent
+          named Explore can still be defined with <code>model: haiku</code> to force the
+          lower-cost model.
+        </p>
 
         <h3 id="custom-agents">Custom Agents</h3>
         <p>
@@ -1839,8 +1848,9 @@ claude --worktree
           <div class="callout-title">Parallel Development Pattern</div>
           <p>
             Use <code>/batch</code> for large refactors. It decomposes the task into 5&ndash;30 parallel
-            subtasks, each running in its own git worktree with a dedicated subagent. Results are
-            merged back into your branch automatically.
+            subtasks<sup><a href="#ref-8">[8]</a></sup>, each running in its own git worktree with a dedicated subagent.
+            Each subtask opens its own pull request for human review &mdash; results are not merged
+            back into your branch automatically<sup><a href="#ref-9">[9]</a></sup>.
           </p>
         </div>
 
@@ -1876,7 +1886,7 @@ flowchart TB
             <tr><td><strong>default</strong></td><td>Ask permission for each tool use</td><td><code>--permission-mode default</code></td></tr>
             <tr><td><strong>acceptEdits</strong></td><td>Auto-approve file edits</td><td><code>--permission-mode acceptEdits</code></td></tr>
             <tr><td><strong>plan</strong></td><td>Read-only, no edits or execution</td><td><code>--permission-mode plan</code></td></tr>
-            <tr><td><strong>dontAsk</strong></td><td>Auto-deny unpre-approved tools</td><td><code>--permission-mode dontAsk</code></td></tr>
+            <tr><td><strong>dontAsk</strong></td><td>Auto-deny unpre-approved tools<sup><a href="#ref-10">[10]</a></sup></td><td><code>--permission-mode dontAsk</code></td></tr>
             <tr><td><strong>bypassPermissions</strong></td><td>Skip all prompts (use with caution)</td><td><code>--dangerously-skip-permissions</code></td></tr>
           </tbody>
         </table>
@@ -1903,7 +1913,7 @@ flowchart TB
   }
 }</code></pre>
 
-        <h4>Settings File Locations</h4>
+        <h4>Settings File Locations<sup><a href="#ref-11">[11]</a></sup></h4>
         <table>
           <thead>
             <tr><th>Scope</th><th>Location</th><th>Priority</th><th>Shared?</th></tr>
@@ -1942,15 +1952,16 @@ flowchart TB
     }
   ]
 }</code></pre>
+        <p class="citation-note">Schema URL and action identifiers shown above.<sup><a href="#ref-12">[12]</a></sup></p>
 
-        <h4>Key Default Shortcuts</h4>
+        <h4>Key Default Shortcuts<sup><a href="#ref-13">[13]</a></sup></h4>
         <table>
           <thead>
             <tr><th>Shortcut</th><th>Action</th><th>Context</th></tr>
           </thead>
           <tbody>
             <tr><td><kbd>Enter</kbd></td><td>Submit message</td><td>Chat</td></tr>
-            <tr><td><kbd>Shift+Tab</kbd></td><td>Toggle Plan Mode</td><td>Chat</td></tr>
+            <tr><td><kbd>Shift+Tab</kbd></td><td>Cycle permission modes (default / acceptEdits / plan / auto / bypassPermissions)</td><td>Chat</td></tr>
             <tr><td><kbd>Ctrl+C</kbd></td><td>Interrupt / Cancel</td><td>Global</td></tr>
             <tr><td><kbd>Ctrl+D</kbd></td><td>Exit Claude Code</td><td>Global</td></tr>
             <tr><td><kbd>Ctrl+G</kbd></td><td>Open external editor</td><td>Chat</td></tr>
@@ -1968,7 +1979,7 @@ flowchart TB
         <h2>12. Memory System</h2>
         <p>
           Claude Code has a persistent, file-based memory system that carries knowledge across sessions.
-          This is a unique feature &mdash; Cursor IDE has no equivalent.
+          Cursor IDE has no direct equivalent.
         </p>
 
         <h3>How It Works</h3>
@@ -1977,8 +1988,8 @@ flowchart TB
             <tr><th>Feature</th><th>Details</th></tr>
           </thead>
           <tbody>
-            <tr><td><strong>Location</strong></td><td><code>~/.claude/projects/{project}/memory/</code></td></tr>
-            <tr><td><strong>Index</strong></td><td><code>MEMORY.md</code> &mdash; first 200 lines loaded each session</td></tr>
+            <tr><td><strong>Location</strong></td><td><code>~/.claude/projects/{project}/memory/</code><sup><a href="#ref-14">[14]</a></sup></td></tr>
+            <tr><td><strong>Index</strong></td><td><code>MEMORY.md</code> &mdash; the first 200 lines, or the first 25KB (whichever comes first), loaded each session<sup><a href="#ref-15">[15]</a></sup></td></tr>
             <tr><td><strong>Topic files</strong></td><td>Individual <code>.md</code> files loaded on-demand</td></tr>
             <tr><td><strong>Auto-memory</strong></td><td>Claude takes notes automatically when enabled</td></tr>
             <tr><td><strong>Browse</strong></td><td><code>/memory</code> command to view and edit</td></tr>
@@ -2043,8 +2054,8 @@ type: feedback
   "autoMemoryEnabled": true
 }</code></pre>
           <p>
-            Claude will automatically save important context across sessions &mdash; build commands,
-            debugging insights, user preferences, and project patterns.
+            Claude will automatically save important context across sessions, including build
+            commands, debugging insights, and user preferences.
           </p>
         </div>
 
@@ -2056,6 +2067,33 @@ type: feedback
             to remove a memory.
           </p>
         </div>
+      </section>
+
+      <!-- ==================== SECTION 13: References ==================== -->
+      <section id="references">
+        <h2>13. References</h2>
+        <p>
+          Citations for facts and figures throughout this guide, verified against official
+          Claude Code documentation.
+        </p>
+
+        <ol class="references-list">
+          <li id="ref-1"><a href="https://code.claude.com/docs/en/agents" target="_blank" rel="noopener">Run agents in parallel - Claude Code Docs</a></li>
+          <li id="ref-2"><a href="https://code.claude.com/docs/en/setup" target="_blank" rel="noopener">Advanced setup - Claude Code Docs</a></li>
+          <li id="ref-3"><a href="https://code.claude.com/docs/en/hooks-guide" target="_blank" rel="noopener">Automate actions with hooks - Claude Code Docs</a></li>
+          <li id="ref-4"><a href="https://code.claude.com/docs/en/hooks-guide" target="_blank" rel="noopener">Automate actions with hooks - Claude Code Docs</a></li>
+          <li id="ref-5"><a href="https://code.claude.com/docs/en/hooks-guide" target="_blank" rel="noopener">Automate actions with hooks - Claude Code Docs</a></li>
+          <li id="ref-6"><a href="https://code.claude.com/docs/en/mcp" target="_blank" rel="noopener">Connect Claude Code to tools via MCP - Claude Code Docs</a></li>
+          <li id="ref-7"><a href="https://code.claude.com/docs/en/sub-agents" target="_blank" rel="noopener">Create custom subagents - Claude Code Docs</a></li>
+          <li id="ref-8"><a href="https://code.claude.com/docs/en/agents" target="_blank" rel="noopener">Run agents in parallel - Claude Code Docs</a></li>
+          <li id="ref-9"><a href="https://code.claude.com/docs/en/agents" target="_blank" rel="noopener">Run agents in parallel - Claude Code Docs</a></li>
+          <li id="ref-10"><a href="https://code.claude.com/docs/en/permission-modes" target="_blank" rel="noopener">Choose a permission mode - Claude Code Docs</a></li>
+          <li id="ref-11"><a href="https://code.claude.com/docs/en/settings" target="_blank" rel="noopener">Claude Code settings - Claude Code Docs</a></li>
+          <li id="ref-12"><a href="https://code.claude.com/docs/en/keybindings" target="_blank" rel="noopener">Customize keyboard shortcuts - Claude Code Docs</a></li>
+          <li id="ref-13"><a href="https://code.claude.com/docs/en/interactive-mode" target="_blank" rel="noopener">Interactive mode - Claude Code Docs</a></li>
+          <li id="ref-14"><a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener">How Claude remembers your project - Claude Code Docs</a></li>
+          <li id="ref-15"><a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener">How Claude remembers your project - Claude Code Docs</a></li>
+        </ol>
       </section>
 
     </main>
