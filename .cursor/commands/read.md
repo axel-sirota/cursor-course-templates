@@ -16,13 +16,13 @@ Read essential project files to load context for the AI. This command is "Stack 
     - `@METHODOLOGY.md` (Core Phase/TDD principles)
 
 3.  **Current Status**:
-    - Checks for `plan/active-session.md` or similar session tracking files if they exist.
+    - Reads `plan/PHASES.md` — the shared phase/session state file created by `@architect` and updated by `@next-session`. If this file does not exist, state clearly that no architecture/session state has been established yet and point the user to `@architect`.
 
 ## Usage
 `@read` -> Loads the brain of the project.
 
 ## Quick Summary Output
 After reading, provide:
-- **Stack**: {Language} / {Framework}
+- **Stack**: {active stack name, e.g. python-fastapi, go-gin, devops-terraform, blank}
 - **Current Phase**: {Phase}
 - **Next Step**: What should be done next based on context?

@@ -34,7 +34,7 @@ You must iterate through 3 complete cycles. Do not summarize or skip steps.
 1. **Refined Hypothesis**: State the more specific solution you are investigating.
 2. **Evidence Gathering (Mandatory)**:
    - Perform **minimum 5 distinct web searches** targeting specific implementation details, error scenarios, or performance benchmarks.
-   - Verify version compatibility (e.g., "Does this work with Python 3.11?").
+   - Verify version compatibility with the active stack (e.g., a specific runtime/toolchain version, a Terraform provider version, or a library's semver range — whatever applies to the active stack).
 3. **Antithesis (Refutation)**:
    - Look for "gotchas", security vulnerabilities, or scale limitations.
 4. **Refinement**: Polish the solution.

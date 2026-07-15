@@ -4,9 +4,24 @@ description: Execute Phase 0 (Architecture & Skeleton) using active stack contex
 
 # Architect Phase Command
 
-Initiates **Phase 0** of the development lifecycle. This command guides the Agent to design the API surface, verify the "shape" of the application, and mock the skeleton before implementation.
+Initiates **Phase 0** of the development lifecycle. This command guides the Agent to design the interface surface (API routes, CLI commands, Terraform module I/O, library exports, UI screens, etc.), verify the "shape" of the project, and mock the skeleton before implementation.
 
 This command works in **two modes**: Design Mode (AI designs everything) or Plan Extraction Mode (use existing plan).
+
+## Stack Shape Reference
+
+Every step below that mentions an entrypoint, mock/skeleton behavior, or verification method MUST branch on the active stack's declared **shape**, exactly as follows. Determine the shape from `CLAUDE.md` (the Active Stack / Architecture Shape). Do not default to Web API assumptions for a non-Web-API stack.
+
+| Shape | Entrypoint example | Skeleton / mock behavior | Verification method |
+|-------|--------------------|---------------------------|----------------------|
+| **Web API** | `main.py`, `server.ts`, or stack's documented entrypoint | Mock routes return hardcoded 200 OK with the planned response shape | Start the server, hit each mocked route, confirm response |
+| **CLI** | Stack's documented CLI entrypoint (e.g. `cli.py`, `cmd/root.go`) | Mock each command/subcommand to accept its planned args and print a placeholder result | Run each command with `--help` and with mock args; confirm exit code 0 and expected stdout shape |
+| **Terraform / IaC** | `main.tf` (root module) | Mock/placeholder variables and resource stubs wired per the planned module inputs/outputs | `terraform init && terraform validate && terraform plan` succeeds with mock/placeholder vars |
+| **Library** | The package's public export/`__init__` (or stack's documented package entrypoint) | Stub each public function/class to accept planned args and return a placeholder value | Import the package, call each public function/class with mock args, confirm no errors — or run a smoke test file |
+| **UI-only** | Stack's documented app entrypoint (e.g. `index.html`, `App.tsx`) | Stub components/pages per the planned screens, rendering placeholder content | Build succeeds and each component renders without runtime error |
+| **Other / not listed above** | Ask the user what the entrypoint convention is, or infer from `.claude/rules/*.md` | Stub the planned unit of work per stack rules | Ask the user for (or infer from stack rules) the appropriate run/validate/test command that proves the skeleton executes |
+
+This table is the single source of truth for entrypoint/mock/verification language in this command — every step below references it instead of restating Web-API-specific text.
 
 ## Execution Flow
 
@@ -80,48 +95,61 @@ This command works in **two modes**: Design Mode (AI designs everything) or Plan
   - Phase 4: Checkout (as specified in plan)
   ```
 
-**5A. Generate Session Plans**
-- **Goal**: Create detailed session markdown files in `plan/sessions/`
-- **Action**: For each phase, create session file based on plan's specifications
+**5A. Write Phase/Session State (MANDATORY)**
+- **Goal**: Persist the phase breakdown as durable, machine-readable state
+- **Requirement**: Write `plan/PHASES.md` using the **exact schema** below. This file MUST exist on disk before this command reports success — do not proceed to step 6A/7A until the Write has been performed and verified by re-reading the file. This is the single shared state file read/written by `/architect`, `/start-session`, and `/next-session`. Do not create `plan/sessions/*.md` files or any alternate format.
 
-- **Example Session File** (`plan/sessions/session-1-phase-0.md`):
+- **Exact schema** (fill in brackets from the plan; use the Stack Shape Reference table above for the "Verify skeleton" wording):
   ```markdown
-  # Session 1: Phase 0 - Skeleton
+  # Project Phases
 
-  ## Goal
-  Build walking skeleton based on [plan.md] specifications
+  current_phase: 0
+  current_status: not_started   # not_started | in_progress | blocked | complete
 
-  ## Requirements (from plan)
-  - [Extract exact requirements from plan]
-  - [List all endpoints mentioned in plan]
-  - [List all data models mentioned in plan]
+  ## Phase 0: Skeleton
+  - Status: not_started
+  - Goal: Build walking skeleton based on [plan.md] specifications
+  - Done:
+    - (none yet)
+  - Pending:
+    - Scaffold directory structure per active stack
+    - Build walking skeleton for: [feature/endpoint/command/module 1 from plan], [feature/endpoint/command/module 2 from plan], ...
+    - Verify skeleton ([per-stack verification method from Stack Shape Reference])
 
-  ## Implementation
-  - Scaffold directory structure per active stack
-  - Create mock endpoints for:
-    - [Endpoint 1 from plan]
-    - [Endpoint 2 from plan]
-  - Return hardcoded 200 OK responses
+  ## Phase 1: [Feature group 1 from plan]
+  - Status: not_started
+  - Goal: [one-line goal, as specified in plan]
+  - Done:
+    - (none yet)
+  - Pending:
+    - [Implementation item from plan]
 
-  ## Verification
-  - Run app, verify all endpoints respond
-  - Check against plan: all specified endpoints exist
+  ## Phase 2: [Feature group 2 from plan]
+  - Status: not_started
+  - Goal: [one-line goal, as specified in plan]
+  - Done:
+    - (none yet)
+  - Pending:
+    - [Implementation item from plan]
   ```
+- Add one `## Phase N: ...` section per phase identified in step 4A.
 
 **6A. Skeleton Implementation**
 - **Goal**: Build the walking skeleton based on plan specifications
 - **Action**:
   - Scaffold directory structure (per active stack)
-  - Create entrypoint (e.g., `main.py`, `server.ts`)
-  - Create **mock endpoints** for ALL features mentioned in plan
-  - Mock responses match plan's specified response formats
+  - Create entrypoint per the active stack's shape (see Stack Shape Reference table above)
+  - Create **mock/stub units** for ALL features mentioned in plan, per the "Skeleton / mock behavior" column for the active shape
+  - Mock outputs match plan's specified formats
+  - Run the verification method for the active shape (see Stack Shape Reference table above) and confirm it passes
+  - Update `plan/PHASES.md`: mark Phase 0's "Verify skeleton" and scaffolding items as Done, set Phase 0 `Status: complete`, set `current_phase: 1` and Phase 1 `Status: in_progress` at the top of the file
 
 **7A. Final Output**
 - Inform user:
   ```
   ✅ Plan extracted from [plan.md]
   ✅ [N] phases identified
-  ✅ [M] session plans created in plan/sessions/
+  ✅ plan/PHASES.md created (current_phase: 1)
   ✅ Skeleton implemented based on plan specifications
 
   Next: Run /start-session to begin implementation
@@ -160,34 +188,88 @@ This command works in **two modes**: Design Mode (AI designs everything) or Plan
   - GET /posts/{id}/comments (list comments)
   ```
 
+- **Example (CLI)**:
+  ```
+  User: /architect "Build a task CLI"
+
+  AI Designs:
+  - task add <title> [--due DATE]
+  - task list [--status STATUS]
+  - task complete <id>
+  - task delete <id>
+  ```
+
+- **Example (Terraform)**:
+  ```
+  User: /architect "Provision an S3-backed static site module"
+
+  AI Designs:
+  - Inputs: bucket_name, region, index_document, tags
+  - Outputs: bucket_arn, website_endpoint
+  - Resources: aws_s3_bucket, aws_s3_bucket_website_configuration, aws_s3_bucket_policy
+  ```
+
+- **Example (Library)**:
+  ```
+  User: /architect "Build a rate-limiter library"
+
+  AI Designs:
+  - RateLimiter(max_calls, period) constructor
+  - .allow() -> bool
+  - .reset() -> None
+  - .remaining -> int (property)
+  ```
+
 **3B. Skeleton Implementation**
-- **Goal**: Build the "Walking Skeleton" (Input -> Controller -> Service -> Mock -> Output)
-- **Action**:
+- **Goal**: Build the "Walking Skeleton" (Input -> Controller/Handler -> Service -> Mock -> Output) for the active stack's shape
+- **Action**: Using the Stack Shape Reference table above:
   - Scaffold the directory structure (if missing)
-  - Create the Entrypoint (e.g., `main.py`, `server.ts`)
-  - Create **Mock Endpoints** (return hardcoded 200 OK)
-  - **Verify**: Can we run the app? Does it respond?
+  - Create the entrypoint per the active shape
+  - Create the mock/stub units per the active shape's "Skeleton / mock behavior"
+  - Run the active shape's verification method and confirm it passes
 
 **4B. Planning**
-- **Goal**: Break down the implementation into Sessions
-- **Action**: Create a `plan/` directory (if relevant)
-- **Output**: A list of "Implementation Sessions" (e.g., "Session 1: User Auth", "Session 2: Products")
+- **Goal**: Break down the implementation into Phases/Sessions
+- **Action**: Create a `plan/` directory (if missing)
+- **Output**: A list of "Implementation Phases" (e.g., "Phase 1: User Auth", "Phase 2: Products")
 
-- **Create Session Files**:
-  ```
-  plan/
-  ├── sessions/
-  │   ├── session-1-phase-0.md   # Skeleton
-  │   ├── session-2-phase-1.md   # First feature
-  │   └── session-3-phase-1.md   # Second feature
-  ```
+**5B. Write Phase/Session State (MANDATORY)**
+- **Goal**: Persist the phase breakdown as durable, machine-readable state
+- **Requirement**: Write `plan/PHASES.md` using the **exact schema** below. This file MUST exist on disk before this command reports success — do not proceed to step 6B until the Write has been performed and verified by re-reading the file. This is the single shared state file read/written by `/architect`, `/start-session`, and `/next-session`. Do not create `plan/sessions/*.md` files or any alternate format.
 
-**5B. Final Output**
+  ```markdown
+  # Project Phases
+
+  current_phase: 0
+  current_status: not_started   # not_started | in_progress | blocked | complete
+
+  ## Phase 0: Skeleton
+  - Status: not_started
+  - Goal: <one-line goal>
+  - Done:
+    - (none yet)
+  - Pending:
+    - Scaffold directory structure per active stack
+    - Build walking skeleton per active stack shape
+    - Verify skeleton ([per-stack verification method from Stack Shape Reference])
+
+  ## Phase 1: <name>
+  - Status: not_started
+  - Goal: <one-line goal>
+  - Done:
+    - (none yet)
+  - Pending:
+    - <item>
+  ```
+- Add one `## Phase N: ...` section per phase identified in step 4B.
+- After completing the skeleton in step 3B, update `plan/PHASES.md`: mark Phase 0's scaffolding/skeleton/verify items as Done, set Phase 0 `Status: complete`, set `current_phase: 1` and Phase 1 `Status: in_progress` at the top of the file.
+
+**6B. Final Output**
 - Inform user:
   ```
-  ✅ API designed with [N] endpoints
+  ✅ [Interface/API/CLI/Module] designed with [N] units
   ✅ [M] phases identified
-  ✅ Session plans created in plan/sessions/
+  ✅ plan/PHASES.md created (current_phase: 1)
   ✅ Skeleton implemented
 
   Next: Run /start-session to begin implementation
@@ -246,3 +328,5 @@ Here's the plan:
 - **Plan trumps AI suggestions**: If plan specifies something, use it exactly
 - **Ask when unclear**: Better to ask user than assume wrong approach
 - **Verify stack compatibility**: Warn if plan's tech stack differs from active context
+- **Stack-shape-aware, not Web-API-only**: Entrypoint, mock behavior, and verification always follow the Stack Shape Reference table for the active stack (Web API / CLI / Terraform / Library / UI / Other) — never assume a running server or HTTP responses for non-Web-API stacks
+- **`plan/PHASES.md` is the only phase/session state file**: `/architect` always creates or updates it before reporting success; `/start-session` reads it to report the current phase; `/next-session` writes progress back into it. No other file or format (e.g. `plan/sessions/*.md`) is used for this purpose

@@ -9,8 +9,8 @@ Creates production-ready Docker configuration for the current project. Supports 
 ## Execution Flow
 
 **1. Context Check**
-- Read `CLAUDE.md` to identify the **Active Stack**
-- If no stack configured: "⚠️ Run /setup-stack first"
+- Read `.cursor/context.md` to identify the **Active Stack**
+- If no stack configured: "⚠️ Run @setup-stack first"
 - **Determine the project shape** from the active stack's own definition (`stacks/<name>/context.md` and `stacks/<name>/rules/`), not from guessing off file extensions:
   - **SERVICE**: a long-running process that listens on a network port (e.g. `python-fastapi`, `node-express`, `go-gin`, `java-spring`).
   - **IAC**: infrastructure-as-code (e.g. `devops-terraform`). Any containerization wraps a CLI tool (`terraform`, `tflint`, `checkov`) invoked on demand — not a server that serves traffic.
@@ -150,7 +150,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
 CMD ["java", "-jar", "app.jar"]
 ```
 
-If the active stack does not define a Dockerfile convention of its own and isn't one of the documented examples above, fall back to a minimal generic multi-stage template driven by the stack's declared build/run commands (read from `CLAUDE.md`'s Architecture Shape / stack rules), and explicitly flag: "⚠️ No Dockerfile convention defined for stack `<name>` — generated a best-effort generic template; review before use."
+If the active stack does not define a Dockerfile convention of its own and isn't one of the documented examples above, fall back to a minimal generic multi-stage template driven by the stack's declared build/run commands (read from `.cursor/context.md`'s Architecture Shape / stack rules), and explicitly flag: "⚠️ No Dockerfile convention defined for stack `<name>` — generated a best-effort generic template; review before use."
 
 **If shape == IAC** (e.g. `devops-terraform`): the Dockerfile wraps the CLI, it does not serve traffic. No `EXPOSE`, no HTTP `HEALTHCHECK`.
 ```dockerfile
@@ -531,24 +531,24 @@ Next: Verify with `curl -I http://localhost/`
 
 ### Basic Usage
 ```
-/dockerize
+@dockerize
 ```
 → Detects stack and shape → Generates Dockerfile (+ docker-compose.yml if applicable)
 
 ### With Options
 ```
-/dockerize --with-redis
+@dockerize --with-redis
 ```
 → Includes Redis service in docker-compose.yml (SERVICE shape only)
 
 ```
-/dockerize --port 3000
+@dockerize --port 3000
 ```
 → Configures app to run on port 3000 (SERVICE shape only)
 
 ### Update Existing
 ```
-/dockerize --update
+@dockerize --update
 ```
 → Updates existing Docker config without overwriting customizations
 
