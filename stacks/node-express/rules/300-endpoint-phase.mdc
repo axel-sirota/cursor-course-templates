@@ -1,0 +1,349 @@
+---
+description: Session N: Phase M endpoint implementation with database integration
+globs: ["src/services/**", "src/repositories/**", "src/routes/**", "tests/**", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session N: Phase M Endpoint Implementation
+
+## Purpose
+Execute individual session to implement one endpoint per session following strict test-driven development. Each session transforms one mock endpoint into a fully functional implementation with Prisma database integration and passing E2E tests.
+
+## Session Prerequisites
+- Previous session completed successfully
+- Session plan reviewed (plan/sessions/session-N-phase-M.md)
+- Phase 0 skeleton with all mock endpoints working
+- OpenAPI specification available
+- Database environment ready (`docker compose up -d postgres`)
+
+## Session Selection
+
+Choose next session based on plan/sessions/ folder:
+1. Review plan/sessions/session-N-phase-M.md
+2. Check dependencies from previous sessions
+3. Confirm prerequisites are met
+4. Follow session plan objectives
+
+Example session progression:
+- Session 2: Phase 1 (POST /resources) - create resources
+- Session 3: Phase 2 (GET /resources/{id}) - read single resource
+- Session 4: Phase 3 (GET /resources) - list resources
+- Session 5: Phase 4 (POST /resources/{id}/items) - create items
+- Session 6: Phase 5 (GET /resources/{id}/items) - read items
+
+## Session Execution Steps
+
+### 1. Session Initialization
+Review session plan and document current session:
+```
+Session N: Phase M ([HTTP Method] [Endpoint Path])
+Goal: [One sentence description from session plan]
+Dependencies: [List previous sessions required]
+Estimated time: [From session plan]
+Session Plan: plan/sessions/session-N-phase-M.md
+```
+
+### 2. E2E Test First (MUST BE FIRST)
+Reference 400-testing-first.mdc for detailed testing rules.
+
+Write a Supertest test using skeleton's mock data as expected shape:
+```typescript
+// tests/routes/resources.test.ts
+import request from 'supertest';
+import app from '../../src/app';
+
+describe('POST /api/resources', () => {
+  it('creates a resource', async () => {
+    const response = await request(app)
+      .post('/api/resources')
+      .set('Authorization', `Bearer ${testToken}`)
+      .send({ name: 'Test Resource', description: 'Test description', ownerId: 'test-owner' });
+
+    expect(response.status).toBe(201);
+    expect(response.body.name).toBe('Test Resource');
+    expect(response.body).toHaveProperty('resourceId');
+    expect(response.body).toHaveProperty('createdAt');
+  });
+});
+```
+
+Run test - it MUST fail against the mock implementation's hardcoded values.
+
+### 3. Prisma Migration
+Reference `vibe/vibe_express_boilerplate.md` for schema patterns.
+
+Add the model to `prisma/schema.prisma`:
+```prisma
+model Resource {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+  @@map("resources")
+}
+```
+
+Generate and apply the migration:
+```bash
+npx prisma migrate dev --name create_resources_table
+npx prisma generate
+```
+
+Migration must include:
+- Table creation with proper columns
+- Primary key (UUID via `@default(uuid())`)
+- Foreign keys (if applicable)
+- Timestamps (`createdAt`, `updatedAt`)
+- Indexes for common queries
+- Required fields with no default `?` marker where appropriate
+
+### 4. Domain/DTO Models (Zod)
+
+Create in `src/schemas/resource.schema.ts`. Zod's `.extend()` / `.omit()` / `.partial()` compose the same "layered model" concept FastAPI achieves with Pydantic inheritance:
+
+```typescript
+import { z } from 'zod';
+
+// Base: business fields only
+export const ResourceBaseSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().min(1).max(10000),
+  ownerId: z.string(),
+});
+
+// Full: includes generated/database fields
+export const ResourceSchema = ResourceBaseSchema.extend({
+  resourceId: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+// Create: same as base (no generated fields yet)
+export const ResourceCreateSchema = ResourceBaseSchema;
+
+// Update: all fields optional
+export const ResourceUpdateSchema = ResourceBaseSchema.partial();
+
+export type Resource = z.infer<typeof ResourceSchema>;
+export type ResourceCreate = z.infer<typeof ResourceCreateSchema>;
+export type ResourceUpdate = z.infer<typeof ResourceUpdateSchema>;
+```
+
+### 5. Repository Implementation
+
+Create in `src/repositories/resource.repository.ts` using the generated `PrismaClient`:
+
+```typescript
+import { PrismaClient, Resource as PrismaResource } from '@prisma/client';
+import { Resource, ResourceCreate } from '../schemas/resource.schema';
+
+export class ResourceRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  private toModel(row: PrismaResource): Resource {
+    return {
+      resourceId: row.id,
+      name: row.name,
+      description: row.description,
+      ownerId: row.ownerId,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async create(data: ResourceCreate): Promise<Resource> {
+    const row = await this.prisma.resource.create({ data });
+    return this.toModel(row);
+  }
+
+  async getById(id: string): Promise<Resource | null> {
+    const row = await this.prisma.resource.findUnique({ where: { id } });
+    return row ? this.toModel(row) : null;
+  }
+
+  async getAll(limit = 20, offset = 0): Promise<Resource[]> {
+    const rows = await this.prisma.resource.findMany({ take: limit, skip: offset });
+    return rows.map((row) => this.toModel(row));
+  }
+
+  async update(id: string, data: Partial<ResourceCreate>): Promise<Resource> {
+    const row = await this.prisma.resource.update({ where: { id }, data });
+    return this.toModel(row);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.resource.delete({ where: { id } });
+  }
+}
+```
+
+Implement only the methods needed for the current endpoint.
+
+### 6. Service Layer
+
+Create in `src/services/resource.service.ts`:
+
+```typescript
+import { ResourceRepository } from '../repositories/resource.repository';
+import { Resource, ResourceCreate } from '../schemas/resource.schema';
+import { logger } from '../config/logger';
+
+export class ResourceService {
+  constructor(private readonly resourceRepo: ResourceRepository) {}
+
+  /**
+   * Create a new resource.
+   * @throws Error if creation fails at the data layer.
+   */
+  async createResource(data: ResourceCreate): Promise<Resource> {
+    try {
+      return await this.resourceRepo.create(data);
+    } catch (error) {
+      logger.error({ err: error }, 'Error creating resource');
+      throw error;
+    }
+  }
+}
+```
+
+### 7. Processor Replacement (Controller Wiring)
+Reference 500-implementation.mdc for replacement patterns.
+
+Replace the mock body from Session 1 with a real service call:
+```typescript
+// Before (Phase 0 mock)
+export async function createResource(req: Request, res: Response): Promise<void> {
+  res.status(201).json({ resourceId: 'mock-123', ...req.body });
+}
+
+// After (Phase 1 real)
+export async function createResource(req: Request, res: Response): Promise<void> {
+  const parsed = ResourceCreateSchema.parse(req.body);
+  const service = new ResourceService(new ResourceRepository(prisma));
+  const created = await service.createResource(parsed);
+  res.status(201).json(created);
+}
+```
+
+### 8. Test Validation
+Run E2E tests - they MUST pass now:
+```bash
+npx jest tests/routes/resources.test.ts -t "creates a resource"
+```
+
+If tests fail:
+- Check `DATABASE_URL` and that Postgres is running
+- Verify migration applied (`npx prisma migrate status`)
+- Check data transformation logic in the repository mapper
+- Review structured log output
+
+### 9. Session Code Quality
+Before session completion:
+```bash
+# Lint and auto-fix
+npx eslint src/ tests/ --fix
+
+# Format
+npx prettier --write src/ tests/
+
+# Type-check
+npx tsc --noEmit
+
+# Run all tests
+npx jest
+```
+
+## Session Completion Checklist
+
+- [ ] Session plan reviewed and objectives confirmed
+- [ ] E2E test written and initially failed
+- [ ] Prisma migration created and applied
+- [ ] Zod domain/DTO schemas implemented (layered architecture)
+- [ ] Repository with typed mappers implemented
+- [ ] Service layer created
+- [ ] Route/controller updated with real implementation
+- [ ] E2E tests passing
+- [ ] Linting passed (eslint)
+- [ ] Code formatted with Prettier
+- [ ] Type checking passed (tsc --noEmit)
+- [ ] Explicit return types added
+- [ ] TSDoc comments added to public methods
+- [ ] Error handling implemented
+- [ ] Logging added
+- [ ] Session summary generated
+
+## Session Shared Libraries
+
+Document any shared code created in session summary:
+- New repositories available for other endpoints
+- New services that can be reused
+- New Zod schemas that represent core entities
+- New utilities or helpers
+
+## Session Completion Response
+
+When session is complete, respond with:
+
+```
+Session N Complete: Phase M ([METHOD] [ENDPOINT])
+
+Implemented:
+- [Specific endpoint] with real Prisma database integration
+- Migration: [migration name]
+- Domain schemas: [schema files]
+- Repository: [repository file]
+- Service layer: [service file]
+- Controller/route: [file]
+
+Tests:
+- E2E tests passing: [test file]
+- All tests passing: YES/NO
+
+Shared Libraries Created:
+- [Repository] - available for future sessions
+- [Service] - available for future sessions
+- [Schemas] - available for future sessions
+
+Session Summary:
+- Generated plan/sessions/session-N-summary.md
+- Documented implementation details
+- Listed shared libraries created
+- Noted dependencies for next session
+
+Next Session:
+- Review plan/sessions/session-N+1-phase-M+1.md for next phase
+- When ready, say "Start Session N+1" to begin next implementation
+
+DO NOT proceed to Session N+1 automatically.
+```
+
+## Session Transition Documentation
+
+Generate plan/sessions/session-N-summary.md including:
+- What was implemented in this session
+- Tests that now pass
+- Shared libraries created
+- Dependencies for next session
+- Known limitations
+- Performance considerations
+- Prerequisites for Session N+1
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Skip session plan review
+- Skip E2E test writing
+- Implement without a failing test first
+- Use a single Zod schema for all operations (create/update/response)
+- Put business logic in controllers
+- Access the repository directly from a controller (always go through the service)
+- Skip error handling
+- Forget to document shared libraries
+- Move to next session with failing tests
+- Implement more than one endpoint per session
+- Skip session summary documentation
+- Automatically start next session

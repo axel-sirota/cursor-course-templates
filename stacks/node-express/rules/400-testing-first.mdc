@@ -1,0 +1,393 @@
+---
+description: Session-based test-driven development patterns for E2E and unit tests
+globs: ["tests/**", "**/*.test.ts", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session-Based Testing First: Test-Driven Development
+
+## Purpose
+Enforce strict test-driven development within each session where Supertest E2E tests are written before implementation, tests drive design decisions, and all tests must pass before session completion.
+
+## Session TDD Core Principle
+
+RED → GREEN → REFACTOR (per session)
+
+1. RED: Write test that fails (at session start)
+2. GREEN: Implement minimum code to pass test (during session)
+3. REFACTOR: Improve code while keeping tests green (before session end)
+
+## Session Testing Context
+
+Each session follows TDD principles:
+- Session N: Write E2E tests for current endpoint
+- Session N: Implement endpoint to make tests pass
+- Session N: Refactor while keeping tests green
+- Session N: Document test results in session summary
+
+## E2E Testing Patterns
+
+### Test Structure
+Every endpoint test follows this structure:
+
+```typescript
+import request from 'supertest';
+import app from '../../src/app';
+
+describe('POST /api/resources', () => {
+  it('creates a resource on the success case', async () => {
+    // Arrange: Setup test data
+    // Act: Make request
+    // Assert: Verify response
+  });
+
+  it('returns an error for invalid input', async () => {
+    // ...
+  });
+
+  it('validates required fields', async () => {
+    // ...
+  });
+
+  it('requires authentication', async () => {
+    // ...
+  });
+});
+```
+
+### Using Skeleton Mock Data
+Phase 0 skeleton provides expected output structure.
+
+**Step 1: Capture mock response**
+```
+# From Phase 0 skeleton
+POST /resources returns:
+{
+    "resourceId": "mock-123",
+    "name": "Mock Resource",
+    "description": "Mock description",
+    "ownerId": "mock-owner",
+    "createdAt": "2024-01-01T00:00:00Z"
+}
+```
+
+**Step 2: Write test using structure**
+```typescript
+it('creates a resource with real implementation', async () => {
+  const response = await request(app)
+    .post('/api/resources')
+    .set('Authorization', `Bearer ${testToken}`)
+    .send({
+      name: 'Test Resource',
+      description: 'Test description',
+      ownerId: 'test-owner-123',
+    });
+
+  // Verify structure matches skeleton
+  expect(response.status).toBe(201);
+  const data = response.body;
+
+  // Check all fields present
+  expect(data).toHaveProperty('resourceId');
+  expect(data).toHaveProperty('name');
+  expect(data).toHaveProperty('description');
+  expect(data).toHaveProperty('ownerId');
+  expect(data).toHaveProperty('createdAt');
+
+  // Verify data correctness
+  expect(data.name).toBe('Test Resource');
+  expect(data.description).toBe('Test description');
+
+  // Verify dynamic fields
+  expect(data.resourceId).not.toBe('mock-123'); // Should be a real ID
+  expect(data.createdAt).not.toBe('2024-01-01T00:00:00Z'); // Should be an actual timestamp
+});
+```
+
+### Test Fixtures
+Create reusable test fixtures in `tests/setup.ts`:
+
+```typescript
+// tests/setup.ts
+import { randomUUID } from 'crypto';
+import request from 'supertest';
+import app from '../src/app';
+
+export async function createTestUser(): Promise<{ email: string; token: string }> {
+  const email = `test-${randomUUID()}@example.com`;
+  const response = await request(app)
+    .post('/api/auth/register')
+    .send({ email, password: 'testpass123', fullName: 'Test User' });
+  return { email, token: response.body.accessToken };
+}
+
+export async function getAuthHeaders(): Promise<{ Authorization: string }> {
+  const { token } = await createTestUser();
+  return { Authorization: `Bearer ${token}` };
+}
+
+export function buildTestResource(overrides: Partial<Record<string, unknown>> = {}) {
+  return {
+    name: 'Test Resource',
+    description: 'Test description',
+    ownerId: 'test-owner',
+    ...overrides,
+  };
+}
+```
+
+### Testing Patterns by HTTP Method
+
+**POST Endpoints:**
+```typescript
+it('creates a resource', async () => {
+  const headers = await getAuthHeaders();
+  const response = await request(app)
+    .post('/api/resources')
+    .set(headers)
+    .send({ name: 'New Resource', description: 'Description' });
+
+  expect(response.status).toBe(201);
+  expect(response.body.resourceId).toBeDefined();
+  expect(response.body.name).toBe('New Resource');
+});
+
+it('rejects invalid input', async () => {
+  const headers = await getAuthHeaders();
+  const response = await request(app)
+    .post('/api/resources')
+    .set(headers)
+    .send({ name: '' }); // Invalid: empty name
+
+  expect(response.status).toBe(400);
+});
+
+it('requires authentication', async () => {
+  const response = await request(app)
+    .post('/api/resources')
+    .send({ name: 'Resource' });
+
+  expect(response.status).toBe(401);
+});
+```
+
+**GET Endpoints:**
+```typescript
+it('retrieves a resource by id', async () => {
+  const headers = await getAuthHeaders();
+  const created = await request(app).post('/api/resources').set(headers).send(buildTestResource());
+  const resourceId = created.body.resourceId;
+
+  const response = await request(app).get(`/api/resources/${resourceId}`).set(headers);
+
+  expect(response.status).toBe(200);
+  expect(response.body.resourceId).toBe(resourceId);
+});
+
+it('returns 404 for a nonexistent resource', async () => {
+  const headers = await getAuthHeaders();
+  const response = await request(app).get('/api/resources/nonexistent').set(headers);
+  expect(response.status).toBe(404);
+});
+```
+
+**PUT/PATCH Endpoints:**
+```typescript
+it('updates a resource', async () => {
+  const headers = await getAuthHeaders();
+  const created = await request(app).post('/api/resources').set(headers).send(buildTestResource());
+  const resourceId = created.body.resourceId;
+
+  const response = await request(app)
+    .put(`/api/resources/${resourceId}`)
+    .set(headers)
+    .send({ name: 'Updated Name' });
+
+  expect(response.status).toBe(200);
+  expect(response.body.name).toBe('Updated Name');
+});
+```
+
+**DELETE Endpoints:**
+```typescript
+it('deletes a resource', async () => {
+  const headers = await getAuthHeaders();
+  const created = await request(app).post('/api/resources').set(headers).send(buildTestResource());
+  const resourceId = created.body.resourceId;
+
+  const response = await request(app).delete(`/api/resources/${resourceId}`).set(headers);
+  expect(response.status).toBe(204);
+
+  const getResponse = await request(app).get(`/api/resources/${resourceId}`).set(headers);
+  expect(getResponse.status).toBe(404);
+});
+```
+
+## Unit Testing Patterns
+
+Unit tests are written AFTER E2E tests pass.
+
+### Service Layer Tests
+Mock the Prisma-backed repository to test business logic in isolation:
+
+```typescript
+// tests/services/resource.service.test.ts
+import { ResourceService } from '../../src/services/resource.service';
+import { ResourceRepository } from '../../src/repositories/resource.repository';
+
+jest.mock('../../src/repositories/resource.repository');
+
+describe('ResourceService', () => {
+  let mockRepo: jest.Mocked<ResourceRepository>;
+  let service: ResourceService;
+
+  beforeEach(() => {
+    mockRepo = new ResourceRepository(null as never) as jest.Mocked<ResourceRepository>;
+    service = new ResourceService(mockRepo);
+  });
+
+  it('creates a resource successfully', async () => {
+    const input = { name: 'Test', description: 'Description', ownerId: 'owner-123' };
+    const expected = { resourceId: 'resource-123', ...input, createdAt: '...', updatedAt: '...' };
+    mockRepo.create = jest.fn().mockResolvedValue(expected);
+
+    const result = await service.createResource(input);
+
+    expect(result.resourceId).toBe('resource-123');
+    expect(mockRepo.create).toHaveBeenCalledWith(input);
+  });
+
+  it('propagates repository errors', async () => {
+    mockRepo.create = jest.fn().mockRejectedValue(new Error('Database error'));
+
+    await expect(
+      service.createResource({ name: 'Test', description: 'Description', ownerId: 'owner-123' })
+    ).rejects.toThrow('Database error');
+  });
+});
+```
+
+## Test Organization
+
+```
+tests/
+├── routes/                 # E2E tests for API endpoints (Supertest)
+│   ├── health.test.ts
+│   ├── auth.test.ts
+│   └── resources.test.ts
+├── services/                # Unit tests for business logic
+│   └── resource.service.test.ts
+└── setup.ts                 # Shared fixtures / app factory
+```
+
+## Session Test Execution Strategy
+
+### Session Development (TDD Cycle)
+```bash
+# Run specific test file while implementing in current session
+npx jest tests/routes/resources.test.ts
+
+# Watch mode
+npx jest --watch tests/routes/resources.test.ts
+```
+
+### Session Completion
+```bash
+# Run all E2E tests for current session
+npx jest tests/routes/resources.test.ts
+
+# Run all tests to ensure no regressions
+npx jest
+
+# Run with coverage for session
+npx jest --coverage
+```
+
+## Test Data Management
+
+### Database State
+For E2E tests using a real database:
+- Use unique identifiers (`crypto.randomUUID()`) to avoid conflicts
+- Wrap each test in a Prisma `$transaction` and roll back, or truncate tables in `beforeEach`
+- Prefer a dedicated test database (`DATABASE_URL` override in `.env.test`) over sharing dev data
+
+### Mock Data Consistency
+Use consistent patterns:
+```typescript
+// Test IDs
+const TEST_USER_ID = 'test-user-123';
+const TEST_RESOURCE_ID = 'test-resource-456';
+const TEST_ITEM_ID = 'test-item-789';
+
+// Test timestamps
+const TEST_TIMESTAMP = '2024-01-01T00:00:00Z';
+```
+
+## Assertions Best Practices
+
+### Be Specific
+```typescript
+// Good: Specific assertions
+expect(data.name).toBe('Expected Name');
+expect(data.resourceId).toBeDefined();
+expect(typeof data.createdAt).toBe('string');
+
+// Bad: Too generic
+expect(data).toBeTruthy();
+expect('name' in data).toBe(true);
+```
+
+### Test Error Messages
+```typescript
+// Good: Verify error details
+expect(response.status).toBe(400);
+expect(response.body.detail).toBe('Invalid resource ID format');
+
+// Bad: Only check status code
+expect(response.status).toBe(400);
+```
+
+### Test Side Effects
+```typescript
+// Good: Verify state changes
+const response = await request(app).post('/api/resources').set(headers).send(resourceData);
+expect(response.status).toBe(201);
+
+// Verify resource was actually created
+const getResponse = await request(app).get(`/api/resources/${response.body.resourceId}`).set(headers);
+expect(getResponse.status).toBe(200);
+```
+
+## Session Testing Checklist
+
+Before completing any session:
+
+- [ ] Session plan reviewed and test objectives confirmed
+- [ ] E2E test written before implementation
+- [ ] Test initially fails (proves it tests something)
+- [ ] Test uses skeleton mock data structure
+- [ ] All success cases tested for current endpoint
+- [ ] All error cases tested for current endpoint
+- [ ] Authentication tested
+- [ ] Zod validation tested
+- [ ] All E2E tests passing for current endpoint
+- [ ] Unit tests added for complex business logic
+- [ ] Test coverage adequate for new code
+- [ ] Tests are maintainable and readable
+- [ ] Session summary documents test results
+
+## Session Testing Anti-Patterns
+
+Do NOT:
+- Skip session plan review
+- Write implementation before test
+- Skip test because "it's simple"
+- Test implementation details instead of behavior
+- Use arbitrary `setTimeout`/sleeps instead of proper async/await
+- Share state between tests
+- Forget to test error cases
+- Test only happy path
+- Commit code with failing tests
+- Skip tests during "rapid development"
+- Test endpoints from other sessions
+- Skip session test documentation

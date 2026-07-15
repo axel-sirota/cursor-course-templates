@@ -1,0 +1,223 @@
+---
+description: CI/CD pipeline pattern for Terraform and Dockerized ops-tooling scripts
+alwaysApply: false
+globs: [".github/workflows/*.yml", "Dockerfile*", "scripts/**"]
+---
+
+# CI/CD & Ops-Tooling Container Standards
+
+This stack's "runtime container" is a CI/CD pipeline plus an optional Dockerized automation image — not an application server. This rule covers both.
+
+## Part A: CI/CD Pipeline Pattern for Terraform
+
+### Stage Order
+```
+fmt-check -> validate -> tflint -> checkov -> plan (PR comment) -> manual-approval gate -> apply (protected branch only) -> post-apply smoke check
+```
+
+Each stage gates the next. `apply` never runs on a PR — only on `main` (or a protected branch) after the plan has been reviewed and approved.
+
+### Authentication: OIDC, Never Long-Lived Keys
+CI authenticates to AWS via GitHub's OIDC provider assuming an IAM role — no `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` stored as repo secrets:
+
+```hcl
+# modules/cicd/main.tf — one-time bootstrap of the OIDC trust
+resource "aws_iam_openid_connect_provider" "github" {
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+}
+
+data "aws_iam_policy_document" "github_trust" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:acme/infra:ref:refs/heads/main"]
+    }
+  }
+}
+
+resource "aws_iam_role" "github_actions" {
+  name               = "${local.name_prefix}-github-actions"
+  assume_role_policy = data.aws_iam_policy_document.github_trust.json
+}
+```
+
+### GitHub Actions Workflow Skeleton
+```yaml
+# .github/workflows/terraform.yml
+name: Terraform
+
+on:
+  pull_request:
+    paths: ["**.tf", "**.tfvars"]
+  push:
+    branches: [main]
+    paths: ["**.tf", "**.tfvars"]
+
+permissions:
+  id-token: write   # required for OIDC
+  contents: read
+  pull-requests: write  # required to comment plan output on PRs
+
+env:
+  TF_VERSION: "1.9.8"
+  AWS_REGION: "us-east-1"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false
+      - run: terraform validate
+      - uses: terraform-linters/setup-tflint@v4
+      - run: tflint --init && tflint
+
+  checkov:
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          quiet: true
+
+  plan:
+    runs-on: ubuntu-latest
+    needs: checkov
+    if: github.event_name == 'pull_request'
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/acme-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      - run: terraform init
+      - id: plan
+        run: terraform plan -no-color -out=tfplan | tee plan_output.txt
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('plan_output.txt', 'utf8').slice(0, 60000);
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Terraform Plan\n\`\`\`\n${plan}\n\`\`\``
+            });
+
+  apply:
+    runs-on: ubuntu-latest
+    needs: checkov
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production   # requires manual approval via GitHub Environments
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/acme-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      - run: terraform init
+      - run: terraform plan -out=tfplan
+      - run: terraform apply -auto-approve tfplan
+      - name: Post-apply smoke check
+        run: |
+          aws ecs describe-services --cluster acme-prod-cluster --services acme-prod-web \
+            --query 'services[0].{running:runningCount,desired:desiredCount}'
+```
+
+The `environment: production` block ties into GitHub's **Environments** feature to require manual approval before `apply` runs — this is the "manual-approval gate" stage. See `templates/ci-pipeline-template.yml` for the copy-paste-ready version wired to `examples/aws-ecs-webapp`.
+
+### GitLab CI Divergence (Notes Only)
+GitLab CI achieves the same shape with `rules:` instead of `on:`, `environment:` + a manual job for the approval gate, and either OIDC (`id_tokens:`) or a CI/CD variable-scoped role. The stage order is identical: `validate -> tflint -> checkov -> plan -> apply (manual, protected branch)`.
+
+## Part B: Dockerizing the Ops-Tooling CLI
+
+Terraform itself is **not** typically containerized for local dev — engineers run it directly via `tfenv`. It CAN be pinned via a `Dockerfile.terraform` for reproducible CI runners if the course wants that pattern (see below). What IS commonly containerized is the **Python/boto3 automation CLI** (`scripts/deploy.py`, `scripts/verify_deployment.py`) when it needs to run outside a developer's machine — e.g. as an ECS scheduled task or a CI job image.
+
+### Multi-Stage Dockerfile for the Ops CLI
+
+```dockerfile
+# Build stage
+FROM python:3.11-slim AS builder
+WORKDIR /app
+COPY scripts/requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Runtime stage
+FROM python:3.11-slim
+WORKDIR /app
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash ops
+USER ops
+
+COPY --from=builder /root/.local /home/ops/.local
+COPY --chown=ops:ops scripts/ .
+
+ENV PATH=/home/ops/.local/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+ENTRYPOINT ["python", "deploy.py"]
+```
+
+Key differences from an application-server Dockerfile: no `EXPOSE`, no `HEALTHCHECK` (this is a CLI, not a long-running service), and the `ENTRYPOINT` is the Click command rather than a WSGI/ASGI server.
+
+### Optional: Pinned Terraform Runner Image for CI Reproducibility
+
+```dockerfile
+# Dockerfile.terraform — only if the course wants pinned, containerized CI runners
+FROM hashicorp/terraform:1.9.8
+
+RUN apk add --no-cache python3 py3-pip aws-cli
+
+WORKDIR /workspace
+ENTRYPOINT ["terraform"]
+```
+
+Explicitly note to students: this is an optional reproducibility pattern for CI runners, not how Terraform is normally invoked in local development.
+
+### `.dockerignore` for the Ops CLI Image
+```
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+tests/
+.terraform/
+*.tfstate*
+terraform_plans/
+```

@@ -1,0 +1,110 @@
+---
+description: Core vibe coding workflow and phase-based development rules
+alwaysApply: true
+---
+
+# Core Vibe Coding Workflow
+
+## Purpose
+This rule defines the fundamental workflow for phase-based development with test-driven implementation in Spring Boot. Always apply these principles regardless of the specific task.
+
+## Workflow Phases
+
+All feature development follows this structure:
+
+1. **Architect Phase**: Design OpenAPI specification
+2. **Phase 0 (Skeleton)**: Create all endpoints with mock responses
+3. **Phase 1+ (Implementation)**: Implement each endpoint following TDD
+4. **Phase Transition**: Generate summary and document learnings
+
+## Golden Rules
+
+### Always Set Up the Maven Wrapper First
+Before any development work:
+- Confirm the wrapper exists and runs: `./mvnw -v`
+- If missing, generate it: `mvn -N io.takari:maven:wrapper` (or `mvn wrapper:wrapper`)
+- Pin the JDK for the project — via sdkman: `sdk install java 21-tem && sdk use java 21-tem`, or via asdf: `asdf install java temurin-21.0.4+7.0.LTS && asdf local java temurin-21.0.4+7.0.LTS`
+- Use the wrapper for all Maven commands: `./mvnw clean install`, `./mvnw spring-boot:run`, `./mvnw test`
+- Never invoke bare `mvn` when `./mvnw` is present — the wrapper guarantees every contributor and CI runner uses the exact same Maven version
+- Add new dependencies to `pom.xml` first, then run `./mvnw dependency:resolve` — never add a jar to the classpath manually
+
+### Always Read Vibe Guides First
+Before starting any phase, read the relevant guide from the vibe/ folder:
+- vibe_phase_workflow.md - Phase-based development patterns
+- vibe_java_spring_boilerplate.md - Project structure and patterns
+- vibe_database.md - JPA entity and repository patterns
+- vibe_development_lifecycle.md - Git workflow and deployment
+
+### Test-Driven Development (TDD)
+- `@WebMvcTest`/`@SpringBootTest` tests MUST be written before implementation
+- Tests MUST fail initially (proves they test something)
+- Implementation MUST make tests pass
+- Tests MUST pass before phase transition
+
+### Code Style Guidelines
+Follow the conventions in `rules/300-java-spring-style.mdc`:
+- `PascalCase` for classes, `camelCase` for methods/fields, `SCREAMING_SNAKE_CASE` for constants
+- Constructor injection via `@RequiredArgsConstructor` — never field `@Autowired`
+- DTOs (Java records) in and out of controllers; entities never leave the service layer
+- Keep methods focused and single-purpose; extract helpers for complex logic
+- Javadoc on all public service and repository methods
+
+### Phase Transition Checklist
+Before transitioning to next phase:
+- [ ] All `@WebMvcTest`/`@SpringBootTest` tests passing (`./mvnw test`)
+- [ ] Compilation clean (`./mvnw compile`)
+- [ ] Checkstyle passed (`./mvnw checkstyle:check`)
+- [ ] Code formatted (`./mvnw spotless:apply`)
+- [ ] Javadoc added to public APIs
+- [ ] Phase summary generated
+- [ ] Shared libraries documented
+
+## Directory Structure Enforcement
+
+When creating files, follow this structure:
+```
+src/main/java/com/example/<app>/
+├── config/          # Security, CORS, OpenAPI, JPA auditing config
+├── web/             # @RestController classes (Experience layer)
+│   └── dto/         # Request/response DTOs (Java records)
+├── service/         # @Service business logic, @Transactional boundaries
+├── repository/      # Spring Data JpaRepository interfaces
+├── model/           # @Entity classes
+└── exception/       # Custom exceptions + @RestControllerAdvice
+src/main/resources/
+├── application.yml
+├── application-dev.yml
+├── application-test.yml
+└── db/migration/    # Flyway migrations (V1__..., V2__...)
+src/test/java/com/example/<app>/
+├── web/             # @WebMvcTest controller tests
+├── service/         # Mockito unit tests
+└── repository/      # @DataJpaTest / Testcontainers tests
+```
+
+## Error Handling
+
+When encountering unknown issues:
+1. Document the problem clearly
+2. List what has been tried
+3. Collect relevant code snippets and the full Java stack trace
+4. Generate research-export.md for external review
+5. Wait for human input before major refactoring
+
+## Secrets Management
+
+NEVER commit secrets to the repository:
+- Use `.env` files (loaded via docker-compose or spring-dotenv) for local development
+- Reference `.env.example` for required variables
+- Never hardcode credentials in `application.yml` — use `${ENV_VAR:default}` placeholders
+- Use environment variables in `docker-compose.yml`
+- Validate all required secrets at startup via `@ConfigurationProperties` with `@Validated`
+
+## Response Format
+
+When generating phase summaries or documentation:
+- Use clear, professional language
+- Include concrete examples
+- Reference specific files and line numbers
+- List dependencies for next phases
+- Note any gotchas or learnings

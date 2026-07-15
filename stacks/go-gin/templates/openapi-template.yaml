@@ -1,0 +1,545 @@
+openapi: 3.0.0
+info:
+  title: Your Project API
+  description: >
+    Gin project with JWT-style bearer authentication and modular structure.
+    NOTE: Gin has no built-in interactive docs UI (unlike FastAPI's /docs). This spec is the
+    primary source of truth for the contract. Optionally pair it with `swaggo/swag` annotations
+    to generate docs from Go comments, or serve this file behind a static Swagger UI container.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@yourproject.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.yourproject.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Posts
+    description: Blog post management
+  - name: Comments
+    description: Comment management
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Health Check
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+        database:
+          type: boolean
+          example: true
+        environment:
+          type: string
+          example: development
+
+    # Authentication
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - fullName
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: securepassword123
+        fullName:
+          type: string
+          example: John Doe
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: securepassword123
+
+    AuthResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login successful
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        user:
+          type: object
+          properties:
+            userId:
+              type: string
+              format: uuid
+              example: 8f14e45f-ceea-4b4b-8f7c-1234567890ab
+            email:
+              type: string
+              example: user@example.com
+            fullName:
+              type: string
+              example: John Doe
+
+    UserResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          example: user@example.com
+        fullName:
+          type: string
+          example: John Doe
+
+    # Posts
+    CreatePostRequest:
+      type: object
+      required:
+        - title
+        - content
+        - authorId
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: My First Post
+        content:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          example: This is the content of my first post.
+        authorId:
+          type: string
+          format: uuid
+          example: 8f14e45f-ceea-4b4b-8f7c-1234567890ab
+
+    UpdatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Updated Post Title
+        content:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          example: Updated content
+
+    PostResponse:
+      type: object
+      properties:
+        postId:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        title:
+          type: string
+          example: My First Post
+        content:
+          type: string
+          example: This is the content of my first post.
+        authorId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-01-01T00:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2024-01-01T00:00:00Z
+
+    PostListResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostResponse'
+        totalCount:
+          type: integer
+          example: 100
+        hasMore:
+          type: boolean
+          example: true
+
+    # Comments
+    CreateCommentRequest:
+      type: object
+      required:
+        - content
+        - authorId
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          example: Great post!
+        authorId:
+          type: string
+          format: uuid
+
+    CommentResponse:
+      type: object
+      properties:
+        commentId:
+          type: string
+          format: uuid
+          example: 6ecd8c99-4036-403d-bf84-cf8400f67836
+        postId:
+          type: string
+          format: uuid
+        content:
+          type: string
+          example: Great post!
+        authorId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-01-01T00:00:00Z
+
+    CommentListResponse:
+      type: object
+      properties:
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentResponse'
+        totalCount:
+          type: integer
+          example: 50
+
+    # Error Responses
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: post not found
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check API health and database connectivity
+      tags:
+        - Health
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/auth/register:
+    post:
+      summary: Register new user
+      description: Create a new user account
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      summary: User login
+      description: Authenticate user and receive a bearer token
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      summary: Get current user
+      description: Get authenticated user information
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/posts:
+    post:
+      summary: Create post
+      description: Create a new blog post
+      tags:
+        - Posts
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: List posts
+      description: Get list of blog posts with pagination
+      tags:
+        - Posts
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostListResponse'
+
+  /api/posts/{postId}:
+    get:
+      summary: Get post
+      description: Get a single blog post by ID
+      tags:
+        - Posts
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Post details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update post
+      description: Update an existing blog post
+      tags:
+        - Posts
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostRequest'
+      responses:
+        '200':
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete post
+      description: Delete a blog post
+      tags:
+        - Posts
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Post deleted successfully
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/posts/{postId}/comments:
+    post:
+      summary: Create comment
+      description: Add a comment to a blog post
+      tags:
+        - Comments
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: List comments
+      description: Get all comments for a blog post
+      tags:
+        - Comments
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentListResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

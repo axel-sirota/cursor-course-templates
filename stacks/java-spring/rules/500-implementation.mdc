@@ -1,0 +1,382 @@
+---
+description: Session-based implementation patterns and processor replacement guidelines
+globs: ["src/main/java/**", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session-Based Implementation: Processor Replacement Patterns
+
+## Purpose
+Guide the replacement of mock `@RestController` implementations with real JPA-backed business logic within individual sessions while maintaining test compatibility and code quality standards.
+
+## Session Pre-Implementation Checklist
+
+Before writing any implementation code in the current session:
+- [ ] Session plan reviewed (`plan/sessions/session-N-phase-M.md`)
+- [ ] `@WebMvcTest` is written and failing
+- [ ] Flyway migration created and applied
+- [ ] `@Entity` defined (layered architecture — never returned from controllers)
+- [ ] `JpaRepository` interface designed
+- [ ] `@Service` layer structure planned
+- [ ] Previous session dependencies confirmed
+
+## Code Style Guidelines
+
+Follow `rules/300-java-spring-style.mdc` strictly:
+
+### Constructor Injection
+```java
+// Good
+@Service
+@RequiredArgsConstructor
+public class PostService {
+    private final PostRepository postRepository;
+}
+
+// Bad
+@Service
+public class PostService {
+    @Autowired
+    private PostRepository postRepository;
+}
+```
+
+### Javadoc
+Use Javadoc for all public service and repository methods:
+```java
+/**
+ * Creates a new blog post.
+ *
+ * @param request the post creation payload
+ * @param authorId the authenticated author's identifier
+ * @return the persisted post with generated id and timestamps
+ * @throws DataIntegrityViolationException if the underlying save fails
+ */
+@Transactional
+public Post createPost(CreatePostRequest request, UUID authorId) {
+    // ...
+}
+```
+
+### Method Length
+Keep methods focused and short:
+- Prefer under ~40 lines per method
+- Single responsibility principle
+- Extract complex logic into private helper methods
+
+### Naming
+- `camelCase` for variables and methods
+- `PascalCase` for classes
+- `SCREAMING_SNAKE_CASE` for constants
+- Descriptive names, avoid abbreviations
+
+## Session Processor Replacement Pattern
+
+### Step 1: Review Session Plan
+Review `plan/sessions/session-N-phase-M.md` to understand:
+- Current session objectives
+- Endpoint to be implemented
+- Dependencies from previous sessions
+- Expected deliverables
+
+### Step 2: Identify Mock Code
+Locate the mock implementation from Session 1 (Phase 0):
+```java
+@PostMapping
+public ResponseEntity<PostResponse> createPost(@Valid @RequestBody CreatePostRequest request) {
+    // MOCK IMPLEMENTATION — Phase 0 skeleton
+    PostResponse mock = new PostResponse(
+        UUID.randomUUID(), request.title(), request.content(), request.authorId(), Instant.now());
+    return ResponseEntity.ok(mock);
+}
+```
+
+### Step 3: Add Service Layer Dependency
+Inject the service via the constructor:
+```java
+@RestController
+@RequestMapping("/api/posts")
+@RequiredArgsConstructor
+public class PostController {
+
+    private final PostService postService;
+}
+```
+
+### Step 4: Delegate to Service, Keep Controller Thin
+The controller's job is HTTP translation only:
+```java
+@PostMapping
+public ResponseEntity<PostResponse> createPost(
+        @Valid @RequestBody CreatePostRequest request,
+        @AuthenticationPrincipal UserDetails currentUser) {
+
+    UUID authorId = UUID.fromString(currentUser.getUsername());
+    Post created = postService.createPost(request, authorId);
+    return ResponseEntity.ok(PostResponse.from(created));
+}
+```
+
+### Step 5: Implement Business Logic in the Service
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class PostService {
+
+    private final PostRepository postRepository;
+
+    @Transactional
+    public Post createPost(CreatePostRequest request, UUID authorId) {
+        if (request.title().length() < 5) {
+            throw new IllegalArgumentException("Title must be at least 5 characters");
+        }
+
+        Post post = new Post();
+        post.setTitle(request.title());
+        post.setContent(request.content());
+        post.setAuthorId(authorId);
+
+        Post saved = postRepository.save(post);
+        log.info("Created post {} for author {}", saved.getId(), authorId);
+        return saved;
+    }
+}
+```
+
+### Complete Implementation
+
+```java
+// web/PostController.java
+@RestController
+@RequestMapping("/api/posts")
+@RequiredArgsConstructor
+public class PostController {
+
+    private final PostService postService;
+
+    /**
+     * Creates a new blog post for the authenticated user.
+     */
+    @PostMapping
+    public ResponseEntity<PostResponse> createPost(
+            @Valid @RequestBody CreatePostRequest request,
+            @AuthenticationPrincipal UserDetails currentUser) {
+        UUID authorId = UUID.fromString(currentUser.getUsername());
+        Post created = postService.createPost(request, authorId);
+        return ResponseEntity.ok(PostResponse.from(created));
+    }
+}
+```
+
+## Error Handling Patterns
+
+### Input Validation
+Use `jakarta.validation` annotations directly on the DTO record:
+```java
+public record CreatePostRequest(
+    @NotBlank @Size(min = 1, max = 200) String title,
+    @NotBlank @Size(min = 1, max = 10000) String content,
+    @NotNull UUID authorId
+) {}
+```
+
+### Business Logic Errors
+Handle in the service layer with typed exceptions:
+```java
+@Service
+@RequiredArgsConstructor
+public class PostService {
+
+    public Post createPost(CreatePostRequest request, UUID authorId) {
+        if (request.title().length() < 5) {
+            throw new IllegalArgumentException("Title must be at least 5 characters");
+        }
+        try {
+            return postRepository.save(toEntity(request, authorId));
+        } catch (DataIntegrityViolationException e) {
+            log.error("Repository error creating post", e);
+            throw e;
+        }
+    }
+}
+```
+
+### Exception Mapping to HTTP Status
+Map domain errors to HTTP status codes via `@RestControllerAdvice` (see `rules/300-java-spring-style.mdc`), not with try/catch in every controller method:
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleBadRequest(IllegalArgumentException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ProblemDetail handleNotFound(EntityNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleForbidden(AccessDeniedException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+}
+```
+
+## Logging Patterns
+
+### Use SLF4J via Lombok's `@Slf4j`
+```java
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class PostService {
+    // log is generated automatically by @Slf4j
+}
+```
+
+### Structured Context
+```java
+// Good: structured with context via SLF4J parameterized logging
+log.info("Post created postId={} authorId={} titleLength={}",
+    post.getId(), post.getAuthorId(), post.getTitle().length());
+
+// Bad: string concatenation, no structure
+log.info("Created post " + post.getId());
+```
+
+### Log Levels
+- `DEBUG`: Detailed information for debugging
+- `INFO`: General informational messages
+- `WARN`: Warning messages for recoverable issues
+- `ERROR`: Error messages for failures
+
+### What to Log
+```java
+// Log significant operations
+log.info("Creating post for author {}", authorId);
+
+// Log errors with the exception for stack trace capture
+log.error("Failed to create post", e);
+
+// Log performance issues
+log.warn("Slow query detected: {}ms", durationMs);
+
+// Never log sensitive data
+log.info("User logged in: {}", userId);       // Good
+log.info("User password: {}", password);      // BAD — NEVER LOG SECRETS
+```
+
+## Transaction Patterns
+
+### Single Operation
+```java
+@Transactional
+public Post createPost(CreatePostRequest request, UUID authorId) {
+    return postRepository.save(toEntity(request, authorId));
+}
+```
+
+### Multiple Operations (Same Transaction)
+```java
+@Transactional
+public Post createPostWithTags(CreatePostRequest request, UUID authorId, List<String> tags) {
+    Post post = postRepository.save(toEntity(request, authorId));
+    tags.forEach(tag -> tagRepository.save(new PostTag(post.getId(), tag)));
+    return post;
+}
+```
+
+`@Transactional` on a `@Service` method wraps the whole method body in a single database transaction — if any repository call throws, everything rolls back. Never place `@Transactional` on a `@RestController`.
+
+## Performance Considerations
+
+### Avoid N+1 Queries
+```java
+// Bad: N+1 query problem
+List<Post> posts = postRepository.findAll();
+posts.forEach(p -> p.getAuthor().getName()); // triggers a query per post
+
+// Good: fetch join in the query method
+@Query("SELECT p FROM Post p JOIN FETCH p.author")
+List<Post> findAllWithAuthor();
+```
+
+### Use Pagination
+```java
+public Page<Post> getPosts(Pageable pageable) {
+    return postRepository.findAll(pageable);
+}
+```
+
+`JpaRepository` already extends `PagingAndSortingRepository` — `findAll(Pageable)` is available without extra code.
+
+### Cache Expensive Operations
+```java
+@Cacheable("postStatistics")
+public PostStatistics getPostStatistics(UUID postId) {
+    // Expensive aggregation query
+    return computeStatistics(postId);
+}
+```
+(Requires `@EnableCaching` on a `@Configuration` class and a cache provider such as Caffeine.)
+
+## Session Testing Implementation
+
+After replacing the mock in the current session:
+
+### Run the Test
+```bash
+./mvnw test -Dtest=PostControllerTest#createPost_returnsCreatedPost
+```
+
+### Verify the Test Passes
+Tests should now pass with the real implementation:
+- Actual UUIDs generated by `GenerationType.UUID`
+- Real timestamps from `@CreationTimestamp`
+- Data persisted correctly in Postgres
+
+### Add Edge Case Tests
+```java
+@Test
+void createPost_titleTooLong_returns400() { }
+
+@Test
+void createPost_duplicateTitle_isAllowed() { } // document the business decision either way
+```
+
+## Session Code Review Checklist
+
+Before marking session implementation complete:
+- [ ] Session plan objectives met
+- [ ] Constructor injection used everywhere (`@RequiredArgsConstructor`)
+- [ ] Javadoc on all public service/repository methods
+- [ ] Error handling implemented via `@RestControllerAdvice`
+- [ ] Logging added for significant operations
+- [ ] No hardcoded values
+- [ ] No secrets in code
+- [ ] Proper `@Transactional` boundaries
+- [ ] Performance considerations addressed (pagination, fetch joins)
+- [ ] Tests passing for current endpoint
+- [ ] Code formatted (`./mvnw spotless:apply`)
+- [ ] No `TODO` comments without a tracked ticket
+- [ ] Session summary documents implementation
+
+## Session Implementation Anti-Patterns
+
+Do NOT:
+- Skip session plan review
+- Put business logic in `@RestController` methods
+- Access `JpaRepository` directly from a controller
+- Return `@Entity` objects to the API layer
+- Use bare `catch (Exception e) {}` without re-throwing or mapping
+- Log sensitive information (passwords, tokens, full request bodies with PII)
+- Hardcode configuration values (use `application.yml` + `@ConfigurationProperties`)
+- Skip error handling
+- Forget Javadoc on public methods
+- Use static/global mutable state
+- Implement features not required by the current session
+- Implement endpoints from other sessions
+- Skip session documentation

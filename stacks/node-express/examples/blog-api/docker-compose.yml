@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: blog_api_postgres
+    environment:
+      POSTGRES_DB: blog_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      # Host port offset to 5433 to avoid clashing with a locally running Postgres
+      - "5433:5432"
+    volumes:
+      - blog_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - blog_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: blog_api_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@blog.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - blog_network
+
+volumes:
+  blog_postgres_data:
+    driver: local
+
+networks:
+  blog_network:
+    driver: bridge

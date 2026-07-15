@@ -1,0 +1,282 @@
+---
+description: Go + Gin + GORM coding standards and idioms
+globs: ["**/*.go"]
+alwaysApply: false
+---
+
+# Go Gin Standards and Idioms
+
+## Purpose
+Concrete, idiomatic Go/Gin/GORM style rules. This is the Go equivalent of a Python style guide —
+apply it to every `.go` file, not just handlers.
+
+## Code Style
+
+### Formatting
+`gofmt` is mandatory, `goimports` for import grouping. Never hand-format Go code.
+
+```bash
+gofmt -l .        # list files needing formatting (should be empty)
+goimports -w .    # fix import grouping/formatting
+```
+
+### Naming
+- Short, concise names in narrow scope: `ctx`, `req`, `svc`, `repo`, `err`
+- Descriptive names for package-level exports: `PostRepository`, not `PR`
+- Avoid stutter: in package `post`, export `Service`, not `PostService` (callers see `post.Service`)
+- Acronyms stay uppercase: `userID`, not `userId`; `HTTPClient`, not `HttpClient`
+- Unexported by default; only export what other packages genuinely need
+
+### Errors
+Errors are always the last return value. Check immediately:
+```go
+// Good
+post, err := repo.Create(ctx, data)
+if err != nil {
+    return nil, fmt.Errorf("creating post: %w", err)
+}
+
+// Bad — deferred/ignored error handling
+post, _ := repo.Create(ctx, data)
+```
+
+**Wrap with context, preserve the chain** using `%w`:
+```go
+func (s *PostService) CreatePost(ctx context.Context, data CreatePostInput) (*Post, error) {
+    post, err := s.repo.Create(ctx, data)
+    if err != nil {
+        return nil, fmt.Errorf("post service: create post: %w", err)
+    }
+    return post, nil
+}
+```
+
+**Inspect wrapped errors** with `errors.Is` / `errors.As`, never string-match:
+```go
+var errNotFound = errors.New("post not found")
+
+// Wrapping
+return fmt.Errorf("repository: %w", errNotFound)
+
+// Checking (anywhere up the call stack)
+if errors.Is(err, errNotFound) {
+    c.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
+    return
+}
+
+// Custom error types
+var validationErr *ValidationError
+if errors.As(err, &validationErr) {
+    c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Message})
+    return
+}
+```
+
+### Doc Comments
+Every exported identifier gets a doc comment starting with its own name:
+```go
+// PostService handles business logic for blog posts.
+type PostService struct {
+    repo PostRepository
+}
+
+// CreatePost validates input and persists a new post via the repository.
+//
+// It returns an error if validation fails or the repository operation fails.
+func (s *PostService) CreatePost(ctx context.Context, data CreatePostInput) (*Post, error) {
+    // ...
+}
+```
+
+### Function Length & Complexity
+- Prefer functions under ~50 lines; extract helpers when a handler/service method does too much
+- One level of abstraction per function — don't mix HTTP concerns with SQL concerns in the same func
+- `golangci-lint`'s `gocyclo`/`gocognit` (if enabled) will flag genuinely complex functions
+
+## Architecture (Standard Layout)
+
+1. `cmd/server/` — Entrypoint (`main.go`): wiring, router setup, graceful shutdown
+2. `internal/handler/` — Gin handlers (HTTP <-> DTO translation only, no business logic)
+3. `internal/service/` — Business logic, orchestrates repositories
+4. `internal/repository/` — GORM/sqlx data access, one file per aggregate
+5. `internal/model/` — GORM models (DB) + API DTOs (request/response structs)
+6. `pkg/` — Only code meant to be imported by other modules; keep this small or empty
+
+### Why `internal/`?
+The Go compiler enforces that packages under `internal/` cannot be imported from outside this module's
+directory tree. This is the mechanism (not just a convention) that keeps business logic private and
+`pkg/` as the only sanctioned public surface.
+
+## Interface-at-Point-of-Use
+
+Define interfaces where they are **consumed**, not where they are implemented. The service package
+declares the interface it needs from a repository; the repository package doesn't know or care.
+
+```go
+// internal/service/post_service.go — interface lives with the CONSUMER
+type PostRepository interface {
+    Create(ctx context.Context, post *model.Post) error
+    GetByID(ctx context.Context, id string) (*model.Post, error)
+}
+
+type PostService struct {
+    repo PostRepository // any type satisfying this 2-method interface works
+}
+
+func NewPostService(repo PostRepository) *PostService {
+    return &PostService{repo: repo}
+}
+```
+
+```go
+// internal/repository/post_repository.go — concrete implementation, no interface declared here
+type GormPostRepository struct {
+    db *gorm.DB
+}
+
+func NewGormPostRepository(db *gorm.DB) *GormPostRepository {
+    return &GormPostRepository{db: db}
+}
+
+func (r *GormPostRepository) Create(ctx context.Context, post *model.Post) error {
+    if err := r.db.WithContext(ctx).Create(post).Error; err != nil {
+        return fmt.Errorf("gorm post repository: create: %w", err)
+    }
+    return nil
+}
+
+func (r *GormPostRepository) GetByID(ctx context.Context, id string) (*model.Post, error) {
+    var post model.Post
+    if err := r.db.WithContext(ctx).First(&post, "id = ?", id).Error; err != nil {
+        return nil, fmt.Errorf("gorm post repository: get by id: %w", err)
+    }
+    return &post, nil
+}
+```
+
+`GormPostRepository` satisfies `service.PostRepository` implicitly — no `implements` keyword, no
+explicit declaration required. This is idiomatic Go and makes mocking trivial in tests (see
+`rules/400-testing-first.mdc`).
+
+## context.Context Propagation
+
+`context.Context` is always the first parameter and flows through every layer:
+
+```
+Gin handler (c *gin.Context)
+    -> c.Request.Context()
+    -> service.CreatePost(ctx, ...)
+    -> repository.Create(ctx, ...)
+    -> db.WithContext(ctx).Create(...)
+```
+
+```go
+func CreatePost(svc *service.PostService) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        var req CreatePostRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+
+        post, err := svc.CreatePost(c.Request.Context(), req.ToServiceInput())
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+            return
+        }
+
+        c.JSON(http.StatusCreated, toPostResponse(post))
+    }
+}
+```
+
+Never use `context.Background()` inside a handler or service — always propagate the request-scoped
+context so cancellation/timeouts/tracing flow correctly.
+
+## Table-Driven Tests
+
+The standard Go pattern for exercising multiple cases with one test function:
+
+```go
+func TestValidateTitle(t *testing.T) {
+    tests := []struct {
+        name    string
+        title   string
+        wantErr bool
+    }{
+        {name: "valid title", title: "My Post", wantErr: false},
+        {name: "empty title", title: "", wantErr: true},
+        {name: "too long", title: strings.Repeat("a", 300), wantErr: true},
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            err := validateTitle(tt.title)
+            if tt.wantErr {
+                assert.Error(t, err)
+            } else {
+                assert.NoError(t, err)
+            }
+        })
+    }
+}
+```
+
+See `rules/400-testing-first.mdc` for the full E2E/unit testing playbook.
+
+## golangci-lint Enabled Linters
+
+Baseline set (see `rules/001-environment-setup.mdc` for the full `.golangci.yml`):
+
+| Linter | Catches |
+|---|---|
+| `errcheck` | Unchecked error return values |
+| `govet` | Suspicious constructs (shadowing, struct tags, etc.) |
+| `staticcheck` | Advanced static analysis, deprecated API use |
+| `gosimple` | Code that can be simplified |
+| `ineffassign` | Assignments that are never used |
+| `unused` | Unused vars/funcs/consts |
+| `bodyclose` | `http.Response.Body` not closed |
+| `sqlclosecheck` | `sql.Rows`/`sql.Stmt` not closed |
+| `noctx` | HTTP requests built without `context.Context` |
+
+Run before every phase transition: `golangci-lint run`.
+
+## Configuration
+
+- Use `viper` (or `envconfig`) to read from `.env` or YAML
+- Inject configuration into a `Config` struct at startup, pass it explicitly — no global mutable state
+- Fail fast: validate required config (e.g. `DATABASE_URL`) at startup, not on first use
+
+```go
+type Config struct {
+    Port        string `mapstructure:"PORT"`
+    DatabaseURL string `mapstructure:"DATABASE_URL"`
+}
+
+func Load() (*Config, error) {
+    viper.SetConfigFile(".env")
+    viper.AutomaticEnv()
+    _ = viper.ReadInConfig() // .env is optional in prod; env vars still work
+
+    cfg := &Config{
+        Port:        viper.GetString("PORT"),
+        DatabaseURL: viper.GetString("DATABASE_URL"),
+    }
+    if cfg.DatabaseURL == "" {
+        return nil, fmt.Errorf("config: DATABASE_URL is required")
+    }
+    return cfg, nil
+}
+```
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Return raw GORM models directly as API responses (leaks DB structure, breaks camelCase JSON contract)
+- Declare an interface next to its implementation ("just in case") — declare it where it's consumed
+- Use `context.Background()` inside a handler or service method
+- Panic in a handler — recover via middleware, return a proper HTTP error
+- Ignore an error return with `_` unless you have documented why it's safe to ignore
+- Use global mutable state for configuration or DB handles — pass them explicitly
+- Mix business logic into handlers — handlers translate HTTP <-> DTO and call a service, nothing more

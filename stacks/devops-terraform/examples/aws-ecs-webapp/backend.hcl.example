@@ -1,0 +1,9 @@
+bucket       = "acme-terraform-state"
+key          = "aws-ecs-webapp/dev/terraform.tfstate"
+region       = "us-east-1"
+encrypt      = true
+use_lockfile = true
+
+# Classic alternative (Terraform < 1.10, or teams already using DynamoDB):
+# dynamodb_table = "acme-terraform-locks"
+# (remove use_lockfile above if using dynamodb_table instead)

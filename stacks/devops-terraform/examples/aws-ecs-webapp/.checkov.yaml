@@ -1,0 +1,12 @@
+directory:
+  - .
+external-checks-dir:
+  - tests/policy
+skip-check:
+  - id: CKV_AWS_150
+    # Justification: enable_deletion_protection is intentionally false in
+    # dev/staging (var.environment != "prod") to allow easy teardown during
+    # coursework; modules/alb sets it true automatically when environment
+    # == "prod". See modules/alb/main.tf.
+compact: true
+quiet: true

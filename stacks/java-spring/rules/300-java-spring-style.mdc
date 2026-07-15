@@ -1,0 +1,143 @@
+---
+description: Java Spring Boot Coding Standards & Best Practices
+globs: ["**/*.java"]
+alwaysApply: false
+---
+
+# Java Spring Boot Guidelines
+
+## Code Style
+- **Naming**: `PascalCase` for classes, `camelCase` for methods/variables, `SCREAMING_SNAKE_CASE` for constants.
+- **Lombok**: Use `@Data`, `@Builder`, `@RequiredArgsConstructor` (for DI) to reduce boilerplate on `@Entity` classes and `@Service`/`@RestController` beans. Prefer Java `record` (no Lombok needed) for immutable DTOs.
+- **Injection**: Always use **Constructor Injection** (via `@RequiredArgsConstructor`). Avoid `@Autowired` on fields — it hides required dependencies and breaks easily in unit tests.
+
+## Architecture (Layered)
+1.  **Web Layer** (`web/`): `@RestController`. DTOs in, DTOs out. No business logic.
+2.  **Service Layer** (`service/`): `@Service`. Transactional boundaries (`@Transactional`).
+3.  **Repository Layer** (`repository/`): `JpaRepository` interfaces.
+4.  **Model Layer** (`model/`): `@Entity` classes.
+
+## Testing
+- **Unit**: Use JUnit 5 and Mockito (`@ExtendWith(MockitoExtension.class)`).
+- **Integration**: Use `@SpringBootTest` with **Testcontainers** for DB.
+- **Convention**: Test classes mirror source structure (e.g., `src/test/java/.../UserServiceTest.java`).
+
+## Error Handling
+- Use `@RestControllerAdvice` for global exception handling.
+- Map exceptions to standardized `ProblemDetail` or custom error DTOs.
+
+## DTO vs Entity Separation
+
+**Never return an `@Entity` from a controller.** Always map to a DTO record in the service layer.
+
+```java
+// model/Post.java — persistence concern only
+@Entity
+@Table(name = "posts")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Post {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(nullable = false, length = 200)
+    private String title;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
+    @Column(name = "author_id", nullable = false)
+    private UUID authorId;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+}
+
+// web/dto/PostResponse.java — API contract concern only
+public record PostResponse(
+    UUID postId,
+    String title,
+    String content,
+    UUID authorId,
+    Instant createdAt
+) {
+    public static PostResponse from(Post post) {
+        return new PostResponse(
+            post.getId(),
+            post.getTitle(),
+            post.getContent(),
+            post.getAuthorId(),
+            post.getCreatedAt()
+        );
+    }
+}
+```
+
+## Constructor Injection Convention
+
+```java
+@Service
+@RequiredArgsConstructor
+public class PostService {
+
+    private final PostRepository postRepository;
+
+    @Transactional
+    public Post createPost(CreatePostRequest request, UUID authorId) {
+        Post post = new Post();
+        post.setTitle(request.title());
+        post.setContent(request.content());
+        post.setAuthorId(authorId);
+        return postRepository.save(post);
+    }
+}
+```
+
+`@RequiredArgsConstructor` generates a constructor for every `final` field — Spring autowires it automatically, no `@Autowired` annotation required, and the class is trivially testable with `new PostService(mockRepo)`.
+
+## Global Exception Handling
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ProblemDetail handleNotFound(EntityNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Resource Not Found");
+        return problem;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
+        String detail = ex.getBindingResult().getFieldErrors().stream()
+            .map(err -> err.getField() + ": " + err.getDefaultMessage())
+            .collect(Collectors.joining(", "));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+        problem.setTitle("Validation Failed");
+        return problem;
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleGeneric(Exception ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        problem.setTitle("Internal Server Error");
+        return problem;
+    }
+}
+```
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Use field injection (`@Autowired private Foo foo;`)
+- Return `@Entity` objects directly from `@RestController` methods
+- Put business logic inside a `@RestController`
+- Call `JpaRepository` methods directly from a controller
+- Use `@Transactional` on a `@RestController` (transactional boundaries belong in `@Service`)
+- Catch `Exception` broadly without re-throwing or mapping to a proper HTTP status
+- Log secrets or full request bodies containing PII

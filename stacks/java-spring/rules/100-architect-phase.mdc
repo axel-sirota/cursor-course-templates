@@ -1,0 +1,379 @@
+---
+description: API design using OpenAPI specification before any implementation
+globs: ["openapi.yaml", "plan/**", "docs/api-design/**", "*.yaml"]
+alwaysApply: false
+---
+
+# Architect Phase: API Design First
+
+## Purpose
+Design the complete API surface using OpenAPI 3.0 specification before writing any Java code. This establishes contracts, validates requirements, and enables phase planning in the `plan/` folder structure.
+
+## CRITICAL: This Phase ONLY Designs - No Implementation
+
+DO NOT:
+- Create any Java files
+- Generate a Maven project structure
+- Implement any `@RestController` endpoints
+- Set up Docker Compose
+- Create Flyway migrations
+
+ONLY:
+- Update the OpenAPI specification
+- Create a comprehensive phase plan in the `plan/` folder
+- Design request/response schemas
+- Plan session-by-session execution strategy
+
+Each phase is executed in a SEPARATE session with clear transition prompts.
+
+## When to Apply
+- Starting a new feature or service
+- Adding new API endpoints
+- Refactoring existing APIs
+- Planning implementation phases
+
+## DTO Strategy Decision
+
+**This stack uses hand-written Java `record` DTOs, not `openapi-generator-maven-plugin` code generation.**
+
+Rationale: hand-written records keep the teaching material readable (students see exactly what a DTO is, with Lombok/records instead of generated boilerplate they didn't write), and they match `templates/java-starter.md` and the example app. If a later course module wants generator-based DTOs, that is a deliberate escalation, not the default — do not silently switch strategies mid-course.
+
+Every DTO in `web/dto/` must have a field-for-field match to its OpenAPI schema (same field names, same types, same nullability) so the spec and the code never drift.
+
+## Design Process
+
+### 1. Requirements Analysis
+Before opening the OpenAPI spec:
+- List all user stories or requirements
+- Identify core entities (e.g., Post, Comment, User)
+- Define relationships between entities
+- Identify CRUD operations needed
+
+### 2. OpenAPI Specification
+Use `templates/openapi-template.yaml` as starting point.
+
+Define for each endpoint:
+- HTTP method and path
+- Request body schema (if applicable)
+- Response schemas (success and error cases)
+- Authentication requirements
+- Request/response examples
+
+### 3. Schema Design Principles
+Follow these patterns from `vibe_java_spring_boilerplate.md`:
+
+**Request DTO (Java record):**
+```yaml
+CreatePostRequest:
+  type: object
+  required: [title, content]
+  properties:
+    title:
+      type: string
+    content:
+      type: string
+    authorId:
+      type: string
+      format: uuid
+```
+
+Maps to:
+```java
+public record CreatePostRequest(
+    @NotBlank @Size(max = 200) String title,
+    @NotBlank String content,
+    @NotNull UUID authorId
+) {}
+```
+
+**Response DTO (Java record):**
+```yaml
+PostResponse:
+  type: object
+  properties:
+    postId:
+      type: string
+      format: uuid
+    title:
+      type: string
+    content:
+      type: string
+    authorId:
+      type: string
+      format: uuid
+    createdAt:
+      type: string
+      format: date-time
+```
+
+Maps to:
+```java
+public record PostResponse(
+    UUID postId,
+    String title,
+    String content,
+    UUID authorId,
+    Instant createdAt
+) {}
+```
+
+### 4. Plan Folder Structure
+Create comprehensive planning in `plan/` folder:
+
+```
+plan/
+├── project-overview.md          # High-level project description
+├── api-design/
+│   ├── overview.md              # Design decisions and rationale
+│   ├── entities.md              # Entity relationships
+│   └── endpoints.md             # Endpoint specifications
+├── phases/
+│   ├── phase-0-skeleton.md      # Phase 0 detailed plan
+│   ├── phase-1-posts-create.md  # Phase 1 detailed plan
+│   ├── phase-2-posts-read.md    # Phase 2 detailed plan
+│   └── phase-N-*.md             # Additional phases
+├── sessions/
+│   ├── session-1-phase-0.md     # Session execution plan
+│   ├── session-2-phase-1.md     # Session execution plan
+│   └── session-N-*.md           # Additional sessions
+└── transition-prompts.md        # Clear prompts for phase transitions
+```
+
+### 5. Session-Based Phase Planning
+
+**Each phase becomes a separate session with:**
+- Clear session objectives
+- Prerequisites from previous sessions
+- Expected deliverables
+- Transition prompts to next session
+
+Example session structure:
+```
+Session 1: Phase 0 (Skeleton)
+Objective: Create complete API skeleton with mock responses
+Prerequisites: OpenAPI spec, phase plan
+Deliverables: All endpoints returning mock DTOs, Docker setup
+Transition: "Session 1 complete. Ready for Session 2: Phase 1"
+
+Session 2: Phase 1 (POST /posts)
+Objective: Implement post creation with database
+Prerequisites: Phase 0 skeleton, @WebMvcTest written and failing
+Deliverables: Real post creation, passing tests
+Transition: "Session 2 complete. Ready for Session 3: Phase 2"
+```
+
+## Deliverables for Architect Phase
+
+When user requests architect phase, generate ONLY these files:
+
+1. **openapi.yaml** - Complete API specification
+2. **plan/project-overview.md** - Project description and scope
+3. **plan/api-design/overview.md** - High-level design decisions
+4. **plan/api-design/entities.md** - Entity relationships (annotate which become `@Entity` classes)
+5. **plan/api-design/endpoints.md** - Detailed endpoint specifications
+6. **plan/phases/phase-0-skeleton.md** - Phase 0 detailed plan
+7. **plan/phases/phase-1-*.md** - Individual phase plans
+8. **plan/sessions/session-*.md** - Session execution plans
+9. **plan/transition-prompts.md** - Clear transition prompts
+
+DO NOT generate any other files. Stop after these deliverables.
+
+## Session Planning Requirements
+
+### Phase 0 Session Plan
+Create `plan/sessions/session-1-phase-0.md`:
+```markdown
+# Session 1: Phase 0 (Skeleton Implementation)
+
+## Objective
+Create complete API skeleton with all endpoints returning mock DTOs.
+
+## Prerequisites
+- OpenAPI specification complete
+- Phase plan reviewed and approved
+- JDK pinned, Maven wrapper working
+
+## Session Deliverables
+- [ ] Maven project structure following java_spring_boilerplate
+- [ ] All endpoints implemented as mock @RestController methods
+- [ ] docker-compose.yml configuration
+- [ ] application.yml + .env.example
+- [ ] Test structure created (@WebMvcTest stubs)
+
+## Session Execution Steps
+1. Create project structure
+2. Set up application.yml
+3. Implement mock endpoints
+4. Create docker-compose.yml
+5. Set up @WebMvcTest scaffolding
+6. Verify all endpoints work via curl / Swagger UI
+
+## Success Criteria
+- All endpoints return mock DTOs matching the OpenAPI spec
+- Docker services start successfully
+- Swagger UI accessible at /swagger-ui.html
+- Actuator health check responds at /actuator/health
+
+## Transition Prompt
+"Session 1 complete. Ready for Session 2: Phase 1 implementation"
+```
+
+### Phase 1+ Session Plans
+Create individual session plans for each implementation phase:
+```markdown
+# Session N: Phase M ([METHOD] [ENDPOINT])
+
+## Objective
+Implement [specific endpoint] with real JPA-backed logic and passing tests.
+
+## Prerequisites
+- Previous session completed
+- @WebMvcTest written and failing
+- Flyway migration planned
+
+## Session Deliverables
+- [ ] Flyway migration applied
+- [ ] @Entity class implemented
+- [ ] Spring Data JpaRepository created
+- [ ] @Service layer implemented
+- [ ] @RestController updated with real logic
+- [ ] Tests passing
+- [ ] Phase summary generated
+
+## Session Execution Steps
+1. Write @WebMvcTest/@SpringBootTest (TDD)
+2. Create Flyway migration
+3. Implement @Entity
+4. Create JpaRepository
+5. Implement @Service layer
+6. Update @RestController
+7. Verify tests pass
+8. Generate phase summary
+
+## Success Criteria
+- All tests passing
+- Endpoint returns real data from Postgres
+- ./mvnw checkstyle:check and spotless:apply clean
+- Documentation updated
+
+## Transition Prompt
+"Session N complete. Ready for Session N+1: [Next phase description]"
+```
+
+## User Confirmation Required
+
+After generating deliverables, ask user:
+```
+Architect Phase Complete.
+
+Generated:
+- openapi.yaml - API specification
+- plan/ folder with comprehensive session planning
+- Individual session plans for each phase
+- Clear transition prompts between sessions
+
+Review these files. When ready to proceed:
+- For Session 1 (Phase 0): Say "Start Session 1"
+- To modify design: Provide feedback
+- To validate spec: Use https://editor.swagger.io/
+
+Each phase will be executed in a separate session with clear objectives.
+```
+
+## Validation Checklist
+
+Before moving to Session 1:
+- [ ] All endpoints documented in OpenAPI
+- [ ] Request/response schemas defined and match planned Java records field-for-field
+- [ ] Authentication specified
+- [ ] Examples provided for all schemas
+- [ ] Error responses defined (400, 401, 404, 500)
+- [ ] Complete plan/ folder structure created
+- [ ] Session plans for all phases generated
+- [ ] Transition prompts defined
+- [ ] OpenAPI spec validates (use online validator)
+
+## Session Transition Management
+
+### Clear Transition Prompts
+Create `plan/transition-prompts.md` with specific prompts:
+```markdown
+# Phase Transition Prompts
+
+## Session 1 → Session 2
+"Session 1 (Phase 0) complete. Ready for Session 2: Phase 1 implementation of POST /posts"
+
+## Session 2 → Session 3
+"Session 2 (Phase 1) complete. Ready for Session 3: Phase 2 implementation of GET /posts/{id}"
+
+## Session N → Session N+1
+"Session N (Phase M) complete. Ready for Session N+1: Phase M+1 implementation of [METHOD] [ENDPOINT]"
+```
+
+### Session Completion Criteria
+Each session must complete:
+- All deliverables from session plan
+- Success criteria met
+- Transition prompt provided
+- No automatic progression to next session
+
+## Real-World Design Decisions
+
+When designing a blog API:
+
+**Good**: Separate read and write DTOs
+```yaml
+CreatePostRequest:  # Only fields needed for creation
+PostResponse:       # All fields including computed ones
+```
+
+**Good**: Nested resources for relationships
+```yaml
+POST /posts/{postId}/comments
+GET /posts/{postId}/comments
+```
+
+**Bad**: Flat structure requiring manual joins
+```yaml
+POST /comments  # Requires postId in body, not path
+GET /comments   # Returns all comments, requires client filtering
+```
+
+## Response Format
+
+When completing architect phase, respond with:
+
+```
+Architect Phase Complete
+
+Created:
+1. openapi.yaml - [Brief description of what was designed]
+2. plan/ folder with [X] session plans
+3. Comprehensive phase planning for [Y] phases
+
+Session Structure:
+- Session 1: Phase 0 (Skeleton) - [estimated time]
+- Session 2: Phase 1 ([METHOD] [ENDPOINT]) - [estimated time]
+- Session N: Phase M ([METHOD] [ENDPOINT]) - [estimated time]
+
+Next Steps:
+- Review plan/ folder for session organization
+- Validate openapi.yaml at https://editor.swagger.io/
+- When ready, say "Start Session 1" to begin skeleton implementation
+
+Each session will be executed separately with clear objectives and transition prompts.
+```
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Skip OpenAPI design and jump to coding
+- Design endpoints without considering @Entity relationships
+- Forget error response schemas
+- Use inconsistent naming (mix camelCase JSON with snake_case)
+- Design endpoints that expose `@Entity` classes directly (always DTO in, DTO out)
+- Create endpoints that require multiple roundtrips for simple operations
+- Automatically proceed to Session 1 without user confirmation
+- Combine multiple phases in a single session
+- Skip session planning documentation
+- Switch between hand-written DTOs and generated DTOs mid-project

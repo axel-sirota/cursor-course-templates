@@ -1,0 +1,114 @@
+---
+description: Core vibe coding workflow and phase-based development rules for Go + Gin
+alwaysApply: true
+---
+
+# Core Vibe Coding Workflow (Go + Gin)
+
+## Purpose
+This rule defines the fundamental workflow for phase-based development with test-driven implementation in Go/Gin projects. Always apply these principles regardless of the specific task.
+
+## Workflow Phases
+
+All feature development follows this structure:
+
+1. **Architect Phase**: Design OpenAPI specification and session plan
+2. **Phase 0 (Skeleton)**: Create all endpoints with mock responses
+3. **Phase 1+ (Implementation)**: Implement each endpoint following TDD
+4. **Phase Transition**: Generate summary and document learnings
+
+## Golden Rules
+
+### Always Set Up the Go Module First
+Before any development work:
+- Initialize the module: `go mod init module/path` (only once, at project creation)
+- Keep `go.mod`/`go.sum` tidy: `go mod tidy` after every dependency change
+- Use `go run ./cmd/server` or a built binary for all execution — never hand-edit `go.sum`
+- Vendor only if the course explicitly requires reproducible offline builds (`go mod vendor`)
+
+### Always Read Vibe Guides First
+Before starting any phase, read the relevant guide from the vibe/ folder:
+- vibe_phase_workflow.md - Phase-based development patterns
+- vibe_gin_boilerplate.md - Project structure and boilerplate patterns
+- vibe_database.md - GORM models and repository patterns
+- vibe_development_lifecycle.md - Git workflow and deployment
+- vibe_docker.md - Containerization patterns (already stack-complete, cross-reference it)
+
+### Test-Driven Development (TDD)
+- E2E tests (via `net/http/httptest`) MUST be written before implementation
+- Tests MUST fail initially (proves they test something real)
+- Implementation MUST make tests pass
+- Tests MUST pass before phase transition: `go test ./... -v`
+
+### Code Style Guidelines
+Follow idiomatic Go conventions (Effective Go + Go Code Review Comments):
+- `gofmt`/`goimports` clean on every file — no exceptions
+- `go vet ./...` and `golangci-lint run` must be clean before phase transition
+- Exported identifiers (types, funcs, consts) MUST have a doc comment starting with the identifier's name
+- Errors are always the last return value; check `if err != nil` immediately, do not defer error handling
+- Short, idiomatic names for local scope (`ctx`, `req`, `svc`, `repo`); descriptive names for package-level exports
+- Wrap errors with context using `fmt.Errorf("doing x: %w", err)`; never swallow errors silently
+- No naked panics in HTTP handlers — recover via middleware, return proper HTTP error responses
+
+### Phase Transition Checklist
+Before transitioning to next phase:
+- [ ] All E2E tests passing (`go test ./... -v`)
+- [ ] `go vet ./...` clean
+- [ ] `golangci-lint run` clean
+- [ ] `gofmt -l .` returns no files (fully formatted)
+- [ ] Doc comments added to all new exported identifiers
+- [ ] Phase summary generated
+- [ ] Shared repositories/services documented
+
+## Directory Structure Enforcement
+
+When creating files, follow this structure:
+```
+cmd/
+└── server/
+    └── main.go          # Entrypoint: router, middleware, graceful shutdown
+internal/
+├── config/               # Configuration loading (viper/envconfig)
+├── database/              # DB connection, pooling, migrations
+├── middleware/             # Gin middleware (recovery, CORS, request-id, logging)
+├── handler/                # Gin handlers (Experience layer, HTTP <-> DTO)
+│   └── {feature}.go
+├── model/                  # GORM models (DB layer) + API DTOs
+│   └── {feature}.go
+├── repository/              # Interfaces + GORM/sqlx implementations
+│   └── {feature}_repository.go
+└── service/                 # Business logic, orchestrates repositories
+    └── {feature}_service.go
+pkg/                        # Only truly reusable, externally-importable code
+tests/                       # Or *_test.go colocated with source — pick one and be consistent
+```
+
+`internal/` is enforced by the Go compiler (not importable outside this module) — this is why business
+logic lives there. `pkg/` is reserved for code you deliberately want other modules to import; most
+course projects will have an empty or near-empty `pkg/`.
+
+## Error Handling
+
+When encountering unknown issues:
+1. Document the problem clearly
+2. List what has been tried
+3. Collect relevant code snippets and `go vet`/compiler output
+4. Generate research-export.md for external review
+5. Wait for human input before major refactoring
+
+## Secrets Management
+
+NEVER commit secrets to the repository:
+- Use `.env` files for local development (loaded via `viper` or `godotenv`)
+- Reference `.env.example` for required variables
+- Use environment variables in `docker-compose.yml`
+- Validate all required secrets at startup — fail fast with a clear error if `DATABASE_URL` or similar is missing
+
+## Response Format
+
+When generating phase summaries or documentation:
+- Use clear, professional language
+- Include concrete Go code examples
+- Reference specific files and line numbers
+- List dependencies for next phases
+- Note any gotchas or learnings (e.g. GORM quirks, Gin binding edge cases)

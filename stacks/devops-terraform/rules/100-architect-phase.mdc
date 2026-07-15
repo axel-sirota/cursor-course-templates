@@ -1,0 +1,343 @@
+---
+description: Module contract design (variables/outputs/resource plan) before any HCL is written
+globs: ["plan/**", "*.tf"]
+alwaysApply: false
+---
+
+# Architect Phase: Module Contract Design First
+
+## Purpose
+Design the complete infrastructure surface — module boundaries, resource inventory, and variable/output contracts — before writing any `.tf` file. This establishes the Terraform analog of an API contract, validates blast radius, and enables phase planning in the `plan/` folder structure.
+
+## CRITICAL: This Phase ONLY Designs — No Implementation
+
+DO NOT:
+- Create any `.tf` files
+- Run `terraform init`
+- Run `terraform plan` or `terraform apply`
+- Touch remote state
+- Scaffold module directories
+
+ONLY:
+- Document the module/resource inventory
+- Draft `variables.tf` / `outputs.tf` contracts (as markdown, not HCL files yet)
+- Create a comprehensive phase plan in `plan/` folder
+- Plan session-by-session execution strategy
+
+Each phase is executed in a SEPARATE session with clear transition prompts.
+
+## When to Apply
+- Starting a new infrastructure project
+- Adding a new module or major resource group
+- Refactoring existing infrastructure
+- Planning implementation phases
+
+## Design Process
+
+### 1. Requirements Analysis
+Before drafting any contract:
+- List the workloads/services this infrastructure must support
+- Identify core AWS resources (e.g., VPC, ECS Cluster, ALB, S3, CloudFront)
+- Define relationships/dependencies between resources (what must exist before what)
+- Identify which resources are stateful (need `prevent_destroy`) vs. disposable
+
+### 2. Module Boundary Design
+Decide module boundaries by blast radius and reuse, not by resource type alone:
+- **Good**: `modules/vpc` (networking, rarely changes, high blast radius if broken) separate from `modules/ecs-service` (application, changes often)
+- **Bad**: One giant `modules/everything` module that couples network changes to app deploys
+
+### 3. Variable/Output Contract Design
+This is the Terraform analog of an OpenAPI schema — design it before writing resource blocks.
+
+**Variable contract (documented in `plan/architecture/variables-outputs.md`, then implemented in Phase 0):**
+```hcl
+variable "vpc_cidr" {
+  type        = string
+  description = "CIDR block for the VPC, e.g. 10.0.0.0/16"
+  validation {
+    condition     = can(cidrhost(var.vpc_cidr, 0))
+    error_message = "vpc_cidr must be a valid CIDR block."
+  }
+}
+
+variable "availability_zone_count" {
+  type        = number
+  description = "Number of AZs to spread public/private subnets across"
+  default     = 2
+  validation {
+    condition     = var.availability_zone_count >= 2 && var.availability_zone_count <= 4
+    error_message = "availability_zone_count must be between 2 and 4."
+  }
+}
+
+variable "environment" {
+  type        = string
+  description = "Deployment environment name, used in the <project>-<env>-<resource> naming convention"
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "environment must be one of: dev, staging, prod."
+  }
+}
+```
+
+**Output contract:**
+```hcl
+output "vpc_id" {
+  description = "ID of the created VPC, consumed by downstream modules via terraform_remote_state"
+  value       = aws_vpc.this.id
+}
+
+output "private_subnet_ids" {
+  description = "IDs of private subnets, one per AZ, for ECS/RDS placement"
+  value       = aws_subnet.private[*].id
+}
+```
+
+### 4. Plan Folder Structure
+Create comprehensive planning in `plan/` folder:
+
+```
+plan/
+├── project-overview.md              # High-level infrastructure description
+├── architecture/
+│   ├── overview.md                   # Module boundaries, blast-radius reasoning
+│   ├── resources.md                   # AWS resource inventory + relationships (VPC -> subnets -> ECS/S3/RDS)
+│   └── variables-outputs.md            # Draft variables.tf/outputs.tf contracts per module
+├── phases/
+│   ├── phase-0-skeleton.md             # Phase 0 detailed plan
+│   └── phase-N-<module>.md              # Per-module phase plans
+├── sessions/
+│   ├── session-1-phase-0.md
+│   └── session-N-*.md
+└── transition-prompts.md               # Clear prompts for phase transitions
+```
+
+### 5. Session-Based Phase Planning
+
+**Each phase becomes a separate session with:**
+- Clear session objectives
+- Prerequisites from previous sessions
+- Expected deliverables
+- Transition prompts to next session
+
+Example session structure:
+```
+Session 1: Phase 0 (Skeleton)
+Objective: Scaffold full module tree, terraform plan succeeds, nothing applied
+Prerequisites: Architecture docs, phase plan
+Deliverables: All modules with valid HCL, backend configured, plan runs clean
+Transition: "Session 1 complete. Ready for Session 2: Phase 1 (VPC)"
+
+Session 2: Phase 1 (VPC module)
+Objective: Apply the networking foundation
+Prerequisites: Phase 0 skeleton, validation-first checks written
+Deliverables: Real VPC/subnets/routing applied, checkov/tflint clean
+Transition: "Session 2 complete. Ready for Session 3: Phase 2 (ECS + ALB)"
+```
+
+## Deliverables for Architect Phase
+
+When user requests architect phase, generate ONLY these files:
+
+1. **plan/project-overview.md** — Project description and scope
+2. **plan/architecture/overview.md** — Module boundaries and blast-radius reasoning
+3. **plan/architecture/resources.md** — AWS resource inventory and relationships
+4. **plan/architecture/variables-outputs.md** — Draft variable/output contracts per module
+5. **plan/phases/phase-0-skeleton.md** — Phase 0 detailed plan
+6. **plan/phases/phase-N-*.md** — Individual per-module phase plans
+7. **plan/sessions/session-*.md** — Session execution plans
+8. **plan/transition-prompts.md** — Clear transition prompts
+
+DO NOT generate any other files. Stop after these deliverables. No `.tf` files, no `terraform init`.
+
+## Session Planning Requirements
+
+### Phase 0 Session Plan
+Create `plan/sessions/session-1-phase-0.md`:
+```markdown
+# Session 1: Phase 0 (Skeleton Implementation)
+
+## Objective
+Scaffold the full module tree with valid-but-inert HCL. `terraform plan` must succeed; nothing is applied.
+
+## Prerequisites
+- Architecture docs complete (overview, resources, variables-outputs)
+- Phase plan reviewed and approved
+- Backend bucket (and lock table, if used) already bootstrapped by hand
+
+## Session Deliverables
+- [ ] Root main.tf/variables.tf/outputs.tf/providers.tf/backend.tf
+- [ ] Every module's main.tf/variables.tf/outputs.tf/versions.tf scaffolded
+- [ ] terraform.tfvars.example documented
+- [ ] terraform fmt -check -recursive passes
+- [ ] terraform validate passes
+- [ ] tflint passes
+- [ ] terraform plan succeeds with the expected (placeholder) resource count
+
+## Session Execution Steps
+1. Create root + module directory structure
+2. Write backend.tf and providers.tf
+3. Scaffold each module with count = 0 or commented resources
+4. Write terraform.tfvars.example
+5. Run terraform init, fmt, validate, tflint, plan
+6. Verify plan output matches expectations
+
+## Success Criteria
+- terraform plan completes with no errors
+- No real AWS resources created
+- Module tree matches plan/architecture/overview.md
+
+## Transition Prompt
+"Session 1 complete. Ready for Session 2: Phase 1 (VPC module) implementation"
+```
+
+### Phase 1+ Session Plans
+Create individual session plans for each module/resource-group phase:
+```markdown
+# Session N: Phase M (<module-name>)
+
+## Objective
+Implement and apply <module-name> with real resources and passing validation.
+
+## Prerequisites
+- Previous session completed
+- Validation-first check written and failing (checkov/tflint/plan-diff assertion)
+- Upstream module outputs available (e.g. VPC before ECS)
+
+## Session Deliverables
+- [ ] Real resource blocks replacing placeholders
+- [ ] terraform plan reviewed (diff matches session scope only)
+- [ ] terraform apply from a saved plan file
+- [ ] Post-apply verification (boto3/aws-cli check)
+- [ ] Session summary generated
+
+## Session Execution Steps
+1. Write validation-first check (must fail against skeleton)
+2. Flesh out real resource blocks
+3. terraform plan -out=terraform_plans/<ts>.tfplan
+4. Human/CI review of plan diff
+5. terraform apply terraform_plans/<ts>.tfplan
+6. Post-apply verification
+7. Generate session summary
+
+## Success Criteria
+- terraform plan shows "No changes" on immediate re-plan
+- checkov/tflint clean
+- Post-apply verification passes
+
+## Transition Prompt
+"Session N complete. Ready for Session N+1: Phase M+1 (<next-module>) implementation"
+```
+
+## User Confirmation Required
+
+After generating deliverables, ask user:
+```
+Architect Phase Complete.
+
+Generated:
+- plan/ folder with comprehensive session planning
+- Architecture docs (overview, resources, variables-outputs)
+- Individual session plans for each module phase
+- Clear transition prompts between sessions
+
+Review these files. When ready to proceed:
+- For Session 1 (Phase 0): Say "Start Session 1"
+- To modify design: Provide feedback
+
+Each phase will be executed in a separate session with clear objectives.
+```
+
+## Validation Checklist
+
+Before moving to Session 1:
+- [ ] All modules documented in plan/architecture/resources.md
+- [ ] Variable/output contracts drafted for every module
+- [ ] Blast-radius reasoning documented for module boundaries
+- [ ] Backend bootstrap prerequisites called out
+- [ ] Complete plan/ folder structure created
+- [ ] Session plans for all phases generated
+- [ ] Transition prompts defined
+
+## Session Transition Management
+
+### Clear Transition Prompts
+Create `plan/transition-prompts.md` with specific prompts:
+```markdown
+# Phase Transition Prompts
+
+## Session 1 → Session 2
+"Session 1 (Phase 0) complete. Ready for Session 2: Phase 1 (VPC module) implementation"
+
+## Session 2 → Session 3
+"Session 2 (Phase 1) complete. Ready for Session 3: Phase 2 (ECS cluster + ALB) implementation"
+
+## Session N → Session N+1
+"Session N (Phase M) complete. Ready for Session N+1: Phase M+1 (<next-module>) implementation"
+```
+
+### Session Completion Criteria
+Each session must complete:
+- All deliverables from session plan
+- Success criteria met
+- Transition prompt provided
+- No automatic progression to next session
+
+## Real-World Design Decisions
+
+When designing the ECS Fargate + ALB reference architecture:
+
+**Good**: Separate networking module from application module
+```
+modules/vpc          # changes rarely, high blast radius
+modules/ecs-service   # changes per deploy, low blast radius
+```
+
+**Good**: Cross-module references via `terraform_remote_state`, not hardcoded IDs
+```hcl
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+  config = { bucket = "acme-terraform-state", key = "vpc/terraform.tfstate", region = "us-east-1" }
+}
+```
+
+**Bad**: Flat single module mixing VPC, ECS, ALB, and RDS
+```
+# One main.tf with 60 resources, no reuse, any change re-plans everything
+```
+
+## Response Format
+
+When completing architect phase, respond with:
+
+```
+Architect Phase Complete
+
+Created:
+1. plan/architecture/ — [Brief description of module boundaries designed]
+2. plan/ folder with [X] session plans
+3. Comprehensive phase planning for [Y] modules
+
+Session Structure:
+- Session 1: Phase 0 (Skeleton) - [estimated time]
+- Session 2: Phase 1 (<module>) - [estimated time]
+- Session N: Phase M (<module>) - [estimated time]
+
+Next Steps:
+- Review plan/ folder for session organization
+- When ready, say "Start Session 1" to begin skeleton implementation
+
+Each session will be executed separately with clear objectives and transition prompts.
+```
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Skip contract design and jump straight to resource blocks
+- Design modules without considering blast radius
+- Forget to document cross-module dependencies
+- Mix networking and application resources in one module
+- Design a module that requires manual state surgery to use
+- Automatically proceed to Session 1 without user confirmation
+- Combine multiple module phases in a single session
+- Skip session planning documentation

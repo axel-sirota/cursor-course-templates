@@ -1,0 +1,394 @@
+---
+description: Session-based test-driven development patterns for JUnit 5, Mockito, and Testcontainers
+globs: ["src/test/java/**", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session-Based Testing First: Test-Driven Development
+
+## Purpose
+Enforce strict test-driven development within each session where controller/integration tests are written before implementation, tests drive design decisions, and all tests must pass before session completion.
+
+## Session TDD Core Principle
+
+RED → GREEN → REFACTOR (per session)
+
+1. RED: Write a test that fails (at session start)
+2. GREEN: Implement minimum code to pass the test (during session)
+3. REFACTOR: Improve code while keeping tests green (before session end)
+
+## Session Testing Context
+
+Each session follows TDD principles:
+- Session N: Write `@WebMvcTest`/`@SpringBootTest` for the current endpoint
+- Session N: Implement the endpoint to make tests pass
+- Session N: Refactor while keeping tests green
+- Session N: Document test results in session summary
+
+## Test Layer Choice
+
+| Layer | Annotation | DB | Speed | Use for |
+|-------|-----------|----|----|---------|
+| Controller (sliced) | `@WebMvcTest(Controller.class)` + `MockMvc` | Mocked (`@MockBean` on the service) | Fast | Verifying request/response mapping, validation, status codes |
+| Full integration | `@SpringBootTest(webEnvironment = RANDOM_PORT)` + `TestRestTemplate` | Real (Testcontainers) | Slower | End-to-end flow through controller → service → repository → Postgres |
+| Service unit | `@ExtendWith(MockitoExtension.class)` | Mocked (`@Mock` repository) | Fastest | Business logic branches, edge cases, without Spring context |
+| Repository | `@DataJpaTest` or Testcontainers | Real | Medium | Query-method correctness, custom `@Query` |
+
+## Controller Test Patterns (`@WebMvcTest`)
+
+### Test Structure
+Every endpoint test follows this structure:
+
+```java
+@WebMvcTest(PostController.class)
+class PostControllerTest {
+
+    @Autowired MockMvc mockMvc;
+    @MockBean PostService postService;
+
+    @Test
+    void createPost_successCase() throws Exception { }
+
+    @Test
+    void createPost_errorCase_returns404WhenAuthorMissing() throws Exception { }
+
+    @Test
+    void createPost_validationCase_rejectsBlankTitle() throws Exception { }
+
+    @Test
+    void createPost_authenticationCase_returns401WithoutToken() throws Exception { }
+}
+```
+
+### Using Skeleton Mock Data
+Phase 0 skeleton provides the expected output structure.
+
+**Step 1: Capture the mock response shape**
+```java
+// From Phase 0 skeleton
+// POST /api/posts returns:
+// {
+//   "postId": "00000000-0000-0000-0000-000000000123",
+//   "title": "Mock Resource",
+//   "content": "Mock description",
+//   "authorId": "00000000-0000-0000-0000-0000000000aa",
+//   "createdAt": "2024-01-01T00:00:00Z"
+// }
+```
+
+**Step 2: Write test using that structure**
+```java
+@Test
+void createPost_returnsCreatedPost() throws Exception {
+    UUID authorId = UUID.randomUUID();
+    Post saved = new Post();
+    saved.setId(UUID.randomUUID());
+    saved.setTitle("Test Resource");
+    saved.setContent("Test description");
+    saved.setAuthorId(authorId);
+    saved.setCreatedAt(Instant.now());
+
+    given(postService.createPost(any(), eq(authorId))).willReturn(saved);
+
+    mockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"title":"Test Resource","content":"Test description","authorId":"%s"}
+                """.formatted(authorId))
+            .header("Authorization", "Bearer " + testToken))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.postId").exists())
+        .andExpect(jsonPath("$.title").value("Test Resource"))
+        .andExpect(jsonPath("$.content").value("Test description"))
+        .andExpect(jsonPath("$.authorId").value(authorId.toString()))
+        .andExpect(jsonPath("$.createdAt").exists());
+}
+```
+
+### Testing Patterns by HTTP Method
+
+**POST Endpoints:**
+```java
+@Test
+void createPost_success() throws Exception {
+    mockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(validPostJson)
+            .header("Authorization", authHeader))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.postId").isNotEmpty());
+}
+
+@Test
+void createPost_validation_blankTitleReturns400() throws Exception {
+    mockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""{"title":"","content":"x","authorId":"%s"}""".formatted(UUID.randomUUID()))
+            .header("Authorization", authHeader))
+        .andExpect(status().isBadRequest());
+}
+
+@Test
+void createPost_unauthorized_returns401() throws Exception {
+    mockMvc.perform(post("/api/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(validPostJson))
+        .andExpect(status().isUnauthorized());
+}
+```
+
+**GET Endpoints:**
+```java
+@Test
+void getPost_success() throws Exception {
+    UUID postId = UUID.randomUUID();
+    given(postService.getPost(postId)).willReturn(Optional.of(existingPost));
+
+    mockMvc.perform(get("/api/posts/{id}", postId)
+            .header("Authorization", authHeader))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.postId").value(postId.toString()));
+}
+
+@Test
+void getPost_notFound_returns404() throws Exception {
+    UUID missingId = UUID.randomUUID();
+    given(postService.getPost(missingId)).willReturn(Optional.empty());
+
+    mockMvc.perform(get("/api/posts/{id}", missingId)
+            .header("Authorization", authHeader))
+        .andExpect(status().isNotFound());
+}
+```
+
+**PUT/PATCH Endpoints:**
+```java
+@Test
+void updatePost_success() throws Exception {
+    mockMvc.perform(put("/api/posts/{id}", postId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""{"title":"Updated Name"}""")
+            .header("Authorization", authHeader))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.title").value("Updated Name"));
+}
+```
+
+**DELETE Endpoints:**
+```java
+@Test
+void deletePost_success() throws Exception {
+    mockMvc.perform(delete("/api/posts/{id}", postId)
+            .header("Authorization", authHeader))
+        .andExpect(status().isNoContent());
+}
+```
+
+## Unit Testing Patterns (Mockito)
+
+Unit tests are written AFTER controller tests pass, to lock down service-layer edge cases.
+
+### Service Layer Tests
+
+```java
+@ExtendWith(MockitoExtension.class)
+class PostServiceTest {
+
+    @Mock
+    private PostRepository postRepository;
+
+    @InjectMocks
+    private PostService postService;
+
+    @Test
+    void createPost_success() {
+        UUID authorId = UUID.randomUUID();
+        CreatePostRequest request = new CreatePostRequest("Test", "Description", authorId);
+        Post saved = new Post();
+        saved.setId(UUID.randomUUID());
+        saved.setTitle("Test");
+        saved.setAuthorId(authorId);
+
+        when(postRepository.save(any(Post.class))).thenReturn(saved);
+
+        Post result = postService.createPost(request, authorId);
+
+        assertThat(result.getId()).isNotNull();
+        assertThat(result.getTitle()).isEqualTo("Test");
+        verify(postRepository).save(any(Post.class));
+    }
+
+    @Test
+    void createPost_repositoryThrows_propagatesException() {
+        UUID authorId = UUID.randomUUID();
+        CreatePostRequest request = new CreatePostRequest("Test", "Description", authorId);
+        when(postRepository.save(any(Post.class))).thenThrow(new DataIntegrityViolationException("db error"));
+
+        assertThatThrownBy(() -> postService.createPost(request, authorId))
+            .isInstanceOf(DataIntegrityViolationException.class);
+    }
+}
+```
+
+## Integration Testing with Testcontainers
+
+Full-stack tests that exercise a real Postgres instance:
+
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Testcontainers
+class PostIntegrationTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+        .withDatabaseName("testdb")
+        .withUsername("test")
+        .withPassword("test");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Test
+    void createPost_persistsToDatabase() {
+        UUID authorId = UUID.randomUUID();
+        CreatePostRequest request = new CreatePostRequest("Integration Test", "Body", authorId);
+
+        ResponseEntity<PostResponse> response = restTemplate.postForEntity(
+            "/api/posts", request, PostResponse.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(postRepository.findById(response.getBody().postId())).isPresent();
+    }
+}
+```
+
+`@Container` boots a real, ephemeral Postgres in Docker for the test class lifetime — no mocking of the datasource, no shared state between test runs, and the schema is created via the same Flyway migrations used in production.
+
+## Test Organization
+
+```
+src/test/java/com/example/<app>/
+├── web/                     # @WebMvcTest controller tests
+│   ├── HealthControllerTest.java
+│   └── PostControllerTest.java
+├── service/                 # Mockito unit tests
+│   └── PostServiceTest.java
+├── integration/             # @SpringBootTest + Testcontainers
+│   └── PostIntegrationTest.java
+└── ApplicationTests.java    # context-loads smoke test
+```
+
+## Session Test Execution Strategy
+
+### Session Development (TDD Cycle)
+```bash
+# Run a specific test class while implementing in the current session
+./mvnw test -Dtest=PostControllerTest
+
+# Run a specific test method
+./mvnw test -Dtest=PostControllerTest#createPost_returnsCreatedPost
+```
+
+### Session Completion
+```bash
+# Run all tests for current session's package
+./mvnw test -Dtest=com.example.app.web.PostControllerTest
+
+# Run all tests to ensure no regressions
+./mvnw test
+
+# Run with coverage (jacoco)
+./mvnw test jacoco:report
+```
+
+## Test Data Management
+
+### Database State
+For integration tests using a real (Testcontainers) database:
+- Use randomly generated UUIDs to avoid collisions between tests
+- Wrap tests in `@Transactional` (rolled back after each test) when full isolation is needed, or clean tables in `@AfterEach`
+- Keep the Testcontainers instance scoped per test class (`static` field) for speed, not per method
+
+### Mock Data Consistency
+Use consistent patterns:
+```java
+static final UUID TEST_USER_ID = UUID.fromString("00000000-0000-0000-0000-0000000000aa");
+static final UUID TEST_POST_ID = UUID.fromString("00000000-0000-0000-0000-000000000123");
+static final Instant TEST_TIMESTAMP = Instant.parse("2024-01-01T00:00:00Z");
+```
+
+## Assertions Best Practices
+
+### Be Specific
+```java
+// Good: specific AssertJ assertions
+assertThat(response.getBody().title()).isEqualTo("Expected Title");
+assertThat(response.getBody().postId()).isNotNull();
+assertThat(response.getBody().createdAt()).isInstanceOf(Instant.class);
+
+// Bad: too generic
+assertThat(response.getBody()).isNotNull();
+```
+
+### Test Error Messages
+```java
+// Good: verify ProblemDetail contents
+mockMvc.perform(get("/api/posts/{id}", missingId))
+    .andExpect(status().isNotFound())
+    .andExpect(jsonPath("$.detail").value("Post not found"));
+
+// Bad: only check status code
+mockMvc.perform(get("/api/posts/{id}", missingId))
+    .andExpect(status().isNotFound());
+```
+
+### Test Side Effects
+```java
+// Good: verify state changes via the repository, not just the response
+mockMvc.perform(post("/api/posts")...).andExpect(status().isOk());
+assertThat(postRepository.findAll()).hasSize(1);
+```
+
+## Session Testing Checklist
+
+Before completing any session:
+
+- [ ] Session plan reviewed and test objectives confirmed
+- [ ] `@WebMvcTest`/`@SpringBootTest` written before implementation
+- [ ] Test initially fails (proves it tests something)
+- [ ] Test uses skeleton mock data structure
+- [ ] All success cases tested for current endpoint
+- [ ] All error cases tested for current endpoint
+- [ ] Authentication tested
+- [ ] Validation tested
+- [ ] All tests passing for current endpoint
+- [ ] Mockito unit tests added for complex business logic
+- [ ] Test coverage adequate for new code
+- [ ] Tests are maintainable and readable
+- [ ] Session summary documents test results
+
+## Session Testing Anti-Patterns
+
+Do NOT:
+- Skip session plan review
+- Write implementation before test
+- Skip a test because "it's simple"
+- Test implementation details instead of behavior
+- Use `Thread.sleep()` instead of Awaitility or proper synchronization
+- Share mutable state between tests
+- Forget to test error cases
+- Test only the happy path
+- Commit code with failing tests
+- Skip tests during "rapid development"
+- Test endpoints from other sessions
+- Skip session test documentation

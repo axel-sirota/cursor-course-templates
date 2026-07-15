@@ -1,0 +1,375 @@
+---
+description: Session N - endpoint implementation with GORM/PostgreSQL integration
+globs: ["internal/service/**", "internal/repository/**", "internal/handler/**", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session N: Phase M Endpoint Implementation (Go + Gin)
+
+## Purpose
+Execute an individual session to implement one endpoint per session following strict test-driven
+development. Each session transforms one mock handler from Phase 0 into a fully functional
+implementation with GORM/PostgreSQL integration and passing E2E tests.
+
+## Session Prerequisites
+- Previous session completed successfully
+- Session plan reviewed (`plan/sessions/session-N-phase-M.md`)
+- Phase 0 skeleton with all mock handlers working
+- OpenAPI specification available
+- Database environment ready (`docker compose up -d`)
+
+## Session Selection
+
+Choose the next session based on the `plan/sessions/` folder:
+1. Review `plan/sessions/session-N-phase-M.md`
+2. Check dependencies from previous sessions
+3. Confirm prerequisites are met
+4. Follow the session plan objectives
+
+Example session progression:
+- Session 2: Phase 1 (POST /posts) — create posts
+- Session 3: Phase 2 (GET /posts/{id}) — read single post
+- Session 4: Phase 3 (GET /posts) — list posts
+- Session 5: Phase 4 (POST /posts/{id}/comments) — create comments
+- Session 6: Phase 5 (GET /posts/{id}/comments) — read comments
+
+## Session Execution Steps
+
+### 1. Session Initialization
+Review the session plan and document the current session:
+```
+Session N: Phase M ([HTTP Method] [Endpoint Path])
+Goal: [One sentence description from session plan]
+Dependencies: [List previous sessions required]
+Estimated time: [From session plan]
+Session Plan: plan/sessions/session-N-phase-M.md
+```
+
+### 2. E2E Test First (MUST BE FIRST)
+Reference `rules/400-testing-first.mdc` for detailed testing rules.
+
+Write a test using the skeleton's mock data as the expected shape:
+```go
+func TestCreatePost(t *testing.T) {
+    router := setupTestRouter(t) // wires real handler + real DB (test transaction)
+
+    body, _ := json.Marshal(map[string]string{
+        "title":    "Test Resource",
+        "content":  "Test description",
+        "authorId": "test-owner",
+    })
+    req := httptest.NewRequest(http.MethodPost, "/api/posts", bytes.NewBuffer(body))
+    req.Header.Set("Content-Type", "application/json")
+    w := httptest.NewRecorder()
+
+    router.ServeHTTP(w, req)
+
+    assert.Equal(t, http.StatusCreated, w.Code)
+
+    var resp PostResponse
+    require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+    assert.Equal(t, "Test Resource", resp.Title)
+    assert.NotEmpty(t, resp.PostID)
+}
+```
+
+Run the test — it MUST fail (compile error or mock-data mismatch is fine; that's the point).
+
+### 3. Database Migration
+Reference `vibe/vibe_database.md` for migration patterns.
+
+Two supported approaches — pick one per project and stay consistent:
+
+**Option A: `golang-migrate` (versioned SQL files, production-grade)**
+```
+migrations/
+└── 000001_create_posts_table.up.sql
+└── 000001_create_posts_table.down.sql
+```
+```sql
+-- 000001_create_posts_table.up.sql
+CREATE TABLE posts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    author_id UUID NOT NULL REFERENCES users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_posts_author_id ON posts(author_id);
+```
+
+**Option B: GORM `AutoMigrate` (fast for course/prototype work)**
+```go
+if err := db.AutoMigrate(&model.Post{}); err != nil {
+    log.Fatalf("automigrate: %v", err)
+}
+```
+
+Apply the migration locally, then verify the schema matches the GORM model.
+
+### 4. GORM Model + API DTOs
+Reference `vibe/vibe_database.md` for the full layering rationale.
+
+Create in `internal/model/post.go`. **Go idiom**: separate flat structs, not inheritance —
+a GORM model for the DB layer, distinct DTO structs for the API layer.
+
+**GORM model (DB layer):**
+```go
+// Post is the GORM model representing the posts table.
+type Post struct {
+    ID        string    `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"-"`
+    Title     string    `gorm:"not null" json:"-"`
+    Content   string    `gorm:"not null" json:"-"`
+    AuthorID  string    `gorm:"type:uuid;not null;index" json:"-"`
+    CreatedAt time.Time `json:"-"`
+    UpdatedAt time.Time `json:"-"`
+}
+
+// TableName overrides GORM's default pluralization if needed.
+func (Post) TableName() string { return "posts" }
+```
+
+**API DTOs (request/response layer):**
+```go
+// CreatePostRequest is the API request body for creating a post.
+type CreatePostRequest struct {
+    Title    string `json:"title" binding:"required,min=1,max=200"`
+    Content  string `json:"content" binding:"required,min=1"`
+    AuthorID string `json:"authorId" binding:"required,uuid"`
+}
+
+// PostResponse is the API response body representing a post.
+type PostResponse struct {
+    PostID    string `json:"postId"`
+    Title     string `json:"title"`
+    Content   string `json:"content"`
+    AuthorID  string `json:"authorId"`
+    CreatedAt string `json:"createdAt"`
+}
+
+// ToPostResponse converts a GORM Post model to its API response DTO.
+func ToPostResponse(p *Post) PostResponse {
+    return PostResponse{
+        PostID:    p.ID,
+        Title:     p.Title,
+        Content:   p.Content,
+        AuthorID:  p.AuthorID,
+        CreatedAt: p.CreatedAt.Format(time.RFC3339),
+    }
+}
+```
+
+### 5. Repository Implementation
+Reference `vibe/vibe_database.md` for repository patterns and `rules/300-go-style.mdc` for the
+interface-at-point-of-use idiom.
+
+Create in `internal/repository/post_repository.go`:
+```go
+type GormPostRepository struct {
+    db *gorm.DB
+}
+
+func NewGormPostRepository(db *gorm.DB) *GormPostRepository {
+    return &GormPostRepository{db: db}
+}
+
+func (r *GormPostRepository) Create(ctx context.Context, post *model.Post) error {
+    if err := r.db.WithContext(ctx).Create(post).Error; err != nil {
+        return fmt.Errorf("gorm post repository: create: %w", err)
+    }
+    return nil
+}
+```
+
+Implement only the methods needed for the current endpoint:
+- `Create()` for POST endpoints
+- `GetByID()` for GET `/{id}` endpoints
+- `List()` for GET list endpoints
+- `Update()` for PUT/PATCH endpoints
+- `Delete()` for DELETE endpoints
+
+### 6. Service Layer
+Create in `internal/service/post_service.go`:
+
+```go
+// PostRepository is the interface this service depends on (consumer-side declaration).
+type PostRepository interface {
+    Create(ctx context.Context, post *model.Post) error
+}
+
+// PostService contains business logic for post operations.
+type PostService struct {
+    repo PostRepository
+}
+
+// NewPostService constructs a PostService with the given repository.
+func NewPostService(repo PostRepository) *PostService {
+    return &PostService{repo: repo}
+}
+
+// CreatePost validates and persists a new post.
+func (s *PostService) CreatePost(ctx context.Context, req CreatePostInput) (*model.Post, error) {
+    post := &model.Post{
+        Title:    req.Title,
+        Content:  req.Content,
+        AuthorID: req.AuthorID,
+    }
+    if err := s.repo.Create(ctx, post); err != nil {
+        return nil, fmt.Errorf("post service: create post: %w", err)
+    }
+    return post, nil
+}
+```
+
+### 7. Handler Replacement (Mock -> Real)
+
+**Before (Phase 0 mock):**
+```go
+func CreatePost(c *gin.Context) {
+    var req CreatePostRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    c.JSON(http.StatusCreated, PostResponse{
+        PostID: "mock-123", Title: req.Title, Content: req.Content,
+        AuthorID: "mock-author-123", CreatedAt: "2024-01-01T00:00:00Z",
+    })
+}
+```
+
+**After (Phase 1 real):**
+```go
+// CreatePost handles POST /api/posts.
+func CreatePost(svc *service.PostService) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        var req model.CreatePostRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+
+        post, err := svc.CreatePost(c.Request.Context(), service.CreatePostInput{
+            Title:    req.Title,
+            Content:  req.Content,
+            AuthorID: req.AuthorID,
+        })
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create post"})
+            return
+        }
+
+        c.JSON(http.StatusCreated, model.ToPostResponse(post))
+    }
+}
+```
+
+Note the handler signature changed from a plain `gin.HandlerFunc` to a **factory function** that
+closes over its dependencies (`svc *service.PostService`) and returns a `gin.HandlerFunc`. This is
+the idiomatic Go way to inject dependencies into Gin handlers without global state.
+
+### 8. Test Validation
+Run the E2E test — it MUST pass now:
+```bash
+go test ./internal/handler/... -run TestCreatePost -v
+```
+
+If tests fail:
+- Check the database connection (`docker compose ps`)
+- Verify the migration/AutoMigrate ran
+- Check the DTO <-> GORM model field mapping
+- Review `go test -v` output and application logs
+
+### 9. Session Code Quality
+Before session completion:
+```bash
+# Format
+gofmt -l .          # should print nothing
+goimports -w .
+
+# Vet
+go vet ./...
+
+# Lint
+golangci-lint run
+
+# Run all tests
+go test ./... -v
+```
+
+## Session Completion Checklist
+
+- [ ] Session plan reviewed and objectives confirmed
+- [ ] E2E test written and initially failed
+- [ ] Database migration created and applied
+- [ ] GORM model + API DTOs implemented (flat structs, not inheritance)
+- [ ] Repository with interface-at-point-of-use implemented
+- [ ] Service layer created
+- [ ] Handler replaced with real implementation (factory-function pattern)
+- [ ] E2E tests passing
+- [ ] `gofmt -l .` empty
+- [ ] `golangci-lint run` clean
+- [ ] Doc comments added to new exported identifiers
+- [ ] Error handling implemented (wrapped errors, `errors.Is`/`errors.As` where relevant)
+- [ ] Session summary generated
+
+## Session Shared Libraries
+
+Document any shared code created in the session summary:
+- New repositories available for other endpoints
+- New services that can be extended
+- New models that represent core entities
+- New utilities or helpers
+
+## Session Completion Response
+
+When the session is complete, respond with:
+
+```
+Session N Complete: Phase M ([METHOD] [ENDPOINT])
+
+Implemented:
+- [Specific endpoint] with real GORM/PostgreSQL integration
+- Database migration: [migration file]
+- GORM model + DTOs: [model file]
+- Repository: [repository file]
+- Service layer: [service file]
+- Handler: [handler file]
+
+Tests:
+- E2E tests passing: [test file]
+- All tests passing: YES/NO
+
+Shared Libraries Created:
+- [Repository] - available for future sessions
+- [Service] - available for future sessions
+- [Model] - available for future sessions
+
+Session Summary:
+- Generated plan/sessions/session-N-summary.md
+- Documented implementation details
+- Listed shared libraries created
+- Noted dependencies for next session
+
+Next Session:
+- Review plan/sessions/session-N+1-phase-M+1.md for next phase
+- When ready, say "Start Session N+1" to begin next implementation
+
+DO NOT proceed to Session N+1 automatically.
+```
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Skip session plan review
+- Skip writing the E2E test first
+- Implement without a failing test first
+- Use a single struct for both the GORM model and the API response
+- Put business logic in handlers
+- Access the repository directly from a handler (must go through the service)
+- Skip error wrapping (`fmt.Errorf("...: %w", err)`)
+- Move to the next session with failing tests
+- Implement more than one endpoint per session
+- Skip session summary documentation
+- Automatically start the next session

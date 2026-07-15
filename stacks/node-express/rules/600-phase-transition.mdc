@@ -1,0 +1,389 @@
+---
+description: Session completion and transition documentation rules
+globs: ["plan/sessions/**", "phases/**", "docs/**"]
+alwaysApply: false
+---
+
+# Session Transition: Documentation and Handoff
+
+## Purpose
+Ensure proper documentation and knowledge transfer between sessions. Each session completion generates a summary that enables efficient continuation in the next session.
+
+## Session Completion Triggers
+
+Transition to next session when:
+- All Supertest E2E tests passing for current endpoint
+- Code quality checks pass (eslint, prettier, tsc --noEmit)
+- Implementation complete per session requirements
+- No known bugs or issues
+- Session documentation updated
+- Session plan objectives met
+
+## Session Summary Generation
+
+Create plan/sessions/session-N-summary.md for each completed session.
+
+### Session Summary Template Structure
+
+```markdown
+# Session N Summary: Phase M ([HTTP Method] [Endpoint Path])
+
+## Overview
+Brief description of what was implemented in this session.
+
+## Implementation Details
+
+### Database Changes
+- Prisma models added/modified
+- Migrations applied (`npx prisma migrate dev --name ...`)
+- Indexes added
+
+### Schemas Created
+- Zod domain schemas (with file paths)
+- API request/response schemas (with file paths)
+- Purpose of each schema
+
+### Repository Methods
+- Methods implemented
+- Typed mappers created
+- File location
+
+### Service Layer
+- Services created or updated
+- Business logic implemented
+- File location
+
+### API Endpoint
+- Endpoint path and method
+- Request/response schemas
+- Authentication requirements
+
+## Tests
+
+### E2E Tests
+- Test files created
+- Test scenarios covered
+- All tests passing: YES/NO
+
+### Unit Tests
+- Services tested
+- Coverage percentage (if applicable)
+
+## Shared Libraries
+
+### Available for Next Phases
+- Repository classes that can be reused
+- Service methods available
+- Schemas representing core entities
+- Utilities or helpers created
+
+### Dependencies
+- External packages added to package.json
+- Configuration variables added to .env
+
+## Known Limitations
+
+### Current Implementation
+- Features not implemented yet
+- Performance considerations
+- Edge cases not handled
+
+### Technical Debt
+- Code that needs refactoring
+- Tests that need improvement
+- Documentation gaps
+
+## Next Session Recommendations
+
+### Suggested Next Session
+Recommend next session based on:
+- Dependency on current session
+- Complexity progression
+- User value
+- Session plan availability
+
+### Prerequisite Work
+- Additional schemas needed
+- Migrations required
+- Shared services to build
+
+## Learnings and Gotchas
+
+### What Worked Well
+- Patterns that were effective
+- Tools that helped
+- Design decisions that paid off
+
+### Challenges Encountered
+- Problems solved during implementation
+- Workarounds applied
+- Areas needing improvement
+
+### Time Estimates
+- Estimated time for phase: X hours
+- Actual time spent: Y hours
+- Variance explanation
+
+## Code Quality Metrics
+
+### Formatting
+- Prettier applied: YES/NO
+- Explicit return type coverage: X%
+- TSDoc comments added: YES/NO
+
+### Testing
+- E2E test coverage: X scenarios
+- Unit test coverage: Y%
+- All tests passing: YES/NO
+
+## Files Changed
+
+### Created
+- List of new files with paths
+
+### Modified
+- List of modified files with paths
+
+### Deleted
+- List of deleted files (if any)
+```
+
+## Example Session Summary
+
+```markdown
+# Session 2 Summary: Phase 1 (POST /posts)
+
+## Overview
+Implemented blog post creation endpoint with full Prisma database integration, authentication, and E2E testing.
+
+## Implementation Details
+
+### Database Changes
+- Added Post model to prisma/schema.prisma
+- Migration applied: 20240101000000_create_posts_table
+- Added index on authorId and createdAt
+
+### Schemas Created
+- PostBaseSchema (src/schemas/post.schema.ts): Business fields only
+- PostSchema (src/schemas/post.schema.ts): Full schema with id + timestamps
+- PostCreateSchema (src/schemas/post.schema.ts): Creation schema
+- PostUpdateSchema (src/schemas/post.schema.ts): Update schema (all fields optional)
+- CreatePostRequestSchema (src/schemas/post.schema.ts): API request schema
+- PostResponseSchema (src/schemas/post.schema.ts): API response schema
+
+### Repository Methods
+- PostRepository.create() - Create new post
+- PostRepository.toModel() - Typed mapper from Prisma row to domain model
+- File: src/repositories/post.repository.ts
+
+### Service Layer
+- PostService.createPost() - Business logic for post creation
+- Includes error handling and logging
+- File: src/services/post.service.ts
+
+### API Endpoint
+- POST /api/posts
+- Request: CreatePostRequestSchema (title, content)
+- Response: PostResponseSchema (postId, title, content, authorId, createdAt)
+- Authentication: Required (JWT Bearer token)
+- File: src/routes/posts.ts, src/controllers/posts.controller.ts
+
+## Tests
+
+### E2E Tests
+- tests/routes/posts.test.ts::creates a post - Success case
+- tests/routes/posts.test.ts::rejects invalid input - Validation errors
+- tests/routes/posts.test.ts::requires authentication - Auth requirement
+- All tests passing: YES
+
+### Unit Tests
+- tests/services/post.service.test.ts - Service layer with mocked repository
+- Coverage: 95% of service methods
+
+## Shared Libraries
+
+### Available for Next Sessions
+- PostRepository - Can be used for GET /posts/{id} in Session 3
+- PostService - Can be extended with getById() method
+- Post schema - Represents core post entity
+
+### Dependencies
+- No new packages added
+- No new environment variables needed
+
+## Known Limitations
+
+### Current Implementation
+- Only creation implemented, no read/update/delete yet
+- No support for tags or categories
+- No content length validation beyond Zod
+- No duplicate post prevention
+
+### Technical Debt
+- Consider adding content sanitization
+- May need to add a post status field (draft/published)
+- Service layer could accept an injected PrismaClient for easier testing
+
+## Next Phase Recommendations
+
+### Suggested Next Session
+Session 3: Phase 2 (GET /posts/{id})
+- Depends on Session 2 (need posts to read)
+- Simple implementation (reuse PostRepository)
+- High user value (view created posts)
+- Session plan: plan/sessions/session-3-phase-2.md
+
+### Prerequisite Work
+- Add PostRepository.getById() method
+- Add PostService.getPostById() method
+- Add GET route to src/routes/posts.ts
+- Write E2E test for retrieval
+
+## Learnings and Gotchas
+
+### What Worked Well
+- Layered Zod schema architecture prevented confusion
+- Typed repository mappers caught field name mismatches early
+- TDD approach caught an authentication middleware bug early
+- Service layer made unit testing straightforward
+
+### Challenges Encountered
+- Initial confusion about which layer owns Zod parsing (controller, not service)
+- Needed to ensure Prisma's `Date` fields were serialized to ISO strings
+- Test fixtures required unique emails per test run
+
+### Time Estimates
+- Estimated time: 25 minutes
+- Actual time: 30 minutes
+- Variance: +5 minutes for debugging date serialization
+
+## Code Quality Metrics
+
+### Formatting
+- Prettier applied: YES
+- Explicit return type coverage: 100%
+- TSDoc comments added: YES
+
+### Testing
+- E2E test coverage: 3 scenarios
+- Unit test coverage: 95%
+- All tests passing: YES
+
+## Files Changed
+
+### Created
+- src/schemas/post.schema.ts
+- src/repositories/post.repository.ts
+- src/services/post.service.ts
+- src/controllers/posts.controller.ts
+- src/routes/posts.ts
+- tests/routes/posts.test.ts
+- tests/services/post.service.test.ts
+- prisma/migrations/20240101000000_create_posts_table/migration.sql
+
+### Modified
+- src/app.ts (registered posts router)
+- prisma/schema.prisma (added Post model)
+- package.json (no changes)
+- .env.example (no changes)
+
+### Deleted
+- None
+```
+
+## Session Transition Checklist
+
+Before generating summary and moving to next session:
+
+### Code Quality
+- [ ] All E2E tests passing
+- [ ] All unit tests passing
+- [ ] Code formatted with Prettier
+- [ ] Explicit return types on all exported functions
+- [ ] TSDoc comments on all public APIs
+- [ ] No linting errors (eslint)
+- [ ] No type checking errors (tsc --noEmit)
+
+### Documentation
+- [ ] Code comments for complex logic
+- [ ] README updated if needed
+- [ ] API documentation (openapi.yaml) updated
+- [ ] Migration files documented
+
+### Testing
+- [ ] E2E test for success case
+- [ ] E2E test for error cases
+- [ ] E2E test for authentication
+- [ ] Unit tests for complex business logic
+- [ ] Test coverage adequate
+
+### Implementation
+- [ ] Feature complete per session requirements
+- [ ] Error handling implemented
+- [ ] Logging added
+- [ ] No hardcoded values
+- [ ] Secrets properly managed
+
+### Knowledge Transfer
+- [ ] Shared libraries documented
+- [ ] Dependencies documented
+- [ ] Known limitations listed
+- [ ] Next session recommendations provided
+- [ ] Session plan objectives met
+
+## Generating the Session Summary
+
+When user says "Session N complete" or "Transition to next session":
+
+1. Read current session implementation
+2. Analyze all changes made
+3. Generate comprehensive summary
+4. Save to plan/sessions/session-N-summary.md
+5. Provide brief verbal summary to user
+6. Ask for confirmation before proceeding
+
+## Session Kickoff
+
+When starting a new session:
+
+1. Read previous session summaries
+2. Review next session plan (plan/sessions/session-N-phase-M.md)
+3. Identify available shared libraries
+4. Check dependencies
+5. Confirm session requirements with user
+6. Begin with E2E test writing
+
+## Research Export
+
+When encountering issues requiring external research:
+
+Generate research-export.md using templates/research-export.md:
+- Document the problem clearly
+- List all attempted solutions
+- Include relevant code snippets
+- Formulate specific questions
+- Provide context from phase summaries
+
+## Continuous Improvement
+
+After each session:
+- Update time estimates based on actual time
+- Note patterns that worked well
+- Document challenges for future reference
+- Suggest process improvements
+- Update session plans for future projects
+
+## Session Transition Anti-Patterns
+
+Do NOT:
+- Move to next session with failing tests
+- Skip session summary generation
+- Document only what was built (also document why)
+- Forget to note known limitations
+- Skip recommendations for next session
+- Generate summary without reading code
+- Use generic summaries (be specific)
+- Forget to document shared libraries
+- Skip session plan review
+- Automatically start next session
+- Combine multiple sessions into one

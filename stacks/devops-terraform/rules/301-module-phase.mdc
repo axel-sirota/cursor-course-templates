@@ -1,0 +1,250 @@
+---
+description: Session N Phase M module implementation and apply with validation-first checks
+globs: ["modules/**", "tests/**", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session N: Phase M Module Implementation
+
+## Purpose
+Execute an individual session to implement and apply ONE module or resource group per session, following strict validation-first discipline. Each session transforms one skeleton module's placeholder resources into fully applied, verified infrastructure.
+
+## Session Prerequisites
+- Previous session completed successfully
+- Session plan reviewed (`plan/sessions/session-N-phase-M.md`)
+- Phase 0 skeleton with `terraform plan` succeeding
+- Upstream module outputs available (e.g. VPC module applied before ECS module references its subnet IDs)
+- Backend reachable (`terraform init` succeeds against remote state)
+
+## Session Selection
+
+Choose the next session based on `plan/sessions/` folder and the module dependency graph:
+1. Review `plan/sessions/session-N-phase-M.md`
+2. Check dependencies from previous sessions (does this module read another module's outputs?)
+3. Confirm prerequisites are met
+4. Follow session plan objectives
+
+Example session progression for the ECS Fargate + ALB reference architecture:
+- Session 2: Phase 1 (`modules/vpc`) — VPC, subnets, routing, NAT
+- Session 3: Phase 2 (`modules/alb` + `modules/ecs-service`) — ALB, target group, ECS cluster + Fargate service
+- Session 4: Phase 3 (`modules/static-site`) — S3 + CloudFront for the frontend
+- Session 5: Phase 4 (CI/CD wiring) — GitHub Actions pipeline resources (OIDC IAM role, artifact bucket)
+
+## Session Execution Steps
+
+### 1. Session Initialization
+Review session plan and document current session:
+```
+Session N: Phase M (<module-name>)
+Goal: [One sentence description from session plan]
+Dependencies: [List previous sessions required]
+Estimated time: [From session plan]
+Session Plan: plan/sessions/session-N-phase-M.md
+```
+
+### 2. Validation-First Check (MUST BE FIRST)
+Reference `400-testing-first.mdc` for detailed testing rules.
+
+Write a validation that MUST fail against the skeleton's placeholder state before any real resource exists. This is the IaC analog of an E2E test written before implementation. Pick the check type that fits the module:
+
+**checkov custom check** (policy-shaped modules — security groups, IAM, encryption):
+```python
+# tests/policy/check_alb_https_only.py
+from checkov.terraform.checks.resource.base_resource_check import BaseResourceCheck
+from checkov.common.models.enums import CheckCategories, CheckResult
+
+class ALBHttpsOnly(BaseResourceCheck):
+    def __init__(self):
+        super().__init__(
+            name="Ensure ALB listener redirects HTTP to HTTPS",
+            id="CKV_ACME_1",
+            categories=[CheckCategories.NETWORKING],
+            supported_resources=["aws_lb_listener"],
+        )
+
+    def scan_resource_conf(self, conf):
+        if conf.get("port") == [80]:
+            action = conf.get("default_action", [{}])[0]
+            if action.get("type") == ["redirect"]:
+                return CheckResult.PASSED
+            return CheckResult.FAILED
+        return CheckResult.PASSED
+```
+
+**pytest + boto3 assertion** (resource-existence / runtime-shaped modules):
+```python
+# tests/scripts/test_ecs_service_exists.py
+import boto3
+import pytest
+
+@pytest.mark.integration
+def test_ecs_service_reaches_steady_state():
+    """Session 3: Phase 2 — ECS service must exist and be steady after apply."""
+    client = boto3.client("ecs", region_name="us-east-1")
+    response = client.describe_services(cluster="acme-dev-cluster", services=["acme-dev-web"])
+    assert response["services"], "expected the ECS service to exist"
+    service = response["services"][0]
+    assert service["runningCount"] == service["desiredCount"]
+```
+
+Run the check — it MUST fail (or error, if the resource doesn't exist yet) against the skeleton.
+
+### 3. Confirm Variable/Output Contract
+Reference `plan/architecture/variables-outputs.md`. The skeleton already declared the contract in Phase 0 — do not silently change variable types or add undocumented outputs in this session. If the contract needs to change, update the architecture doc first.
+
+### 4. Flesh Out Real Resource Blocks
+Replace the skeleton's `var.enabled`-gated placeholders with real resource configuration:
+
+```hcl
+# Before (Phase 0 skeleton)
+resource "aws_ecs_service" "web" {
+  count = var.enabled ? 1 : 0
+  # ... minimal placeholder args
+}
+
+# After (Phase 2 real)
+resource "aws_ecs_service" "web" {
+  name            = "${local.name_prefix}-web"
+  cluster         = aws_ecs_cluster.this.id
+  task_definition = aws_ecs_task_definition.web.arn
+  desired_count   = var.desired_count
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = data.terraform_remote_state.vpc.outputs.private_subnet_ids
+    security_groups  = [aws_security_group.service.id]
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.web.arn
+    container_name   = "web"
+    container_port   = 8080
+  }
+
+  depends_on = [aws_lb_listener.https]
+}
+```
+
+### 5. `terraform plan` and Review
+```bash
+terraform fmt -check -recursive
+terraform validate
+tflint
+checkov -d .
+terraform plan -out=terraform_plans/$(date +%Y%m%d%H%M%S).tfplan
+```
+
+Review the plan diff line by line:
+- Does it match ONLY this session's declared scope?
+- Are there any unexpected `destroy` or `replace` actions on resources from previous sessions?
+- If yes to the latter, STOP — investigate before applying.
+
+### 6. `terraform apply` From the Saved Plan
+```bash
+terraform apply terraform_plans/<timestamp>.tfplan
+```
+Never re-run `terraform plan` implicitly at apply time — always apply the exact plan that was reviewed.
+
+### 7. Post-Apply Verification
+Run the validation-first check again — it MUST now pass:
+```bash
+.venv/bin/python3 -m pytest tests/scripts/test_ecs_service_exists.py -v
+```
+Or, for a checkov policy check, re-run against the applied HCL:
+```bash
+checkov -d . --check CKV_ACME_1
+```
+
+Also confirm via CLI that the real resource exists and is healthy:
+```bash
+aws ecs describe-services --cluster acme-dev-cluster --services acme-dev-web \
+  --query 'services[0].{running:runningCount,desired:desiredCount,status:status}'
+```
+
+### 8. Session Code Quality
+Before session completion:
+```bash
+terraform fmt -recursive
+terraform validate
+tflint
+checkov -d .
+.venv/bin/python3 -m pytest tests/ -v
+.venv/bin/python3 -m mypy scripts/
+```
+
+## Session Completion Checklist
+
+- [ ] Session plan reviewed and objectives confirmed
+- [ ] Validation-first check written and initially failed
+- [ ] Variable/output contract unchanged from Phase 0 (or architecture doc updated first)
+- [ ] Real resource blocks implemented
+- [ ] terraform plan diff matches session scope only (no unexpected destroys)
+- [ ] terraform apply run from the saved plan file
+- [ ] Post-apply verification passing (validation check + boto3/aws-cli check)
+- [ ] terraform fmt / validate / tflint / checkov all clean
+- [ ] Session summary generated
+
+## Session Shared Modules
+
+Document any shared module/output created in the session summary:
+- New module outputs available for downstream modules (e.g. `module.vpc.outputs.private_subnet_ids`)
+- New IAM roles/policies that can be reused
+- New `local.common_tags` extensions
+
+## Session Completion Response
+
+When session is complete, respond with:
+
+```
+Session N Complete: Phase M (<module-name>)
+
+Implemented:
+- <module-name> with real resources: [list key resource addresses]
+- Applied from: terraform_plans/<timestamp>.tfplan
+- Post-apply verification: PASS
+
+Validation:
+- Validation-first check: [file] — now PASSING
+- checkov: PASS
+- tflint: PASS
+
+Shared Modules/Outputs Created:
+- [module.X.outputs.Y] - available for future sessions
+
+Session Summary:
+- Generated plan/sessions/session-N-summary.md
+- Documented resources created and state changes
+- Noted dependencies for next session
+
+Next Session:
+- Review plan/sessions/session-N+1-phase-M+1.md for next phase
+- When ready, say "Start Session N+1" to begin next module implementation
+
+DO NOT proceed to Session N+1 automatically.
+```
+
+## Session Transition Documentation
+
+Generate `plan/sessions/session-N-summary.md` including:
+- What was implemented and applied in this session
+- Validation checks that now pass
+- Resource addresses created (for rollback reference)
+- Dependencies for next session
+- Known limitations
+- Cost impact note
+- Prerequisites for Session N+1
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Skip session plan review
+- Skip the validation-first check
+- Apply without a saved plan file
+- Change a module's variable/output contract mid-session without updating the architecture doc
+- Apply a plan that shows unexpected destroys without investigating first
+- Implement more than one module per session
+- Move to next session with `checkov`/`tflint` failing
+- Skip post-apply verification
+- Skip session summary documentation
+- Automatically start the next session

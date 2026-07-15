@@ -1,0 +1,32 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+main
+server
+/bin/
+/dist/
+
+# Test artifacts
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Environment
+.env
+.env.local
+
+# Go workspace
+go.work
+go.work.sum
+
+# Vendoring
+vendor/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store

@@ -1,0 +1,365 @@
+---
+description: Session-based implementation patterns and processor replacement guidelines
+globs: ["src/**/*.ts", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session-Based Implementation: Processor Replacement Patterns
+
+## Purpose
+Guide the replacement of mock implementations with real business logic within individual sessions while maintaining test compatibility and code quality standards.
+
+## Session Pre-Implementation Checklist
+
+Before writing any implementation code in current session:
+- [ ] Session plan reviewed (plan/sessions/session-N-phase-M.md)
+- [ ] E2E test is written and failing
+- [ ] Prisma migration created and applied
+- [ ] Zod domain schemas defined (layered architecture)
+- [ ] Repository interface designed
+- [ ] Service layer structure planned
+- [ ] Previous session dependencies confirmed
+
+## Code Style Guidelines
+
+Full style rules live in `rules/node-standards.mdc`; this section covers implementation-specific additions.
+
+### Explicit Return Types
+Always annotate exported function/method return types:
+```typescript
+// Good
+async function createPost(data: PostCreate): Promise<Post> { ... }
+
+// Bad
+async function createPost(data: PostCreate) { ... }
+```
+
+### TSDoc Comments
+Use TSDoc for all public services/repositories:
+```typescript
+/**
+ * Create a new blog post.
+ *
+ * @param data - Post creation data containing title, content, and author ID.
+ * @returns The created post with generated ID and timestamps.
+ * @throws {Error} If the database operation fails.
+ */
+async function createPost(data: PostCreate): Promise<Post> { ... }
+```
+
+### Function Length
+Keep functions focused and short:
+- Prefer under ~50 lines per function
+- Single responsibility principle
+- Extract complex logic into helper functions
+
+### No `any`
+Use `unknown` and narrow, or a precise interface/Zod-inferred type. `any` disables the type checker entirely and is banned by ESLint (`@typescript-eslint/no-explicit-any`).
+
+## Session Processor Replacement Pattern
+
+### Step 1: Review Session Plan
+Review plan/sessions/session-N-phase-M.md to understand:
+- Current session objectives
+- Endpoint to be implemented
+- Dependencies from previous sessions
+- Expected deliverables
+
+### Step 2: Identify Mock Code
+Locate the mock implementation from Session 1 (Phase 0):
+```typescript
+// src/controllers/posts.controller.ts
+export async function createPost(req: Request, res: Response): Promise<void> {
+  // MOCK IMPLEMENTATION
+  res.status(201).json({
+    postId: 'mock-123',
+    title: req.body.title,
+    content: req.body.content,
+    authorId: 'mock-author',
+    createdAt: '2024-01-01T00:00:00Z',
+  });
+}
+```
+
+### Step 3: Add Service Layer
+Import and initialize service (via a small factory or manual DI in the controller module):
+```typescript
+import { PostService } from '../services/post.service';
+import { PostRepository } from '../repositories/post.repository';
+import { prisma } from '../config/prisma';
+
+const postService = new PostService(new PostRepository(prisma));
+```
+
+### Step 4: Validate the Request
+Parse and validate with Zod before touching the service:
+```typescript
+export async function createPost(req: Request, res: Response): Promise<void> {
+  const parsed = CreatePostRequestSchema.parse(req.body);
+```
+
+### Step 5: Call Service Layer
+Execute business logic through the service, mapping thrown errors to HTTP status codes:
+```typescript
+  try {
+    const created = await postService.createPost({
+      title: parsed.title,
+      content: parsed.content,
+      authorId: req.user!.userId,
+    });
+    res.status(201).json(created);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      res.status(400).json({ detail: error.message });
+      return;
+    }
+    logger.error({ err: error }, 'Error creating post');
+    res.status(500).json({ detail: 'Internal server error' });
+  }
+}
+```
+
+### Complete Implementation
+```typescript
+/**
+ * Create a new blog post.
+ *
+ * Request: CreatePostRequest (title, content)
+ * Response: PostResponse (postId, title, content, authorId, createdAt)
+ * Auth: required (JWT Bearer token, injects req.user)
+ */
+export async function createPost(req: Request, res: Response): Promise<void> {
+  const parsed = CreatePostRequestSchema.parse(req.body);
+
+  try {
+    const created = await postService.createPost({
+      title: parsed.title,
+      content: parsed.content,
+      authorId: req.user!.userId,
+    });
+    res.status(201).json(created);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      res.status(400).json({ detail: error.message });
+      return;
+    }
+    logger.error({ err: error }, 'Error creating post');
+    res.status(500).json({ detail: 'Internal server error' });
+  }
+}
+```
+
+Note Zod's `.parse()` throwing a `ZodError` should be caught centrally by the error-handling middleware (see below) rather than in every controller — prefer wrapping route handlers so `ZodError` maps to 400 automatically.
+
+## Error Handling Patterns
+
+### Input Validation
+Zod schemas provide automatic validation and refinement:
+```typescript
+export const CreatePostRequestSchema = z.object({
+  title: z.string().min(1).max(200).transform((v) => v.trim()),
+  content: z.string().min(1).max(10000),
+  authorId: z.string(),
+}).refine((data) => data.title.length > 0, {
+  message: 'Title cannot be empty',
+  path: ['title'],
+});
+```
+
+### Business Logic Errors
+Handle in the service layer with typed custom errors:
+```typescript
+export class ValidationError extends Error {}
+export class NotFoundError extends Error {}
+
+export class PostService {
+  async createPost(data: PostCreate): Promise<Post> {
+    if (data.title.length < 5) {
+      throw new ValidationError('Title must be at least 5 characters');
+    }
+    try {
+      return await this.postRepo.create(data);
+    } catch (error) {
+      logger.error({ err: error }, 'Repository error');
+      throw error;
+    }
+  }
+}
+```
+
+### Centralized Error Middleware
+Map domain errors to HTTP status codes in one place instead of per-controller try/catch:
+```typescript
+// src/middleware/errorHandler.ts
+import { ErrorRequestHandler } from 'express';
+import { ZodError } from 'zod';
+import { ValidationError, NotFoundError } from '../errors';
+
+export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+  if (err instanceof ZodError) {
+    res.status(400).json({ detail: err.issues });
+    return;
+  }
+  if (err instanceof ValidationError) {
+    res.status(400).json({ detail: err.message });
+    return;
+  }
+  if (err instanceof NotFoundError) {
+    res.status(404).json({ detail: err.message });
+    return;
+  }
+  logger.error({ err }, 'Unexpected error');
+  res.status(500).json({ detail: 'Internal server error' });
+};
+```
+
+## Logging Patterns
+
+### Use Structured Logging
+```typescript
+import { logger } from '../config/logger';
+
+// Good: structured with context
+logger.info({ postId: post.id, authorId: post.authorId, titleLength: post.title.length }, 'Post created');
+
+// Bad: unstructured
+console.log(`Created post ${post.id}`);
+```
+
+### Log Levels
+- `debug`: Detailed information for debugging
+- `info`: General informational messages
+- `warn`: Warning messages for recoverable issues
+- `error`: Error messages for failures
+- `fatal`: Critical errors requiring immediate attention (pino)
+
+### What to Log
+```typescript
+// Log significant operations
+logger.info({ authorId }, 'Creating post for author');
+
+// Log errors with context
+logger.error({ err: error }, 'Failed to create post');
+
+// Log performance issues
+logger.warn({ durationMs: duration }, 'Slow query detected');
+
+// Never log secrets
+logger.info({ userId: user.id }, 'User logged in'); // Good
+logger.info({ password: user.password }, 'User logged in'); // BAD - NEVER LOG SECRETS
+```
+
+## Database Transaction Patterns
+
+### Single Operation
+```typescript
+async createPost(data: PostCreate): Promise<Post> {
+  return this.postRepo.create(data);
+}
+```
+
+### Multiple Operations
+```typescript
+async createPostWithTags(data: PostCreate, tags: string[]): Promise<Post> {
+  return this.prisma.$transaction(async (tx) => {
+    const post = await tx.post.create({ data });
+    await tx.postTag.createMany({
+      data: tags.map((tag) => ({ postId: post.id, tag })),
+    });
+    return post;
+  });
+}
+```
+
+## Performance Considerations
+
+### Avoid N+1 Queries
+```typescript
+// Bad: N+1 query problem
+const posts = await this.postRepo.getAll();
+for (const post of posts) {
+  post.author = await this.userRepo.getById(post.authorId);
+}
+
+// Good: single query with Prisma `include`
+const postsWithAuthors = await this.prisma.post.findMany({ include: { author: true } });
+```
+
+### Use Pagination
+```typescript
+async getPosts(limit = 20, offset = 0): Promise<Post[]> {
+  return this.postRepo.getAll(limit, offset); // maps to Prisma `take`/`skip`
+}
+```
+
+### Cache Expensive Operations
+```typescript
+import LRUCache from 'lru-cache';
+
+const statsCache = new LRUCache<string, PostStatistics>({ max: 100, ttl: 60_000 });
+
+function getPostStatistics(postId: string): PostStatistics {
+  const cached = statsCache.get(postId);
+  if (cached) return cached;
+  const stats = calculateStatistics(postId);
+  statsCache.set(postId, stats);
+  return stats;
+}
+```
+
+For distributed caching across multiple app instances, use Redis instead of an in-process LRU cache.
+
+## Session Testing Implementation
+
+After replacing the processor in the current session:
+
+### Run E2E Tests
+```bash
+npx jest tests/routes/posts.test.ts -t "creates a post"
+```
+
+### Verify Test Passes
+Tests should now pass with the real implementation:
+- Actual database IDs generated
+- Real timestamps created
+- Data persisted correctly
+
+### Add Edge Case Tests
+```typescript
+it('rejects an overly long title', async () => { /* ... */ });
+it('prevents duplicate resource creation', async () => { /* ... */ });
+```
+
+## Session Code Review Checklist
+
+Before marking session implementation complete:
+- [ ] Session plan objectives met
+- [ ] Explicit return types on all exported functions
+- [ ] TSDoc comments on all public services/repositories
+- [ ] Error handling implemented
+- [ ] Logging added for operations
+- [ ] No hardcoded values
+- [ ] No secrets in code
+- [ ] Proper Prisma transaction handling where needed
+- [ ] Performance considerations addressed
+- [ ] E2E tests passing for current endpoint
+- [ ] Code formatted with Prettier
+- [ ] No TODO comments without tickets
+- [ ] Session summary documents implementation
+
+## Session Implementation Anti-Patterns
+
+Do NOT:
+- Skip session plan review
+- Put business logic in controllers
+- Access the repository directly from a route/controller
+- Return raw Prisma model objects to the API (always map through the repository/service)
+- Use bare `catch {}` blocks that swallow errors
+- Log sensitive information
+- Hardcode configuration values
+- Skip error handling
+- Use `any` instead of a precise type
+- Use module-level mutable global state
+- Implement features not required by the current session
+- Implement endpoints from other sessions
+- Skip session documentation

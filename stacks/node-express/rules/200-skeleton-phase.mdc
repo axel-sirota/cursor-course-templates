@@ -1,0 +1,315 @@
+---
+description: Session 1: Phase 0 skeleton creation with all endpoints returning mock data
+globs: ["src/routes/**", "src/controllers/**", "docker-compose.yml", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session 1: Phase 0 (Skeleton Implementation)
+
+## Purpose
+Execute Session 1 to create a fully functional API skeleton where all endpoints return mock data matching the OpenAPI specification. This establishes project structure, enables E2E test writing, and validates API contracts.
+
+## CRITICAL: This Session Stops After Skeleton - No Endpoint Implementation
+
+DO NOT:
+- Implement real business logic
+- Create Prisma migrations
+- Create domain models beyond request/response Zod schemas
+- Create repositories or services
+- Proceed to Session 2 automatically
+
+ONLY:
+- Create project structure
+- Implement mock endpoints
+- Set up Docker Compose
+- Configure environment
+- Set up testing framework
+
+Session 2 (First real endpoint implementation) is a SEPARATE session that requires explicit user command.
+
+## Session Prerequisites
+- OpenAPI specification complete and validated
+- Plan folder structure created with session plans
+- Session 1 plan reviewed (plan/sessions/session-1-phase-0.md)
+- Development environment ready (`.nvmrc`, `package.json`)
+
+## Session Execution Steps
+
+### 1. Review Session Plan
+Before starting implementation:
+- Read plan/sessions/session-1-phase-0.md
+- Confirm session objectives and deliverables
+- Review OpenAPI specification
+- Check prerequisites are met
+
+### 2. Project Structure
+Follow `vibe/vibe_express_boilerplate.md` exactly:
+
+Create complete directory structure:
+```
+src/
+├── config/
+│   └── env.ts
+├── middleware/
+│   ├── requestLogger.ts
+│   ├── errorHandler.ts
+│   └── auth.ts
+├── routes/
+│   ├── health.ts
+│   ├── auth.ts
+│   └── [feature].ts
+├── controllers/
+├── services/
+├── repositories/
+├── app.ts
+└── server.ts
+prisma/
+└── schema.prisma
+```
+
+### 3. Configuration Setup
+Reference `vibe/vibe_express_boilerplate.md` for:
+- Environment variable loading and validation (`src/config/env.ts`)
+- CORS configuration
+- Middleware setup
+- Logging configuration (winston/pino)
+
+Create .env.example with all required variables:
+```
+PORT=3000
+NODE_ENV=development
+DATABASE_URL=postgresql://user:pass@localhost:5432/dbname
+JWT_SECRET=change-in-production
+```
+
+### 4. Docker Compose Setup
+Use `templates/docker-compose-template.yaml`.
+
+Include services:
+- PostgreSQL database
+- pgAdmin (optional, for development)
+- Application (optional, for container testing)
+
+Ensure proper networking and volume mounting (with the `node_modules` anonymous-volume trick for hot reload).
+
+### 5. Mock Endpoint Implementation
+
+For each endpoint in OpenAPI spec, create a mock controller returning hardcoded JSON that matches the Zod response schema.
+
+**Pattern for POST endpoints:**
+```typescript
+// src/controllers/posts.controller.ts
+import { Request, Response } from 'express';
+import { CreatePostRequestSchema } from '../schemas/post.schema';
+
+export async function createPost(req: Request, res: Response): Promise<void> {
+  const parsed = CreatePostRequestSchema.parse(req.body);
+
+  // MOCK IMPLEMENTATION
+  res.status(201).json({
+    postId: 'mock-123',
+    title: parsed.title,
+    content: parsed.content,
+    authorId: parsed.authorId,
+    createdAt: '2024-01-01T00:00:00Z',
+  });
+}
+```
+
+**Pattern for GET endpoints:**
+```typescript
+export async function getPost(req: Request, res: Response): Promise<void> {
+  const { postId } = req.params;
+
+  // MOCK IMPLEMENTATION
+  res.status(200).json({
+    postId,
+    title: 'Mock Post Title',
+    content: 'Mock post content here',
+    authorId: 'mock-author-123',
+    createdAt: '2024-01-01T00:00:00Z',
+  });
+}
+```
+
+### 6. Request/Response Validation
+
+Create Zod schemas matching OpenAPI schemas. Because JSON, TypeScript, and Zod all use camelCase natively, there is no aliasing layer to write — the schema field names are the wire format:
+
+```typescript
+// src/schemas/post.schema.ts
+import { z } from 'zod';
+
+export const CreatePostRequestSchema = z.object({
+  title: z.string().min(1).max(200),
+  content: z.string().min(1).max(10000),
+  authorId: z.string(),
+});
+export type CreatePostRequest = z.infer<typeof CreatePostRequestSchema>;
+
+export const PostResponseSchema = z.object({
+  postId: z.string(),
+  title: z.string(),
+  content: z.string(),
+  authorId: z.string(),
+  createdAt: z.string(),
+});
+export type PostResponse = z.infer<typeof PostResponseSchema>;
+```
+
+### 7. Routing
+
+Wire mock controllers into an Express router:
+
+```typescript
+// src/routes/posts.ts
+import { Router } from 'express';
+import { createPost, getPost } from '../controllers/posts.controller';
+import { requireAuth } from '../middleware/auth';
+
+const router = Router();
+
+router.post('/posts', requireAuth, createPost);
+router.get('/posts/:postId', requireAuth, getPost);
+
+export default router;
+```
+
+### 8. Testing Setup
+Create test structure:
+```
+tests/
+├── routes/
+│   ├── health.test.ts
+│   └── posts.test.ts
+└── setup.ts
+```
+
+Add Jest configuration (`jest.config.ts`):
+```typescript
+import type { Config } from 'jest';
+
+const config: Config = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/tests'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+};
+
+export default config;
+```
+
+### 9. Session Verification
+Before completing Session 1:
+
+**Manual testing:**
+```bash
+# Start services
+docker compose up -d
+
+# Start application
+npm run dev
+
+# Test endpoints
+curl http://localhost:3000/health
+curl -X POST http://localhost:3000/api/posts -H "Content-Type: application/json" -d '{"title":"t","content":"c","authorId":"a"}'
+```
+
+**Automated testing:**
+```bash
+# All endpoints should return mock data
+npx jest tests/routes/health.test.ts -v
+```
+
+## Mock Data Guidelines
+
+### Consistency
+Use consistent mock IDs across related endpoints:
+- Post ID: "mock-123"
+- Author ID: "mock-author-123"
+- Comment ID: "mock-comment-456"
+
+### Realistic Structure
+Mock responses should match production structure:
+- Include all required fields
+- Use proper data types
+- Include timestamps in ISO format
+- Return appropriate HTTP status codes
+
+### Error Cases
+Implement mock error responses:
+```typescript
+export async function getPost(req: Request, res: Response): Promise<void> {
+  const { postId } = req.params;
+  if (postId === 'error') {
+    res.status(404).json({ detail: 'Post not found' });
+    return;
+  }
+  res.status(200).json(mockResponse);
+}
+```
+
+## Session 1 Completion Checklist
+
+- [ ] Session plan reviewed and objectives confirmed
+- [ ] All endpoints implemented with mock responses
+- [ ] Zod request/response schemas match OpenAPI spec
+- [ ] Docker Compose configuration working
+- [ ] Environment variables documented in .env.example
+- [ ] Health check endpoint responding
+- [ ] Test structure created (Jest + Supertest)
+- [ ] All mock endpoints manually tested
+- [ ] Session 1 summary generated in plan/sessions/
+
+## Session Completion Response
+
+When Session 1 is complete, respond with:
+
+```
+Session 1 Complete: Phase 0 (Skeleton)
+
+Created:
+- Project structure following Express boilerplate
+- [N] mock endpoints matching OpenAPI spec
+- Docker Compose with PostgreSQL
+- Environment configuration
+- Test structure (Jest + Supertest)
+
+Verification:
+- All endpoints return mock data
+- Health check: http://localhost:3000/health
+
+Session Summary:
+- Generated plan/sessions/session-1-summary.md
+- Documented all implemented endpoints
+- Listed mock data patterns used
+- Noted dependencies and configuration
+
+Next Session:
+- Review plan/sessions/session-2-phase-1.md for next phase
+- When ready, say "Start Session 2" to begin Phase 1 implementation
+
+DO NOT proceed to Session 2 automatically.
+```
+
+## Session Transition Documentation
+
+Generate plan/sessions/session-1-summary.md including:
+- List of all implemented endpoints
+- Mock data patterns used
+- Dependencies added (package.json)
+- Configuration variables needed
+- Known limitations of mock implementation
+- Prerequisites for Session 2
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Implement real business logic in Session 1
+- Connect to an actual database
+- Make external API calls
+- Implement complex validation beyond Zod `.parse()`
+- Skip any endpoints from OpenAPI spec
+- Use inconsistent mock data patterns
+- Automatically start Session 2 implementation
+- Skip session summary documentation

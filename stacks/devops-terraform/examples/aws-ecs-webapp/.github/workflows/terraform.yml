@@ -1,0 +1,158 @@
+name: Terraform (aws-ecs-webapp)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "examples/aws-ecs-webapp/**"
+  push:
+    branches: [main]
+    paths:
+      - "examples/aws-ecs-webapp/**"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  TF_VERSION: "1.9.8"
+  AWS_REGION: "us-east-1"
+  AWS_DEPLOY_ROLE_ARN: "arn:aws:iam::123456789012:role/acme-github-actions"
+  WORKING_DIR: "examples/aws-ecs-webapp"
+
+jobs:
+  fmt-and-validate:
+    name: fmt-check + validate + tflint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false
+      - run: terraform validate
+
+      - uses: terraform-linters/setup-tflint@v4
+      - run: tflint --init
+      - run: tflint --recursive
+
+  checkov:
+    name: checkov policy scan
+    runs-on: ubuntu-latest
+    needs: fmt-and-validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: ${{ env.WORKING_DIR }}
+          config_file: ${{ env.WORKING_DIR }}/.checkov.yaml
+          quiet: true
+          soft_fail: false
+
+  script-unit-tests:
+    name: pytest (scripts/, mocked AWS)
+    runs-on: ubuntu-latest
+    needs: fmt-and-validate
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install -r scripts/requirements.txt
+
+      - run: .venv/bin/python3 -m pytest tests/scripts/ -v
+
+  plan:
+    name: terraform plan (PR comment)
+    runs-on: ubuntu-latest
+    needs: [checkov, script-unit-tests]
+    if: github.event_name == 'pull_request'
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - run: terraform init -backend-config=backend.hcl
+
+      - run: terraform plan -no-color -out=tfplan -var-file=terraform.tfvars | tee plan_output.txt
+
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const file = path.join(process.env.WORKING_DIR, 'plan_output.txt');
+            let plan = fs.readFileSync(file, 'utf8').slice(0, 60000);
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Terraform Plan: aws-ecs-webapp\n\`\`\`\n${plan}\n\`\`\``,
+            });
+        env:
+          WORKING_DIR: ${{ env.WORKING_DIR }}
+
+  apply:
+    name: terraform apply (protected branch, manual approval)
+    runs-on: ubuntu-latest
+    needs: [checkov, script-unit-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - run: terraform init -backend-config=backend.hcl
+      - run: terraform plan -out=tfplan -var-file=terraform.tfvars
+      - run: terraform apply -auto-approve tfplan
+
+      - name: Post-apply smoke check
+        run: |
+          aws ecs describe-services \
+            --cluster "$(terraform output -raw ecs_cluster_name)" \
+            --services "$(terraform output -raw ecs_service_name)" \
+            --query 'services[0].{running:runningCount,desired:desiredCount,status:status}' \
+            --output table

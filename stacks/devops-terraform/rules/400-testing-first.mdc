@@ -1,0 +1,252 @@
+---
+description: Session-based validation-first testing pyramid for Terraform and automation scripts
+globs: ["tests/**", "**/*test*.py", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session-Based Testing First: Validation-Driven Infrastructure
+
+## Purpose
+Enforce strict validation-first development within each session, where a failing check (policy, lint, or plan-diff assertion) is written before any real resource exists, checks drive design decisions, and all checks must pass before session completion.
+
+## Session Validation Core Principle
+
+RED → GREEN → REFACTOR (per session), reinterpreted for IaC:
+
+1. **RED**: Write a failing validation — a `checkov` finding, a `tflint` rule, or a Terratest/pytest+boto3 assertion against non-existent infra — before any resource exists in code (at session start).
+2. **GREEN**: Write minimal HCL to satisfy it, `terraform plan`, confirm no unexpected diffs, `terraform apply` (during session).
+3. **REFACTOR**: Extract to module / `for_each` / `locals` for DRY while keeping validations green (before session end).
+
+## Session Testing Context
+
+Each session follows validation-first principles:
+- Session N: Write the validation-first check for the current module
+- Session N: Implement the module to make the check pass
+- Session N: Refactor (extract locals, tighten variable validation) while keeping checks green
+- Session N: Document check results in session summary
+
+## Testing Pyramid for This Stack
+
+```
+        ┌─────────────────────────────┐
+        │  e2e / integration           │  Terratest (Go) or pytest+boto3
+        │  (real apply, torn down)     │  against an ephemeral workspace
+        ├─────────────────────────────┤
+        │  plan-diff review             │  terraform plan output inspected
+        │                                │  for unexpected destroy/replace
+        ├─────────────────────────────┤
+        │  policy / security             │  checkov -d ., optionally tfsec/OPA
+        ├─────────────────────────────┤
+        │  static                         │  terraform validate, tflint,
+        │                                  │  terraform fmt -check
+        ├─────────────────────────────────┤
+        │  script unit tests                │  pytest for scripts/, mocked via
+        │                                    │  moto or botocore.stub.Stubber
+        └───────────────────────────────────┘
+```
+
+Run the pyramid bottom-up during a session, and top-down when reviewing whether a session is done.
+
+### 1. Static Layer
+```bash
+terraform fmt -check -recursive
+terraform validate
+tflint
+```
+
+### 2. Policy / Security Layer
+```bash
+checkov -d .
+```
+
+Skip-with-justification pattern in `.checkov.yaml` (never a bare skip):
+```yaml
+# .checkov.yaml
+skip-check:
+  - id: CKV_AWS_79
+    # Justification: NAT instance intentionally uses an unencrypted root volume
+    # for the ephemeral course environment; production module (modules/vpc)
+    # sets encrypted = true. Tracked in plan/architecture/resources.md.
+```
+
+Or inline, on the resource:
+```hcl
+resource "aws_instance" "nat" {
+  # checkov:skip=CKV_AWS_79:Ephemeral course NAT instance, see plan/architecture/resources.md
+  ...
+}
+```
+
+### 3. Plan-Diff Review Layer
+Before every `apply`, the reviewer (human or CI) inspects the plan output for anything outside the session's declared scope:
+```bash
+terraform plan -out=terraform_plans/$(date +%Y%m%d%H%M%S).tfplan | tee /tmp/plan.txt
+grep -E '(destroyed|replaced)' /tmp/plan.txt
+```
+Any unplanned destroy/replace on a resource from a previous session is a STOP signal, not a warning.
+
+### 4. Integration Layer — pytest + moto (Script Unit Tests)
+Mock AWS entirely — never call real AWS in a unit test:
+```python
+# tests/scripts/test_verify_deployment.py
+import boto3
+import pytest
+from moto import mock_aws
+
+from scripts.verify_deployment import get_service_status
+
+
+@mock_aws
+def test_get_service_status_steady_state():
+    """HP: service already at steady state is reported correctly."""
+    client = boto3.client("ecs", region_name="us-east-1")
+    client.create_cluster(clusterName="acme-dev-cluster")
+    # moto's ECS support for full service lifecycle is limited; for
+    # deeper coverage stub the client instead (see Stubber example below).
+
+    status = get_service_status(cluster="acme-dev-cluster", service="acme-dev-web", region="us-east-1")
+    assert status["cluster"] == "acme-dev-cluster"
+
+
+def test_get_service_status_missing_service_raises():
+    """UP: an unknown service name surfaces a clear error, not a KeyError."""
+    from botocore.stub import Stubber
+
+    client = boto3.client("ecs", region_name="us-east-1")
+    stubber = Stubber(client)
+    stubber.add_response("describe_services", {"services": [], "failures": [{"arn": "x", "reason": "MISSING"}]})
+    stubber.activate()
+
+    with pytest.raises(ValueError, match="service not found"):
+        get_service_status(cluster="acme-dev-cluster", service="does-not-exist", region="us-east-1", client=client)
+```
+
+### 5. e2e / Integration Layer — Ephemeral Apply
+For a true integration test, apply into an isolated workspace/state key and tear down immediately after assertions — never against the shared dev/staging/prod state:
+```python
+# tests/integration/test_vpc_module_e2e.py — costs money, run manually / nightly only
+import subprocess
+import json
+import pytest
+
+@pytest.mark.e2e
+def test_vpc_module_creates_expected_subnet_count(tmp_path):
+    """e2e: apply modules/vpc into a throwaway workspace, assert, then destroy."""
+    workspace_dir = tmp_path / "vpc-e2e"
+    subprocess.run(["terraform", "init"], cwd=workspace_dir, check=True)
+    subprocess.run(
+        ["terraform", "apply", "-auto-approve", "-var", "availability_zone_count=2"],
+        cwd=workspace_dir, check=True,
+    )
+    try:
+        output = subprocess.run(
+            ["terraform", "output", "-json"], cwd=workspace_dir, check=True, capture_output=True, text=True
+        )
+        outputs = json.loads(output.stdout)
+        assert len(outputs["private_subnet_ids"]["value"]) == 2
+    finally:
+        subprocess.run(["terraform", "destroy", "-auto-approve"], cwd=workspace_dir, check=True)
+```
+Note: this is the one place `terraform destroy` is acceptable — an explicit, human-triggered, ephemeral-workspace teardown in an e2e test, never against real project state.
+
+## Test Organization
+
+```
+tests/
+├── policy/                          # checkov custom checks + .checkov.yaml
+│   └── check_alb_https_only.py
+├── scripts/                          # pytest unit tests for scripts/, mocked
+│   ├── test_verify_deployment.py
+│   └── conftest.py
+├── integration/                       # optional, costs money, ephemeral apply
+│   └── test_vpc_module_e2e.py
+└── test_terraform_validate.py          # thin wrapper invoking validate/tflint/checkov from pytest, for CI aggregation
+```
+
+## Session Test Execution Strategy
+
+### Session Development (RED → GREEN cycle)
+```bash
+# Write and run the failing check first
+checkov -d . --check CKV_ACME_1        # or: pytest tests/scripts/test_x.py -v
+
+# Implement, then re-run
+terraform plan -out=terraform_plans/session.tfplan
+terraform apply terraform_plans/session.tfplan
+checkov -d . --check CKV_ACME_1        # now PASS
+```
+
+### Session Completion
+```bash
+terraform fmt -check -recursive
+terraform validate
+tflint
+checkov -d .
+.venv/bin/python3 -m pytest tests/ -v -m "not e2e"
+```
+
+## Test Data Management
+
+### State Isolation
+- Never point a test at shared dev/staging/prod state
+- e2e tests use a dedicated backend key under `tests/` or a local backend in `tmp_path`
+- Clean up (`terraform destroy`) in a `finally` block so a failed assertion never leaks resources
+
+### Mock Data Consistency
+```python
+TEST_CLUSTER = "acme-test-cluster"
+TEST_SERVICE = "acme-test-web"
+TEST_REGION = "us-east-1"
+```
+
+## Assertions Best Practices
+
+### Be Specific
+```python
+# Good
+assert status["runningCount"] == status["desiredCount"]
+assert response["services"][0]["status"] == "ACTIVE"
+
+# Bad
+assert status
+assert "runningCount" in status
+```
+
+### Verify Plan-Diff, Not Just Apply Success
+```bash
+# Good: assert the plan touches only the expected resources
+terraform plan -out=plan.tfplan
+terraform show -json plan.tfplan | jq '.resource_changes[].address'
+
+# Bad: only checking exit code
+terraform apply -auto-approve
+```
+
+## Session Testing Checklist
+
+Before completing any session:
+
+- [ ] Session plan reviewed and validation objectives confirmed
+- [ ] Failing check written before implementation (checkov/tflint/pytest+boto3)
+- [ ] Check initially fails (proves it tests something)
+- [ ] terraform plan diff reviewed for unexpected destroy/replace
+- [ ] All static checks passing (`fmt`, `validate`, `tflint`)
+- [ ] checkov clean (or skips justified)
+- [ ] Script unit tests passing with mocked AWS (moto/Stubber)
+- [ ] Post-apply verification passing against real resources
+- [ ] Session summary documents check results
+
+## Session Testing Anti-Patterns
+
+Do NOT:
+- Skip session plan review
+- Write real resource blocks before the failing check
+- Skip a check because "it's simple"
+- Call real AWS in a unit test — use moto or Stubber
+- Run `terraform destroy` outside a dedicated, ephemeral e2e test
+- Share state between test runs
+- Forget to test the failure path (missing service, denied IAM action)
+- Test only the happy path
+- Commit code with `checkov`/`tflint` failing
+- Skip tests during "rapid development"
+- Apply a plan you have not reviewed

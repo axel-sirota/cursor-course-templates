@@ -1,0 +1,247 @@
+---
+description: Maven wrapper, JDK pinning, and dependency management for Spring Boot projects
+alwaysApply: false
+globs: ["pom.xml", "mvnw", "mvnw.cmd", ".mvn/**", ".sdkmanrc", ".tool-versions"]
+---
+
+# Environment Setup and Dependency Management
+
+## Purpose
+This rule ensures proper JDK pinning, Maven wrapper discipline, and dependency management for all Spring Boot projects.
+
+## Mandatory Environment Setup
+
+### 1. JDK Pinning
+
+**ALWAYS** pin the JDK version explicitly — never rely on whatever JDK happens to be on `PATH`.
+
+**sdkman (recommended for local dev):**
+```bash
+sdk install java 21-tem
+sdk use java 21-tem
+sdk current java
+
+# Pin it for the project so `cd` auto-switches (with sdkman auto-env enabled)
+echo "java=21-tem" > .sdkmanrc
+```
+
+**asdf (if the team already uses asdf for other languages):**
+```bash
+asdf plugin add java
+asdf install java temurin-21.0.4+7.0.LTS
+asdf local java temurin-21.0.4+7.0.LTS   # writes .tool-versions
+```
+
+Commit `.sdkmanrc` or `.tool-versions` so every contributor and CI runner resolves the same JDK.
+
+### 2. Maven Wrapper Discipline
+
+**ALWAYS** use the Maven wrapper (`mvnw` / `mvnw.cmd`) instead of a system-installed `mvn`:
+
+```bash
+# Generate the wrapper once, if missing
+mvn -N io.takari:maven:wrapper -Dmaven=3.9.9
+
+# Then always invoke via the wrapper
+./mvnw -v
+./mvnw clean install
+./mvnw spring-boot:run
+./mvnw test
+```
+
+**Never**:
+```bash
+# ❌ DON'T DO THIS — bypasses the pinned Maven version
+mvn clean install
+
+# ✅ DO THIS INSTEAD
+./mvnw clean install
+```
+
+Commit `.mvn/wrapper/maven-wrapper.jar`, `.mvn/wrapper/maven-wrapper.properties`, `mvnw`, and `mvnw.cmd` to the repository — the wrapper only works if the jar and properties file travel with the source.
+
+### 3. Dependency Management Rules
+
+**ALWAYS** follow this workflow for dependencies:
+
+1. **Add the dependency to `pom.xml` FIRST**:
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-validation</artifactId>
+   </dependency>
+   ```
+
+2. **Then resolve/download using the wrapper**:
+   ```bash
+   ./mvnw dependency:resolve
+   ```
+
+3. **Never download jars manually or edit the local `.m2` cache directly**:
+   ```bash
+   # ❌ DON'T DO THIS
+   curl -o some-lib.jar https://repo1.maven.org/...
+
+   # ✅ DO THIS INSTEAD — declare it in pom.xml, then resolve
+   ./mvnw dependency:resolve
+   ```
+
+### 4. Project Initialization Checklist
+
+When starting any new project, **ALWAYS**:
+
+1. Pin the JDK:
+   ```bash
+   sdk install java 21-tem && sdk use java 21-tem
+   ```
+
+2. Generate the Maven wrapper:
+   ```bash
+   mvn -N io.takari:maven:wrapper -Dmaven=3.9.9
+   ```
+
+3. Verify the wrapper works:
+   ```bash
+   ./mvnw -v
+   ```
+
+4. Add core starters to `pom.xml` (web, data-jpa, validation, test, actuator, lombok).
+
+5. Install dependencies:
+   ```bash
+   ./mvnw dependency:resolve
+   ```
+
+### 5. Adding New Dependencies
+
+**ALWAYS** follow this exact sequence:
+
+1. **Add the `<dependency>` block to `pom.xml`**
+2. **Resolve with the wrapper**:
+   ```bash
+   ./mvnw dependency:resolve
+   ```
+3. **Verify it landed on the classpath**:
+   ```bash
+   ./mvnw dependency:tree | grep <artifactId>
+   ```
+
+### 6. .gitignore Requirements
+
+**ALWAYS** ensure `.gitignore` includes:
+
+```gitignore
+# Maven build output
+target/
+
+# Compiled class files
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+
+# Environment
+.env
+
+# Keep the wrapper jar tracked — do NOT ignore .mvn/
+!.mvn/wrapper/maven-wrapper.jar
+```
+
+Note the last line: unlike a typical blanket ignore, the Maven wrapper's jar and properties file under `.mvn/wrapper/` must stay **tracked** in git — that is what lets a fresh clone run `./mvnw` with zero setup.
+
+### 7. Session Commands Integration
+
+When using session commands (`@start-session`, `@architect`, etc.):
+
+1. **ALWAYS** check that `./mvnw` exists and is executable
+2. **ALWAYS** confirm the pinned JDK is active (`java -version` matches `.sdkmanrc`/`.tool-versions`)
+3. **ALWAYS** use `./mvnw` for all build/test commands
+4. **ALWAYS** add new dependencies to `pom.xml` before resolving
+
+### 8. Docker Integration
+
+When using Docker, mirror the wrapper discipline inside the build stage (see `rules/500-docker-java.mdc` for the full multi-stage pattern):
+
+```dockerfile
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
+WORKDIR /app
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+RUN ./mvnw dependency:go-offline -B
+COPY src ./src
+RUN ./mvnw package -DskipTests -B
+```
+
+### 9. CI/CD Integration
+
+In CI/CD pipelines, pin the JDK via `actions/setup-java` and let the wrapper drive the build:
+
+```yaml
+- name: Set up JDK 21
+  uses: actions/setup-java@v4
+  with:
+    distribution: temurin
+    java-version: '21'
+    cache: maven
+
+- name: Build and test
+  run: ./mvnw -B verify
+```
+
+### 10. Common Commands Reference
+
+```bash
+# Verify wrapper + JDK
+./mvnw -v
+
+# Install dependencies / compile
+./mvnw clean install
+
+# Run the application locally
+./mvnw spring-boot:run
+
+# Run all tests
+./mvnw test
+
+# Run only a single test class
+./mvnw test -Dtest=PostControllerTest
+
+# Static analysis
+./mvnw checkstyle:check
+
+# Auto-format
+./mvnw spotless:apply
+
+# Build a runnable jar
+./mvnw clean package -DskipTests
+
+# Inspect the dependency tree
+./mvnw dependency:tree
+```
+
+## Anti-Patterns to Avoid
+
+**NEVER**:
+- Run bare `mvn` when `./mvnw` exists
+- Skip JDK pinning and rely on "whatever `java` resolves to"
+- Add a jar to the classpath without declaring it in `pom.xml`
+- Commit `target/` or IDE metadata (`.idea/`, `*.iml`) to git
+- Ignore `.mvn/wrapper/maven-wrapper.jar` — it must be tracked, not gitignored
+
+## Success Criteria
+
+Environment setup is correct when:
+- [ ] `mvnw` / `mvnw.cmd` / `.mvn/wrapper/` exist and are committed
+- [ ] `.sdkmanrc` or `.tool-versions` pins the JDK version
+- [ ] `pom.xml` contains all dependencies actually in use
+- [ ] `target/` and IDE metadata are in `.gitignore`
+- [ ] `./mvnw -v` runs successfully and reports the pinned JDK
+- [ ] Dependencies are resolved exclusively through `./mvnw dependency:resolve`

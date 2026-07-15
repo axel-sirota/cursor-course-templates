@@ -1,0 +1,395 @@
+---
+description: Session-based implementation patterns and mock-to-real handler replacement guidelines
+globs: ["internal/**/*.go", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session-Based Implementation: Mock-to-Real Replacement Patterns (Go + Gin)
+
+## Purpose
+Guide the replacement of mock handlers with real business logic within individual sessions while
+maintaining test compatibility and Go code quality standards.
+
+## Session Pre-Implementation Checklist
+
+Before writing any implementation code in the current session:
+- [ ] Session plan reviewed (`plan/sessions/session-N-phase-M.md`)
+- [ ] E2E test is written and failing
+- [ ] Database migration created and applied
+- [ ] GORM model + DTOs defined (layered: DB model vs API request/response structs)
+- [ ] Repository interface designed (consumer-side, in the service package)
+- [ ] Service layer structure planned
+- [ ] Previous session dependencies confirmed
+
+## Code Style Guidelines
+
+Follow idiomatic Go conventions strictly (see `rules/300-go-style.mdc` for the full reference).
+
+### Doc Comments
+Every exported identifier needs a doc comment starting with its own name:
+```go
+// CreatePost creates a new blog post.
+//
+// It validates the input, persists it via the repository, and returns the
+// created post with its generated ID and timestamps.
+func (s *PostService) CreatePost(ctx context.Context, req CreatePostInput) (*model.Post, error) {
+    // ...
+}
+```
+
+### Function Length & Single Responsibility
+- Keep functions focused and short — extract helpers rather than growing one function
+- One concern per function: a handler does HTTP <-> DTO translation and calls a service; it does not
+  also contain SQL or business rules
+
+### Naming
+- `camelCase` for unexported identifiers, `PascalCase` for exported
+- `UPPER_SNAKE` is not idiomatic Go — use exported `const` identifiers in `PascalCase` (or grouped
+  `const` blocks with `iota` for enums)
+- Descriptive names; avoid abbreviations except well-known ones (`ctx`, `req`, `err`, `svc`, `repo`)
+
+## Session Mock-to-Real Replacement Pattern
+
+### Step 1: Review Session Plan
+Review `plan/sessions/session-N-phase-M.md` to understand:
+- Current session objectives
+- Endpoint to be implemented
+- Dependencies from previous sessions
+- Expected deliverables
+
+### Step 2: Identify Mock Code
+Locate the mock handler from Session 1 (Phase 0):
+```go
+// CreatePost handles POST /api/posts — MOCK IMPLEMENTATION.
+func CreatePost(c *gin.Context) {
+    var req CreatePostRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    c.JSON(http.StatusCreated, PostResponse{
+        PostID: "mock-123", Title: req.Title, Content: req.Content,
+        AuthorID: "mock-author", CreatedAt: "2024-01-01T00:00:00Z",
+    })
+}
+```
+
+### Step 3: Convert Handler to a Dependency-Injecting Factory
+Gin handlers are `func(c *gin.Context)`. To inject a service without global state, wrap the handler
+in a factory function that closes over its dependencies:
+
+```go
+func CreatePost(svc *service.PostService) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        // handler body goes here, has access to svc via closure
+    }
+}
+```
+
+Register it in the router with the dependency already bound:
+```go
+posts := api.Group("/posts")
+posts.POST("", handler.CreatePost(postService))
+```
+
+### Step 4: Convert API DTO to Service Input
+Transform the request DTO into whatever shape the service layer expects:
+```go
+func CreatePost(svc *service.PostService) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        var req model.CreatePostRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+
+        input := service.CreatePostInput{
+            Title:    req.Title,
+            Content:  req.Content,
+            AuthorID: req.AuthorID,
+        }
+```
+
+### Step 5: Call the Service Layer
+Execute business logic through the service, mapping errors to HTTP status codes:
+```go
+        post, err := svc.CreatePost(c.Request.Context(), input)
+        if err != nil {
+            if errors.Is(err, service.ErrValidation) {
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+            }
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+            return
+        }
+```
+
+### Step 6: Convert the Service Result Back to an API Response
+```go
+        c.JSON(http.StatusCreated, model.ToPostResponse(post))
+    }
+}
+```
+
+### Complete Implementation
+```go
+// CreatePost handles POST /api/posts.
+func CreatePost(svc *service.PostService) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        var req model.CreatePostRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+
+        post, err := svc.CreatePost(c.Request.Context(), service.CreatePostInput{
+            Title:    req.Title,
+            Content:  req.Content,
+            AuthorID: req.AuthorID,
+        })
+        if err != nil {
+            if errors.Is(err, service.ErrValidation) {
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+            }
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+            return
+        }
+
+        c.JSON(http.StatusCreated, model.ToPostResponse(post))
+    }
+}
+```
+
+## Error Handling Patterns
+
+### Input Validation
+Use Gin binding tags for structural validation; sentinel errors for business rules:
+```go
+type CreatePostRequest struct {
+    Title    string `json:"title" binding:"required,min=1,max=200"`
+    Content  string `json:"content" binding:"required,min=1,max=10000"`
+    AuthorID string `json:"authorId" binding:"required,uuid"`
+}
+```
+
+### Business Logic Errors
+Handle in the service layer with sentinel errors or custom error types:
+```go
+var ErrValidation = errors.New("validation failed")
+
+func (s *PostService) CreatePost(ctx context.Context, req CreatePostInput) (*model.Post, error) {
+    if len(req.Title) < 5 {
+        return nil, fmt.Errorf("%w: title must be at least 5 characters", ErrValidation)
+    }
+
+    post := &model.Post{Title: req.Title, Content: req.Content, AuthorID: req.AuthorID}
+    if err := s.repo.Create(ctx, post); err != nil {
+        return nil, fmt.Errorf("post service: create post: %w", err)
+    }
+    return post, nil
+}
+```
+
+### HTTP Error Mapping
+Map domain errors to HTTP status codes in the handler layer, using `errors.Is`:
+```go
+post, err := svc.CreatePost(c.Request.Context(), input)
+if err != nil {
+    switch {
+    case errors.Is(err, service.ErrValidation):
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    case errors.Is(err, service.ErrForbidden):
+        c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+    case errors.Is(err, service.ErrNotFound):
+        c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+    default:
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+    }
+    return
+}
+```
+
+## No Panics in Handlers
+
+Handlers must never panic on bad input — that's what `gin.Recovery()` middleware is for as a last
+resort, but the goal is to never reach it via normal request handling:
+
+```go
+// main.go — recover from any unexpected panic and return 500 instead of crashing the process
+r := gin.New()
+r.Use(gin.Recovery())
+r.Use(gin.Logger())
+```
+
+```go
+// Bad: will panic on missing param
+id, _ := strconv.Atoi(c.Param("id"))
+
+// Good: handle the error explicitly
+idStr := c.Param("id")
+if _, err := uuid.Parse(idStr); err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id format"})
+    return
+}
+```
+
+## Logging Patterns
+
+### Use Structured Logging
+Prefer `log/slog` (standard library, Go 1.21+) or `zerolog`/`zap` for high-throughput services:
+
+```go
+import "log/slog"
+
+// Good: structured with context
+slog.Info("post created",
+    "post_id", post.ID,
+    "author_id", post.AuthorID,
+    "title_length", len(post.Title),
+)
+
+// Bad: unstructured
+log.Printf("Created post %s", post.ID)
+```
+
+### Log Levels
+- `Debug`: detailed information for debugging
+- `Info`: general informational messages
+- `Warn`: recoverable issues
+- `Error`: failures
+
+### What to Log
+```go
+// Log significant operations
+slog.Info("creating post", "author_id", authorID)
+
+// Log errors with context
+slog.Error("failed to create post", "error", err)
+
+// Don't log sensitive data
+slog.Info("user logged in", "user_id", userID)  // Good
+slog.Info("user password", "password", password) // BAD — NEVER LOG SECRETS
+```
+
+## Database Transaction Patterns
+
+### Single Operation
+```go
+func (r *GormPostRepository) Create(ctx context.Context, post *model.Post) error {
+    return r.db.WithContext(ctx).Create(post).Error
+}
+```
+
+### Multiple Operations (GORM transaction)
+```go
+func (r *GormPostRepository) CreateWithTags(ctx context.Context, post *model.Post, tags []string) error {
+    return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+        if err := tx.Create(post).Error; err != nil {
+            return fmt.Errorf("create post: %w", err)
+        }
+        for _, tag := range tags {
+            if err := tx.Create(&model.PostTag{PostID: post.ID, Tag: tag}).Error; err != nil {
+                return fmt.Errorf("create tag %q: %w", tag, err)
+            }
+        }
+        return nil
+    })
+}
+```
+
+## Performance Considerations
+
+### Avoid N+1 Queries
+```go
+// Bad: N+1 query problem
+var posts []model.Post
+db.Find(&posts)
+for i := range posts {
+    var author model.User
+    db.First(&author, "id = ?", posts[i].AuthorID)
+    posts[i].AuthorName = author.Name
+}
+
+// Good: eager load with Preload
+var posts []model.Post
+db.Preload("Author").Find(&posts)
+```
+
+### Use Pagination
+```go
+func (r *GormPostRepository) List(ctx context.Context, limit, offset int) ([]model.Post, error) {
+    var posts []model.Post
+    err := r.db.WithContext(ctx).Limit(limit).Offset(offset).Find(&posts).Error
+    return posts, err
+}
+```
+
+### Cache Expensive Operations
+```go
+// Simple in-memory cache for course-scale demos; use Redis for production scale
+var statsCache = sync.Map{}
+
+func (s *PostService) GetPostStatistics(postID string) Stats {
+    if cached, ok := statsCache.Load(postID); ok {
+        return cached.(Stats)
+    }
+    stats := computeExpensiveStats(postID)
+    statsCache.Store(postID, stats)
+    return stats
+}
+```
+
+## Session Testing Implementation
+
+After replacing the mock handler in the current session:
+
+### Run E2E Tests
+```bash
+go test ./internal/handler/... -run TestCreatePost -v
+```
+
+### Verify Test Passes
+Tests should now pass with the real implementation:
+- Actual database-generated IDs
+- Real timestamps
+- Data persisted correctly (verifiable via a follow-up GET)
+
+### Add Edge Case Tests
+```go
+func TestCreatePost_TitleTooLong(t *testing.T) { /* ... */ }
+func TestCreatePost_DuplicateCheck(t *testing.T) { /* ... */ }
+```
+
+## Session Code Review Checklist
+
+Before marking session implementation complete:
+- [ ] Session plan objectives met
+- [ ] Doc comments on all new exported identifiers
+- [ ] Error handling implemented (wrapped, checked with `errors.Is`/`errors.As`)
+- [ ] Structured logging added for significant operations
+- [ ] No hardcoded values (config-driven)
+- [ ] No secrets in code
+- [ ] Proper transaction handling for multi-step writes
+- [ ] Performance considerations addressed (pagination, no N+1)
+- [ ] E2E tests passing for the current endpoint
+- [ ] `gofmt -l .` empty, `golangci-lint run` clean
+- [ ] No `// TODO` comments without a tracked follow-up
+- [ ] Session summary documents implementation
+
+## Session Implementation Anti-Patterns
+
+Do NOT:
+- Skip session plan review
+- Put business logic in handlers
+- Access the repository directly from a handler
+- Return the raw GORM model to the API (always convert via `ToXResponse`)
+- Use `_` to discard errors without a documented reason
+- Log sensitive information
+- Hardcode configuration values
+- Skip error handling
+- Forget doc comments on exported identifiers
+- Use global mutable state
+- Implement features not required by the current session
+- Implement endpoints from other sessions
+- Skip session documentation

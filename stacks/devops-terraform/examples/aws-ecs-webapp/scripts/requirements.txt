@@ -1,0 +1,7 @@
+boto3==1.35.0
+botocore==1.35.0
+click==8.1.7
+python-dotenv==1.0.1
+pytest==8.3.0
+moto[ec2,ecs,elbv2,s3,cloudfront]==5.0.13
+mypy==1.11.2

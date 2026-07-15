@@ -1,0 +1,319 @@
+---
+description: Session 1 - Phase 0 skeleton creation with all Gin endpoints returning mock data
+globs: ["cmd/**", "internal/handler/**", "docker-compose.yml", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session 1: Phase 0 (Skeleton Implementation) — Go + Gin
+
+## Purpose
+Execute Session 1 to create a fully functional API skeleton where all endpoints return mock data
+matching the OpenAPI specification. This establishes project structure, enables E2E test writing, and
+validates API contracts before any real business logic exists.
+
+## CRITICAL: This Session Stops After Skeleton - No Endpoint Implementation
+
+DO NOT:
+- Implement real business logic
+- Create database migrations
+- Create GORM models beyond what's needed for mock handler DTOs
+- Create repositories or services
+- Proceed to Session 2 automatically
+
+ONLY:
+- Create project structure
+- Implement mock handlers
+- Set up Docker Compose
+- Configure environment
+- Create test scaffolding
+
+Session 2 (first real endpoint implementation) is a SEPARATE session that requires explicit user command.
+
+## Session Prerequisites
+- OpenAPI specification complete and validated
+- Plan folder structure created with session plans
+- Session 1 plan reviewed (`plan/sessions/session-1-phase-0.md`)
+- Go toolchain and golangci-lint installed
+
+## Session Execution Steps
+
+### 1. Review Session Plan
+Before starting implementation:
+- Read `plan/sessions/session-1-phase-0.md`
+- Confirm session objectives and deliverables
+- Review the OpenAPI specification
+- Check prerequisites are met
+
+### 2. Project Structure
+Follow `vibe/vibe_gin_boilerplate.md` exactly:
+
+```
+cmd/
+└── server/
+    └── main.go
+internal/
+├── config/
+│   └── config.go
+├── database/
+│   └── database.go
+├── middleware/
+│   ├── recovery.go
+│   ├── cors.go
+│   └── logging.go
+├── handler/
+│   ├── health.go
+│   └── [feature].go
+├── model/
+│   └── [feature].go
+└── service/
+    └── (created in Session 2+)
+```
+
+### 3. Configuration Setup
+Reference `vibe/vibe_gin_boilerplate.md` for:
+- Environment variable management (`viper` or `envconfig`)
+- CORS configuration (`gin-contrib/cors`)
+- Middleware setup (recovery, request-ID, structured logging)
+
+Create `.env.example` with all required variables:
+```
+PORT=8080
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/app_db
+LOG_LEVEL=info
+```
+
+### 4. Docker Compose Setup
+Use `templates/docker-compose-template.yaml`.
+
+Include services:
+- PostgreSQL database
+- Application (optional, for containerized dev)
+
+Ensure proper networking, volumes, and healthchecks. `vibe/vibe_docker.md` already covers the Docker
+patterns for this stack in depth — cross-reference it, don't duplicate it.
+
+### 5. Mock Handler Implementation
+
+For each endpoint in the OpenAPI spec, create a mock handler.
+
+**Pattern for POST endpoints:**
+```go
+// CreatePost handles POST /api/posts — MOCK IMPLEMENTATION (Phase 0).
+func CreatePost(c *gin.Context) {
+    var req CreatePostRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusCreated, PostResponse{
+        PostID:    "mock-123",
+        Title:     req.Title,
+        Content:   req.Content,
+        AuthorID:  "mock-author-123",
+        CreatedAt: "2024-01-01T00:00:00Z",
+    })
+}
+```
+
+**Pattern for GET (single resource) endpoints:**
+```go
+// GetPost handles GET /api/posts/:id — MOCK IMPLEMENTATION (Phase 0).
+func GetPost(c *gin.Context) {
+    postID := c.Param("id")
+
+    c.JSON(http.StatusOK, PostResponse{
+        PostID:    postID,
+        Title:     "Mock Post Title",
+        Content:   "Mock post content here",
+        AuthorID:  "mock-author-123",
+        CreatedAt: "2024-01-01T00:00:00Z",
+    })
+}
+```
+
+**Pattern for GET (list) endpoints:**
+```go
+// ListPosts handles GET /api/posts — MOCK IMPLEMENTATION (Phase 0).
+func ListPosts(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{
+        "posts": []PostResponse{
+            {PostID: "mock-123", Title: "Mock Post 1", AuthorID: "mock-author-123", CreatedAt: "2024-01-01T00:00:00Z"},
+            {PostID: "mock-124", Title: "Mock Post 2", AuthorID: "mock-author-123", CreatedAt: "2024-01-01T00:00:00Z"},
+        },
+        "totalCount": 2,
+    })
+}
+```
+
+### 6. Request/Response DTO Structs
+Create Go structs matching the OpenAPI schemas, in `internal/model/`.
+
+Go idiom: use flat, separate structs per operation — there is no Pydantic-style inheritance chain.
+
+```go
+// internal/model/post.go
+
+// CreatePostRequest is the API request body for creating a post.
+type CreatePostRequest struct {
+    Title    string `json:"title" binding:"required,min=1,max=200"`
+    Content  string `json:"content" binding:"required,min=1"`
+    AuthorID string `json:"authorId" binding:"required"`
+}
+
+// PostResponse is the API response body representing a post.
+type PostResponse struct {
+    PostID    string `json:"postId"`
+    Title     string `json:"title"`
+    Content   string `json:"content"`
+    AuthorID  string `json:"authorId"`
+    CreatedAt string `json:"createdAt"`
+}
+```
+
+### 7. Router Registration
+Wire mock handlers into the router in `cmd/server/main.go` or a dedicated `internal/handler/routes.go`:
+
+```go
+func RegisterRoutes(r *gin.Engine) {
+    r.GET("/health", HealthCheck)
+
+    api := r.Group("/api")
+    {
+        posts := api.Group("/posts")
+        {
+            posts.POST("", CreatePost)
+            posts.GET("/:id", GetPost)
+            posts.GET("", ListPosts)
+        }
+    }
+}
+```
+
+### 8. Testing Setup
+Create test scaffolding (colocated `_test.go` files are idiomatic Go):
+```
+internal/handler/
+├── health.go
+├── health_test.go
+├── posts.go
+└── posts_test.go
+```
+
+Set `gin.SetMode(gin.TestMode)` in test setup to suppress debug output.
+
+### 9. Session Verification
+
+**Manual testing:**
+```bash
+# Start services
+docker compose up -d
+
+# Start application
+go run ./cmd/server
+
+# Test endpoints
+curl http://localhost:8080/health
+curl -X POST http://localhost:8080/api/posts -d '{"title":"t","content":"c","authorId":"a"}' -H 'Content-Type: application/json'
+```
+
+**Automated testing:**
+```bash
+# All endpoints should return mock data
+go test ./internal/handler/... -v
+```
+
+## Mock Data Guidelines
+
+### Consistency
+Use consistent mock IDs across related endpoints:
+- Post ID: `"mock-123"`
+- Author ID: `"mock-author-123"`
+- Comment ID: `"mock-comment-456"`
+
+### Realistic Structure
+Mock responses should match production structure:
+- Include all required fields
+- Use proper JSON types
+- Include timestamps in RFC3339/ISO format
+- Return appropriate HTTP status codes (`201` for creation, `200` for reads, `204` for deletes)
+
+### Error Cases
+Implement mock error responses:
+```go
+func GetPost(c *gin.Context) {
+    postID := c.Param("id")
+    if postID == "error" {
+        c.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
+        return
+    }
+    // ... mock success response
+}
+```
+
+## Session 1 Completion Checklist
+
+- [ ] Session plan reviewed and objectives confirmed
+- [ ] All endpoints implemented with mock responses
+- [ ] Request/response DTOs match OpenAPI spec
+- [ ] Docker Compose configuration working (references `templates/docker-compose-template.yaml`)
+- [ ] Environment variables documented in `.env.example`
+- [ ] Health check endpoint responding
+- [ ] Test scaffolding created (`*_test.go` files with `httptest`)
+- [ ] All mock endpoints manually tested with `curl`
+- [ ] `go build ./...` and `go vet ./...` succeed
+- [ ] Session 1 summary generated in `plan/sessions/`
+
+## Session Completion Response
+
+When Session 1 is complete, respond with:
+
+```
+Session 1 Complete: Phase 0 (Skeleton)
+
+Created:
+- Project structure following the Go/Gin boilerplate
+- [N] mock endpoints matching OpenAPI spec
+- Docker Compose with PostgreSQL
+- Environment configuration
+- Test scaffolding
+
+Verification:
+- Health check: http://localhost:8080/health
+- All endpoints return mock data (test with curl or Postman)
+- Gin has no built-in /docs UI — refer to openapi.yaml directly
+
+Session Summary:
+- Generated plan/sessions/session-1-summary.md
+- Documented all implemented endpoints
+- Listed mock data patterns used
+- Noted dependencies and configuration
+
+Next Session:
+- Review plan/sessions/session-2-phase-1.md for next phase
+- When ready, say "Start Session 2" to begin Phase 1 implementation
+
+DO NOT proceed to Session 2 automatically.
+```
+
+## Session Transition Documentation
+
+Generate `plan/sessions/session-1-summary.md` including:
+- List of all implemented endpoints
+- Mock data patterns used
+- Dependencies added (go.mod)
+- Configuration variables needed
+- Known limitations of the mock implementation
+- Prerequisites for Session 2
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Implement real business logic in Session 1
+- Connect to an actual database
+- Make external API calls
+- Implement complex validation beyond Gin binding tags
+- Skip any endpoints from the OpenAPI spec
+- Use inconsistent mock data patterns
+- Automatically start Session 2 implementation
+- Skip session summary documentation

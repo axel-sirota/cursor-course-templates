@@ -1,0 +1,251 @@
+---
+description: Session 1 Phase 0 skeleton scaffolding with plan-only, no apply
+globs: ["modules/**", "*.tf", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session 1: Phase 0 (Skeleton Implementation)
+
+## Purpose
+Execute Session 1 to scaffold the full module tree with valid-but-not-yet-real HCL. `terraform plan` must succeed; `terraform apply` is never run in this phase. This establishes project structure, enables validation-first checks to be written, and confirms the variable/output contracts compile.
+
+## CRITICAL: This Session Stops After Skeleton — No Apply, No Real Resources
+
+DO NOT:
+- Run `terraform apply`
+- Create real cloud resources
+- Commit secrets or real `.tfvars` values
+- Proceed to Session 2 automatically
+
+ONLY:
+- Create the full directory/module structure
+- Write inert-but-valid HCL (`count = 0` or resources gated behind a `var.enabled` flag)
+- Configure the remote backend
+- Configure providers with pinned versions
+- Write `terraform.tfvars.example`
+
+Session 2 (first real module apply) is a SEPARATE session that requires explicit user command.
+
+## Session Prerequisites
+- Architecture docs complete (`plan/architecture/overview.md`, `resources.md`, `variables-outputs.md`)
+- Plan folder structure created with session plans
+- Session 1 plan reviewed (`plan/sessions/session-1-phase-0.md`)
+- Backend bucket (and lock table, if used) already bootstrapped by hand (see `000-environment-setup.mdc`)
+
+## Session Execution Steps
+
+### 1. Review Session Plan
+Before starting implementation:
+- Read `plan/sessions/session-1-phase-0.md`
+- Confirm session objectives and deliverables
+- Review `plan/architecture/variables-outputs.md`
+- Check prerequisites are met
+
+### 2. Project Structure
+Follow `vibe_terraform_boilerplate.md` exactly:
+
+```
+.
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── providers.tf
+├── backend.tf
+├── terraform.tfvars.example
+├── modules/
+│   ├── vpc/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── versions.tf
+│   ├── ecs-service/
+│   │   └── (same 4 files)
+│   ├── alb/
+│   │   └── (same 4 files)
+│   └── static-site/
+│       └── (same 4 files)
+├── scripts/
+└── tests/
+```
+
+### 3. Backend and Provider Setup
+Use `templates/backend-config-template.tf` as the starting point for `backend.tf` and `providers.tf`.
+
+```hcl
+# backend.tf
+terraform {
+  backend "s3" {
+    # values supplied via -backend-config or backend.hcl — never hardcode account-specific values here
+  }
+}
+```
+
+```hcl
+# providers.tf
+terraform {
+  required_version = ">= 1.9, < 2.0.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+  default_tags {
+    tags = local.common_tags
+  }
+}
+```
+
+### 4. Skeleton Resource Pattern
+
+For each module, create inert-but-syntactically-real HCL. Prefer a `var.enabled` gate over `count = 0` when the resource has downstream references, so `terraform plan` still validates argument types:
+
+```hcl
+# modules/vpc/variables.tf
+variable "enabled" {
+  type        = bool
+  description = "Set true to create real VPC resources. False in Phase 0 skeleton."
+  default     = false
+}
+
+variable "vpc_cidr" {
+  type        = string
+  description = "CIDR block for the VPC"
+}
+
+# modules/vpc/main.tf
+resource "aws_vpc" "this" {
+  count      = var.enabled ? 1 : 0
+  cidr_block = var.vpc_cidr
+
+  tags = merge(var.tags, { Name = "${var.project}-${var.environment}-vpc" })
+}
+
+# modules/vpc/outputs.tf
+output "vpc_id" {
+  description = "ID of the created VPC (empty string in skeleton phase)"
+  value       = try(aws_vpc.this[0].id, "")
+}
+```
+
+### 5. Variable/Output Contracts
+Every module's `variables.tf` and `outputs.tf` must match `plan/architecture/variables-outputs.md` exactly — this is the skeleton's job: prove the contract type-checks via `terraform validate`, before any resource is real.
+
+### 6. `terraform.tfvars.example`
+Document every required root variable with a realistic (non-secret) example value:
+```hcl
+project     = "acme"
+environment = "dev"
+aws_region  = "us-east-1"
+vpc_cidr    = "10.0.0.0/16"
+```
+
+### 7. Root README
+Create a root `README.md` documenting the minimum commands:
+```markdown
+# Infrastructure
+
+```bash
+terraform init
+terraform plan
+```
+```
+
+### 8. Session Verification
+Before completing Session 1:
+
+```bash
+terraform fmt -check -recursive
+terraform validate
+tflint
+terraform plan -out=terraform_plans/session1-skeleton.tfplan
+```
+
+Expected: `terraform plan` succeeds with the expected placeholder resource count (0 real resources, or only `var.enabled = false`-gated resources that resolve to zero).
+
+## Skeleton Guidelines
+
+### Consistency
+Use consistent placeholder patterns across all modules:
+- Gate variable: `var.enabled` (default `false`)
+- Placeholder output value: `try(<resource>[0].<attr>, "")`
+
+### Realistic Structure
+Skeleton contracts should match the real, final structure:
+- Include all required variables with real types and descriptions
+- Include all planned outputs, even if their value resolves to an empty string
+- Use proper `type` constraints (not `any`)
+
+### No Real Business Logic Yet
+- No hardcoded ARNs, account IDs, or real CIDR overlaps
+- No IAM policies with real permissions attached yet (structure only)
+- No data sources that require existing infrastructure to resolve
+
+## Session 1 Completion Checklist
+
+- [ ] Session plan reviewed and objectives confirmed
+- [ ] Full module tree scaffolded per `plan/architecture/overview.md`
+- [ ] Every module's variables.tf/outputs.tf matches the drafted contract
+- [ ] backend.tf and providers.tf configured with pinned versions
+- [ ] terraform.tfvars.example documents all root variables
+- [ ] terraform fmt -check -recursive passes
+- [ ] terraform validate passes
+- [ ] tflint passes
+- [ ] terraform plan succeeds with expected (placeholder) resource count
+- [ ] No terraform apply run
+- [ ] Session 1 summary generated in plan/sessions/
+
+## Session Completion Response
+
+When Session 1 is complete, respond with:
+
+```
+Session 1 Complete: Phase 0 (Skeleton)
+
+Created:
+- Full module tree ([N] modules) following the boilerplate structure
+- Backend + provider configuration (pinned versions)
+- terraform.tfvars.example
+- Skeleton resources gated behind var.enabled = false
+
+Verification:
+- terraform validate: PASS
+- tflint: PASS
+- terraform plan: PASS (0 resources to create)
+
+Session Summary:
+- Generated plan/sessions/session-1-summary.md
+- Documented module tree and contracts
+- Listed dependencies and configuration needed
+
+Next Session:
+- Review plan/sessions/session-2-phase-1.md for next phase
+- When ready, say "Start Session 2" to begin Phase 1 (VPC) implementation
+
+DO NOT proceed to Session 2 automatically.
+```
+
+## Session Transition Documentation
+
+Generate `plan/sessions/session-1-summary.md` including:
+- List of all scaffolded modules
+- Variable/output contract confirmed for each
+- Dependencies added (`scripts/requirements.txt`, provider pins)
+- Configuration variables needed (`terraform.tfvars.example` fields)
+- Known limitations of the skeleton
+- Prerequisites for Session 2
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Run `terraform apply` in Session 1
+- Create real cloud resources
+- Hardcode account IDs, ARNs, or CIDR blocks meant to be variables
+- Skip any module from `plan/architecture/overview.md`
+- Use inconsistent placeholder patterns across modules
+- Automatically start Session 2 implementation
+- Skip session summary documentation

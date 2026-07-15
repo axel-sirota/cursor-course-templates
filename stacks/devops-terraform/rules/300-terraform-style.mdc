@@ -1,0 +1,217 @@
+---
+description: HCL and Python automation-script style conventions for this stack
+globs: ["**/*.tf", "**/*.tfvars", "scripts/**/*.py"]
+alwaysApply: false
+---
+
+# Terraform & DevOps Style Guide
+
+This rule absorbs and supersedes the previous flat `devops-standards.mdc` — it is the single source of truth for HCL and Python style in this stack.
+
+## Terraform / HCL Style
+
+### Formatting
+`terraform fmt -recursive` is mandatory before every commit. Never hand-align `=` signs — let `fmt` do it.
+
+### Naming
+- snake_case for resource names, variable names, output names, and local names: `aws_ecs_service.web`, not `aws_ecs_service.Web` or `aws_ecs_service.web-service`.
+- Resource **instances** (the AWS-side `Name` tag / physical name) follow `<project>-<env>-<resource>`, e.g. `acme-prod-ecs-cluster`, `acme-dev-alb`.
+- One resource-type grouping per file once a module grows large: `alb.tf`, `target_groups.tf`, `security_groups.tf` instead of one 400-line `main.tf`.
+
+### Variables
+Every variable requires `type` and `description`:
+```hcl
+variable "desired_count" {
+  type        = number
+  description = "Number of ECS tasks to run"
+  default     = 2
+}
+```
+Secrets get `sensitive = true`:
+```hcl
+variable "db_password" {
+  type        = string
+  description = "RDS master password, sourced from TF_VAR_db_password"
+  sensitive   = true
+}
+```
+
+### Outputs
+Every module has an explicit `outputs.tf` — no implicit exposure of internal resource attributes. If a caller needs a value, it must be an output; do not expect callers to reach into module internals.
+```hcl
+output "cluster_arn" {
+  description = "ARN of the ECS cluster, consumed by CI/CD deploy scripts"
+  value       = aws_ecs_cluster.this.arn
+}
+```
+
+### Module Versioning
+Pin every module source:
+```hcl
+# Registry module
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+}
+
+# Git-sourced internal module
+module "ecs_service" {
+  source = "git::https://github.com/acme/terraform-modules.git//ecs-service?ref=v2.3.1"
+}
+```
+Never use an unpinned `ref` (no branch names like `main`) and never float `version = ">= 5.0"` without an upper bound.
+
+### State
+- Remote S3 backend is mandatory for any project with more than one contributor.
+- Locking: prefer native S3 locking (`use_lockfile = true`, GA since Terraform 1.11) for new projects. The classic S3 + DynamoDB lock-table pattern is still valid and is what most existing courses/projects use — teach both, default to native locking for anything started today.
+- Use `terraform_remote_state` for cross-module references, never hardcoded resource IDs:
+```hcl
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+  config = {
+    bucket = "acme-terraform-state"
+    key    = "vpc/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+resource "aws_ecs_service" "web" {
+  network_configuration {
+    subnets = data.terraform_remote_state.vpc.outputs.private_subnet_ids
+  }
+}
+```
+
+### Tagging Standard
+Every resource is tagged via a shared `local.common_tags` map merged into a `default_tags` provider block (so new resource types are tagged automatically) plus per-resource overrides where needed:
+```hcl
+locals {
+  common_tags = {
+    Project     = var.project
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+  default_tags {
+    tags = local.common_tags
+  }
+}
+```
+
+### Lifecycle Management
+Stateful resources get `prevent_destroy`:
+```hcl
+resource "aws_db_instance" "this" {
+  # ...
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_s3_bucket" "data" {
+  # ...
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+```
+
+### `for_each` Over `count` for Named Sets
+Use `for_each` (keyed by a stable name) for collections of distinctly-named resources; reserve `count` for simple repetition (e.g. one-per-AZ) or the skeleton-phase `enabled` gate:
+```hcl
+resource "aws_security_group_rule" "ingress" {
+  for_each          = var.ingress_rules
+  type              = "ingress"
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  protocol          = each.value.protocol
+  cidr_blocks       = each.value.cidr_blocks
+  security_group_id = aws_security_group.this.id
+}
+```
+
+### Locals for Repeated Expressions
+Extract any expression used more than twice into `locals`:
+```hcl
+locals {
+  name_prefix = "${var.project}-${var.environment}"
+}
+
+resource "aws_ecs_cluster" "this" {
+  name = "${local.name_prefix}-cluster"
+}
+```
+
+## Python Automation-Script Style
+
+Scripts under `scripts/` are Boto3/Click CLIs, not application code — hold them to the same rigor as the FastAPI reference stack's Python style.
+
+### Naming and Structure
+- snake_case for functions/variables, PascalCase for classes
+- CLI entrypoints use `click`:
+```python
+import click
+
+@click.command()
+@click.option("--cluster", required=True, help="ECS cluster name")
+@click.option("--service", required=True, help="ECS service name")
+def verify_deployment(cluster: str, service: str) -> None:
+    """Poll an ECS service until it reaches steady state."""
+    ...
+
+if __name__ == "__main__":
+    verify_deployment()
+```
+
+### Boto3 Client Patterns
+Use a shared client factory with retry/backoff configured explicitly (boto3's default retry mode is `legacy` — opt into `adaptive` or `standard`):
+```python
+import boto3
+from botocore.config import Config
+
+def make_client(service: str, region: str) -> "boto3.client":
+    """Create a boto3 client with adaptive retries.
+
+    Args:
+        service: AWS service name, e.g. "ecs".
+        region: AWS region, e.g. "us-east-1".
+
+    Returns:
+        A configured boto3 client.
+    """
+    config = Config(retries={"max_attempts": 5, "mode": "adaptive"})
+    return boto3.client(service, region_name=region, config=config)
+```
+
+### Type Hints and mypy
+All function signatures require type hints; run `mypy` in CI:
+```python
+def get_service_status(cluster: str, service: str, region: str) -> dict[str, str]:
+    """Return the ECS service's runningCount/desiredCount/status."""
+    ...
+```
+
+### Logging, Not Print
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.info("Polling ECS service", extra={"cluster": cluster, "service": service})
+```
+
+### Idempotency Requirement
+Every script must be safe to re-run:
+- Check current state before mutating (e.g. don't re-create a resource that already exists — check first, or use boto3 calls that are naturally idempotent)
+- Use deterministic identifiers derived from inputs, not random UUIDs, when the script itself creates named resources
+- Log a no-op clearly when the desired state already matches reality
+
+## Testing (Static + Script)
+
+- **Infrastructure**: `terraform validate` and `tflint` on every change.
+- **Scripts**: `pytest` unit tests for logic functions, with AWS calls mocked via `moto` or `botocore.stub.Stubber` — never hit real AWS in a unit test.
+
+See `400-testing-first.mdc` for the full validation-first testing pyramid.

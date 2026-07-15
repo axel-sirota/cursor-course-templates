@@ -1,0 +1,24 @@
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - gosimple
+    - ineffassign
+    - unused
+    - gofmt
+    - goimports
+    - bodyclose
+    - sqlclosecheck
+    - noctx
+
+linters-settings:
+  govet:
+    enable-all: true
+
+issues:
+  exclude-dirs:
+    - vendor

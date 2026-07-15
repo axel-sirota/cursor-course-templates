@@ -1,0 +1,374 @@
+---
+description: Session-based implementation patterns for placeholder-to-real-resource replacement
+globs: ["modules/**/*.tf", "scripts/**/*.py", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session-Based Implementation: Placeholder-to-Real-Resource Replacement
+
+## Purpose
+Guide the replacement of Phase 0 skeleton placeholders with real, applied infrastructure within individual sessions while maintaining validation compatibility and code quality standards.
+
+## Session Pre-Implementation Checklist
+
+Before writing any real resource block in the current session:
+- [ ] Session plan reviewed (`plan/sessions/session-N-phase-M.md`)
+- [ ] Validation-first check is written and failing
+- [ ] Module's variable/output contract confirmed unchanged from Phase 0
+- [ ] State backend reachable (`terraform init` / `terraform state list` succeed)
+- [ ] Upstream module dependencies applied and their outputs available
+
+## Code Quality Rules — HCL
+
+### Consistent Formatting
+```bash
+terraform fmt -recursive
+```
+Never hand-format; never commit HCL that `fmt` would rewrite.
+
+### No Hardcoded ARNs or Account IDs
+```hcl
+# Bad
+resource "aws_iam_role_policy" "ecs_exec" {
+  policy = jsonencode({
+    Statement = [{ Resource = "arn:aws:s3:::acme-prod-bucket/*" }]
+  })
+}
+
+# Good — derive from data sources or variables
+data "aws_caller_identity" "current" {}
+
+resource "aws_iam_role_policy" "ecs_exec" {
+  policy = jsonencode({
+    Statement = [{ Resource = "${aws_s3_bucket.data.arn}/*" }]
+  })
+}
+```
+
+### `for_each` Over `count` for Named Resource Sets
+```hcl
+# Bad — reordering var.rules silently replaces unrelated rules
+resource "aws_security_group_rule" "ingress" {
+  count = length(var.ingress_rules)
+  ...
+}
+
+# Good — keyed by name, resilient to reordering
+resource "aws_security_group_rule" "ingress" {
+  for_each = { for r in var.ingress_rules : r.name => r }
+  ...
+}
+```
+
+### Locals for Repeated Expressions
+```hcl
+locals {
+  name_prefix = "${var.project}-${var.environment}"
+  common_tags = {
+    Project     = var.project
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+```
+
+## Code Quality Rules — Python Scripts
+
+### Type Hints
+```python
+# Good
+def poll_service_steady_state(cluster: str, service: str, timeout_s: int = 300) -> bool:
+    """Poll until the ECS service reaches steady state or timeout."""
+    ...
+
+# Bad
+def poll_service_steady_state(cluster, service, timeout_s=300):
+    ...
+```
+
+### Google-Style Docstrings
+```python
+def deploy(cluster: str, service: str, image_tag: str) -> None:
+    """Update an ECS service to a new task definition revision.
+
+    Args:
+        cluster: ECS cluster name.
+        service: ECS service name.
+        image_tag: Docker image tag to deploy.
+
+    Raises:
+        RuntimeError: If the service does not reach steady state within
+            the configured timeout.
+    """
+```
+
+### Idempotency
+```python
+def ensure_log_group(name: str, retention_days: int, client) -> None:
+    """Create the CloudWatch log group only if it does not already exist."""
+    existing = client.describe_log_groups(logGroupNamePrefix=name)["logGroups"]
+    if any(g["logGroupName"] == name for g in existing):
+        logger.info("Log group already exists, skipping create", extra={"log_group": name})
+        return
+    client.create_log_group(logGroupName=name)
+    client.put_retention_policy(logGroupName=name, retentionInDays=retention_days)
+```
+
+### Structured Logging With Run Correlation
+```python
+import logging
+import uuid
+
+logger = logging.getLogger(__name__)
+
+def main() -> None:
+    run_id = str(uuid.uuid4())
+    logger.info("Starting deploy", extra={"run_id": run_id})
+    ...
+    logger.info("Deploy complete", extra={"run_id": run_id, "duration_s": 12.4})
+```
+
+## Session Placeholder-to-Real-Resource Replacement Pattern
+
+### Step 1: Review Session Plan
+Review `plan/sessions/session-N-phase-M.md` to understand:
+- Current session objectives
+- Module to be implemented
+- Dependencies from previous sessions
+- Expected deliverables
+
+### Step 2: Identify Skeleton Placeholder
+Locate the placeholder from Session 1 (Phase 0):
+```hcl
+resource "aws_lb_target_group" "web" {
+  count = var.enabled ? 1 : 0
+  # minimal placeholder args only
+}
+```
+
+### Step 3: Confirm Upstream Outputs Available
+```hcl
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+  config = {
+    bucket = var.state_bucket
+    key    = "vpc/terraform.tfstate"
+    region = var.aws_region
+  }
+}
+```
+
+### Step 4: Flesh Out Real Configuration
+```hcl
+resource "aws_lb_target_group" "web" {
+  name        = "${local.name_prefix}-tg"
+  port        = 8080
+  protocol    = "HTTP"
+  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+  target_type = "ip"
+
+  health_check {
+    path                = "/health"
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    interval            = 30
+    timeout             = 5
+  }
+
+  tags = local.common_tags
+}
+```
+
+### Step 5: `terraform plan` and Review Diff
+```bash
+terraform plan -out=terraform_plans/$(date +%Y%m%d%H%M%S).tfplan
+```
+The diff MUST match the session's declared scope only — no surprise changes to resources from other sessions.
+
+### Step 6: `terraform apply` From the Saved Plan
+```bash
+terraform apply terraform_plans/<timestamp>.tfplan
+```
+
+### Step 7: Post-Apply Verification
+```bash
+aws elbv2 describe-target-groups --names acme-dev-tg
+```
+
+## Complete Implementation Example
+
+```hcl
+# modules/ecs-service/main.tf
+
+locals {
+  name_prefix = "${var.project}-${var.environment}"
+}
+
+resource "aws_ecs_task_definition" "web" {
+  family                   = "${local.name_prefix}-web"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                       = var.task_cpu
+  memory                    = var.task_memory
+  execution_role_arn         = aws_iam_role.execution.arn
+  task_role_arn                = aws_iam_role.task.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "web"
+      image     = "${var.ecr_repository_url}:${var.image_tag}"
+      essential = true
+      portMappings = [{ containerPort = 8080, protocol = "tcp" }]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.web.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "web"
+        }
+      }
+    }
+  ])
+
+  tags = local.common_tags
+}
+
+resource "aws_ecs_service" "web" {
+  name            = "${local.name_prefix}-web"
+  cluster         = aws_ecs_cluster.this.id
+  task_definition = aws_ecs_task_definition.web.arn
+  desired_count   = var.desired_count
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [aws_security_group.service.id]
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name    = "web"
+    container_port     = 8080
+  }
+
+  lifecycle {
+    ignore_changes = [task_definition] # deploys update the task def out-of-band via scripts/deploy.py
+  }
+
+  tags = local.common_tags
+}
+```
+
+## Error Handling Patterns
+
+### Variable Validation
+```hcl
+variable "desired_count" {
+  type        = number
+  description = "Number of ECS tasks to run"
+  validation {
+    condition     = var.desired_count >= 1 && var.desired_count <= 20
+    error_message = "desired_count must be between 1 and 20."
+  }
+}
+```
+
+### Preconditions on Resources/Data
+```hcl
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+  config  = { bucket = var.state_bucket, key = "vpc/terraform.tfstate", region = var.aws_region }
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.outputs.private_subnet_ids) >= 2
+      error_message = "VPC module must expose at least 2 private subnets for the ECS service to be highly available."
+    }
+  }
+}
+```
+
+### Python Exception Mapping
+```python
+try:
+    response = client.update_service(cluster=cluster, service=service, forceNewDeployment=True)
+except client.exceptions.ServiceNotFoundException:
+    logger.error("ECS service not found", extra={"cluster": cluster, "service": service})
+    raise
+except client.exceptions.ClientException as e:
+    logger.error("ECS client error", extra={"error": str(e)})
+    raise
+```
+
+## Database/Stateful-Resource Transaction Analogue
+
+Terraform applies are already transactional per-resource via the provider; the analog of "multiple operations in one transaction" is grouping tightly-coupled resources in one `apply` (one plan file) rather than splitting them across sessions in a way that leaves infrastructure in a half-applied state:
+
+```hcl
+# Good — target group, listener rule, and service applied together in one session
+# since a listener rule referencing a target group with no service behind it
+# is a broken intermediate state.
+```
+
+## Performance Considerations
+
+### Avoid Unnecessary `count`/`for_each` Recomputation
+```hcl
+# Bad — count depends on a data source that changes every plan, causing
+# spurious diffs
+count = length(data.aws_availability_zones.available.names)
+
+# Good — pin the AZ count via a variable, cross-check with a validation block
+count = var.availability_zone_count
+```
+
+### Use `-target` Sparingly, Never as a Habit
+`-target` is for emergency surgical fixes only, never a normal part of the session workflow — it can leave state inconsistent with the declared configuration.
+
+## Session Testing Implementation
+
+After replacing the placeholder in the current session:
+
+### Re-run the validation-first check
+```bash
+checkov -d . --check CKV_ACME_1
+.venv/bin/python3 -m pytest tests/scripts/test_ecs_service_exists.py -v
+```
+
+### Verify Check Passes
+Checks should now pass with real applied infrastructure:
+- Real ARNs/IDs present in outputs
+- `terraform plan` shows "No changes" on immediate re-plan
+
+## Session Code Review Checklist
+
+Before marking session implementation complete:
+- [ ] Session plan objectives met
+- [ ] Type hints on all Python function signatures
+- [ ] Docstrings on all public Python functions
+- [ ] `type` and `description` on every Terraform variable
+- [ ] Error handling implemented (variable validation, preconditions, Python exceptions)
+- [ ] Logging added for script operations
+- [ ] No hardcoded ARNs/account IDs/CIDR blocks
+- [ ] No secrets in code
+- [ ] `terraform plan` shows "No changes" on re-plan after apply
+- [ ] `terraform fmt` clean
+- [ ] No TODO comments without a tracked follow-up
+- [ ] Session summary documents implementation
+
+## Session Implementation Anti-Patterns
+
+Do NOT:
+- Skip session plan review
+- Put multi-step orchestration logic inside a single sprawling resource block instead of composing modules
+- Reference another module's internals directly instead of its declared outputs
+- Use `-target` as a routine workaround
+- Log sensitive information (secrets, credentials)
+- Hardcode configuration values that should be variables
+- Skip variable validation
+- Forget type hints in Python scripts
+- Use global mutable state in scripts
+- Implement resources not required by the current session
+- Implement modules from other sessions
+- Skip session documentation

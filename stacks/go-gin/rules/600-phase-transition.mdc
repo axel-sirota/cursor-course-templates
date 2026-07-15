@@ -1,0 +1,384 @@
+---
+description: Session completion and transition documentation rules (Go + Gin)
+globs: ["plan/sessions/**", "phases/**", "docs/**"]
+alwaysApply: false
+---
+
+# Session Transition: Documentation and Handoff (Go + Gin)
+
+## Purpose
+Ensure proper documentation and knowledge transfer between sessions. Each session completion
+generates a summary that enables efficient continuation in the next session.
+
+## Session Completion Triggers
+
+Transition to the next session when:
+- All E2E tests passing for the current endpoint (`go test ./... -v`)
+- Code quality checks pass (`gofmt -l .` empty, `golangci-lint run` clean)
+- Implementation complete per session requirements
+- No known bugs or issues
+- Session documentation updated
+- Session plan objectives met
+
+## Session Summary Generation
+
+Create `plan/sessions/session-N-summary.md` for each completed session.
+
+### Session Summary Template Structure
+
+```markdown
+# Session N Summary: Phase M ([HTTP Method] [Endpoint Path])
+
+## Overview
+Brief description of what was implemented in this session.
+
+## Implementation Details
+
+### Database Changes
+- Tables created or modified
+- Migration applied (golang-migrate file or GORM AutoMigrate)
+- Indexes added
+
+### Models Created
+- GORM model (with file path)
+- API DTOs (with file path)
+- Purpose of each
+
+### Repository Methods
+- Methods implemented
+- File location
+
+### Service Layer
+- Services created or updated
+- Business logic implemented
+- File location
+
+### Handler
+- Endpoint path and method
+- Request/response DTOs
+- Dependency-injection factory signature
+
+## Tests
+
+### E2E Tests
+- Test files created
+- Test scenarios covered
+- All tests passing: YES/NO
+
+### Unit Tests
+- Services tested (mocked repository)
+- Coverage (if measured: `go test ./... -cover`)
+
+## Shared Libraries
+
+### Available for Next Phases
+- Repository types that can be reused
+- Service methods available
+- Models representing core entities
+- Utilities or helpers created
+
+### Dependencies
+- External packages added to go.mod (`go get ...@vX.Y.Z`)
+- Configuration variables added to .env
+
+## Known Limitations
+
+### Current Implementation
+- Features not implemented yet
+- Performance considerations
+- Edge cases not handled
+
+### Technical Debt
+- Code that needs refactoring
+- Tests that need improvement
+- Documentation gaps
+
+## Next Session Recommendations
+
+### Suggested Next Session
+Recommend the next session based on:
+- Dependency on the current session
+- Complexity progression
+- User value
+- Session plan availability
+
+### Prerequisite Work
+- Additional models needed
+- Migrations required
+- Shared services to build
+
+## Learnings and Gotchas
+
+### What Worked Well
+- Patterns that were effective
+- Tools that helped
+- Design decisions that paid off
+
+### Challenges Encountered
+- Problems solved during implementation
+- Workarounds applied (e.g. GORM quirks, Gin binding edge cases)
+- Areas needing improvement
+
+### Time Estimates
+- Estimated time for phase: X minutes
+- Actual time spent: Y minutes
+- Variance explanation
+
+## Code Quality Metrics
+
+### Formatting
+- `gofmt -l .` clean: YES/NO
+- Doc comments on new exports: YES/NO
+- `golangci-lint run` clean: YES/NO
+
+### Testing
+- E2E test coverage: X scenarios
+- Unit test coverage: Y%
+- All tests passing: YES/NO
+
+## Files Changed
+
+### Created
+- List of new files with paths
+
+### Modified
+- List of modified files with paths
+
+### Deleted
+- List of deleted files (if any)
+```
+
+## Example Session Summary
+
+```markdown
+# Session 2 Summary: Phase 1 (POST /posts)
+
+## Overview
+Implemented blog post creation endpoint with full GORM/PostgreSQL integration and E2E testing.
+
+## Implementation Details
+
+### Database Changes
+- Created posts table via golang-migrate: migrations/000002_create_posts_table.up.sql
+- Added index on author_id
+- Applied migration successfully to local database
+
+### Models Created
+- Post (internal/model/post.go): GORM model, DB layer
+- CreatePostRequest (internal/model/post.go): API request DTO (camelCase JSON)
+- PostResponse (internal/model/post.go): API response DTO
+- ToPostResponse() converter function
+
+### Repository Methods
+- GormPostRepository.Create() — create new post
+- File: internal/repository/post_repository.go
+
+### Service Layer
+- PostService.CreatePost() — business logic for post creation
+- Includes error wrapping and structured logging
+- File: internal/service/post_service.go
+
+### Handler
+- POST /api/posts
+- Handler: handler.CreatePost(svc *service.PostService) gin.HandlerFunc
+- Request: CreatePostRequest (title, content, authorId)
+- Response: PostResponse (postId, title, content, authorId, createdAt)
+- File: internal/handler/posts.go
+
+## Tests
+
+### E2E Tests
+- internal/handler/posts_test.go::TestCreatePost_Success
+- internal/handler/posts_test.go::TestCreatePost_ValidationError
+- All tests passing: YES
+
+### Unit Tests
+- internal/service/post_service_test.go — service layer with mocked repository
+- Coverage: 95% of service methods
+
+## Shared Libraries
+
+### Available for Next Sessions
+- GormPostRepository — can be extended with GetByID() in Session 3
+- PostService — can be extended with GetPostByID()
+- Post model — represents the core post entity
+
+### Dependencies
+- No new packages added
+- No new environment variables needed
+
+## Known Limitations
+
+### Current Implementation
+- Only creation implemented, no read/update/delete yet
+- No support for tags or categories
+- No content length validation beyond binding tags
+- No duplicate post prevention
+
+### Technical Debt
+- Consider adding content sanitization
+- May need a post status field (draft/published)
+- Service layer could accept a logger via constructor for better testability
+
+## Next Phase Recommendations
+
+### Suggested Next Session
+Session 3: Phase 2 (GET /posts/{id})
+- Depends on Session 2 (need posts to read)
+- Simple implementation (reuse GormPostRepository)
+- High user value (view created posts)
+- Session plan: plan/sessions/session-3-phase-2.md
+
+### Prerequisite Work
+- Add GormPostRepository.GetByID() method
+- Add PostService.GetPostByID() method
+- Add GET handler to internal/handler/posts.go
+- Write E2E test for retrieval
+
+## Learnings and Gotchas
+
+### What Worked Well
+- Layered model architecture (GORM model vs DTOs) prevented JSON leakage of DB fields
+- Interface-at-point-of-use made the service trivially mockable in unit tests
+- TDD approach caught a binding-tag typo early
+- Factory-function handlers made dependency injection explicit and testable
+
+### Challenges Encountered
+- Initial confusion with `gorm:"type:uuid;default:gen_random_uuid()"` needing the `pgcrypto`
+  extension enabled in Postgres
+- Needed `c.Request.Context()` (not `context.Background()`) to propagate cancellation
+- Test fixtures required unique author IDs per test run
+
+### Time Estimates
+- Estimated time: 25 minutes
+- Actual time: 30 minutes
+- Variance: +5 minutes debugging the UUID default extension
+
+## Code Quality Metrics
+
+### Formatting
+- `gofmt -l .` clean: YES
+- Doc comments on new exports: YES
+- `golangci-lint run` clean: YES
+
+### Testing
+- E2E test coverage: 2 scenarios
+- Unit test coverage: 95%
+- All tests passing: YES
+
+## Files Changed
+
+### Created
+- internal/model/post.go
+- internal/repository/post_repository.go
+- internal/service/post_service.go
+- internal/service/post_service_test.go
+- internal/handler/posts.go
+- internal/handler/posts_test.go
+- migrations/000002_create_posts_table.up.sql
+- migrations/000002_create_posts_table.down.sql
+
+### Modified
+- cmd/server/main.go (wired posts routes)
+- go.mod / go.sum (no new deps this session)
+- .env.example (no changes)
+
+### Deleted
+- None
+```
+
+## Session Transition Checklist
+
+Before generating the summary and moving to the next session:
+
+### Code Quality
+- [ ] All E2E tests passing
+- [ ] All unit tests passing
+- [ ] `gofmt -l .` clean
+- [ ] Doc comments on all new exported identifiers
+- [ ] `golangci-lint run` clean
+- [ ] `go vet ./...` clean
+
+### Documentation
+- [ ] Code comments for complex logic
+- [ ] README updated if needed
+- [ ] OpenAPI spec updated if the contract changed
+- [ ] Migration files documented
+
+### Testing
+- [ ] E2E test for the success case
+- [ ] E2E test for error cases
+- [ ] E2E test for validation
+- [ ] Unit tests for complex business logic
+- [ ] Test coverage adequate
+
+### Implementation
+- [ ] Feature complete per session requirements
+- [ ] Error handling implemented (wrapped errors)
+- [ ] Structured logging added
+- [ ] No hardcoded values
+- [ ] Secrets properly managed
+
+### Knowledge Transfer
+- [ ] Shared libraries documented
+- [ ] Dependencies documented
+- [ ] Known limitations listed
+- [ ] Next session recommendations provided
+- [ ] Session plan objectives met
+
+## Generating the Session Summary
+
+When the user says "Session N complete" or "Transition to next session":
+
+1. Read the current session's implementation
+2. Analyze all changes made
+3. Generate a comprehensive summary
+4. Save to `plan/sessions/session-N-summary.md`
+5. Provide a brief verbal summary to the user
+6. Ask for confirmation before proceeding
+
+## Session Kickoff
+
+When starting a new session:
+
+1. Read previous session summaries
+2. Review the next session plan (`plan/sessions/session-N-phase-M.md`)
+3. Identify available shared libraries (repositories/services already built)
+4. Check dependencies
+5. Confirm session requirements with the user
+6. Begin with E2E test writing
+
+## Research Export
+
+When encountering issues requiring external research:
+
+Generate `research-export.md` using `templates/research-export.md`:
+- Document the problem clearly
+- List all attempted solutions
+- Include relevant Go code snippets and `go vet`/compiler output
+- Formulate specific questions
+- Provide context from phase summaries
+
+## Continuous Improvement
+
+After each session:
+- Update time estimates based on actual time
+- Note patterns that worked well
+- Document challenges for future reference (e.g. GORM edge cases)
+- Suggest process improvements
+- Update session plans for future projects
+
+## Session Transition Anti-Patterns
+
+Do NOT:
+- Move to the next session with failing tests
+- Skip session summary generation
+- Document only what was built (also document why)
+- Forget to note known limitations
+- Skip recommendations for the next session
+- Generate a summary without reading the code
+- Use generic summaries (be specific)
+- Forget to document shared libraries
+- Skip session plan review
+- Automatically start the next session
+- Combine multiple sessions into one

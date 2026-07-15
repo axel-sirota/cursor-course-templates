@@ -1,0 +1,315 @@
+---
+description: Go module setup, dependency management, and toolchain discipline
+globs: ["go.mod", "go.sum", "Makefile", "**/*.go"]
+alwaysApply: false
+---
+
+# Environment Setup and Dependency Management (Go)
+
+## Purpose
+This rule ensures proper Go module setup, dependency management, and linting toolchain configuration for all Go/Gin projects.
+
+## Mandatory Environment Setup
+
+### 1. Go Toolchain
+**ALWAYS** verify the Go toolchain version before starting:
+
+```bash
+go version   # Expect go1.23.x or newer
+```
+
+Pin the module's minimum Go version in `go.mod`:
+
+```go
+module github.com/example/blog-api
+
+go 1.23
+```
+
+### 2. Module Initialization
+
+**ALWAYS** initialize the module once, at project creation, using the real (or placeholder) import path:
+
+```bash
+go mod init github.com/example/blog-api
+```
+
+Never run `go mod init` again after the module exists — subsequent commands are `go get` and `go mod tidy`.
+
+### 3. Dependency Management Rules
+
+**ALWAYS** follow this workflow for dependencies:
+
+1. **Add a pinned dependency**:
+   ```bash
+   go get github.com/gin-gonic/gin@v1.10.0
+   ```
+
+2. **Tidy the module graph immediately after**:
+   ```bash
+   go mod tidy
+   ```
+
+3. **Never hand-edit `go.sum`**:
+   ```bash
+   # ❌ DON'T DO THIS — never edit go.sum by hand
+   # ✅ DO THIS — let the toolchain regenerate it
+   go mod tidy
+   ```
+
+4. **Never use unpinned `@latest` in committed code** — always pin an explicit version tag so builds are reproducible:
+   ```bash
+   # ❌ Avoid in course/production code
+   go get github.com/gin-gonic/gin@latest
+
+   # ✅ Pin explicitly
+   go get github.com/gin-gonic/gin@v1.10.0
+   ```
+
+### 4. Project Initialization Checklist
+
+When starting any new project, **ALWAYS**:
+
+1. Initialize the module:
+   ```bash
+   go mod init github.com/example/project-name
+   ```
+
+2. Add core dependencies:
+   ```bash
+   go get github.com/gin-gonic/gin@v1.10.0
+   go get gorm.io/gorm@v1.25.10
+   go get gorm.io/driver/postgres@v1.5.9
+   go get github.com/stretchr/testify@v1.9.0
+   go get github.com/spf13/viper@v1.19.0
+   ```
+
+3. Tidy the module:
+   ```bash
+   go mod tidy
+   ```
+
+4. Install `golangci-lint` (once per machine, not per project):
+   ```bash
+   go install github.com/golangci-lint/golangci-lint/cmd/golangci-lint@latest
+   # or on macOS:
+   brew install golangci-lint
+   ```
+
+5. Add a `.golangci.yml` at the project root (see below).
+
+### 5. Adding New Dependencies
+
+**ALWAYS** follow this exact sequence:
+
+1. **Get the pinned version**:
+   ```bash
+   go get github.com/some/package@v1.2.3
+   ```
+
+2. **Tidy immediately**:
+   ```bash
+   go mod tidy
+   ```
+
+3. **Verify it resolved correctly**:
+   ```bash
+   go list -m all | grep some/package
+   ```
+
+### 6. `.gitignore` Requirements
+
+**ALWAYS** ensure `.gitignore` includes:
+
+```gitignore
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+main
+server
+/bin/
+/dist/
+
+# Test artifacts
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Go workspace file (unless intentionally committed)
+go.work
+go.work.sum
+
+# Vendoring (unless the course intentionally vendors)
+vendor/
+
+# Environment
+.env
+.env.local
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+```
+
+### 7. `.golangci.yml` Baseline
+
+Every project gets a linter config at the root:
+
+```yaml
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck      # unchecked errors
+    - govet         # suspicious constructs
+    - staticcheck   # advanced static analysis
+    - gosimple      # simplification suggestions
+    - ineffassign   # ineffectual assignments
+    - unused        # unused code
+    - gofmt
+    - goimports
+    - bodyclose     # HTTP response bodies must be closed
+    - sqlclosecheck # sql.Rows/Stmt must be closed
+    - noctx         # HTTP requests without context.Context
+
+linters-settings:
+  govet:
+    enable-all: true
+
+issues:
+  exclude-dirs:
+    - vendor
+```
+
+Run it before every phase transition:
+
+```bash
+golangci-lint run
+```
+
+### 8. Docker Integration
+
+When using Docker, leverage layer caching by copying module files before source:
+
+```dockerfile
+FROM golang:1.23-alpine AS builder
+WORKDIR /app
+
+# Cache dependency downloads in their own layer
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Only now copy source — changes here don't bust the dependency cache
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
+```
+
+See `rules/500-docker-go.mdc` and `vibe/vibe_docker.md` for the full multi-stage pattern (already
+complete in this stack — do not duplicate, just reference).
+
+### 9. CI/CD Integration
+
+In CI/CD pipelines (GitHub Actions example):
+
+```yaml
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+      - name: Test
+        run: go test ./... -race -cover
+```
+
+### 10. GOFLAGS / GOPROXY Notes
+
+- `GOPROXY` defaults to `https://proxy.golang.org,direct` — fine for most environments; only override
+  behind a corporate proxy or for private modules (`GOPRIVATE=github.com/your-org/*`).
+- `GOFLAGS=-mod=mod` can be set in CI if you want `go build`/`go test` to auto-update `go.mod` on
+  missing requires, but prefer explicit `go mod tidy` in course material — it is more teachable.
+- `CGO_ENABLED=0` is required for static binaries used in `scratch`/`alpine` Docker images (see
+  `rules/500-docker-go.mdc`).
+
+### 11. Common Commands Reference
+
+```bash
+# Verify toolchain
+go version
+
+# Add and pin a dependency
+go get github.com/some/package@v1.2.3
+
+# Tidy the module graph
+go mod tidy
+
+# Download without adding (CI cache warm)
+go mod download
+
+# Build everything
+go build ./...
+
+# Run the server directly
+go run ./cmd/server
+
+# Run all tests, verbose, race detector, coverage
+go test ./... -v -race -cover
+
+# Format check (should print nothing)
+gofmt -l .
+
+# Vet
+go vet ./...
+
+# Lint
+golangci-lint run
+```
+
+## Anti-Patterns to Avoid
+
+**NEVER**:
+- Run `go mod init` more than once per module
+- Hand-edit `go.sum`
+- Pin dependencies with `@latest` in committed code
+- Commit `vendor/` unless the course explicitly vendors dependencies
+- Skip `go mod tidy` after adding or removing an import
+- Ignore `golangci-lint` failures by disabling linters project-wide instead of fixing the code
+- Use different module-cache directories per developer without documenting `GOPATH`/`GOMODCACHE`
+
+## Success Criteria
+
+Environment setup is correct when:
+- [ ] `go.mod` exists with a real module path and `go 1.23` (or newer) directive
+- [ ] `go.sum` is present and untouched by hand edits
+- [ ] `.golangci.yml` exists at the project root
+- [ ] `.gitignore` excludes binaries, test artifacts, and `.env`
+- [ ] `go build ./...`, `go vet ./...`, and `golangci-lint run` all succeed
+- [ ] `gofmt -l .` returns no output

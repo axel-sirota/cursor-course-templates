@@ -1,0 +1,234 @@
+# Environment Setup and Dependency Management
+
+## Purpose
+This rule ensures proper Node.js project setup and dependency management for all projects using npm.
+
+## Mandatory Environment Setup
+
+### 1. Node Version Pinning
+**ALWAYS** pin the Node version in the project root before any development:
+
+```bash
+# Create .nvmrc pinning the LTS version this stack targets
+echo "20" > .nvmrc
+
+# If using asdf instead of nvm
+echo "nodejs 20.11.1" > .tool-versions
+```
+
+### 2. Dependency Management Rules
+
+**ALWAYS** follow this workflow for dependencies:
+
+1. **Install with `--save` (or `--save-dev`) so package.json is updated automatically**:
+   ```bash
+   npm install express --save
+   npm install --save-dev typescript ts-node-dev
+   ```
+
+2. **Never hand-edit version numbers in package.json without running install**:
+   ```bash
+   # ❌ DON'T DO THIS — editing package.json then forgetting to install
+   # "express": "^5.0.0"   (never installed, lockfile now stale)
+
+   # ✅ DO THIS INSTEAD
+   npm install express@5
+   ```
+
+3. **Never install a package globally to satisfy a project dependency**:
+   ```bash
+   # ❌ DON'T DO THIS
+   npm install -g typescript
+
+   # ✅ DO THIS INSTEAD
+   npm install --save-dev typescript
+   npx tsc --noEmit
+   ```
+
+### 3. Project Initialization Checklist
+
+When starting any new project, **ALWAYS**:
+
+1. Initialize package.json:
+   ```bash
+   npm init -y
+   ```
+
+2. Pin Node version:
+   ```bash
+   echo "20" > .nvmrc
+   ```
+
+3. Install initial dependencies (see `vibe/vibe_express_boilerplate.md` for the full list):
+   ```bash
+   npm install express cors dotenv zod jsonwebtoken bcryptjs @prisma/client pino
+   npm install --save-dev typescript ts-node-dev @types/node @types/express \
+     @types/cors @types/jsonwebtoken @types/bcryptjs jest ts-jest @types/jest \
+     supertest @types/supertest eslint prettier prisma
+   ```
+
+4. Verify `package-lock.json` was generated and commit it:
+   ```bash
+   git add package.json package-lock.json
+   ```
+
+### 4. Adding New Dependencies
+
+**ALWAYS** follow this exact sequence:
+
+1. **Install and let npm update package.json + package-lock.json**:
+   ```bash
+   npm install new-package
+   ```
+
+2. **Verify it landed in package.json**:
+   ```bash
+   npm list new-package
+   ```
+
+3. **Commit both files together**:
+   ```bash
+   git add package.json package-lock.json
+   ```
+
+### 5. Lockfile Discipline
+
+**ALWAYS**:
+- Commit `package-lock.json` to git
+- Use exactly one package manager per repo (npm here — never mix in a `yarn.lock` or `pnpm-lock.yaml`)
+- Run `npm ci` (not `npm install`) in CI and Docker builds for reproducible installs
+
+### 6. .gitignore Requirements
+
+**ALWAYS** ensure .gitignore includes:
+
+```gitignore
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/dev.db
+```
+
+### 7. Session Commands Integration
+
+When using session commands (@start-session, @architect, etc.):
+
+1. **ALWAYS** check if `node_modules/` exists; if not, run `npm ci` (or `npm install` if no lockfile yet)
+2. **ALWAYS** use `npm install --save[-dev]` for new packages, never bare `npm i` without a flag when you intend a dependency to persist
+3. **ALWAYS** verify `package.json` diff before/after installing
+
+### 8. Docker Integration
+
+When using Docker:
+
+```dockerfile
+# Copy manifest first for layer caching
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy source after dependencies are cached
+COPY . .
+```
+
+See `rules/500-docker-node.mdc` for the full multi-stage Dockerfile pattern.
+
+### 9. CI/CD Integration
+
+In CI/CD pipelines:
+
+```yaml
+- name: Setup Node
+  uses: actions/setup-node@v4
+  with:
+    node-version-file: '.nvmrc'
+    cache: 'npm'
+
+- name: Install dependencies
+  run: npm ci
+
+- name: Build
+  run: npm run build
+
+- name: Test
+  run: npm test
+```
+
+### 10. Common Commands Reference
+
+```bash
+# Install pinned Node version (nvm)
+nvm install
+nvm use
+
+# Install from package-lock.json (reproducible)
+npm ci
+
+# Install new package (updates package.json + lockfile)
+npm install package-name
+
+# Run dev server with hot reload
+npm run dev
+
+# Build TypeScript to dist/
+npm run build
+
+# Run compiled app
+npm start
+
+# Run tests
+npm test
+
+# Lint
+npm run lint
+
+# Type-check only (no output)
+npx tsc --noEmit
+```
+
+## Anti-Patterns to Avoid
+
+**NEVER**:
+- Install packages without updating `package.json` (always use `npm install <pkg>`, never manual edits)
+- Use global npm installs for project dependencies
+- Commit `node_modules/` to git
+- Mix package managers (npm + yarn + pnpm) in the same repo
+- Forget to commit `package-lock.json` alongside `package.json`
+- Use `npm install` (mutates lockfile) inside CI or Docker builds — use `npm ci` instead
+
+## Success Criteria
+
+Environment setup is correct when:
+- [ ] `.nvmrc` exists and pins Node 20
+- [ ] `package.json` contains all dependencies with no manual/unsynced edits
+- [ ] `package-lock.json` is committed and in sync
+- [ ] `node_modules/` is in `.gitignore`
+- [ ] `npm ci` succeeds from a clean clone
+- [ ] Only one package manager's lockfile exists in the repo

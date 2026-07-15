@@ -1,0 +1,342 @@
+---
+description: Session completion criteria and transition documentation for infrastructure sessions
+globs: ["plan/sessions/**", "plan/phases/**"]
+alwaysApply: false
+---
+
+# Session Transition: Documentation and Handoff
+
+## Purpose
+Ensure proper documentation and knowledge transfer between sessions. Each session completion generates a summary that enables efficient continuation in the next session and provides a rollback reference.
+
+## Session Completion Triggers
+
+Transition to next session when:
+- `terraform apply` completed cleanly from a reviewed plan
+- A follow-up `terraform plan` shows "No changes" (no drift)
+- `checkov`/`tflint`/`terraform validate` all clean
+- State file confirmed present in the remote backend for this module
+- Post-apply verification (boto3/aws-cli check) passing
+- Session documentation updated
+
+## Session Summary Generation
+
+Create `plan/sessions/session-N-summary.md` for each completed session.
+
+### Session Summary Template Structure
+
+```markdown
+# Session N Summary: Phase M (<module-name>)
+
+## Overview
+Brief description of what was implemented and applied in this session.
+
+## Resources Created / Modified
+
+### New Resources
+- Resource address, AWS logical name/ARN, purpose
+
+### Modified Resources
+- Resource address, what changed, why
+
+## State Changes
+
+### terraform plan Summary (pre-apply)
+- Resources to add: N
+- Resources to change: N
+- Resources to destroy: N (should be 0 unless intentional)
+
+### Resource Addresses Added
+- module.<name>.aws_<type>.<name>
+
+### Resource Addresses Changed
+- module.<name>.aws_<type>.<name> — [attribute changed]
+
+### Resource Addresses Destroyed
+- None (or: explicit list + justification)
+
+## Variables / Outputs Added
+- New variables introduced this session (name, type, description)
+- New outputs exposed (name, description, consumers)
+
+## Cost Impact
+
+### Rough Monthly Estimate
+- [Resource]: ~$X/month (manual estimate, or via `infracost breakdown --path .`)
+- Total incremental cost this session: ~$Y/month
+
+## Known Limitations
+
+### Current Implementation
+- Features not implemented yet
+- Scaling/performance considerations
+- Edge cases not handled
+
+### Technical Debt
+- HCL that needs refactoring (e.g. extract to `for_each`)
+- Checks that need broader coverage
+- Documentation gaps
+
+## Next Session Recommendations
+
+### Suggested Next Session
+Recommend next session based on:
+- Dependency on current session's outputs
+- Complexity progression
+- Blast-radius ordering (networking before application, application before CI/CD)
+
+### Prerequisite Work
+- Additional variables needed
+- Upstream module outputs required
+- Backend/state prerequisites
+
+## Rollback Notes
+
+### How to Revert This Module's Plan
+1. Identify the last-known-good state: `terraform state pull > backup-session-N.tfstate` (before any further changes)
+2. To revert HCL: `git revert <commit>` then re-plan/apply the previous configuration
+3. To revert only specific resources: `terraform state rm` + `terraform import` is a last resort — prefer re-applying prior HCL
+4. NEVER hand-edit `.tfstate` to "fix" a rollback
+
+## Learnings and Gotchas
+
+### What Worked Well
+- Patterns that were effective
+- Tools that helped
+
+### Challenges Encountered
+- Problems solved during implementation
+- Provider version quirks
+- Areas needing improvement
+
+### Time Estimates
+- Estimated time for phase: X minutes
+- Actual time spent: Y minutes
+- Variance explanation
+
+## Code Quality Metrics
+
+### Validation
+- terraform fmt: PASS
+- terraform validate: PASS
+- tflint: PASS
+- checkov: PASS (or N skips, justified)
+
+### Testing
+- Validation-first checks passing: X
+- Post-apply verification: PASS/FAIL
+
+## Files Changed
+
+### Created
+- List of new files with paths
+
+### Modified
+- List of modified files with paths
+
+### Deleted
+- List of deleted files (if any)
+```
+
+## Example Session Summary
+
+```markdown
+# Session 2 Summary: Phase 1 (modules/vpc)
+
+## Overview
+Applied the networking foundation: VPC, 2 public + 2 private subnets across 2 AZs, NAT gateway, route tables.
+
+## Resources Created / Modified
+
+### New Resources
+- module.vpc.aws_vpc.this — acme-dev-vpc (10.0.0.0/16)
+- module.vpc.aws_subnet.public[0], [1] — acme-dev-public-1a, acme-dev-public-1b
+- module.vpc.aws_subnet.private[0], [1] — acme-dev-private-1a, acme-dev-private-1b
+- module.vpc.aws_nat_gateway.this — acme-dev-nat
+- module.vpc.aws_route_table.private, .public
+
+## State Changes
+
+### terraform plan Summary (pre-apply)
+- Resources to add: 14
+- Resources to change: 0
+- Resources to destroy: 0
+
+### Resource Addresses Added
+- module.vpc.aws_vpc.this
+- module.vpc.aws_subnet.public[0]
+- module.vpc.aws_subnet.public[1]
+- module.vpc.aws_subnet.private[0]
+- module.vpc.aws_subnet.private[1]
+- module.vpc.aws_nat_gateway.this
+- module.vpc.aws_internet_gateway.this
+
+## Variables / Outputs Added
+- vpc_cidr (string) — root variable, no default, required
+- availability_zone_count (number) — default 2
+- Outputs: vpc_id, public_subnet_ids, private_subnet_ids
+
+## Cost Impact
+
+### Rough Monthly Estimate
+- NAT Gateway: ~$32/month + data processing
+- Total incremental cost this session: ~$35/month
+
+## Known Limitations
+
+### Current Implementation
+- Single NAT gateway (not one per AZ) — acceptable for dev, revisit for prod
+- No VPC Flow Logs yet
+
+### Technical Debt
+- Subnet CIDR carve-up is hardcoded per AZ count; consider `cidrsubnet()` generalization if AZ count becomes a variable
+
+## Next Session Recommendations
+
+### Suggested Next Session
+Session 3: Phase 2 (modules/alb + modules/ecs-service)
+- Depends on Session 2 (needs private_subnet_ids, vpc_id)
+- Session plan: plan/sessions/session-3-phase-2.md
+
+### Prerequisite Work
+- None — VPC outputs are consumed directly via terraform_remote_state
+
+## Rollback Notes
+
+### How to Revert This Module's Plan
+1. `terraform state pull > backup-session-2.tfstate`
+2. To fully revert: `git revert <commit>`, re-plan, re-apply (will destroy the VPC — confirm nothing downstream depends on it first)
+3. Never hand-edit state
+
+## Learnings and Gotchas
+
+### What Worked Well
+- `terraform_remote_state` cross-module reference worked cleanly on first try
+- checkov caught a missing `map_public_ip_on_launch = false` on the private subnets before apply
+
+### Challenges Encountered
+- Initial CIDR math off-by-one for the 4th subnet; fixed by switching to `cidrsubnet(var.vpc_cidr, 4, count.index)`
+
+### Time Estimates
+- Estimated time: 40 minutes
+- Actual time: 50 minutes
+- Variance: +10 minutes debugging CIDR math
+
+## Code Quality Metrics
+
+### Validation
+- terraform fmt: PASS
+- terraform validate: PASS
+- tflint: PASS
+- checkov: PASS (1 skip: CKV_AWS_130, justified — dev subnets)
+
+### Testing
+- Validation-first checks passing: 1 (checkov CKV_AWS_130 custom check)
+- Post-apply verification: PASS (aws ec2 describe-subnets confirms 4 subnets)
+
+## Files Changed
+
+### Created
+- modules/vpc/main.tf
+- modules/vpc/variables.tf
+- modules/vpc/outputs.tf
+- modules/vpc/versions.tf
+
+### Modified
+- main.tf (module "vpc" block wired in)
+- terraform.tfvars.example (vpc_cidr documented)
+
+### Deleted
+- None
+```
+
+## Session Transition Checklist
+
+Before generating summary and moving to next session:
+
+### Validation Quality
+- [ ] terraform fmt -check -recursive passes
+- [ ] terraform validate passes
+- [ ] tflint passes
+- [ ] checkov clean (or skips justified)
+- [ ] terraform plan shows "No changes" on immediate re-plan
+
+### Documentation
+- [ ] Resource comments for non-obvious HCL
+- [ ] Root README updated if module list changed
+- [ ] Module docs updated (terraform-docs, if used)
+
+### Testing
+- [ ] Validation-first check for this session's module passing
+- [ ] Post-apply verification against real AWS resources
+- [ ] Script unit tests passing (mocked)
+
+### Implementation
+- [ ] Module complete per session requirements
+- [ ] Error handling implemented (variable validation, preconditions)
+- [ ] Secrets properly managed
+- [ ] No hardcoded values
+
+### Knowledge Transfer
+- [ ] New module outputs documented
+- [ ] Dependencies documented
+- [ ] Known limitations listed
+- [ ] Cost impact noted
+- [ ] Rollback notes provided
+- [ ] Next session recommendations provided
+
+## Generating the Session Summary
+
+When user says "Session N complete" or "Transition to next session":
+
+1. Read current session's applied HCL and `terraform plan`/`apply` output
+2. Analyze all resource changes made
+3. Generate comprehensive summary
+4. Save to `plan/sessions/session-N-summary.md`
+5. Provide brief verbal summary to user
+6. Ask for confirmation before proceeding
+
+## Session Kickoff
+
+When starting a new session:
+
+1. Read previous session summaries
+2. Review next session plan (`plan/sessions/session-N-phase-M.md`)
+3. Identify available upstream module outputs
+4. Check `terraform plan` shows no drift before starting new work
+5. Confirm session requirements with user
+6. Begin with the validation-first check
+
+## Research Export
+
+When encountering issues requiring external research:
+
+Generate `research-export.md` using `templates/research-export.md`:
+- Document the problem clearly
+- List all attempted solutions with HCL/CLI snippets
+- Include full `terraform plan`/`apply` stack traces
+- Formulate specific research questions
+- Provide context from prior session summaries
+
+## Continuous Improvement
+
+After each session:
+- Update time estimates based on actual time
+- Note provider-version quirks encountered
+- Document challenges for future reference
+- Suggest process improvements
+- Update session plans for future projects
+
+## Session Transition Anti-Patterns
+
+Do NOT:
+- Move to next session with `terraform plan` showing unexpected drift
+- Skip session summary generation
+- Document only what was built (also document why and its cost impact)
+- Forget to document rollback notes
+- Skip recommendations for next session
+- Generate summary without reviewing actual plan/apply output
+- Use generic summaries (be specific with resource addresses)
+- Skip session plan review
+- Automatically start next session
+- Combine multiple sessions into one

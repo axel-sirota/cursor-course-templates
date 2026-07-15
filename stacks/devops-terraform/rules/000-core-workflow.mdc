@@ -1,0 +1,124 @@
+---
+description: Core IaC workflow and phase-based development rules for Terraform
+alwaysApply: true
+---
+
+# Core IaC Workflow
+
+## Purpose
+This rule defines the fundamental workflow for phase-based infrastructure development with validation-driven implementation. Always apply these principles regardless of the specific module being built.
+
+## Workflow Phases
+
+All infrastructure development follows this structure:
+
+1. **Architect Phase**: Design the module contract — resource inventory, variable/output contracts, blast-radius reasoning. No `.tf` files written.
+2. **Phase 0 (Skeleton)**: Scaffold every module's file tree with valid-but-inert HCL. `terraform plan` only — never `apply`.
+3. **Phase 1+ (Implementation)**: Implement one module or resource group per session, validation-first (`terraform validate` + `tflint` + `checkov` before every `apply`).
+4. **Phase Transition**: Generate a session summary documenting resources created, state changes, and rollback notes.
+
+## Golden Rules
+
+### Always `terraform init` for New or Changed Modules
+Whenever a module is added or its `required_providers`/`backend` block changes:
+```bash
+terraform init
+# or, after backend changes:
+terraform init -reconfigure
+```
+This mirrors the standing rule: run `terraform init` every time for new modules.
+
+### Always Plan to a File Before Apply
+Never run `terraform apply` without a saved plan:
+```bash
+terraform plan -out=terraform_plans/$(date +%Y%m%d%H%M%S).tfplan
+terraform apply terraform_plans/<timestamp>.tfplan
+```
+`terraform_plans/` is a gitignored local directory (see `.gitignore` requirements in `000-environment-setup.mdc`).
+
+### Never Run `terraform destroy` Automatically
+`terraform destroy` (or a plan that destroys stateful resources) requires explicit human confirmation outside of the agent workflow. Never invoke it as part of a session.
+
+### Never Touch `.tfstate` Directly
+No manual edits, no text-editing state files. State mutations go through `terraform state mv`, `terraform state rm`, `terraform import`, or a normal `apply` — never a text editor.
+
+### Always Read Vibe Guides First
+Before starting any phase, read the relevant guide from the `vibe/` folder:
+- `vibe_phase_workflow.md` — phase-based development patterns for this stack
+- `vibe_terraform_boilerplate.md` — project structure and file-by-file walkthrough
+- `vibe_state_management.md` — remote state, locking, and `terraform_remote_state` patterns
+- `vibe_deploy_lifecycle.md` — Git/CI workflow for infra changes
+- `vibe_iam_security.md` — least-privilege IAM and secrets handling
+
+### Validation-Driven Development
+- A failing validation (checkov finding, tflint rule, or plan-diff assertion) MUST exist before real resource blocks are written.
+- `terraform plan` MUST be reviewed for unexpected destroys/replacements before every `apply`.
+- All static and policy checks MUST pass before phase transition.
+
+### Code Style Guidelines
+Follow HCL and Python conventions defined in `300-terraform-style.mdc`:
+- snake_case for Terraform resource/variable/output names
+- Every variable has `type` and `description`
+- Python automation scripts use type hints, Google-style docstrings, and `logging` (never `print`)
+
+### Phase Transition Checklist
+Before transitioning to next phase:
+- [ ] `terraform plan` shows only the resources declared for this session
+- [ ] `terraform fmt -check -recursive` passes
+- [ ] `terraform validate` passes
+- [ ] `tflint` passes
+- [ ] `checkov -d .` passes (or findings are explicitly skipped with justification)
+- [ ] State confirmed in remote backend after apply
+- [ ] Session summary generated
+
+## Directory Structure Enforcement
+
+When creating files, follow this structure:
+```
+.
+├── main.tf                   # Root orchestration — calls modules
+├── variables.tf               # Root input variables
+├── outputs.tf                  # Root outputs
+├── providers.tf                 # Provider version pins + default_tags
+├── backend.tf                    # Remote state backend config
+├── terraform.tfvars.example       # Documented example values (committed)
+├── modules/
+│   └── <name>/
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── outputs.tf
+│       └── versions.tf
+├── scripts/                    # Python automation (boto3/click)
+│   ├── requirements.txt
+│   └── *.py
+└── tests/
+    ├── policy/                 # checkov custom checks / skip config
+    ├── scripts/                 # pytest + moto unit tests for scripts
+    └── test_terraform_validate.py
+```
+
+## Error Handling
+
+When encountering unknown issues (a `plan`/`apply` error that resists two attempts, or unclear provider behavior):
+1. Document the problem clearly
+2. List what has been tried (exact commands + HCL diffs)
+3. Collect relevant `terraform plan`/`apply` output, including full stack traces
+4. Generate `research-export.md` (see `templates/research-export.md`) for external review
+5. Wait for human input before major refactoring or before re-running `apply`
+
+## Secrets Management
+
+NEVER commit secrets to the repository:
+- Use `TF_VAR_*` environment variables for local development, or a secrets backend (Vault, AWS Secrets Manager, SSM Parameter Store)
+- Reference `terraform.tfvars.example` for required variables — never commit a populated `.tfvars`
+- Mark every secret-bearing variable `sensitive = true`
+- Validate that required secrets exist before `apply` (fail fast with a clear `precondition` or a check in `scripts/`)
+
+## Response Format
+
+When generating phase summaries or documentation:
+- Use clear, professional language
+- Include concrete resource addresses (e.g. `module.vpc.aws_subnet.private[0]`)
+- Reference specific files and line numbers
+- List dependencies for next phases
+- Note any gotchas or learnings, especially around provider version drift

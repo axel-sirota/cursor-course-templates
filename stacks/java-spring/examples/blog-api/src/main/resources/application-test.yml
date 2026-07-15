@@ -1,0 +1,7 @@
+spring:
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    org.testcontainers: INFO

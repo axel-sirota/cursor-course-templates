@@ -1,0 +1,28 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+crash.log
+crash.*.log
+terraform_plans/
+
+# .terraform.lock.hcl is COMMITTED, not ignored
+
+# tfvars (never commit real values)
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+
+backend.hcl
+!backend.hcl.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage

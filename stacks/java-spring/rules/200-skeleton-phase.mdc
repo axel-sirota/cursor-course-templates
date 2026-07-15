@@ -1,0 +1,314 @@
+---
+description: Session 1 - Phase 0 skeleton creation with all endpoints returning mock DTOs
+globs: ["src/main/java/**/web/**", "src/main/resources/**", "docker-compose.yml", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session 1: Phase 0 (Skeleton Implementation)
+
+## Purpose
+Execute Session 1 to create a fully functional Spring Boot skeleton where all endpoints return mock DTOs matching the OpenAPI specification. This establishes project structure, enables `@WebMvcTest` writing, and validates API contracts.
+
+## CRITICAL: This Session Stops After Skeleton - No Endpoint Implementation
+
+DO NOT:
+- Implement real business logic
+- Create Flyway migrations
+- Create `@Entity` classes
+- Create `JpaRepository` interfaces or `@Service` classes with real logic
+- Proceed to Session 2 automatically
+
+ONLY:
+- Create Maven project structure
+- Implement mock `@RestController` endpoints
+- Set up Docker Compose
+- Configure `application.yml`
+- Create `@WebMvcTest` scaffolding
+
+Session 2 (first real endpoint implementation) is a SEPARATE session that requires explicit user command.
+
+## Session Prerequisites
+- OpenAPI specification complete and validated
+- Plan folder structure created with session plans
+- Session 1 plan reviewed (`plan/sessions/session-1-phase-0.md`)
+- Maven wrapper working, JDK pinned (see `rules/000-environment-setup.mdc`)
+
+## Session Execution Steps
+
+### 1. Review Session Plan
+Before starting implementation:
+- Read `plan/sessions/session-1-phase-0.md`
+- Confirm session objectives and deliverables
+- Review the OpenAPI specification
+- Check prerequisites are met
+
+### 2. Project Structure
+Follow `vibe_java_spring_boilerplate.md` exactly:
+
+Create complete directory structure:
+```
+src/main/java/com/example/<app>/
+├── Application.java
+├── config/
+│   ├── OpenApiConfig.java
+│   └── WebConfig.java
+├── web/
+│   ├── HealthController.java
+│   ├── PostController.java
+│   └── dto/
+│       ├── CreatePostRequest.java
+│       └── PostResponse.java
+├── service/
+├── repository/
+├── model/
+└── exception/
+    └── GlobalExceptionHandler.java
+src/main/resources/
+├── application.yml
+└── application-dev.yml
+```
+
+### 3. Configuration Setup
+Reference `vibe_java_spring_boilerplate.md` for:
+- `application.yml` profile structure (dev/test/prod)
+- CORS configuration (`WebConfig` implementing `WebMvcConfigurer`)
+- Actuator exposure
+- Global exception handling shape
+
+Create `.env.example` with all required variables:
+```
+SERVER_PORT=8080
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/appdb
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=postgres
+JWT_SECRET=change-in-production
+```
+
+### 4. Docker Compose Setup
+Use `templates/docker-compose-template.yaml`.
+
+Include services:
+- PostgreSQL database
+- pgAdmin (optional, for development)
+- Application (optional, for container testing)
+
+Ensure proper networking, healthchecks, and volume mounting.
+
+### 5. Mock Endpoint Implementation
+
+For each endpoint in the OpenAPI spec, create a mock `@RestController` method.
+
+**Pattern for POST endpoints:**
+```java
+@RestController
+@RequestMapping("/api/posts")
+@RequiredArgsConstructor
+public class PostController {
+
+    @PostMapping
+    public ResponseEntity<PostResponse> createPost(@Valid @RequestBody CreatePostRequest request) {
+        // MOCK IMPLEMENTATION — Phase 0 skeleton
+        PostResponse mock = new PostResponse(
+            UUID.fromString("00000000-0000-0000-0000-000000000123"),
+            request.title(),
+            request.content(),
+            request.authorId(),
+            Instant.parse("2024-01-01T00:00:00Z")
+        );
+        return ResponseEntity.ok(mock);
+    }
+}
+```
+
+**Pattern for GET endpoints:**
+```java
+@GetMapping("/{postId}")
+public ResponseEntity<PostResponse> getPost(@PathVariable UUID postId) {
+    // MOCK IMPLEMENTATION — Phase 0 skeleton
+    PostResponse mock = new PostResponse(
+        postId,
+        "Mock Post Title",
+        "Mock post content here",
+        UUID.fromString("00000000-0000-0000-0000-0000000000aa"),
+        Instant.parse("2024-01-01T00:00:00Z")
+    );
+    return ResponseEntity.ok(mock);
+}
+```
+
+### 6. Request/Response DTOs
+Create Java `record` DTOs matching OpenAPI schemas.
+
+```java
+public record CreatePostRequest(
+    @NotBlank @Size(max = 200) String title,
+    @NotBlank String content,
+    @NotNull UUID authorId
+) {}
+
+public record PostResponse(
+    UUID postId,
+    String title,
+    String content,
+    UUID authorId,
+    Instant createdAt
+) {}
+```
+
+Field names are camelCase to match the JSON contract by default — no aliasing layer is needed since Jackson serializes Java record component names directly.
+
+### 7. OpenAPI / Swagger UI
+Add `springdoc-openapi-starter-webmvc-ui` to `pom.xml` so mock endpoints are immediately browsable:
+```xml
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>2.6.0</version>
+</dependency>
+```
+This exposes interactive docs at `/swagger-ui.html` with zero extra configuration — the Phase 0 equivalent of FastAPI's automatic `/docs`.
+
+### 8. Testing Setup
+Create test structure:
+```
+src/test/java/com/example/<app>/
+├── web/
+│   ├── HealthControllerTest.java
+│   └── PostControllerTest.java
+└── ApplicationTests.java
+```
+
+Add a minimal `@WebMvcTest` stub:
+```java
+@WebMvcTest(PostController.class)
+class PostControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void createPost_returnsOk() throws Exception {
+        mockMvc.perform(post("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"title":"Test","content":"Body","authorId":"00000000-0000-0000-0000-0000000000aa"}
+                    """))
+            .andExpect(status().isOk());
+    }
+}
+```
+
+### 9. Session Verification
+Before completing Session 1:
+
+**Manual testing:**
+```bash
+# Start services
+docker compose up -d
+
+# Start application
+./mvnw spring-boot:run
+
+# Test endpoints
+curl http://localhost:8080/swagger-ui.html
+curl http://localhost:8080/actuator/health
+```
+
+**Automated testing:**
+```bash
+# All endpoints should return mock data
+./mvnw test -Dtest=PostControllerTest
+```
+
+## Mock Data Guidelines
+
+### Consistency
+Use consistent mock IDs across related endpoints:
+- Post ID: `00000000-0000-0000-0000-000000000123`
+- Author ID: `00000000-0000-0000-0000-0000000000aa`
+- Comment ID: `00000000-0000-0000-0000-000000000456`
+
+### Realistic Structure
+Mock responses should match production structure:
+- Include all required fields
+- Use proper Java types (`UUID`, `Instant`, not raw `String`)
+- Return appropriate HTTP status codes
+
+### Error Cases
+Implement mock error responses via the global exception handler:
+```java
+@GetMapping("/{postId}")
+public ResponseEntity<PostResponse> getPost(@PathVariable UUID postId) {
+    if (postId.toString().equals("00000000-0000-0000-0000-000000000000")) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
+    }
+    return ResponseEntity.ok(mockResponse);
+}
+```
+
+## Session 1 Completion Checklist
+
+- [ ] Session plan reviewed and objectives confirmed
+- [ ] All endpoints implemented with mock `@RestController` responses
+- [ ] Request/response DTOs match OpenAPI spec
+- [ ] `docker-compose.yml` working
+- [ ] Environment variables documented in `.env.example`
+- [ ] Actuator health endpoint responding at `/actuator/health`
+- [ ] Swagger UI accessible at `/swagger-ui.html`
+- [ ] Test structure created (`@WebMvcTest` stubs)
+- [ ] All mock endpoints manually tested
+- [ ] Session 1 summary generated in `plan/sessions/`
+
+## Session Completion Response
+
+When Session 1 is complete, respond with:
+
+```
+Session 1 Complete: Phase 0 (Skeleton)
+
+Created:
+- Maven project structure following java_spring_boilerplate
+- [N] mock endpoints matching OpenAPI spec
+- Docker Compose with PostgreSQL
+- application.yml configuration
+- @WebMvcTest scaffolding
+
+Verification:
+- Visit http://localhost:8080/swagger-ui.html to test all endpoints
+- All endpoints return mock DTOs
+- Health check: http://localhost:8080/actuator/health
+
+Session Summary:
+- Generated plan/sessions/session-1-summary.md
+- Documented all implemented endpoints
+- Listed mock data patterns used
+- Noted dependencies and configuration
+
+Next Session:
+- Review plan/sessions/session-2-phase-1.md for next phase
+- When ready, say "Start Session 2" to begin Phase 1 implementation
+
+DO NOT proceed to Session 2 automatically.
+```
+
+## Session Transition Documentation
+
+Generate `plan/sessions/session-1-summary.md` including:
+- List of all implemented endpoints
+- Mock data patterns used
+- Dependencies added (`pom.xml`)
+- Configuration variables needed
+- Known limitations of mock implementation
+- Prerequisites for Session 2
+
+## Anti-Patterns to Avoid
+
+Do NOT:
+- Implement real business logic in Session 1
+- Connect to an actual database
+- Make external API calls
+- Implement complex validation beyond `jakarta.validation` annotations
+- Skip any endpoints from the OpenAPI spec
+- Use inconsistent mock data patterns
+- Automatically start Session 2 implementation
+- Skip session summary documentation

@@ -1,0 +1,19 @@
+project     = "acme"
+environment = "dev"
+aws_region  = "us-east-1"
+
+vpc_cidr                = "10.0.0.0/16"
+availability_zone_count = 2
+single_nat_gateway      = true
+
+acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/REPLACE-ME"
+
+ecr_repository_url = "123456789012.dkr.ecr.us-east-1.amazonaws.com/acme-web"
+image_tag           = "latest"
+container_port       = 8080
+task_cpu              = 256
+task_memory            = 512
+desired_count           = 2
+enable_autoscaling       = false
+
+static_site_domain = "static.example.com"

@@ -1,0 +1,460 @@
+---
+description: Session-based test-driven development patterns for E2E and unit tests (Go)
+globs: ["**/*_test.go", "plan/sessions/**"]
+alwaysApply: false
+---
+
+# Session-Based Testing First: Test-Driven Development (Go + Gin)
+
+## Purpose
+Enforce strict test-driven development within each session where E2E tests are written before
+implementation, tests drive design decisions, and all tests must pass before session completion.
+
+## Session TDD Core Principle
+
+RED -> GREEN -> REFACTOR (per session)
+
+1. RED: Write a test that fails (at session start)
+2. GREEN: Implement the minimum code to pass the test (during session)
+3. REFACTOR: Improve the code while keeping tests green (before session end)
+
+## Session Testing Context
+
+Each session follows TDD principles:
+- Session N: Write E2E tests for the current endpoint
+- Session N: Implement the endpoint to make tests pass
+- Session N: Refactor while keeping tests green
+- Session N: Document test results in the session summary
+
+## E2E Testing Patterns
+
+### Test Structure
+Every endpoint test follows this structure, using `net/http/httptest` and `gin.SetMode(gin.TestMode)`:
+
+```go
+package handler_test
+
+import (
+    "bytes"
+    "encoding/json"
+    "net/http"
+    "net/http/httptest"
+    "testing"
+
+    "github.com/gin-gonic/gin"
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
+)
+
+func TestMain(m *testing.M) {
+    gin.SetMode(gin.TestMode)
+    m.Run()
+}
+
+func TestCreatePost_Success(t *testing.T) {
+    router := setupRouter(t)
+
+    body, _ := json.Marshal(map[string]string{
+        "title":    "Test Resource",
+        "content":  "Test description",
+        "authorId": "test-owner-123",
+    })
+    req := httptest.NewRequest(http.MethodPost, "/api/posts", bytes.NewBuffer(body))
+    req.Header.Set("Content-Type", "application/json")
+    w := httptest.NewRecorder()
+
+    router.ServeHTTP(w, req)
+
+    require.Equal(t, http.StatusCreated, w.Code)
+}
+
+func TestCreatePost_ValidationError(t *testing.T) {
+    router := setupRouter(t)
+
+    body, _ := json.Marshal(map[string]string{"title": ""}) // missing required fields
+    req := httptest.NewRequest(http.MethodPost, "/api/posts", bytes.NewBuffer(body))
+    req.Header.Set("Content-Type", "application/json")
+    w := httptest.NewRecorder()
+
+    router.ServeHTTP(w, req)
+
+    assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+```
+
+### Using Skeleton Mock Data
+The Phase 0 skeleton provides the expected output structure.
+
+**Step 1: Capture the mock response shape**
+```go
+// From Phase 0 skeleton, POST /api/posts returned:
+// {
+//   "postId": "mock-123",
+//   "title": "Mock Post",
+//   "content": "Mock content",
+//   "authorId": "mock-author",
+//   "createdAt": "2024-01-01T00:00:00Z"
+// }
+```
+
+**Step 2: Write the test asserting the real structure**
+```go
+func TestCreatePost_Session2_RealImplementation(t *testing.T) {
+    router := setupRouter(t)
+
+    body, _ := json.Marshal(map[string]string{
+        "title": "Test Resource", "content": "Test description", "authorId": "test-owner-123",
+    })
+    req := httptest.NewRequest(http.MethodPost, "/api/posts", bytes.NewBuffer(body))
+    req.Header.Set("Content-Type", "application/json")
+    w := httptest.NewRecorder()
+    router.ServeHTTP(w, req)
+
+    require.Equal(t, http.StatusCreated, w.Code)
+
+    var resp map[string]any
+    require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+
+    // Check all fields present
+    assert.Contains(t, resp, "postId")
+    assert.Contains(t, resp, "title")
+    assert.Contains(t, resp, "authorId")
+    assert.Contains(t, resp, "createdAt")
+
+    // Verify data correctness
+    assert.Equal(t, "Test Resource", resp["title"])
+
+    // Verify dynamic fields differ from mock data
+    assert.NotEqual(t, "mock-123", resp["postId"])
+    assert.NotEqual(t, "2024-01-01T00:00:00Z", resp["createdAt"])
+}
+```
+
+### Test Setup Helpers
+Create reusable setup helpers, typically in a `_test.go` file or a small `testutil` package:
+
+```go
+// setupRouter wires a real Gin router with a test database transaction.
+func setupRouter(t *testing.T) *gin.Engine {
+    t.Helper()
+
+    db := setupTestDB(t) // opens a transaction, rolls back via t.Cleanup
+    repo := repository.NewGormPostRepository(db)
+    svc := service.NewPostService(repo)
+
+    r := gin.New()
+    r.POST("/api/posts", handler.CreatePost(svc))
+    r.GET("/api/posts/:id", handler.GetPost(svc))
+    return r
+}
+
+// setupTestDB opens a connection and wraps the test in a transaction that is
+// always rolled back, so tests never leave residue in the database.
+func setupTestDB(t *testing.T) *gorm.DB {
+    t.Helper()
+
+    db, err := gorm.Open(postgres.Open(testDatabaseURL), &gorm.Config{})
+    require.NoError(t, err)
+
+    tx := db.Begin()
+    t.Cleanup(func() { tx.Rollback() })
+    return tx
+}
+```
+
+### Testing Patterns by HTTP Method
+
+**POST endpoints:**
+```go
+func TestCreatePost(t *testing.T) {
+    router := setupRouter(t)
+    // ... success case: assert 201, response fields populated
+
+    // Validation error
+    body, _ := json.Marshal(map[string]string{"title": ""})
+    req := httptest.NewRequest(http.MethodPost, "/api/posts", bytes.NewBuffer(body))
+    req.Header.Set("Content-Type", "application/json")
+    w := httptest.NewRecorder()
+    router.ServeHTTP(w, req)
+    assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+```
+
+**GET (single) endpoints:**
+```go
+func TestGetPost_Success(t *testing.T) {
+    router, postID := setupRouterWithPost(t)
+
+    req := httptest.NewRequest(http.MethodGet, "/api/posts/"+postID, nil)
+    w := httptest.NewRecorder()
+    router.ServeHTTP(w, req)
+
+    assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestGetPost_NotFound(t *testing.T) {
+    router := setupRouter(t)
+
+    req := httptest.NewRequest(http.MethodGet, "/api/posts/00000000-0000-0000-0000-000000000000", nil)
+    w := httptest.NewRecorder()
+    router.ServeHTTP(w, req)
+
+    assert.Equal(t, http.StatusNotFound, w.Code)
+}
+```
+
+**PUT/PATCH endpoints:**
+```go
+func TestUpdatePost(t *testing.T) {
+    router, postID := setupRouterWithPost(t)
+
+    body, _ := json.Marshal(map[string]string{"title": "Updated Title"})
+    req := httptest.NewRequest(http.MethodPut, "/api/posts/"+postID, bytes.NewBuffer(body))
+    req.Header.Set("Content-Type", "application/json")
+    w := httptest.NewRecorder()
+    router.ServeHTTP(w, req)
+
+    assert.Equal(t, http.StatusOK, w.Code)
+}
+```
+
+**DELETE endpoints:**
+```go
+func TestDeletePost(t *testing.T) {
+    router, postID := setupRouterWithPost(t)
+
+    req := httptest.NewRequest(http.MethodDelete, "/api/posts/"+postID, nil)
+    w := httptest.NewRecorder()
+    router.ServeHTTP(w, req)
+    assert.Equal(t, http.StatusNoContent, w.Code)
+
+    // Verify deletion
+    getReq := httptest.NewRequest(http.MethodGet, "/api/posts/"+postID, nil)
+    getW := httptest.NewRecorder()
+    router.ServeHTTP(getW, getReq)
+    assert.Equal(t, http.StatusNotFound, getW.Code)
+}
+```
+
+## Unit Testing Patterns
+
+Unit tests are written AFTER E2E tests pass, and they mock the repository interface to isolate
+business logic in the service layer.
+
+### Service Layer Tests with testify/mock
+
+```go
+package service_test
+
+import (
+    "context"
+    "errors"
+    "testing"
+
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/mock"
+    "github.com/stretchr/testify/require"
+)
+
+// mockPostRepository implements service.PostRepository for testing.
+type mockPostRepository struct {
+    mock.Mock
+}
+
+func (m *mockPostRepository) Create(ctx context.Context, post *model.Post) error {
+    args := m.Called(ctx, post)
+    return args.Error(0)
+}
+
+func TestPostService_CreatePost_Success(t *testing.T) {
+    repo := new(mockPostRepository)
+    repo.On("Create", mock.Anything, mock.AnythingOfType("*model.Post")).Return(nil)
+
+    svc := service.NewPostService(repo)
+
+    post, err := svc.CreatePost(context.Background(), service.CreatePostInput{
+        Title: "Test", Content: "Content", AuthorID: "author-123",
+    })
+
+    require.NoError(t, err)
+    assert.Equal(t, "Test", post.Title)
+    repo.AssertExpectations(t)
+}
+
+func TestPostService_CreatePost_RepositoryError(t *testing.T) {
+    repo := new(mockPostRepository)
+    repo.On("Create", mock.Anything, mock.Anything).Return(errors.New("db error"))
+
+    svc := service.NewPostService(repo)
+
+    _, err := svc.CreatePost(context.Background(), service.CreatePostInput{
+        Title: "Test", Content: "Content", AuthorID: "author-123",
+    })
+
+    require.Error(t, err)
+    assert.Contains(t, err.Error(), "db error")
+}
+```
+
+### Hand-Written Fakes (alternative to testify/mock)
+For simple interfaces, a hand-written fake is often clearer than `testify/mock`:
+
+```go
+type fakePostRepository struct {
+    createFn func(ctx context.Context, post *model.Post) error
+}
+
+func (f *fakePostRepository) Create(ctx context.Context, post *model.Post) error {
+    return f.createFn(ctx, post)
+}
+
+func TestPostService_CreatePost_WithFake(t *testing.T) {
+    repo := &fakePostRepository{
+        createFn: func(ctx context.Context, post *model.Post) error {
+            post.ID = "generated-id"
+            return nil
+        },
+    }
+    svc := service.NewPostService(repo)
+
+    post, err := svc.CreatePost(context.Background(), service.CreatePostInput{Title: "Test"})
+
+    require.NoError(t, err)
+    assert.Equal(t, "generated-id", post.ID)
+}
+```
+
+## Test Organization
+
+Colocated `_test.go` files are the idiomatic Go convention (unlike Python's separate `tests/` tree):
+
+```
+internal/
+├── handler/
+│   ├── posts.go
+│   └── posts_test.go        # E2E tests (httptest + real test-transaction DB)
+├── service/
+│   ├── post_service.go
+│   └── post_service_test.go # Unit tests (mocked repository)
+└── repository/
+    └── post_repository.go   # Usually NOT unit tested directly — thin GORM wrapper
+```
+
+Repositories are thin GORM/SQL wrappers and are typically **not** unit tested directly — the E2E
+tests exercise them through the full stack. Focus unit tests on the service layer, where business
+logic and error handling live.
+
+## Session Test Execution Strategy
+
+### Session Development (TDD Cycle)
+```bash
+# Run a specific test while implementing in the current session
+go test ./internal/handler/... -run TestCreatePost -v
+
+# Watch mode (if using an external tool like reflex or air)
+```
+
+### Session Completion
+```bash
+# Run all tests for the current session's package
+go test ./internal/handler/... -v
+
+# Run all tests to ensure no regressions
+go test ./... -v
+
+# Run with race detector and coverage
+go test ./... -race -cover
+```
+
+## Test Data Management
+
+### Database State
+For E2E tests using a real database:
+- Wrap each test in a transaction and roll back (`t.Cleanup(func() { tx.Rollback() })`) for isolation
+- Use unique identifiers to avoid collisions when transactions aren't used
+- Consider a dedicated test database (`DATABASE_URL_TEST`) separate from development
+
+### Mock Data Consistency
+Use consistent patterns:
+```go
+const (
+    TestUserID     = "test-user-123"
+    TestResourceID = "test-resource-456"
+    TestItemID     = "test-item-789"
+)
+
+var TestTimestamp = "2024-01-01T00:00:00Z"
+```
+
+## Assertions Best Practices
+
+### Be Specific
+```go
+// Good: specific assertions
+assert.Equal(t, "Expected Name", resp["name"])
+assert.NotEmpty(t, resp["resourceId"])
+assert.IsType(t, "", resp["createdAt"])
+
+// Bad: too generic
+assert.NotNil(t, resp)
+```
+
+### Test Error Messages
+```go
+// Good: verify error details
+assert.Equal(t, http.StatusBadRequest, w.Code)
+var errResp map[string]string
+json.Unmarshal(w.Body.Bytes(), &errResp)
+assert.Equal(t, "invalid post ID format", errResp["error"])
+
+// Bad: only check status code
+assert.Equal(t, http.StatusBadRequest, w.Code)
+```
+
+### Test Side Effects
+```go
+// Good: verify state changes
+w := httptest.NewRecorder()
+router.ServeHTTP(w, createReq)
+require.Equal(t, http.StatusCreated, w.Code)
+
+var created PostResponse
+json.Unmarshal(w.Body.Bytes(), &created)
+
+getW := httptest.NewRecorder()
+router.ServeHTTP(getW, httptest.NewRequest(http.MethodGet, "/api/posts/"+created.PostID, nil))
+assert.Equal(t, http.StatusOK, getW.Code)
+```
+
+## Session Testing Checklist
+
+Before completing any session:
+
+- [ ] Session plan reviewed and test objectives confirmed
+- [ ] E2E test written before implementation
+- [ ] Test initially fails (proves it tests something)
+- [ ] Test uses skeleton mock data structure as a baseline
+- [ ] All success cases tested for the current endpoint
+- [ ] All error cases tested for the current endpoint
+- [ ] Validation tested (binding tags exercised)
+- [ ] All E2E tests passing for the current endpoint
+- [ ] Unit tests added for complex business logic (service layer, mocked repo)
+- [ ] `go test ./... -race -cover` output reviewed
+- [ ] Tests are maintainable and readable
+- [ ] Session summary documents test results
+
+## Session Testing Anti-Patterns
+
+Do NOT:
+- Skip session plan review
+- Write implementation before the test
+- Skip a test because "it's simple"
+- Test implementation details instead of behavior
+- Use `time.Sleep()` instead of proper synchronization
+- Share mutable state between tests (always isolate via transaction or fresh fixtures)
+- Forget to test error cases
+- Test only the happy path
+- Commit code with failing tests
+- Skip tests during "rapid development"
+- Test endpoints from other sessions
+- Skip session test documentation

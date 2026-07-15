@@ -1,0 +1,22 @@
+# Maven build output
+target/
+
+# Compiled class files
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+
+# Environment
+.env
+
+# Keep the wrapper jar tracked
+!.mvn/wrapper/maven-wrapper.jar
