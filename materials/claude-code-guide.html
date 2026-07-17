@@ -425,10 +425,13 @@
           <li class="sub"><a href="#claude-md-hierarchy">File Hierarchy</a></li>
           <li class="sub"><a href="#claude-md-example">Real Example</a></li>
           <li class="sub"><a href="#rules-directory">Rules Directory</a></li>
+          <li class="sub"><a href="#lab-claude-md">Lab: CLAUDE.md</a></li>
+          <li class="sub"><a href="#lab-custom-rule">Lab: Custom Rule</a></li>
           <li><a href="#skills">4. Skills &amp; Commands</a></li>
           <li class="sub"><a href="#builtin-commands">Built-in Commands</a></li>
           <li class="sub"><a href="#custom-skills">Custom Skills</a></li>
           <li class="sub"><a href="#skill-example">Skill Example</a></li>
+          <li class="sub"><a href="#lab-custom-command">Lab: Custom Command</a></li>
           <li><a href="#sdd-tdd">5. SDD &amp; TDD</a></li>
           <li class="sub"><a href="#schema-driven">Schema-Driven Dev</a></li>
           <li class="sub"><a href="#tdd-workflow">TDD Workflow</a></li>
@@ -436,6 +439,7 @@
           <li><a href="#workflow">6. The Workflow</a></li>
           <li class="sub"><a href="#phase-dev">Phase-Based Dev</a></li>
           <li class="sub"><a href="#three-workflows">Three Workflows</a></li>
+          <li class="sub"><a href="#lab-full-session">Lab: Full Session</a></li>
           <li><a href="#demo">7. Practical Demo</a></li>
           <li class="sub"><a href="#demo-steps">Step-by-Step</a></li>
           <li><a href="#hooks">8. Hooks</a></li>
@@ -845,6 +849,26 @@ paths:
           <p><strong>Path-scope when possible.</strong> API rules shouldn&rsquo;t load when editing Docker configs.</p>
           <p><strong>Composable over monolithic.</strong> Many focused files beat one giant CLAUDE.md.</p>
         </div>
+
+        <h3 id="lab-claude-md">Lab: Shape Your CLAUDE.md</h3>
+        <div class="callout callout-info">
+          <div class="callout-title">Easy</div>
+          <p>Add one explicit, testable rule to your project&rsquo;s <code>CLAUDE.md</code>, then prove &mdash; without mentioning the rule in your prompt &mdash; that Claude Code&rsquo;s output honors it.</p>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">Hard</div>
+          <p>Add a <code>## Key Rules</code> subsection with 2&ndash;3 explicit, checkable rules, then deliberately ask for something that conflicts with one of them. Claude Code should hold the line instead of silently complying.</p>
+        </div>
+
+        <h3 id="lab-custom-rule">Lab: Write a Custom Rule</h3>
+        <div class="callout callout-info">
+          <div class="callout-title">Easy</div>
+          <p>Create an <code>alwaysApply: true</code> rule in <code>.claude/rules/</code> that enforces a naming or style convention, and prove it fires on ordinary code generation.</p>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">Hard</div>
+          <p>Create a glob-scoped rule (<code>alwaysApply: false</code> + <code>globs</code>) that flags hardcoded secrets in your stack&rsquo;s source files. Prove it fires on a matching file and stays silent on a non-matching one.</p>
+        </div>
       </section>
 
       <!-- ==================== SECTION 4: Skills ==================== -->
@@ -990,6 +1014,16 @@ sequenceDiagram
             <code>!`git diff`</code>, <code>!`gh pr view --comments`</code>. The output is injected into
             the skill content dynamically.
           </p>
+        </div>
+
+        <h3 id="lab-custom-command">Lab: Build a Custom Command</h3>
+        <div class="callout callout-info">
+          <div class="callout-title">Easy</div>
+          <p>Build a custom slash command that performs a short, repeatable multi-step task of your choosing (e.g. generating a changelog entry from recent commits). Run it and confirm it produces the expected output.</p>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">Hard</div>
+          <p>Build a narrow security-review command, modeled on the built-in <code>/code-review</code>, that <code>@</code>-references your Lab 2 Hard secrets rule and a stack template&rsquo;s security checklist line. Run it against a file containing a planted fake secret and confirm the report reflects both referenced sources.</p>
         </div>
       </section>
 
@@ -1330,6 +1364,25 @@ flowchart TB
     style E fill:#00897b,color:#fff
     style I fill:#ff8f00,color:#fff
     style N fill:#7b1fa2,color:#fff
+        </div>
+
+        <h3 id="lab-full-session">Lab: Run a Full Session</h3>
+        <div class="callout callout-warning">
+          <div class="callout-title"><code>/code-review</code> Is a Convention, Not a Gate</div>
+          <p>
+            Nothing mechanically stops you from running <code>/next-session</code> right after a <code>/code-review</code>
+            that found real issues &mdash; there is no severity field or pass/fail check wired between them. Treating
+            &ldquo;fix flagged issues before moving on&rdquo; as a hard rule is <strong>your</strong> discipline to practice,
+            not something the tooling enforces for you.
+          </p>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">Easy</div>
+          <p>Pick any stack and, on a Blog API (Posts + Comments), run the full pipeline once end-to-end: <code>/setup-stack &rarr; /architect &rarr; /start-session &rarr; </code>implement one endpoint with TDD<code> &rarr; /code-review &rarr; /next-session &rarr; /start-session</code>. Deliverable: a <code>plan/PHASES.md</code> diff showing the phase advanced between your two <code>/start-session</code> runs.</p>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">Hard</div>
+          <p>Run the same pipeline on a different endpoint, but deliberately plant one real issue before <code>/code-review</code> (a hardcoded secret, a missing validation, an untested error path). Triage the free-text findings yourself, fix the blocking one, re-run <code>/code-review</code> to confirm it&rsquo;s clean, and only then run <code>/next-session</code>. Deliverable: your before/after <code>/code-review</code> output plus the resulting <code>plan/PHASES.md</code> diff.</p>
         </div>
       </section>
 
