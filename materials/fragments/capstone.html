@@ -1,0 +1,136 @@
+<!-- fragment: capstone -->
+<h2>10. Capstone: Your Monorepo</h2>
+<p>
+  Everything so far ran against the sample repo. This section runs the whole stack against
+  <em>your</em> monorepo &mdash; about 35 minutes, you drive, the instructor circulates.
+  Treat it as a runbook: six steps, each with a verification gate. Do not move to the next
+  step until the gate passes; a skipped gate here is a debugging session later.
+</p>
+
+<div class="mermaid">
+flowchart LR
+    S1["1. /detect-stack"] -->|"report matches<br/>your repo"| S2["2. Nested<br/>CLAUDE.md"]
+    S2 -->|"/context shows<br/>per-service memory"| S3["3. Scoped agents<br/>+ path_guard"]
+    S3 -->|"cross-service<br/>edit blocked"| S4["4. Worktree<br/>settings"]
+    S4 -->|"tests pass in a<br/>fresh worktree"| S5["5. Parallel<br/>implementation"]
+    S5 -->|"both branches<br/>green"| S6["6. Merge in<br/>dependency order"]
+    S6 --> M(["Measure your<br/>/context saving"])
+</div>
+
+<h3 id="capstone-checklist">The six-step checklist</h3>
+<ol class="steps">
+  <li>
+    <strong>Detect your stack.</strong> Run <code>/detect-stack</code> at the root of your
+    monorepo and read the report critically &mdash; it decides which adaptation row below applies.
+    <br /><em>Gate:</em> the detected stack, test runner, and service layout match what you know
+    to be true. If it misreads your repo, correct the generated context before continuing.
+  </li>
+  <li>
+    <strong>Write nested <code>CLAUDE.md</code> files.</strong> Cover at least two of your
+    services: root file holds shared conventions, each service file holds only what is unique
+    to that service &mdash; zero duplication between levels.
+    <br /><em>Gate:</em> <code>/context</code> lists the root file plus the service file under
+    Memory files when you work inside that service, and no rule appears twice.
+  </li>
+  <li>
+    <strong>Create two service-scoped agents.</strong> Each gets the isolation treatment: its
+    own worktree, a restricted tool list, and the <code>path_guard</code> hook copy-adapted
+    from the sample monorepo so its paths name <em>your</em> services.
+    <br /><em>Gate:</em> ask agent A to edit a file owned by agent B&rsquo;s service and watch
+    the hook block it.
+  </li>
+  <li>
+    <strong>Configure worktree settings.</strong> In <code>.claude/settings.json</code> set
+    <code>"baseRef": "head"</code> and <code>symlinkDirectories</code> for your dependency
+    directory (see the table). If your repo is large, add <code>sparsePaths</code> so each
+    agent checks out only its slice.
+    <br /><em>Gate:</em> a fresh worktree runs your test suite green without reinstalling
+    dependencies.
+  </li>
+  <li>
+    <strong>Run a real parallel implementation.</strong> Pick a real ticket that touches two
+    services, adapt <code>/implement-across-services</code> to your service names, and launch
+    it. Resist the urge to micromanage &mdash; watch the activity log instead.
+    <br /><em>Gate:</em> both agents finish on their own branches and each branch passes its
+    service&rsquo;s tests.
+  </li>
+  <li>
+    <strong>Merge and measure.</strong> Merge the branches in dependency order &mdash; provider
+    service first, consumer second &mdash; and rerun the full test suite on the result. Then
+    compare <code>/context</code> inside a service against your pre-capstone baseline.
+    <br /><em>Gate:</em> a clean merge, a green suite, and a concrete token number for what the
+    nested layout saved you.
+  </li>
+</ol>
+
+<h3 id="capstone-adaptation">Adapting to your stack</h3>
+<p>
+  The course ships worked templates for the python-fastapi and node-express variants. The
+  java-spring and go-gin rows are honest about that: you adapt the shipped templates rather
+  than copy a ready-made one.
+</p>
+<table class="comparison-table">
+  <thead>
+    <tr>
+      <th>Stack</th>
+      <th>Test command</th>
+      <th><code>symlinkDirectories</code> target</th>
+      <th>Service context files</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>python-fastapi</td>
+      <td><code>.venv/bin/python3 -m pytest</code></td>
+      <td><code>.venv</code></td>
+      <td><code>services/&lt;name&gt;/CLAUDE.md</code> (shipped template)</td>
+    </tr>
+    <tr>
+      <td>node-express</td>
+      <td><code>npm test --workspace=&lt;service&gt;</code></td>
+      <td><code>node_modules</code></td>
+      <td><code>services/&lt;name&gt;/CLAUDE.md</code> (shipped template)</td>
+    </tr>
+    <tr>
+      <td>java-spring</td>
+      <td><code>./mvnw test -pl &lt;module&gt;</code></td>
+      <td><code>~/.m2</code> is already shared per user; do <em>not</em> symlink
+          <code>target/</code> &mdash; each worktree builds its own</td>
+      <td><code>&lt;module&gt;/CLAUDE.md</code>, adapted from the python template</td>
+    </tr>
+    <tr>
+      <td>go-gin</td>
+      <td><code>go test ./services/&lt;name&gt;/...</code></td>
+      <td>usually none &mdash; the Go build cache lives in
+          <code>~/.cache/go-build</code>, outside the worktree</td>
+      <td><code>services/&lt;name&gt;/CLAUDE.md</code>, adapted from the node template</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Take It Home</div>
+  <p><strong>Finish the rollout.</strong> Add agents for your remaining services &mdash; the second one takes a fraction of the time the first did.</p>
+  <p><strong>Commit the <code>.claude/</code> config.</strong> Hooks, settings, and agents in version control mean your whole team inherits the setup instead of rebuilding it.</p>
+  <p><strong>Make <code>/catchup</code> a habit.</strong> After every <code>/clear</code>, it is the cheapest way back to full working context.</p>
+</div>
+
+<h3 id="lab-capstone">Lab 9 &mdash; the real thing</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Run the six-step checklist against the sample monorepo variant matching your stack.
+    Every gate must pass before you tick the step.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    Run the checklist against <em>your actual repo</em> with a real ticket from your backlog
+    as the step-5 parallel implementation.
+  </p>
+</div>
+<p>
+  <strong>You succeeded when:</strong> two agents implemented in parallel on separate branches
+  and both merged cleanly.
+</p>
