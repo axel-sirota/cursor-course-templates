@@ -6,6 +6,29 @@ This repository is a **Context-Aware Development Environment** for AI Assistants
 
 **Works with both Cursor IDE and Claude Code CLI.**
 
+## Course 102 — Parallel Development
+
+Course 102 builds on the 101 workflow and teaches parallel AI-assisted development with Claude Code: delegating work to subagents, isolating them in git worktrees, coordinating several implementation agents against frozen contracts, and running experimental Agent Teams — closing with a capstone where you apply the pattern to your own monorepo. Attendees who took 101 can jump straight in; everyone else starts from the workflow reference listed below.
+
+### Materials map
+
+| Material | What it is |
+| :--- | :--- |
+| [`materials/claude-code-102-guide.html`](materials/claude-code-102-guide.html) | The student guide — all modules, demos, and labs |
+| `materials/instructor/` | Instructor-only materials: lab solutions, demo captures, timing notes |
+| [`sample-monorepo/python-fastapi/`](sample-monorepo/python-fastapi/), [`sample-monorepo/node-express/`](sample-monorepo/node-express/) | The practice monorepo in two variants — copy one out of this repo, then run `./init.sh` inside the copy |
+| [`student_runbook.md`](student_runbook.md) | The workflow reference for attendees who did not take 101 |
+
+### Session structure (180 minutes)
+
+| Block | Duration |
+| :--- | :--- |
+| Intro & workflow recap | 15 min |
+| Module 1 — Subagents & Worktree Isolation (4 topics, Labs 1–4) | 40 min |
+| Module 2 — Parallel Orchestration & Agent Teams (4 topics, Labs 5–8) | 80 min |
+| Module 3 — Capstone: Your Monorepo (Lab 9) | 35 min |
+| Wrap-up & references | 10 min |
+
 ## 🚀 Getting Started
 
 ### Using Cursor IDE
