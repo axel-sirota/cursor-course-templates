@@ -1,0 +1,201 @@
+<!-- fragment: parallel-implementation -->
+        <h2>6. Parallel Implementation Across Services</h2>
+        <p>
+          Everything so far &mdash; subagents, worktrees, per-service <code>CLAUDE.md</code> files,
+          token budgets &mdash; has been building toward this section. The sample monorepo ships a
+          custom command, <code>/implement-across-services</code>, that takes one feature spec and
+          implements it across all three services <em>at the same time</em>: one subagent per
+          service, each in its own worktree, coordinated by the lead session you are typing into.
+        </p>
+        <p>
+          The refunds feature in <code>specs/feature-refunds.md</code> is the perfect test case.
+          It touches every service &mdash; <code>gateway</code> accepts <code>POST /refunds</code>,
+          <code>payments</code> makes the approve/reject decision, <code>notifications</code>
+          records the outcome &mdash; but the services only meet at the JSON Schemas in
+          <code>contracts/</code>. Three agents can build three services independently precisely
+          because the contract, not conversation, defines where they touch.
+        </p>
+
+        <h3 id="parallel-command-anatomy">Anatomy of the Command</h3>
+        <p>
+          <code>/implement-across-services &lt;spec-file&gt;</code> runs in four phases. The command
+          file spells each one out so the lead session cannot improvise its way into a mess:
+        </p>
+        <ol class="steps">
+          <li>
+            <strong>Read the spec.</strong> The lead session reads the feature spec in full and
+            extracts each service&rsquo;s responsibilities and acceptance criteria. It does
+            <em>not</em> start implementing anything itself.
+          </li>
+          <li>
+            <strong>Spawn all three service agents in one message.</strong> The lead issues three
+            Agent tool calls &mdash; payments, notifications, gateway &mdash; in a single response
+            block. Each agent gets its own worktree, its own service directory, and only the slice
+            of the spec it owns.
+          </li>
+          <li>
+            <strong>Collect completion reports.</strong> Each agent finishes by returning a small
+            JSON report: which branch it worked on, which files it touched, and whether its
+            service&rsquo;s tests pass. The lead does not proceed until all three reports are in.
+          </li>
+          <li>
+            <strong>Merge sequentially, in dependency order.</strong> The lead &mdash; and only the
+            lead &mdash; merges the three worktree branches back one at a time: payments, then
+            notifications, then gateway, running <code>contracts/validate.sh</code> after each
+            merge so a contract break is caught at the merge that introduced it.
+          </li>
+        </ol>
+        <p>
+          Two lines in the command file carry most of the weight. The first forces the fan-out to
+          actually be parallel:
+        </p>
+        <pre><code class="language-markdown">CRITICAL: run these in PARALLEL using multiple Agent tool calls in a single message, not sequentially</code></pre>
+        <p>
+          Without that line, the model will happily launch agent one, wait for it to finish, launch
+          agent two, and so on &mdash; technically using subagents, practically sequential. Parallel
+          tool calls in a single message are what make three agents run at once. The second line
+          governs the way back:
+        </p>
+        <pre><code class="language-markdown">MERGE PHASE (you are the sole merger): merge each agent's worktree branch back sequentially in dependency order — payments, then notifications, then gateway — running contracts/validate.sh &lt;service-dir&gt; after EACH merge</code></pre>
+        <div class="callout callout-warning">
+          <div class="callout-title">One Merger, Always</div>
+          <p>
+            The fan-out is parallel; the merge never is. Agents never merge their own branches
+            &mdash; they report and stop. If three agents raced to merge into <code>main</code>,
+            you would trade file conflicts (which worktrees solved) for merge conflicts (which
+            nothing solves for free). One merger, a fixed dependency order, and a contract check
+            between merges turns integration from a race into a pipeline.
+          </p>
+        </div>
+
+        <h3 id="parallel-wall-clock">Wall-Clock vs. Tokens</h3>
+        <p>
+          Be clear about what parallelism buys you. Three agents working at once finish in roughly
+          the time of the slowest one, so a feature that would take three sequential agent runs
+          lands in about a third of the wall-clock time. What it does <em>not</em> buy you is
+          tokens: three agents means three separate contexts, each loading its own instructions,
+          its own service files, and its own conversation &mdash; and each billed separately. If
+          anything, parallel runs cost slightly <em>more</em> tokens than one careful sequential
+          session, because shared context (the spec, the contracts) is loaded three times instead
+          of once.
+        </p>
+        <p>
+          You are spending tokens to buy wall-clock time. On a three-service feature with an
+          afternoon deadline, that is an excellent trade. It is not always the right one.
+        </p>
+        <div class="callout callout-tip">
+          <div class="callout-title">When Sequential Is Still Right</div>
+          <p>
+            <strong>Tiny changes.</strong> If the whole feature is a two-line edit per service, the
+            worktree setup and triple context load cost more than they save. One session editing
+            three files wins.
+          </p>
+          <p>
+            <strong>Heavy cross-service coupling.</strong> If the services need to negotiate as they
+            go &mdash; the payload shape is still being discovered, or a contract change is part of
+            the work &mdash; parallel agents will each guess differently and you will pay for it at
+            merge time. Settle the contract first, or work sequentially in one context that sees
+            all three services.
+          </p>
+        </div>
+
+        <p>
+          Here is the whole flow &mdash; parallel fan-out, isolated work, sequential merge &mdash;
+          in one picture:
+        </p>
+        <div class="mermaid">
+sequenceDiagram
+    participant L as Lead session
+    participant P as payments agent
+    participant N as notifications agent
+    participant G as gateway agent
+    L->>L: read specs/feature-refunds.md
+    par payments
+        L->>P: Agent call (single message)
+        P->>P: implement in own worktree
+        P-->>L: JSON completion report
+    and notifications
+        L->>N: Agent call (single message)
+        N->>N: implement in own worktree
+        N-->>L: JSON completion report
+    and gateway
+        L->>G: Agent call (single message)
+        G->>G: implement in own worktree
+        G-->>L: JSON completion report
+    end
+    L->>L: merge payments branch
+    L->>L: contracts/validate.sh services/payments
+    L->>L: merge notifications branch
+    L->>L: contracts/validate.sh services/notifications
+    L->>L: merge gateway branch
+    L->>L: contracts/validate.sh services/gateway
+        </div>
+
+        <h3 id="demo-parallel-run">Demo 5 &mdash; The Parallel Run</h3>
+        <p>
+          Full walkthrough &mdash; run this in your copy of the Python monorepo. You need two
+          terminals: one for the lead session, one to watch the agents work.
+        </p>
+        <p><strong>Terminal 1</strong> &mdash; start the lead session and kick off the run:</p>
+        <pre><code class="language-bash">cd ~/labs/refund-monorepo
+claude</code></pre>
+        <pre><code class="language-markdown">/implement-across-services specs/feature-refunds.md</code></pre>
+        <p>
+          The lead reads the spec, then fires all three Agent calls in one message. From this
+          point on, terminal 1 is mostly quiet until the reports come back.
+        </p>
+        <p>
+          <strong>Terminal 2</strong> &mdash; watch the three agents interleave. Every tool call
+          any agent makes passes through the <code>agent_activity</code> PostToolUse hook, which
+          appends one JSON line to <code>logs/tool_usage.jsonl</code>:
+        </p>
+        <pre><code class="language-bash">tail -f logs/tool_usage.jsonl</code></pre>
+        <!-- CAPTURE: demo5-activity-tail -->
+        <p>
+          This is the moment the section is named after: three streams of Read/Write/Bash events,
+          tagged with different worktree paths, interleaved in real time. No agent ever touches a
+          file outside its own service directory &mdash; the worktree isolation from section 3 is
+          doing its job while you watch.
+        </p>
+        <p>
+          When all three reports are in, the lead merges the branches back &mdash; payments, then
+          notifications, then gateway &mdash; running <code>contracts/validate.sh</code> after each
+          one. Afterwards, look at the shape of the history:
+        </p>
+        <pre><code class="language-bash">git log --oneline --graph</code></pre>
+        <!-- CAPTURE: demo5-git-graph -->
+        <p>
+          Three short-lived branches, one per service, each merged into <code>main</code> by a
+          single merger in a fixed order. That graph is the signature of a healthy parallel run
+          &mdash; keep a mental picture of it, because in Lab 5 you produce it yourself.
+        </p>
+
+        <h3 id="lab-parallel-run">Lab 5 &mdash; Run It and Race It</h3>
+        <div class="callout callout-info">
+          <div class="callout-title">Easy</div>
+          <p>
+            Before you start, write down your estimate: how long would implementing the refunds
+            spec take as three sequential agent runs? Then run
+            <code>/implement-across-services specs/feature-refunds.md</code> and time it. When it
+            finishes, verify that each agent&rsquo;s changes landed on a separate branch and that
+            each branch touches only its own service&rsquo;s directory. Compare wall-clock reality
+            against your sequential estimate.
+          </p>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">Hard</div>
+          <p>
+            Edit the spec so that two services need the same contract change &mdash; for example,
+            a new field that payments must emit and notifications must record. Re-run the command
+            and deal with what happens at merge time: the contract change has to land in the right
+            order for <code>contracts/validate.sh</code> to pass after every merge, not just the
+            last one. Resolve it without ever letting an agent merge its own branch.
+          </p>
+        </div>
+        <div class="callout callout-tip">
+          <div class="callout-title">You Succeeded When&hellip;</div>
+          <p>
+            You succeeded when: <code>git log --oneline --graph</code> shows three merged branches
+            and <code>validate.sh</code> passes for all services.
+          </p>
+        </div>
