@@ -1,0 +1,5 @@
+{
+  "payment_id": "pay_001",
+  "amount": 50,
+  "reason": "duplicate charge"
+}
