@@ -1,0 +1,215 @@
+<!-- fragment: subagent-architecture -->
+<h2>2. Service-Scoped Subagents</h2>
+
+<p>
+  A subagent is a separate Claude instance that the lead session spawns to do one job with its
+  own fresh context window. In a monorepo, the natural unit of delegation is the service: one
+  agent that knows the payments service, one for the gateway, one for notifications. Each agent
+  is a Markdown file in <code>.claude/agents/</code> &mdash; the frontmatter configures it, and
+  <strong>the body of the file is the agent&rsquo;s system prompt</strong>. The lead session reads the
+  <code>description</code> field to decide when to delegate, hands the agent a task, and gets back
+  a report instead of a wall of intermediate tool calls.
+</p>
+
+<div class="mermaid">
+flowchart TB
+    LEAD["Lead session<br/>plans the work, delegates via Task,<br/>keeps the big-picture context"]
+
+    subgraph PAY["payments-implementer"]
+        PCTX["Own context window"]
+        PSCOPE["tools: Read, Grep, Glob,<br/>Edit, Write, Bash"]
+    end
+
+    subgraph GWA["gateway-implementer"]
+        GCTX["Own context window"]
+        GSCOPE["tools: Read, Grep, Glob,<br/>Edit, Write, Bash"]
+    end
+
+    subgraph NOTIF["notifications-implementer"]
+        NCTX["Own context window"]
+        NSCOPE["tools: Read, Grep, Glob,<br/>Edit, Write, Bash"]
+    end
+
+    PAYDIR["services/payments/"]
+    GWDIR["services/gateway/"]
+    NOTDIR["services/notifications/"]
+
+    LEAD --> PAY
+    LEAD --> GWA
+    LEAD --> NOTIF
+    PAY --> PAYDIR
+    GWA --> GWDIR
+    NOTIF --> NOTDIR
+    PAY -. "✗ path_guard: exit 2" .-> GWDIR
+
+    style LEAD fill:#7c4dff,color:#fff
+    style PAYDIR fill:#00897b,color:#fff
+    style GWDIR fill:#00897b,color:#fff
+    style NOTDIR fill:#00897b,color:#fff
+    linkStyle 6 stroke:#d32f2f,color:#d32f2f,stroke-width:2px
+</div>
+
+<h3 id="agent-frontmatter">The agent file: frontmatter reference</h3>
+
+<p>
+  Everything about an agent is declared in the YAML frontmatter of its
+  <code>.claude/agents/&lt;name&gt;.md</code> file. These are the fields you will use in this course:
+</p>
+
+<table>
+  <thead>
+    <tr><th>Field</th><th>Meaning</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>Unique identifier; how the lead session (and you, in prompts) refer to the agent.</td></tr>
+    <tr><td><code>description</code></td><td>When to use this agent &mdash; the lead reads this to decide whether to delegate a task here.</td></tr>
+    <tr><td><code>tools</code></td><td>Strict allowlist of tool names the agent may call. A tool not on the list simply does not exist for this agent.</td></tr>
+    <tr><td><code>disallowedTools</code></td><td>Explicit denylist subtracted from the allowlist; useful to inherit defaults but carve out exceptions.</td></tr>
+    <tr><td><code>model</code></td><td>Which model runs the agent (<code>sonnet</code>, <code>opus</code>, <code>haiku</code>, or <code>inherit</code> to match the lead).</td></tr>
+    <tr><td><code>effort</code></td><td>Reasoning-effort level for the agent&rsquo;s model &mdash; dial down for mechanical tasks, up for design work.</td></tr>
+    <tr><td><code>maxTurns</code></td><td>Hard cap on the agent&rsquo;s turns before it is stopped &mdash; a runaway-loop budget.</td></tr>
+    <tr><td><code>color</code></td><td>Accent color for the agent&rsquo;s entries in the transcript, so parallel agents are tellable apart.</td></tr>
+    <tr><td><code>isolation</code></td><td>Execution isolation for the agent (e.g. running in its own worktree) so its edits stay off your checkout.</td></tr>
+    <tr><td><code>hooks</code></td><td>Per-agent lifecycle hooks (e.g. <code>PreToolUse</code>) that fire only for this agent&rsquo;s tool calls.</td></tr>
+    <tr><td><code>memory</code></td><td>Persistent memory directory for the agent, carried across sessions instead of starting blank each time.</td></tr>
+  </tbody>
+</table>
+
+<p>
+  Below the frontmatter comes plain Markdown: the agent&rsquo;s system prompt. That is where you
+  state its scope (&ldquo;you own <code>services/payments</code> and nothing else&rdquo;), its working rules,
+  and its reporting format.
+</p>
+
+<h3 id="completion-report">The completion-report contract</h3>
+
+<p>
+  A subagent&rsquo;s final message is the only thing the lead session keeps, so make it
+  machine-checkable. The pattern used throughout this course: the agent&rsquo;s system prompt ends
+  with an instruction to close every task with a fenced JSON block in a fixed shape.
+</p>
+
+<pre><code class="language-json">{
+  "agent": "payments-implementer",
+  "status": "green",
+  "files_changed": ["services/payments/app/validators.py"],
+  "tests": "12 passed",
+  "blocked_attempts": []
+}</code></pre>
+
+<p>
+  The lead (or a script in CI) can parse this block instead of re-reading the agent&rsquo;s whole
+  transcript: <code>status</code> gates the merge, <code>files_changed</code> is checked against the
+  agent&rsquo;s declared scope, and a non-empty <code>blocked_attempts</code> means a hook fired and
+  someone should look at why.
+</p>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Write-scoping is a hook, not a permission</div>
+  <p>
+    Subagents inherit the session&rsquo;s permissions and have <strong>no per-agent cwd</strong>. The
+    <code>tools</code> allowlist is all-or-nothing per <em>tool</em>, never per <em>path</em>: you can take
+    <code>Edit</code> away from an agent entirely, but you cannot tell <code>Edit</code> &ldquo;only inside
+    <code>services/payments</code>&rdquo; with the allowlist alone. The mechanism that stops the payments
+    agent from editing gateway files is a per-agent <code>PreToolUse</code> hook that inspects the
+    target path and exits <code>2</code> to block the call:
+  </p>
+<pre><code class="language-yaml">hooks:
+  PreToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: command
+          command: "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/path_guard.py services/payments"</code></pre>
+  <p>
+    This block is the canonical wiring used by every scoped agent in the sample monorepo &mdash;
+    copy it verbatim and change only the service path argument.
+  </p>
+</div>
+
+<div class="callout callout-tip">
+  <div class="callout-title">New agents/ directory? Restart the session</div>
+  <p>
+    Agent files are discovered at session start. The first file you add to a brand-new
+    <code>.claude/agents/</code> directory will not load into the running session &mdash; restart
+    <code>claude</code> and it appears. Subsequent edits to existing agents are picked up normally.
+  </p>
+</div>
+
+<h3 id="demo-scoped-agent">Demo 1 &mdash; a scoped agent in action</h3>
+
+<p>
+  Open your copy of the sample monorepo (python variant) and look at the payments agent that
+  ships with it, then delegate a small change and watch where the edits land.
+</p>
+
+<pre><code class="language-bash">cd ~/labs/refund-monorepo        # your copy of sample-monorepo/python-fastapi
+cat .claude/agents/payments-implementer.md
+claude</code></pre>
+
+<p>
+  The <code>cat</code> shows the pattern from this section in one file: a <code>tools</code> allowlist, the
+  canonical <code>path_guard</code> hook pointed at <code>services/payments</code>, and a body that pins the
+  agent&rsquo;s scope and demands the JSON completion report. Inside the session, delegate:
+</p>
+
+<pre><code class="language-text">&gt; Use the payments-implementer agent to add an amount-format check to payments</code></pre>
+
+<p>
+  In the transcript, every read may roam (the agent is allowed to <em>look at</em> contracts and
+  neighbors), but every <code>Edit</code> and <code>Write</code> stays inside <code>services/payments/</code>:
+</p>
+
+<!-- CAPTURE: demo1-transcript -->
+<pre><code class="language-text">⏺ Task(payments-implementer): add an amount-format check to payments
+  ⎿ Read(services/payments/README.md)
+  ⎿ Read(contracts/payment.schema.json)
+  ⎿ Edit(services/payments/app/validators.py)
+  ⎿ Bash(.venv/bin/python3 -m pytest services/payments/tests -q)
+      12 passed
+  ⎿ Agent reply (final message):
+      {
+        "agent": "payments-implementer",
+        "status": "green",
+        "files_changed": ["services/payments/app/validators.py"],
+        "tests": "12 passed",
+        "blocked_attempts": []
+      }</code></pre>
+
+<p>
+  Two things to point at in the real run: the only files under <code>Edit</code>/<code>Write</code> are
+  payments files, and the final message is exactly the machine-checkable report the agent&rsquo;s
+  system prompt demanded.
+</p>
+
+<h3 id="lab-service-agent">Lab 1 &mdash; build the notifications agent</h3>
+
+<p>
+  The monorepo ships a payments agent; the notifications service has none. Build it twice &mdash;
+  once with tool-level scoping, once with path-level scoping &mdash; and feel the difference between
+  the two mechanisms.
+</p>
+
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Create <code>notifications-implementer</code> from the payments agent as a template, with
+    <code>Write</code> and <code>Edit</code> <strong>removed</strong> from its <code>tools</code> list. Delegate a change to
+    the notifications service and prove the allowlist blocks <em>all</em> writes &mdash; including ones
+    inside <code>services/notifications</code>. That is the point: allowlists gate tools, not paths.
+  </p>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    Restore <code>Write</code> and <code>Edit</code>, then wire <code>path_guard.py</code> into the agent&rsquo;s
+    frontmatter <code>hooks</code> scoped to <code>services/notifications</code>. Prove both directions: an
+    attempted gateway edit dies with exit <code>2</code>, while a notifications edit goes through.
+    Path-scoping is the hook&rsquo;s job.
+  </p>
+</div>
+
+<p>
+  You succeeded when: the blocked attempt appears in the transcript with the hook&rsquo;s BLOCKED
+  message.
+</p>
