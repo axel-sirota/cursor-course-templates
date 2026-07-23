@@ -1,0 +1,181 @@
+<!-- fragment: nested-claude-md -->
+<h2>4. Nested CLAUDE.md: Hierarchical Context</h2>
+<p>
+  A monorepo has one repo but many contexts. The payments service cares about idempotency keys and
+  migration order; the gateway cares about routing tables and rate limits. Stuffing all of it into
+  one root <code>CLAUDE.md</code> means every session pays for every team&rsquo;s notes. Claude Code
+  solves this with <strong>hierarchical context</strong>: a <code>CLAUDE.md</code> per directory
+  level, each loaded only when it is relevant.
+</p>
+
+<h3>The loading rules</h3>
+<p>Three rules govern which files reach the context window:</p>
+<table>
+  <thead>
+    <tr><th>Where the CLAUDE.md lives</th><th>When it loads</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Repo root, or any ancestor of your working directory</td>
+      <td>In full, at session launch</td>
+    </tr>
+    <tr>
+      <td>A subdirectory below you (e.g. <code>services/payments/</code>)</td>
+      <td>Lazily &mdash; the first time Claude reads a file in that subtree</td>
+    </tr>
+    <tr>
+      <td>A sibling directory you never touch</td>
+      <td>Never</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  The third rule is the one that makes monorepos workable: a session focused on the gateway never
+  sees the payments migration notes, no matter how long it runs. Context isolation between services
+  is free &mdash; you get it just by putting the notes where the code is.
+</p>
+
+<div class="mermaid">
+flowchart TD
+    root["CLAUDE.md (repo root)<br/>always loaded at launch"]
+    services["services/"]
+    payments["services/payments/CLAUDE.md<br/>loads on first read"]
+    gateway["services/gateway/CLAUDE.md<br/>never in a payments session"]
+
+    root --> services
+    services --> payments
+    services --> gateway
+
+    classDef always fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20;
+    classDef lazy fill:#fff9c4,stroke:#f9a825,color:#795500;
+    classDef never fill:#eeeeee,stroke:#9e9e9e,color:#616161;
+    class root always;
+    class payments lazy;
+    class gateway never;
+</div>
+
+<h3>Size discipline</h3>
+<p>
+  Lazy loading only pays off if each level stays small. The working budget: root
+  <code>CLAUDE.md</code> under <strong>200 lines</strong>, each service file under
+  <strong>150 lines</strong>, and <strong>zero duplication</strong> between levels. If a rule
+  applies to every service, it belongs at the root; if it applies to one service, it belongs in
+  that service&rsquo;s file &mdash; never both. Duplicated rules drift, and the copy Claude reads
+  last wins in ways you can&rsquo;t predict.
+</p>
+<p>
+  For packages owned by other teams that you never want in your sessions at all, add their paths to
+  <code>claudeMdExcludes</code> in your settings &mdash; their <code>CLAUDE.md</code> files then
+  stay out of context even if Claude reads a file there.
+</p>
+
+<div class="callout callout-warning">
+  <div class="callout-title">What /compact forgets</div>
+  <p>
+    Compaction does not treat all context sources equally. After a <code>/compact</code>:
+  </p>
+  <table>
+    <thead>
+      <tr><th>Context source</th><th>After /compact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Project-root <code>CLAUDE.md</code></td><td>Re-injected from disk &mdash; survives</td></tr>
+      <tr><td>Nested <code>CLAUDE.md</code> files</td><td><strong>Lost</strong> until a matching file is read again</td></tr>
+      <tr><td>Path-scoped rules</td><td><strong>Lost</strong> until a matching file is read again</td></tr>
+    </tbody>
+  </table>
+  <p>
+    So a long payments session that compacts mid-task silently drops the payments conventions it
+    started with. This is the principled reason the next section prefers
+    <code>/clear</code> + <code>/catchup</code> over <code>/compact</code> in monorepos: a fresh
+    session replays the loading rules deterministically instead of hoping the summary kept the
+    right notes.
+  </p>
+</div>
+
+<h3 id="demo-lazy-load">Demo 3 &mdash; watch the lazy load happen</h3>
+<p>
+  The loading rules are easy to state and easy to disbelieve. The <code>InstructionsLoaded</code>
+  hook fires every time a context file enters the session, so a two-line hook turns the rules into
+  a visible log.
+</p>
+<ol class="steps">
+  <li>
+    <p>
+      In your copy of the sample monorepo, register the hook in
+      <code>.claude/settings.local.json</code> (local settings, so the shared
+      <code>settings.json</code> stays untouched):
+    </p>
+<pre><code class="language-json">{
+  "hooks": {
+    "InstructionsLoaded": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat &gt;&gt; \"$CLAUDE_PROJECT_DIR\"/instructions-loaded.log"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  </li>
+  <li>
+    <p>Open a second terminal and watch the log:</p>
+<pre><code class="language-bash">cd sample-monorepo/python-fastapi
+touch instructions-loaded.log
+tail -f instructions-loaded.log</code></pre>
+  </li>
+  <li>
+    <p>
+      Launch <code>claude</code> at the monorepo root. The root <code>CLAUDE.md</code> event
+      appears in the log immediately &mdash; that is rule one. Now touch the payments service:
+    </p>
+<pre><code class="language-bash">claude
+&gt; Read services/payments/README.md and summarize the service in two sentences.</code></pre>
+    <p>
+      The moment Claude reads a payments file, a second event lands in the log:
+      <code>services/payments/CLAUDE.md</code> has lazy-loaded. That is rule two.
+    </p>
+  </li>
+  <li>
+    <p>
+      Keep working inside payments for a few more turns, then check for the sibling:
+    </p>
+<pre><code class="language-bash">grep payments instructions-loaded.log
+grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"</code></pre>
+    <p>Expected result &mdash; payments present, gateway absent, rule three on the record:</p>
+    <!-- CAPTURE: demo3-instructions-log -->
+<pre><code class="language-bash">$ grep payments instructions-loaded.log
+{"hook_event_name":"InstructionsLoaded","path":"services/payments/CLAUDE.md", ...}
+$ grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"
+gateway CLAUDE.md never loaded</code></pre>
+  </li>
+</ol>
+
+<h3 id="lab-nested-claude-md">Lab 3 &mdash; author a service context</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    The sample monorepo&rsquo;s <code>services/notifications/CLAUDE.md</code> is yours: rewrite it
+    for your own style and stack conventions. Constraints: under 150 lines, and nothing duplicated
+    from the root <code>CLAUDE.md</code>. Then prove lazy loading &mdash; run <code>/context</code>
+    and note the &ldquo;Memory files&rdquo; list <em>before</em> touching notifications, have
+    Claude read one notifications file, and run <code>/context</code> again.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    First prove sibling isolation: work an entire session inside one service and show the other
+    services&rsquo; <code>CLAUDE.md</code> files never appear in <code>/context</code>. Then add
+    <code>claudeMdExcludes</code> to your settings to suppress one service&rsquo;s file entirely,
+    read a file in that service, and verify with <code>/context</code> that the exclusion held.
+  </p>
+</div>
+<p>
+  <strong>You succeeded when:</strong> <code>/context</code>&rsquo;s Memory files list shows exactly
+  the files you predicted, in both states &mdash; before and after the read.
+</p>
