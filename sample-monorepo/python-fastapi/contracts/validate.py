@@ -96,12 +96,14 @@ def main(argv):
         return 1
 
     failed = False
+    validated = 0
     for fixture in fixtures:
         rel = fixture.relative_to(service_dir)
         schema_name, definition = schema_for(fixture.stem)
         if schema_name is None:
             print("SKIP %s: no schema matches this fixture name." % rel)
             continue
+        validated += 1
 
         try:
             instance = json.loads(fixture.read_text())
@@ -118,6 +120,9 @@ def main(argv):
         else:
             print("PASS %s" % rel)
 
+    if validated == 0:
+        print("FAIL %s: no fixture matched any schema — nothing was validated." % fixtures_dir)
+        return 1
     return 1 if failed else 0
 
 
