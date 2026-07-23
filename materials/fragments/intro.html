@@ -1,0 +1,108 @@
+<!-- fragment: intro -->
+<h2>Parallel Development: Subagents, Worktrees &amp; Monorepos</h2>
+
+<p>
+  Here is the situation this course is built around: your feature touches three services in
+  one monorepo &mdash; <code>gateway/</code>, <code>payments/</code>, and
+  <code>notifications/</code>. Load the whole repo into a single Claude session and two things
+  go wrong at once. You burn tokens on code the current task never touches, and the context
+  cross-contaminates: payments conventions leak into gateway edits, a notifications helper gets
+  &ldquo;reused&rdquo; where it does not belong, and review time goes to undoing confusion
+  rather than shipping. Over the next three hours you will build the alternative:
+  service-scoped subagents that each see exactly one service, git worktrees that give each
+  agent an isolated checkout, nested <code>CLAUDE.md</code> files that load the right rules at
+  the right level, and Agent Teams that coordinate the whole thing against a shared contract.
+</p>
+
+<div class="callout callout-info">
+  <div class="callout-title">From a 101 callout to a full class</div>
+  <p>
+    In 101, the &ldquo;Parallel Development Pattern&rdquo; callout teased this in three
+    sentences: <code>/batch</code> decomposes a large change into parallel subtasks, each in
+    its own git worktree with a dedicated subagent. In 101 you saw the pattern in one callout;
+    today it is the whole class &mdash; how the decomposition works, why worktrees keep agents
+    from stepping on each other, and how to run it on a real monorepo.
+  </p>
+</div>
+
+<div class="mermaid">
+flowchart LR
+    subgraph ONE["One session, whole monorepo"]
+        G1["gateway/"] -->|"20k tokens"| CTX["Single context window<br/>all three services loaded"]
+        P1["payments/"] -->|"25k tokens"| CTX
+        N1["notifications/"] -->|"15k tokens"| CTX
+    end
+    subgraph THREE["Three scoped subagents"]
+        G2["gateway/"] -->|"8k tokens"| AG["Gateway agent"]
+        P2["payments/"] -->|"9k tokens"| AP["Payments agent"]
+        N2["notifications/"] -->|"7k tokens"| AN["Notifications agent"]
+    end
+    ONE -.->|"same feature,<br/>a third of the context each"| THREE
+
+    style CTX fill:#c62828,color:#fff
+    style AG fill:#2e7d32,color:#fff
+    style AP fill:#2e7d32,color:#fff
+    style AN fill:#2e7d32,color:#fff
+</div>
+
+<h3 id="workflow-recap">The 101 workflow in 60 seconds</h3>
+
+<p>
+  Everything in 102 runs on top of the 101 command chain. Each parallel agent you launch today
+  executes this same loop &mdash; just scoped to one service:
+</p>
+
+<table class="comparison-table">
+  <thead>
+    <tr>
+      <th>Command</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="cmd-name">/setup-stack</td>
+      <td>Configures the project's stack, rules, and context so every later command knows what it is building with.</td>
+    </tr>
+    <tr>
+      <td class="cmd-name">/architect</td>
+      <td>Runs Phase 0: designs the contract and skeleton before any implementation code exists.</td>
+    </tr>
+    <tr>
+      <td class="cmd-name">/start-session</td>
+      <td>Opens a focused implementation session against the current phase plan.</td>
+    </tr>
+    <tr>
+      <td class="cmd-name">/next-session</td>
+      <td>Closes the session with a transition summary, so the next <code>/start-session</code> picks up with fresh context and zero re-explaining.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Took 101? Skim and move on.</div>
+  <p>
+    New to the workflow? The full Workflow Reference is <code>student_runbook.md</code> in this
+    repo &mdash; read it before the first lab, because every parallel agent in 102 runs this
+    exact loop.
+  </p>
+</div>
+
+<div class="mermaid">
+flowchart LR
+    A["/setup-stack"] --> B["/architect"]
+    B --> C["/start-session"]
+    C --> D["/next-session"]
+    D -->|"next phase"| C
+    C --> E["102: parallel<br/>implementation"]
+
+    style E fill:#7c4dff,color:#fff
+</div>
+
+<p>
+  The three hours map onto that highlighted branch. Module&nbsp;1 builds the scoped agents and
+  the context discipline behind them &mdash; subagent architecture, worktree isolation, nested
+  <code>CLAUDE.md</code>, and token budgets. Module&nbsp;2 turns those agents loose in
+  parallel &mdash; orchestrated implementation, contract hooks that keep services honest, and
+  Agent Teams. Module&nbsp;3 is the capstone: you apply the whole pattern to your monorepo.
+</p>
