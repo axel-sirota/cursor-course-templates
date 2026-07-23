@@ -1,0 +1,14 @@
+{
+  "name": "notifications",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Records customer-facing notification events for the refund monorepo.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

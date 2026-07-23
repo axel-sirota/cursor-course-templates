@@ -1,0 +1,6 @@
+{
+  "event_type": "refund.approved",
+  "payment_id": "pay_1001",
+  "refund_id": "ref_2001",
+  "recipient": "customer@example.com"
+}
