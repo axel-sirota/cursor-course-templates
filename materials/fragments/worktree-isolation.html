@@ -1,0 +1,231 @@
+<!-- fragment: worktree-isolation -->
+<h2>3. Worktree Isolation</h2>
+<p>
+  Subagents that share your checkout also share your uncommitted state. Two agents editing the
+  same tree can trample each other&rsquo;s files, and a half-finished agent run leaves debris in
+  <code>git status</code> that you have to untangle by hand. Worktree isolation removes the
+  problem at the git layer: each agent gets its own checkout, its own branch, and its own blast
+  radius.
+</p>
+
+<h3 id="worktree-semantics">What <code>isolation: worktree</code> Actually Does</h3>
+<p>
+  Setting <code>isolation: worktree</code> in an agent definition changes where that agent runs.
+  Instead of operating on your checkout, each run gets a temporary
+  <a href="https://git-scm.com/docs/git-worktree" target="_blank" rel="noopener">git worktree</a>:
+</p>
+<ul>
+  <li>
+    The worktree is created under <code>.claude/worktrees/&lt;name&gt;</code>, on a dedicated
+    branch named <code>worktree-&lt;name&gt;</code>.
+  </li>
+  <li>
+    Every file the agent reads, writes, or executes lives inside that directory. Since
+    v2.1.203, the agent&rsquo;s <code>Bash</code> tool is confined to the worktree as well &mdash;
+    a stray <code>rm</code> or test command cannot touch your main checkout.
+  </li>
+  <li>
+    If the run ends with <em>no changes</em>, the worktree and its branch are removed
+    automatically. Nothing to clean up.
+  </li>
+  <li>
+    If the agent did commit work, the worktree stays behind so you can inspect, cherry-pick, or
+    merge the <code>worktree-&lt;name&gt;</code> branch on your own terms.
+  </li>
+</ul>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Housekeeping: gitignore the worktree root</div>
+  <p>
+    Add <code>.claude/worktrees/</code> to your <code>.gitignore</code>. Worktrees are nested
+    <em>inside</em> the repo directory, and without the ignore entry every agent run pollutes
+    <code>git status</code> in your main checkout &mdash; the exact noise isolation is supposed to
+    remove. The sample monorepo ships this entry already.
+  </p>
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-title">The #1 Gotcha: Worktrees Branch from the DEFAULT Branch</div>
+  <p>
+    By default, a new agent worktree branches from the repository&rsquo;s <strong>default
+    branch</strong> (usually <code>main</code>) &mdash; <em>not</em> from your current
+    <code>HEAD</code>. If your feature spec, contracts, or scaffolding live on a feature branch,
+    every worktree-isolated agent silently implements against code that does not contain them.
+    The agents look busy, the diffs look plausible, and the result is wrong.
+  </p>
+  <p>
+    The fix is one setting in <code>.claude/settings.json</code>, which the sample monorepo
+    ships:
+  </p>
+  <pre><code class="language-json">{
+  "worktree": {
+    "baseRef": "head"
+  }
+}</code></pre>
+  <p>
+    With <code>"baseRef": "head"</code>, worktrees branch from whatever commit you have checked
+    out &mdash; agents see the same code you see. Leave the default (<code>"fresh"</code>) only
+    when you deliberately want agents to start from a clean default-branch state.
+  </p>
+</div>
+
+<h3 id="fresh-checkout-kit">The Fresh-Checkout Survival Kit</h3>
+<p>
+  A worktree is a <em>fresh checkout</em>: it contains only tracked files. Two categories of
+  things your project depends on are therefore missing, and without them every agent&rsquo;s
+  first test run fails before it does any useful work:
+</p>
+<ol>
+  <li>
+    <strong>Gitignored files the code needs</strong> &mdash; <code>.env</code> is the classic
+    case. A <code>.worktreeinclude</code> file at the repo root lists gitignored paths that
+    should be <em>copied</em> into each new worktree:
+    <pre><code class="language-text"># .worktreeinclude &mdash; gitignored files every agent worktree still needs
+.env</code></pre>
+  </li>
+  <li>
+    <strong>Heavy dependency directories</strong> &mdash; <code>.venv</code>,
+    <code>node_modules</code>. Copying gigabytes per agent is a non-starter;
+    <code>worktree.symlinkDirectories</code> <em>symlinks</em> them from the main checkout
+    instead, so every worktree shares one installed set:
+    <pre><code class="language-json">{
+  "worktree": {
+    "baseRef": "head",
+    "symlinkDirectories": [".venv"]
+  }
+}</code></pre>
+    <p>
+      For the Node variant of the sample monorepo the list is
+      <code>["node_modules"]</code> instead. Symlinked directories are shared state &mdash; fine
+      for read-mostly dependency trees, wrong for anything agents should mutate independently.
+    </p>
+  </li>
+</ol>
+
+<p>
+  With <code>baseRef</code>, <code>.worktreeinclude</code>, and <code>symlinkDirectories</code>
+  in place, the picture looks like this: three agents branch from the same base in parallel,
+  work in complete isolation, and their branches merge back one at a time.
+</p>
+
+<div class="mermaid">
+gitGraph
+    commit id: "contracts"
+    commit id: "base (HEAD)"
+    branch worktree-payments
+    commit id: "payments work"
+    checkout main
+    branch worktree-notifications
+    commit id: "notifications work"
+    checkout main
+    branch worktree-gateway
+    commit id: "gateway work"
+    checkout main
+    merge worktree-payments
+    merge worktree-notifications
+    merge worktree-gateway
+</div>
+
+<h3 id="demo-worktree">Demo 2 &mdash; Watch the Isolation</h3>
+<p>
+  This demo makes the invisible machinery visible: you spawn a worktree-isolated agent, then
+  watch git from a second terminal while it works.
+</p>
+
+<ol class="steps">
+  <li>
+    <h4>Give an agent worktree isolation</h4>
+    <p>
+      In the sample monorepo, add <code>isolation: worktree</code> to a small agent&rsquo;s
+      frontmatter &mdash; for example a docs agent that only touches one file:
+    </p>
+    <pre><code class="language-markdown">---
+name: changelog-scribe
+description: Adds a dated entry to CHANGELOG.md summarizing recent changes.
+tools: Read, Edit, Bash
+isolation: worktree
+---
+Read the git log since the last CHANGELOG entry and append a new dated
+entry to CHANGELOG.md. Keep entries to one line each.</code></pre>
+  </li>
+
+  <li>
+    <h4>Spawn it on a small task</h4>
+    <p>In Claude Code:</p>
+    <pre><code class="language-text">&gt; Use the changelog-scribe agent to add a changelog entry
+  for the refunds feature.</code></pre>
+  </li>
+
+  <li>
+    <h4>In a second terminal: catch the worktree in the act</h4>
+    <p>While the agent runs, list worktrees and branches from the repo root:</p>
+    <pre><code class="language-bash">git worktree list
+git branch --list 'worktree-*'</code></pre>
+    <!-- CAPTURE: demo2-worktree-list -->
+    <pre><code class="language-text">$ git worktree list
+/Users/you/sample-monorepo                                    3f2a1c9 [main]
+/Users/you/sample-monorepo/.claude/worktrees/changelog-scribe 3f2a1c9 [worktree-changelog-scribe]
+
+$ git branch --list 'worktree-*'
+  worktree-changelog-scribe</code></pre>
+    <p>
+      Both checkouts point at the same base commit &mdash; the agent branched from your
+      <code>HEAD</code> because <code>baseRef</code> is <code>"head"</code>.
+    </p>
+  </li>
+
+  <li>
+    <h4>Confirm your checkout stays clean</h4>
+    <p>Still in the second terminal:</p>
+    <pre><code class="language-bash">git status</code></pre>
+    <pre><code class="language-text">On branch main
+nothing to commit, working tree clean</code></pre>
+    <p>
+      The agent is editing files <em>right now</em>, and your working tree shows nothing. All of
+      its changes live in <code>.claude/worktrees/changelog-scribe</code>.
+    </p>
+  </li>
+
+  <li>
+    <h4>Watch a no-change run vanish</h4>
+    <p>
+      Run the agent again with a task that produces no edits (&ldquo;check whether the changelog
+      already covers the refunds feature &mdash; change nothing&rdquo;). When it finishes:
+    </p>
+    <pre><code class="language-bash">git worktree list
+git branch --list 'worktree-*'</code></pre>
+    <pre><code class="language-text">$ git worktree list
+/Users/you/sample-monorepo  3f2a1c9 [main]
+
+$ git branch --list 'worktree-*'</code></pre>
+    <p>
+      No changes, no worktree, no branch. The isolation machinery cleans up after itself when
+      there is nothing worth keeping.
+    </p>
+  </li>
+</ol>
+
+<h3 id="lab-worktree">Lab 2 &mdash; Base Branch Forensics</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Take the agent you built in Lab 1 and give it <code>isolation: worktree</code>. Run it on a
+    small task, then &mdash; while it runs or right after &mdash; locate its worktree directory
+    and its <code>worktree-*</code> branch using git commands, and verify that your main
+    checkout&rsquo;s <code>git status</code> stayed clean the whole time.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    Create a feature branch with at least one commit that <code>main</code> does not have. Run
+    your worktree-isolated agent twice from that branch: once with
+    <code>worktree.baseRef</code> set to <code>"fresh"</code> and once with <code>"head"</code>.
+    Using <code>git log</code> on each run&rsquo;s <code>worktree-*</code> branch, prove which
+    commit each worktree branched from &mdash; and predict, before looking, which run can see
+    your feature-branch commit.
+  </p>
+</div>
+<p>
+  <strong>You succeeded when:</strong> you can explain which base commit the agent saw and why.
+</p>
