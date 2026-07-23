@@ -1,0 +1,271 @@
+<!-- fragment: agent-teams -->
+<h2>Agent Teams: Coordinated Parallel Work</h2>
+
+<p>
+  Everything in this module so far follows one shape: a main session that farms work out and
+  collects results. Subagents research and implement, worktrees keep them from stepping on each
+  other, hooks keep the contract honest &mdash; but the workers never speak to one another. Agent
+  teams change that shape. A team is a group of full Claude Code sessions that share a task list,
+  message each other directly, and coordinate under a lead. Teams launched alongside Opus 4.6
+  (February 2026), but they are not tied to any model &mdash; the official guidance in fact
+  recommends Sonnet for teammates, and everything in this section works that way.
+</p>
+
+<p>
+  Teams are experimental and off by default. Enable them with an environment variable in your
+  project&rsquo;s <code>.claude/settings.json</code>:
+</p>
+
+<pre><code class="language-json">{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}</code></pre>
+
+<h3 id="team-architecture">The four moving parts</h3>
+
+<p>A team has exactly four pieces:</p>
+
+<ul>
+  <li><strong>Team lead</strong> &mdash; your session. It breaks the goal into tasks, spawns
+    teammates, arbitrates disagreements, and synthesizes the result.</li>
+  <li><strong>Teammates</strong> &mdash; full, independent Claude Code sessions, not lightweight
+    subagents. Each has its own context window and works through tasks on its own.</li>
+  <li><strong>Shared task list</strong> &mdash; the coordination backbone. Teammates claim tasks
+    with file locking, so two teammates can never grab the same one. Tasks can declare
+    dependencies; when a blocking task completes, its dependents unblock automatically.</li>
+  <li><strong>Mailbox</strong> &mdash; peer-to-peer messages. Teammates can question each
+    other&rsquo;s decisions, share findings, and negotiate interfaces without routing everything
+    through the lead.</li>
+</ul>
+
+<p>
+  Teammates can be spawned from the subagent definitions you already wrote in the Subagent
+  Architecture section: mention the agent by name when you ask the lead to build the team. The
+  definition&rsquo;s <code>tools</code> and <code>model</code> fields are honored; its
+  <code>skills</code> and <code>mcpServers</code> fields are <em>not</em> &mdash; teammates do not
+  inherit those, so anything a teammate needs from a skill has to go into the task description
+  instead.
+</p>
+
+<p>
+  Two control mechanisms keep a team from running away from you. First, the
+  <strong>plan-approval flow</strong>: you can require that a teammate present its plan and get
+  the lead&rsquo;s approval before touching code &mdash; use it for any task you would not hand to
+  a new hire without a design review. Second, <strong>quality-gate hooks</strong>: three team
+  events are hookable, and an exit code of 2 pushes the work back instead of letting it through.
+</p>
+
+<table>
+  <thead>
+    <tr><th>Hook event</th><th>Fires when</th><th>Exit 2 means</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="cmd-name">TeammateIdle</td><td>A teammate runs out of claimed work</td><td>Send it back for more &mdash; e.g. its tests do not pass yet</td></tr>
+    <tr><td class="cmd-name">TaskCreated</td><td>A new task lands on the shared list</td><td>Reject the task &mdash; e.g. it is missing acceptance criteria</td></tr>
+    <tr><td class="cmd-name">TaskCompleted</td><td>A teammate marks a task done</td><td>Reopen the task &mdash; e.g. the contract validator fails</td></tr>
+  </tbody>
+</table>
+
+<p>
+  A <code>TaskCompleted</code> gate that reruns the service tests looks just like the contract
+  hooks from earlier in this module &mdash; same JSON shape, new event name, and exit 2 instead of
+  a block message. You will wire one up in the Hard tier of Lab 8.
+</p>
+
+<div class="mermaid">
+flowchart LR
+  subgraph hub ["Subagents: hub-and-spoke"]
+    direction TB
+    MAIN["Main session"]
+    S1["payments subagent"] -- "report back" --> MAIN
+    S2["notifications subagent"] -- "report back" --> MAIN
+    S3["gateway subagent"] -- "report back" --> MAIN
+  end
+  subgraph mesh ["Agent team: mesh"]
+    direction TB
+    LEAD["Team lead (your session)"]
+    TASKS[("Shared task list")]
+    T1["Teammate: payments"]
+    T2["Teammate: notifications"]
+    T3["Teammate: gateway"]
+    LEAD --- TASKS
+    T1 --- TASKS
+    T2 --- TASKS
+    T3 --- TASKS
+    T1 &lt;-. "peer message" .-&gt; T2
+    T2 &lt;-. "peer message" .-&gt; T3
+  end
+</div>
+
+<h3 id="subagents-vs-teams">Subagents or a team?</h3>
+
+<p>
+  This is the decision the whole module has been building toward. The two models are not rivals
+  &mdash; they answer different questions.
+</p>
+
+<table class="comparison-table">
+  <thead>
+    <tr><th></th><th>Subagents</th><th>Agent team</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Who coordinates</td>
+      <td>The main session orchestrates everything itself</td>
+      <td>The lead sets direction; teammates self-claim from the shared task list</td>
+    </tr>
+    <tr>
+      <td>Do workers talk to each other</td>
+      <td>No &mdash; each reports back to the caller only</td>
+      <td>Yes &mdash; peer-to-peer messages through the mailbox</td>
+    </tr>
+    <tr>
+      <td>Token cost</td>
+      <td>Lower &mdash; only condensed results return to your context</td>
+      <td>High &mdash; every teammate is a full session running in parallel</td>
+    </tr>
+    <tr>
+      <td>Best for</td>
+      <td>Parallel research and well-scoped tasks where only the result matters</td>
+      <td>Work that needs discussion between workers: cross-service changes, reviews that challenge each other</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Teams do not isolate teammates in worktrees</div>
+  <p>
+    Every teammate shares the working directory. Two teammates editing the same file will corrupt
+    each other&rsquo;s work exactly like two developers editing one checkout. The fix is
+    partitioning, not isolation: give each teammate <em>ownership</em> of a different
+    service&rsquo;s files and say so in the task descriptions. Worktrees are the
+    <strong>subagent</strong> story; teams are the <strong>coordination</strong> story &mdash; do
+    not expect one to do the other&rsquo;s job.
+  </p>
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Cost: a team is roughly 7&times; a single session</div>
+  <p>
+    Every teammate burns tokens like a full session, so a team multiplies your spend by roughly
+    the team size plus coordination overhead &mdash; about 7&times; for a typical setup. Keep
+    teams at 3&ndash;5 teammates, run teammates on Sonnet, and shut the team down as soon as the
+    work lands.
+  </p>
+  <p>
+    <strong>Live-training note:</strong> a classroom of concurrent teams needs a generous
+    tokens-per-minute limit &mdash; coordinate with your org admin before the session. That is why
+    the instructor runs Demo 8 while you run the scaled-down lab.
+  </p>
+</div>
+
+<h3 id="team-limitations">Known limitations</h3>
+
+<ul>
+  <li>No session resume while in-process teammates are running &mdash; finish or shut down the team first.</li>
+  <li>Task status can lag reality &mdash; nudge the lead to refresh if the list looks stale.</li>
+  <li>The lead may stop early with tasks still open &mdash; tell it to keep going.</li>
+  <li>One team per session &mdash; you cannot run two teams side by side.</li>
+  <li>No nested teams &mdash; a teammate cannot spawn a team of its own.</li>
+</ul>
+
+<h3 id="demo-agent-team">Demo 8 &mdash; a real team, instructor-driven</h3>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Instructor runs this &mdash; token-heavy</div>
+  <p>
+    This demo runs three Sonnet teammates plus a lead for 10&ndash;15 minutes. Watch it happen on
+    the shared screen; you will build a smaller team yourself in Lab 8.
+  </p>
+</div>
+
+<p>
+  The demo implements <strong>Part 2 of <code>specs/feature-refunds.md</code></strong>: adding a
+  required <code>reason</code> field to <code>NotificationEvent</code>. It is the ideal team job
+  &mdash; a contract change that all three services consume, where the workers genuinely need to
+  talk to each other. With the flag enabled, the instructor starts from the monorepo root:
+</p>
+
+<pre><code class="language-text">Create an agent team to implement Part 2 of specs/feature-refunds.md.
+Spawn three teammates from the payments-dev, notifications-dev and
+gateway-dev agent definitions. Partition ownership strictly:
+- payments-dev owns contracts/notification.schema.json and services/payments/
+- notifications-dev owns services/notifications/
+- gateway-dev owns services/gateway/ and the end-to-end check
+The schema task blocks the other tasks. Require plan approval on the
+schema task before any code is written.</code></pre>
+
+<p>Three things are worth watching for as the team runs:</p>
+
+<ol class="steps">
+  <li>
+    <strong>Task claiming and unblocking.</strong> The teammates claim tasks from the shared list
+    &mdash; file locking guarantees no double-claims &mdash; and the two service tasks sit blocked
+    until the schema task completes, then unblock on their own.
+  </li>
+  <li>
+    <strong>A teammate challenging a teammate.</strong> In the captured run, payments-dev
+    populated <code>reason</code> with free-form prose; notifications-dev messaged it directly to
+    demand the machine-readable identifiers the spec requires
+    (<code>refund_approved</code>, <code>refund_rejected_amount_exceeds_payment</code>) &mdash;
+    and payments-dev changed its implementation. No lead involvement, no human involvement.
+  </li>
+  <li>
+    <strong>The lead&rsquo;s synthesis.</strong> When the last task completes, the lead verifies
+    the Part 2 acceptance criteria &mdash; schema, payments, and notifications landed as a
+    coherent set &mdash; and reports one combined summary.
+  </li>
+</ol>
+
+<!-- CAPTURE: demo8-team-transcript -->
+<pre><code class="language-text">[transcript excerpt from the captured run]
+
+● Task claimed: "Add required reason to notification.schema.json" (payments-dev)
+● Plan approved by lead — payments-dev may edit the schema
+● Task completed: schema change — 2 dependent tasks unblocked
+● Task claimed: "Reject events without reason; log it" (notifications-dev)
+● Task claimed: "Verify gateway pass-through + e2e" (gateway-dev)
+✉ notifications-dev → payments-dev:
+    "Your emitted reason is prose ('the refund was approved because…').
+     The spec calls for machine-readable values like refund_approved.
+     I am validating against identifiers — please emit those."
+✉ payments-dev → notifications-dev:
+    "Agreed — switching to refund_approved /
+     refund_rejected_amount_exceeds_payment. Re-check after my next push."
+● Task completed: notifications validation + logging
+● Task completed: gateway e2e — all Part 1 criteria still pass
+● Lead: synthesis — Part 2 acceptance criteria met across all three services</code></pre>
+
+<h3 id="lab-agent-team">Lab 8 &mdash; a small team of your own</h3>
+
+<p>
+  Time-boxed: <strong>15 minutes</strong>. Pick one tier. Keep the team small, use Sonnet
+  teammates, and shut the team down when you finish.
+</p>
+
+<div class="callout callout-info">
+  <div class="callout-title">Easy &mdash; a review-only team</div>
+  <p>
+    Enable the flag, then spawn a team of <strong>2 teammates in review-only mode</strong> (no
+    code changes) over the refunds feature you merged earlier in this module. Give each a
+    different lens &mdash; for example, contract compliance versus error handling. Read their
+    peer messages: where do the two reviews disagree, and how do they resolve it?
+  </p>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">Hard &mdash; implement Part 2 with a gated team</div>
+  <p>
+    Spawn <strong>3 teammates</strong> to implement the Part 2 contract change, with strict
+    file-ownership partitioning (each teammate owns a different service&rsquo;s files &mdash;
+    remember, no worktree isolation here). Add a <code>TaskCompleted</code> hook that runs your
+    service tests and exits 2 on failure, and watch it reopen at least one task before the team
+    converges.
+  </p>
+</div>
+
+<p>
+  <strong>You succeeded when:</strong> the task list shows claimed and completed tasks, and at
+  least one teammate-to-teammate message exists.
+</p>
