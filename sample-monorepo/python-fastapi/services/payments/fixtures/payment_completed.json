@@ -1,0 +1,7 @@
+{
+  "id": "pay-001",
+  "amount": 100.0,
+  "currency": "USD",
+  "status": "completed",
+  "customer_email": "ada@example.com"
+}
