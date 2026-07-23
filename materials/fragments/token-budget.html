@@ -1,0 +1,179 @@
+<!-- fragment: token-budget -->
+<h2>5. Reading Your Token Budget</h2>
+<p>
+  The previous section made a claim you should not take on faith: nested <code>CLAUDE.md</code> files
+  load lazily, so a scoped layout keeps most of its instructions out of the window until a file in
+  that service is actually touched. Claude Code ships the instrument to check that claim:
+  <code>/context</code>. This section teaches you to read it, and to re-measure after every change
+  you make to your memory layout.
+</p>
+
+<h3 id="reading-context">What <code>/context</code> Shows</h3>
+<p>
+  Run <code>/context</code> inside any session and you get a breakdown of the context window,
+  category by category:
+</p>
+<table>
+  <thead>
+    <tr><th>Category</th><th>What it contains</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>System prompt</strong></td><td>Claude Code's own operating instructions &mdash; fixed per version, not yours to tune</td></tr>
+    <tr><td><strong>System tools</strong></td><td>Definitions of the built-in tools (Read, Edit, Bash, &hellip;)</td></tr>
+    <tr><td><strong>MCP tools</strong></td><td>Tool schemas from every connected MCP server &mdash; grows with each server you add</td></tr>
+    <tr><td><strong>Memory files</strong></td><td>Every <code>CLAUDE.md</code> and rule file currently loaded &mdash; listed by path</td></tr>
+    <tr><td><strong>Messages</strong></td><td>The conversation so far: your prompts, Claude's replies, tool results</td></tr>
+    <tr><td><strong>Free space</strong></td><td>What remains before the window fills and compaction kicks in</td></tr>
+  </tbody>
+</table>
+<p>
+  The row that matters for this module is <strong>Memory files</strong>. It is not just a number
+  &mdash; it lists each loaded file by path. That list is the verification surface for everything in
+  the previous section: after <code>/clear</code> on a scoped layout you should see the root
+  <code>CLAUDE.md</code> only; after touching a payments file you should see
+  <code>services/payments/CLAUDE.md</code> appear. If a nested file shows up before you touched its
+  service, your scoping is wrong &mdash; the list tells you so immediately.
+</p>
+<p>
+  Do not confuse the two budget commands. <code>/context</code> shows what is occupying the current
+  session's context window right now. <code>/usage</code> shows how much of your plan's rate limits
+  (session and weekly) you have consumed &mdash; a billing view, not a window view.
+</p>
+
+<h3 id="clear-catchup">The <code>/clear</code> + <code>/catchup</code> Pattern</h3>
+<p>
+  When a long session bloats the Messages category, the reflex is <code>/compact</code>. In a
+  nested-memory monorepo that reflex has a hidden cost: compaction summarizes the conversation, and
+  lazily loaded <code>CLAUDE.md</code> files ride along in that summarization &mdash; the payments
+  rules you triggered two hours ago may survive only as a vague paraphrase, or not at all. The
+  window looks healthy; the instructions are gone.
+</p>
+<p>
+  The pattern that preserves correctness is <code>/clear</code> followed by <code>/catchup</code>.
+  <code>/clear</code> drops the window to its baseline. <code>/catchup</code> (a custom command this
+  course ships in <code>.claude/commands/catchup.md</code>) rebuilds exactly the working state you
+  need by re-reading what changed &mdash; and because reading a service's files re-triggers that
+  service's lazy <code>CLAUDE.md</code> load, the right nested rules come back as real files, not as
+  summary residue. The command runs four steps:
+</p>
+<ol class="steps">
+  <li><code>git diff main...HEAD --name-only</code> to list the files changed on this branch
+      (falling back to <code>git status --short</code> when already on <code>main</code>).</li>
+  <li>Read each changed file.</li>
+  <li>Read the <code>CLAUDE.md</code> of any service whose files appear in that list &mdash;
+      re-triggering the lazy load of exactly the rules the work needs.</li>
+  <li>Summarize the state of the work in at most 10 bullets and state which memory files are now
+      loaded &mdash; which you verify with <code>/context</code>.</li>
+</ol>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Measure the delta, not the total</div>
+  <p>
+    Absolute <code>/context</code> numbers are not comparable across machines: your MCP servers,
+    plugins, and Claude Code version all shift the totals. The honest measurement is the
+    <strong>Memory files category compared between two runs on the same machine</strong> &mdash;
+    flat layout vs. scoped layout, before compaction vs. after recovery.
+  </p>
+  <p>
+    Published real-world savings from scoping memory range from 40% to 92%. Your number is yours:
+    it depends on how much of your context was rule text to begin with. The lab below has you
+    measure it rather than quote it.
+  </p>
+</div>
+
+<p>
+  Diagram D6 shows the shape of the result you are about to produce: two context windows measured
+  right after <code>/clear</code>, one per layout. The Memory-files segment is the only one that
+  moves &mdash; and it is the one you control.
+</p>
+
+<!-- D6 segment counts are placeholders — swap in the real values from the
+     demo4-context-before / demo4-context-after captured runs. -->
+<div class="mermaid">
+flowchart TB
+    subgraph FLAT["flat-claude-md branch &mdash; /context after /clear"]
+        direction LR
+        F1["System prompt<br/>~3k"] --- F2["System tools<br/>~12k"] --- F3["MCP tools<br/>~5k"] --- F4["Memory files<br/>~18k<br/>(one fat root file)"] --- F5["Messages<br/>~0k"] --- F6["Free space"]
+    end
+    subgraph NESTED["nested + scoped (main) &mdash; /context after /clear"]
+        direction LR
+        N1["System prompt<br/>~3k"] --- N2["System tools<br/>~12k"] --- N3["MCP tools<br/>~5k"] --- N4["Memory files<br/>~2k<br/>(root only)"] --- N5["Messages<br/>~0k"] --- N6["Free space"]
+    end
+    FLAT ~~~ NESTED
+    style F4 fill:#e65100,color:#fff
+    style N4 fill:#2e7d32,color:#fff
+    style F6 fill:#eeeeee,color:#333
+    style N6 fill:#eeeeee,color:#333
+</div>
+
+<h3 id="demo-context-measurement">Demo 4 &mdash; the Before/After Measurement</h3>
+<p>
+  The sample monorepo's <code>init.sh</code> built a branch for exactly this comparison:
+  <code>flat-claude-md</code> squashes the root <code>CLAUDE.md</code> and every
+  <code>services/*/CLAUDE.md</code> into one fat root file &mdash; the layout most teams start with.
+  <code>main</code> keeps the nested, scoped layout. Same rules, two shapes.
+</p>
+<p>Measure the flat layout first:</p>
+<pre><code class="language-bash">cd ~/labs/refund-monorepo
+git checkout flat-claude-md
+claude
+</code></pre>
+<pre><code class="language-text">&gt; /clear
+&gt; /context
+</code></pre>
+<p>
+  Record the Memory files line &mdash; one entry, the fat root <code>CLAUDE.md</code>, every rule for
+  every service loaded whether this session needs them or not:
+</p>
+<!-- CAPTURE: demo4-context-before -->
+<pre><code class="language-text">Memory files: <em>(captured run goes here)</em>
+</code></pre>
+<p>Now the scoped layout. Exit, switch branches, and repeat the measurement:</p>
+<pre><code class="language-bash">git checkout main
+claude
+</code></pre>
+<pre><code class="language-text">&gt; /clear
+&gt; /context
+</code></pre>
+<p>
+  The Memory files list now shows the root <code>CLAUDE.md</code> only &mdash; the service files
+  exist on disk but none are loaded. Then touch one payments file to trigger the lazy load and
+  measure a third time:
+</p>
+<pre><code class="language-text">&gt; Read services/payments/README.md and summarize what this service does.
+&gt; /context
+</code></pre>
+<p>
+  <code>services/payments/CLAUDE.md</code> has joined the list &mdash; and only it. Gateway and
+  notifications rules stay on disk, unloaded:
+</p>
+<!-- CAPTURE: demo4-context-after -->
+<pre><code class="language-text">Memory files: <em>(captured run goes here)</em>
+</code></pre>
+<p>
+  Three readings, one story: the flat branch pays the full rule bill up front; the scoped branch
+  pays a small baseline and then only for the service in play.
+</p>
+
+<h3 id="lab-context-measurement">Lab 4 &mdash; Your Own Numbers</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Reproduce the Demo 4 comparison on your machine: measure the Memory-files category on
+    <code>flat-claude-md</code> and on <code>main</code> (after <code>/clear</code>, before touching
+    any service), and compute your percentage saving on that category.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    On <code>main</code>, trigger a nested <code>CLAUDE.md</code> load, work until you can run
+    <code>/compact</code> mid-session, and show from the <code>/context</code> output that the
+    nested rule file is no longer loaded. Then recover it with <code>/clear</code> +
+    <code>/catchup</code> and prove from <code>/context</code> that it is back.
+  </p>
+</div>
+<p>
+  <strong>You succeeded when:</strong> you have two Memory-files numbers &mdash; flat and scoped
+  &mdash; and can explain the delta between them.
+</p>
