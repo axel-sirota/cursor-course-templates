@@ -1,0 +1,100 @@
+<!-- fragment: references -->
+<h2>11. The Decision Framework</h2>
+<p>
+  Everything in this course reduces to one escalation ladder. Start at the cheapest rung and
+  climb only when the task forces you to:
+</p>
+
+<ol>
+  <li>
+    <strong>Scoped context</strong> (nested <code>CLAUDE.md</code>, sparse checkout,
+    <code>/context</code>) &mdash; the cheapest tool. One session, small window, no
+    coordination overhead. Most monorepo pain is solved right here.
+  </li>
+  <li>
+    <strong>Subagents + worktrees</strong> &mdash; parallel implementation. Each worker gets
+    its own context window and its own checkout, so N tasks run at once without stepping on
+    each other. You pay N context windows, but zero worker-to-worker coordination.
+  </li>
+  <li>
+    <strong>Agent teams</strong> &mdash; coordination. Workers share a task list and message
+    each other. This is the most powerful rung and the most expensive one: every message and
+    every shared-state read costs tokens on top of each worker's own window.
+  </li>
+</ol>
+
+<p>
+  You saw the full subagents-vs-teams comparison in the agent-teams section; here it is again
+  in compact form, because this is the distinction people mix up on Monday morning:
+</p>
+
+<table>
+  <thead>
+    <tr><th></th><th>Subagents</th><th>Agent teams</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Communication</strong></td><td>Report results to the parent only</td><td>Message each other directly</td></tr>
+    <tr><td><strong>Shared state</strong></td><td>None &mdash; each has its own context</td><td>Shared task list + mailboxes</td></tr>
+    <tr><td><strong>Token cost</strong></td><td>Lower &mdash; results summarized upward</td><td>Higher &mdash; coordination traffic on top</td></tr>
+    <tr><td><strong>Best for</strong></td><td>Independent, parallelizable tasks</td><td>Tasks that need mid-flight negotiation</td></tr>
+  </tbody>
+</table>
+
+<p>
+  When you are unsure which rung a task belongs on, walk this tree:
+</p>
+
+<div class="mermaid">
+flowchart TD
+    START(["New parallel task"]) --> Q1{"Tasks touch the<br/>same files?"}
+    Q1 -->|"Yes"| WT["Git worktrees<br/>one checkout per worker"]
+    Q1 -->|"No"| Q2{"Workers need to talk<br/>to each other?"}
+    Q2 -->|"Yes"| AT["Agent teams<br/>shared task list + messaging"]
+    Q2 -->|"No"| SA["Subagents<br/>independent, report to parent"]
+    WT -.-> ALWAYS["Always: nested CLAUDE.md + /context"]
+    AT -.-> ALWAYS
+    SA -.-> ALWAYS
+
+    style WT fill:#ff9800,color:#fff
+    style AT fill:#7c4dff,color:#fff
+    style SA fill:#4caf50,color:#fff
+    style ALWAYS fill:#2196f3,color:#fff
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">The Two Questions</div>
+  <p>
+    Notice the tree only asks two questions: <em>do the tasks collide on files?</em> and
+    <em>do the workers need to coordinate?</em> File collisions are an isolation problem
+    (worktrees). Coordination is a communication problem (teams). Everything else is a plain
+    subagent. And the leaf note applies to all three branches: scoped context via nested
+    <code>CLAUDE.md</code> plus a <code>/context</code> check is never optional &mdash; it is
+    the floor you stand on at every rung.
+  </p>
+</div>
+
+<h3 id="references-list">References</h3>
+<p>
+  Official documentation for every technique in this course, in the order you met them.
+</p>
+
+<ol class="references-list">
+  <li id="ref-1"><a href="https://code.claude.com/docs/en/sub-agents" target="_blank" rel="noopener">Create custom subagents</a></li>
+  <li id="ref-2"><a href="https://code.claude.com/docs/en/worktrees" target="_blank" rel="noopener">Run parallel sessions with worktrees</a></li>
+  <li id="ref-3"><a href="https://code.claude.com/docs/en/large-codebases" target="_blank" rel="noopener">Set up Claude Code in a monorepo</a></li>
+  <li id="ref-4"><a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener">Orchestrate teams of Claude Code sessions</a></li>
+  <li id="ref-5"><a href="https://code.claude.com/docs/en/agents" target="_blank" rel="noopener">Run agents in parallel</a></li>
+  <li id="ref-6"><a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener">How Claude remembers your project</a></li>
+  <li id="ref-7"><a href="https://code.claude.com/docs/en/context-window" target="_blank" rel="noopener">Explore the context window</a></li>
+  <li id="ref-8"><a href="https://code.claude.com/docs/en/costs" target="_blank" rel="noopener">Manage costs effectively</a></li>
+  <li id="ref-9"><a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Hooks reference</a></li>
+  <li id="ref-10"><a href="claude-code-guide.html">Course 101 guide</a></li>
+</ol>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Take It Home</div>
+  <p>
+    Course repo, sample monorepo, and student runbook: everything you used today is in this
+    repository &mdash; copy the <code>.claude/</code> patterns into your own monorepo tomorrow.
+  </p>
+</div>
