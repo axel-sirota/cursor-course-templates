@@ -68,6 +68,13 @@ build_flat_branch() {
     return 0
   fi
 
+  # The CLAUDE.md files may be untracked (init ran before they existed, re-run after adding
+  # them). Commit them on main first so the flat branch can `git rm` tracked files safely.
+  if [ -n "$(git status --porcelain -- CLAUDE.md services/*/CLAUDE.md 2>/dev/null)" ]; then
+    git add CLAUDE.md services/*/CLAUDE.md
+    git commit -q -m "docs: nested CLAUDE.md files"
+  fi
+
   git checkout -b flat-claude-md
 
   local flat_file
