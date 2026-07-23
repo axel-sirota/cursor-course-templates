@@ -1,0 +1,16 @@
+{
+  "name": "gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Public HTTP entry point: validates refund requests and forwards them to payments.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
