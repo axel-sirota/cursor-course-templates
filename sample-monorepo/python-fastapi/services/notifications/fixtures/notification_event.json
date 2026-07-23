@@ -1,0 +1,7 @@
+{
+  "_comment": "INTENTIONAL-VIOLATION: Demo 6 expects validate.sh to reject this fixture; the notifications agent must fix it live.",
+  "event_type": "refund.done",
+  "payment_id": "pay_001",
+  "refund_id": "ref_001",
+  "recipient": "customer@example.com"
+}
