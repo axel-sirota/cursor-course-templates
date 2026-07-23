@@ -1,0 +1,16 @@
+# Python
+venv/
+.venv/
+__pycache__/
+
+# Node (kept in both variants so worktrees behave the same way)
+node_modules/
+
+# Secrets — .worktreeinclude copies .env into agent worktrees
+.env
+
+# Claude Code agent worktrees
+.claude/worktrees/
+
+# Runtime output
+logs/
