@@ -1,0 +1,2 @@
+# Git-ignored files that every agent worktree still needs a copy of.
+.env

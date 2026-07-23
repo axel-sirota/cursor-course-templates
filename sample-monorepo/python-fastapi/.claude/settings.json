@@ -1,0 +1,26 @@
+{
+  "worktree": {
+    "baseRef": "head",
+    "symlinkDirectories": [".venv"]
+  },
+  "permissions": {
+    "deny": [
+      "Read(./**/dist/**)",
+      "Read(./**/build/**)",
+      "Read(./**/__pycache__/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/agent_activity.py"
+          }
+        ]
+      }
+    ]
+  }
+}
