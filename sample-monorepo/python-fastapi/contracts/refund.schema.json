@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "refund.schema.json",
+  "title": "Refund",
+  "definitions": {
+    "RefundRequest": {
+      "type": "object",
+      "required": ["payment_id", "amount", "reason"],
+      "properties": {
+        "payment_id": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "RefundResult": {
+      "type": "object",
+      "required": ["refund_id", "payment_id", "status", "processed_at"],
+      "properties": {
+        "refund_id": {
+          "type": "string"
+        },
+        "payment_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["approved", "rejected"]
+        },
+        "processed_at": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

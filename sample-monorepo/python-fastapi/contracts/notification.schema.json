@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "notification.schema.json",
+  "title": "NotificationEvent",
+  "type": "object",
+  "required": ["event_type", "payment_id", "refund_id", "recipient"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": ["refund.approved", "refund.rejected"]
+    },
+    "payment_id": {
+      "type": "string"
+    },
+    "refund_id": {
+      "type": "string"
+    },
+    "recipient": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "payment.schema.json",
+  "title": "Payment",
+  "type": "object",
+  "required": ["id", "amount", "currency", "status", "customer_email"],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "currency": {
+      "type": "string",
+      "enum": ["USD", "EUR", "ARS"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "completed", "refunded"]
+    },
+    "customer_email": {
+      "type": "string"
+    }
+  }
+}
