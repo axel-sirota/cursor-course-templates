@@ -10,8 +10,8 @@
 
 <h3 id="subagentstop-mechanics">SubagentStop: the exit that can say no</h3>
 <p>
-  The gate is built on one hook event: <code>SubagentStop</code>. It fires when a subagent
-  believes it is done, and unlike most hooks it can overrule that belief.
+  The gate is built on one hook event: <code>SubagentStop</code>.<sup><a href="#ref-9">[9]</a></sup>
+  It fires when a subagent believes it is done, and unlike most hooks it can overrule that belief.
 </p>
 <ul>
   <li><strong>When it fires:</strong> the moment a subagent finishes its turn and tries to return control.</li>
@@ -97,8 +97,8 @@ claude
   <code>Stop</code> hook runs <code>validate.sh services/notifications</code>, the validator hits
   the bad enum value, and the stop is blocked:
 </p>
-<!-- CAPTURE: demo6-gate-fail -->
-<pre><code class="language-text">FAIL fixtures/notification_event.json: field "event_type" value "refund.done" not in enum [refund.approved, refund.rejected].</code></pre>
+<pre><code class="language-text">Stop hook feedback:
+[bash "$CLAUDE_PROJECT_DIR"/contracts/validate.sh services/notifications]: FAIL fixtures/notification_event.json: field "event_type" value "refund.done" not in enum [refund.approved, refund.rejected].</code></pre>
 <p>
   That FAIL line is delivered straight back into the agent&rsquo;s session as feedback. The agent
   is not done anymore &mdash; it reads the message, opens the fixture, and makes the smallest fix
@@ -107,10 +107,15 @@ claude
 <pre><code class="language-text">-  "event_type": "refund.done",
 +  "event_type": "refund.approved",</code></pre>
 <p>
-  On its second attempt to stop, the hook runs again &mdash; and this time the gate opens:
+  On its second attempt to stop, the hook runs again &mdash; and this time the gate opens. The
+  agent&rsquo;s own re-validation before that stop attempt, from the captured run:
 </p>
-<!-- CAPTURE: demo6-gate-pass -->
-<pre><code class="language-text">PASS fixtures/notification_event.json</code></pre>
+<pre><code class="language-text">$ ./contracts/validate.sh services/notifications; echo "validate exit=$?"
+PASS fixtures/notification_event.json
+validate exit=0
+
+$ .venv/bin/python3 -m pytest services/notifications -q
+5 passed</code></pre>
 <p>
   Two stop attempts, one blocked, zero human intervention. The agent was forced to fix its own
   work because the gate would not let it leave otherwise.

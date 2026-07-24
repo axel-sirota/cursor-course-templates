@@ -9,7 +9,7 @@
 </p>
 
 <h3>The loading rules</h3>
-<p>Three rules govern which files reach the context window:</p>
+<p>Three rules govern which files reach the context window:<sup><a href="#ref-6">[6]</a></sup></p>
 <table>
   <thead>
     <tr><th>Where the CLAUDE.md lives</th><th>When it loads</th></tr>
@@ -65,14 +65,15 @@ flowchart TD
 </p>
 <p>
   For packages owned by other teams that you never want in your sessions at all, add their paths to
-  <code>claudeMdExcludes</code> in your settings &mdash; their <code>CLAUDE.md</code> files then
-  stay out of context even if Claude reads a file there.
+  <code>claudeMdExcludes</code> in your settings<sup><a href="#ref-3">[3]</a></sup> &mdash; their
+  <code>CLAUDE.md</code> files then stay out of context even if Claude reads a file there.
 </p>
 
 <div class="callout callout-warning">
   <div class="callout-title">What /compact forgets</div>
   <p>
-    Compaction does not treat all context sources equally. After a <code>/compact</code>:
+    Compaction does not treat all context sources equally. After a
+    <code>/compact</code>:<sup><a href="#ref-7">[7]</a></sup>
   </p>
   <table>
     <thead>
@@ -146,12 +147,25 @@ tail -f instructions-loaded.log</code></pre>
     </p>
 <pre><code class="language-bash">grep payments instructions-loaded.log
 grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"</code></pre>
-    <p>Expected result &mdash; payments present, gateway absent, rule three on the record:</p>
-    <!-- CAPTURE: demo3-instructions-log -->
-<pre><code class="language-bash">$ grep payments instructions-loaded.log
-{"hook_event_name":"InstructionsLoaded","path":"services/payments/CLAUDE.md", ...}
+    <p>
+      The captured run, all three rules on the record (long identifier fields &mdash;
+      <code>session_id</code>, <code>transcript_path</code>, <code>cwd</code> &mdash; elided as
+      <code>&hellip;</code>):
+    </p>
+<pre><code class="language-text">$ cat instructions-loaded.log        # immediately after session launch — rule one
+{…,"hook_event_name":"InstructionsLoaded","file_path":"/private/tmp/refund-monorepo/CLAUDE.md","memory_type":"Project","load_reason":"session_start"}
+
+$ grep payments instructions-loaded.log       # after Claude read one payments file — rule two
+{…,"hook_event_name":"InstructionsLoaded","file_path":"/private/tmp/refund-monorepo/services/payments/CLAUDE.md","memory_type":"Project","load_reason":"nested_traversal","trigger_file_path":"/private/tmp/refund-monorepo/services/payments/README.md"}
+
 $ grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"
 gateway CLAUDE.md never loaded</code></pre>
+    <p>
+      Read the <code>load_reason</code> fields: <code>session_start</code> for the root file,
+      <code>nested_traversal</code> &mdash; with the payments README as
+      <code>trigger_file_path</code> &mdash; for the service file. Rules one and two, straight
+      from the hook; the empty gateway grep is rule three.
+    </p>
   </li>
 </ol>
 

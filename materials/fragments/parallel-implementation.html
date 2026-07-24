@@ -139,6 +139,14 @@ sequenceDiagram
           Full walkthrough &mdash; run this in your copy of the Python monorepo. You need two
           terminals: one for the lead session, one to watch the agents work.
         </p>
+        <div class="callout callout-warning">
+          <div class="callout-title">Expect One Contract-Gate Bounce</div>
+          <p>
+            Running Demo 5 before Demo 6 trips the notifications agent&rsquo;s Stop gate once on
+            the shipped intentional fixture violation &mdash; section 7 is about exactly this.
+            Fix the fixture when prompted and continue; the run then proceeds normally.
+          </p>
+        </div>
         <p><strong>Terminal 1</strong> &mdash; start the lead session and kick off the run:</p>
         <pre><code class="language-bash">cd ~/labs/refund-monorepo
 claude</code></pre>
@@ -153,7 +161,26 @@ claude</code></pre>
           appends one JSON line to <code>logs/tool_usage.jsonl</code>:
         </p>
         <pre><code class="language-bash">tail -f logs/tool_usage.jsonl</code></pre>
-        <!-- CAPTURE: demo5-activity-tail -->
+        <pre><code class="language-text"># Three implementer agents inside the same 8 seconds, identifiable by worktree path:
+#   agent-a6cbfbf7f41c7a0e5 = payments   agent-add810dca40113442 = notifications
+#   agent-a4c07923e58b3a851 = gateway
+# ("agent" field elided — on 2.1.218 it logs "main" for every entry; the worktree
+#  path in "target" is the per-agent attribution. Worktree prefix shortened to "…".)
+
+{"ts": "2026-07-24T02:43:28+00:00", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/services/payments/src/store.py", "success": true}
+{"ts": "2026-07-24T02:43:28+00:00", "tool_name": "Read", "target": "…/agent-add810dca40113442/specs/feature-refunds.md", "success": true}
+{"ts": "2026-07-24T02:43:29+00:00", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/services/payments/tests/test_refund_logic.py", "success": true}
+{"ts": "2026-07-24T02:43:31+00:00", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/src/main.py", "success": true}
+{"ts": "2026-07-24T02:43:32+00:00", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/src/events.py", "success": true}
+{"ts": "2026-07-24T02:43:34+00:00", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/contracts/validate.sh", "success": true}
+{"ts": "2026-07-24T02:43:35+00:00", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/fixtures/notification_event.json", "success": true}
+{"ts": "2026-07-24T02:43:36+00:00", "tool_name": "Read", "target": "…/agent-a4c07923e58b3a851/services/gateway/CLAUDE.md", "success": true}
+
+# Mid-run worktree list, from the second terminal at the same moment:
+$ git worktree list
+/private/tmp/refund-monorepo                                           165d144 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-a6cbfbf7f41c7a0e5 165d144 [worktree-agent-a6cbfbf7f41c7a0e5] locked
+/private/tmp/refund-monorepo/.claude/worktrees/agent-add810dca40113442 165d144 [worktree-agent-add810dca40113442] locked</code></pre>
         <p>
           This is the moment the section is named after: three streams of Read/Write/Bash events,
           tagged with different worktree paths, interleaved in real time. No agent ever touches a
@@ -166,7 +193,27 @@ claude</code></pre>
           one. Afterwards, look at the shape of the history:
         </p>
         <pre><code class="language-bash">git log --oneline --graph</code></pre>
-        <!-- CAPTURE: demo5-git-graph -->
+        <pre><code class="language-text">*   42cb63f Merge gateway: proxy GET /refunds/{refund_id} to payments
+|\
+| * ceb70c8 gateway: proxy GET /refunds/{refund_id} to payments
+* |   f547c09 Merge notifications: filter GET /events by optional refund_id
+|\ \
+| * | c2bc908 notifications: filter GET /events by optional refund_id
+| |/
+* |   64c29df Merge payments: GET /refunds/{refund_id} status lookup
+|\ \
+| |/
+|/|
+| * 0514a5e payments: add GET /refunds/{refund_id} status lookup
+|/
+* 165d144 fix: notification fixture event_type per contract gate (Demo 6)
+
+# Post-merge verification, all three suites (Part 1 + new Part 1.5 tests):
+#   services/payments       8 passed   (was 4 before the run)
+#   services/notifications  8 passed   (was 5 before the run)
+#   services/gateway        7 passed   (was 4 before the run)
+# contracts/validate.sh: PASS for payments, notifications, and gateway.
+# Wall clock for the whole parallel run: ~4 minutes.</code></pre>
         <p>
           Three short-lived branches, one per service, each merged into <code>main</code> by a
           single merger in a fixed order. That graph is the signature of a healthy parallel run
