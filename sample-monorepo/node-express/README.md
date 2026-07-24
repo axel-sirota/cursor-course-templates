@@ -77,9 +77,9 @@ commands to copy it out.
 ## After init
 
 ```bash
-npm install
+npm install    # run at the monorepo ROOT — the root package.json declares
+               # services/* as npm workspaces, so one install covers all three
 claude
 ```
 
-Service dependencies and run commands live in each service's own README once
-the services are implemented.
+Service dependencies and run commands live in each service's own README.

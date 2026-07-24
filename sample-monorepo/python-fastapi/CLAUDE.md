@@ -34,9 +34,11 @@ Any `FAIL` line means the change is not done.
   lists the exact run and test commands.
 - Environment comes from `.env` at the repo root (created from
   `.env.example` by `init.sh`); source it before starting a service.
-- Test command shape: pytest through the repo venv. Full suite, from the
-  repo root: `.venv/bin/python3 -m pytest services/`. Never bare `pytest`
-  or bare `python3`.
+- Test command shape: pytest through the repo venv, one service per pytest
+  run (each service has its own `src` package, so a single run across all
+  services shadows imports). Full suite, from the repo root:
+  `for s in services/*/; do (cd "$s" && ../../.venv/bin/python3 -m pytest); done`.
+  Never bare `pytest` or bare `python3`.
 - Commit style: one service per commit, message
   `<scope>: <imperative summary>`, where scope is the service name or
   `contracts`.

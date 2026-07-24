@@ -78,6 +78,16 @@ stateDiagram-v2
   Nobody planted a bug in code &mdash; the data itself is out of contract, which is exactly the
   kind of drift a reviewer skims past and a gate does not.
 </p>
+<div class="callout callout-tip">
+  <div class="callout-title">Run Demo 6 Before the First Full Parallel Run</div>
+  <p>
+    Demo 6 depends on the intentional violation still being in place. If an earlier parallel run
+    already fixed it, re-break it first: restore the shipped fixture with
+    <code>git checkout &lt;initial-commit&gt; -- services/notifications/fixtures/notification_event.json</code>,
+    or simply re-edit its <code>event_type</code> back to <code>"refund.done"</code>. Sequence
+    note: Demo 6 is designed to run before the first full parallel run.
+  </p>
+</div>
 <p>Point the notifications agent at its own fixtures:</p>
 <pre><code class="language-bash">cd sample-monorepo/python-fastapi
 claude
@@ -88,7 +98,7 @@ claude
   the bad enum value, and the stop is blocked:
 </p>
 <!-- CAPTURE: demo6-gate-fail -->
-<pre><code class="language-text">FAIL fixtures/notification_refund_done.json: field "event_type" value "refund.done" not in enum [refund.approved, refund.rejected].</code></pre>
+<pre><code class="language-text">FAIL fixtures/notification_event.json: field "event_type" value "refund.done" not in enum [refund.approved, refund.rejected].</code></pre>
 <p>
   That FAIL line is delivered straight back into the agent&rsquo;s session as feedback. The agent
   is not done anymore &mdash; it reads the message, opens the fixture, and makes the smallest fix
@@ -100,7 +110,7 @@ claude
   On its second attempt to stop, the hook runs again &mdash; and this time the gate opens:
 </p>
 <!-- CAPTURE: demo6-gate-pass -->
-<pre><code class="language-text">PASS fixtures/notification_refund_done.json</code></pre>
+<pre><code class="language-text">PASS fixtures/notification_event.json</code></pre>
 <p>
   Two stop attempts, one blocked, zero human intervention. The agent was forced to fix its own
   work because the gate would not let it leave otherwise.

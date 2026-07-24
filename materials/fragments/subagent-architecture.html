@@ -91,17 +91,19 @@ flowchart TB
 
 <pre><code class="language-json">{
   "agent": "payments-implementer",
+  "task": "add an amount-format check to payments",
   "status": "green",
-  "files_changed": ["services/payments/app/validators.py"],
-  "tests": "12 passed",
-  "blocked_attempts": []
+  "files_changed": ["services/payments/src/refunds.py"],
+  "tests_run": ".venv/bin/python3 -m pytest services/payments — 12 passed",
+  "notes": ""
 }</code></pre>
 
 <p>
   The lead (or a script in CI) can parse this block instead of re-reading the agent&rsquo;s whole
-  transcript: <code>status</code> gates the merge, <code>files_changed</code> is checked against the
-  agent&rsquo;s declared scope, and a non-empty <code>blocked_attempts</code> means a hook fired and
-  someone should look at why.
+  transcript: <code>status</code> (<code>green</code> or <code>red</code>) gates the merge,
+  <code>files_changed</code> is checked against the agent&rsquo;s declared scope, and
+  <code>notes</code> carries anything the orchestrator needs for the merge &mdash; including any
+  blocked attempts worth looking at.
 </p>
 
 <div class="callout callout-warning">
@@ -163,16 +165,17 @@ claude</code></pre>
 <pre><code class="language-text">⏺ Task(payments-implementer): add an amount-format check to payments
   ⎿ Read(services/payments/README.md)
   ⎿ Read(contracts/payment.schema.json)
-  ⎿ Edit(services/payments/app/validators.py)
-  ⎿ Bash(.venv/bin/python3 -m pytest services/payments/tests -q)
+  ⎿ Edit(services/payments/src/refunds.py)
+  ⎿ Bash(.venv/bin/python3 -m pytest services/payments -q)
       12 passed
   ⎿ Agent reply (final message):
       {
         "agent": "payments-implementer",
+        "task": "add an amount-format check to payments",
         "status": "green",
-        "files_changed": ["services/payments/app/validators.py"],
-        "tests": "12 passed",
-        "blocked_attempts": []
+        "files_changed": ["services/payments/src/refunds.py"],
+        "tests_run": ".venv/bin/python3 -m pytest services/payments — 12 passed",
+        "notes": ""
       }</code></pre>
 
 <p>
@@ -181,12 +184,15 @@ claude</code></pre>
   system prompt demanded.
 </p>
 
-<h3 id="lab-service-agent">Lab 1 &mdash; build the notifications agent</h3>
+<h3 id="lab-service-agent">Lab 1 &mdash; rebuild the notifications agent</h3>
 
 <p>
-  The monorepo ships a payments agent; the notifications service has none. Build it twice &mdash;
-  once with tool-level scoping, once with path-level scoping &mdash; and feel the difference between
-  the two mechanisms.
+  The monorepo ships a notifications agent too &mdash; but you will rebuild it from scratch to
+  feel the difference between tool-level and path-level scoping. Move the shipped one aside first
+  (<code>mv .claude/agents/notifications-implementer.md .claude/agents/notifications-implementer.md.bak</code>),
+  then rebuild it from the payments agent as a template, twice &mdash; once per tier below. When
+  you finish, compare your version with the shipped one and restore it &mdash; Demo 5 needs the
+  shipped agent back in place.
 </p>
 
 <div class="callout callout-info">

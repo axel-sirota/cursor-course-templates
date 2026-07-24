@@ -79,8 +79,8 @@ commands to copy it out.
 ```bash
 python3 -m venv .venv
 .venv/bin/python3 -m pip install -U pip
+.venv/bin/python3 -m pip install -r services/gateway/requirements.txt -r services/payments/requirements.txt -r services/notifications/requirements.txt
 claude
 ```
 
-Service dependencies and run commands live in each service's own README once
-the services are implemented.
+Service dependencies and run commands live in each service's own README.

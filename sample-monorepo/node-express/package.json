@@ -1,0 +1,8 @@
+{
+  "name": "sample-monorepo-node",
+  "private": true,
+  "workspaces": ["services/*"],
+  "engines": {
+    "node": ">=18"
+  }
+}

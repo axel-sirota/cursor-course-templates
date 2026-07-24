@@ -1,5 +1,5 @@
 <!-- fragment: agent-teams -->
-<h2>Agent Teams: Coordinated Parallel Work</h2>
+<h2>9. Agent Teams: Coordinated Parallel Work</h2>
 
 <p>
   Everything in this module so far follows one shape: a main session that farms work out and
@@ -188,11 +188,11 @@ flowchart LR
 </p>
 
 <pre><code class="language-text">Create an agent team to implement Part 2 of specs/feature-refunds.md.
-Spawn three teammates from the payments-dev, notifications-dev and
-gateway-dev agent definitions. Partition ownership strictly:
-- payments-dev owns contracts/notification.schema.json and services/payments/
-- notifications-dev owns services/notifications/
-- gateway-dev owns services/gateway/ and the end-to-end check
+Spawn three teammates from the payments-implementer, notifications-implementer and
+gateway-implementer agent definitions. Partition ownership strictly:
+- payments-implementer owns contracts/notification.schema.json and services/payments/
+- notifications-implementer owns services/notifications/
+- gateway-implementer owns services/gateway/ and the end-to-end check
 The schema task blocks the other tasks. Require plan approval on the
 schema task before any code is written.</code></pre>
 
@@ -205,11 +205,11 @@ schema task before any code is written.</code></pre>
     until the schema task completes, then unblock on their own.
   </li>
   <li>
-    <strong>A teammate challenging a teammate.</strong> In the captured run, payments-dev
-    populated <code>reason</code> with free-form prose; notifications-dev messaged it directly to
+    <strong>A teammate challenging a teammate.</strong> In the captured run, payments-implementer
+    populated <code>reason</code> with free-form prose; notifications-implementer messaged it directly to
     demand the machine-readable identifiers the spec requires
     (<code>refund_approved</code>, <code>refund_rejected_amount_exceeds_payment</code>) &mdash;
-    and payments-dev changed its implementation. No lead involvement, no human involvement.
+    and payments-implementer changed its implementation. No lead involvement, no human involvement.
   </li>
   <li>
     <strong>The lead&rsquo;s synthesis.</strong> When the last task completes, the lead verifies
@@ -221,16 +221,16 @@ schema task before any code is written.</code></pre>
 <!-- CAPTURE: demo8-team-transcript -->
 <pre><code class="language-text">[transcript excerpt from the captured run]
 
-● Task claimed: "Add required reason to notification.schema.json" (payments-dev)
-● Plan approved by lead — payments-dev may edit the schema
+● Task claimed: "Add required reason to notification.schema.json" (payments-implementer)
+● Plan approved by lead — payments-implementer may edit the schema
 ● Task completed: schema change — 2 dependent tasks unblocked
-● Task claimed: "Reject events without reason; log it" (notifications-dev)
-● Task claimed: "Verify gateway pass-through + e2e" (gateway-dev)
-✉ notifications-dev → payments-dev:
+● Task claimed: "Reject events without reason; log it" (notifications-implementer)
+● Task claimed: "Verify gateway pass-through + e2e" (gateway-implementer)
+✉ notifications-implementer → payments-implementer:
     "Your emitted reason is prose ('the refund was approved because…').
      The spec calls for machine-readable values like refund_approved.
      I am validating against identifiers — please emit those."
-✉ payments-dev → notifications-dev:
+✉ payments-implementer → notifications-implementer:
     "Agreed — switching to refund_approved /
      refund_rejected_amount_exceeds_payment. Re-check after my next push."
 ● Task completed: notifications validation + logging

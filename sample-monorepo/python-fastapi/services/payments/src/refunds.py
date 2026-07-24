@@ -63,7 +63,7 @@ def notify(event: dict) -> None:
     """
     try:
         response = httpx.post(
-            f"{NOTIFICATIONS_URL}/notifications",
+            f"{NOTIFICATIONS_URL}/events",
             json=event,
             timeout=NOTIFICATION_TIMEOUT_SECONDS,
         )

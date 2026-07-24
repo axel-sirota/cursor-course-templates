@@ -79,7 +79,10 @@ Record customer-facing notifications:
 ## Running checks (this variant)
 
 ```bash
-.venv/bin/python3 -m pytest services/          # all service tests
+# all service tests (one pytest run per service — a single run across
+# services/ shadows each service's src package)
+for s in services/*/; do (cd "$s" && ../../.venv/bin/python3 -m pytest); done
+
 .venv/bin/python3 -m pytest services/payments  # one service
 ```
 
