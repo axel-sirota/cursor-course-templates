@@ -145,6 +145,18 @@ flowchart TB
   ships with it, then delegate a small change and watch where the edits land.
 </p>
 
+<p>
+  First time here? Copy the variant out of the course repo and initialize it. init.sh
+  refuses to run in place, and the copy carries the monorepo&rsquo;s own <code>.claude/</code>
+  (agents, hooks, settings), which is separate from the course repo&rsquo;s root
+  <code>.claude/</code>. Copy the directory itself, not <code>/*</code> (a glob skips dotfiles):
+</p>
+
+<pre><code class="language-bash">cp -R sample-monorepo/python-fastapi ~/labs/refund-monorepo
+cd ~/labs/refund-monorepo
+./init.sh
+# dependencies: see the 102 prerequisites in QUICKSTART.md</code></pre>
+
 <pre><code class="language-bash">cd ~/labs/refund-monorepo        # your copy of sample-monorepo/python-fastapi
 cat .claude/agents/payments-implementer.md
 claude</code></pre>

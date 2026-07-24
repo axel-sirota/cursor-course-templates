@@ -713,6 +713,18 @@ flowchart TB
   ships with it, then delegate a small change and watch where the edits land.
 </p>
 
+<p>
+  First time here? Copy the variant out of the course repo and initialize it. init.sh
+  refuses to run in place, and the copy carries the monorepo&rsquo;s own <code>.claude/</code>
+  (agents, hooks, settings), which is separate from the course repo&rsquo;s root
+  <code>.claude/</code>. Copy the directory itself, not <code>/*</code> (a glob skips dotfiles):
+</p>
+
+<pre><code class="language-bash">cp -R sample-monorepo/python-fastapi ~/labs/refund-monorepo
+cd ~/labs/refund-monorepo
+./init.sh
+# dependencies: see the 102 prerequisites in QUICKSTART.md</code></pre>
+
 <pre><code class="language-bash">cd ~/labs/refund-monorepo        # your copy of sample-monorepo/python-fastapi
 cat .claude/agents/payments-implementer.md
 claude</code></pre>
@@ -808,14 +820,10 @@ claude</code></pre>
 </p>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-1-service-agent.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>Start from the payments agent, change the name/description/paths to notifications,
-and cut the write tools from the frontmatter. Two deltas from the shipped file:
-no `Write`/`Edit` in `tools`, and no `PreToolUse` block (there is nothing left for
-`path_guard` to guard). Keep the `Stop` validate hook. Leave `isolation` out.
-Lab 2 adds it.</p>
-    <pre><code>---
+  <div class="callout-title">Instructor: Lab 1 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p>Start from the payments agent, change the name/description/paths to notifications, and cut the write tools from the frontmatter. Two deltas from the shipped file: no <code>Write</code>/<code>Edit</code> in <code>tools</code>, and no <code>PreToolUse</code> block (there is nothing left for <code>path_guard</code> to guard). Keep the <code>Stop</code> validate hook. Leave <code>isolation</code> out. Lab 2 adds it.</p>
+<pre><code class="language-yaml">---
 name: notifications-implementer
 description: Implements features in services/notifications ONLY. Use for any notifications-service task.
 tools: Read, Grep, Glob
@@ -826,11 +834,24 @@ hooks:
         - type: command
           command: &quot;bash \&quot;$CLAUDE_PROJECT_DIR\&quot;/contracts/validate.sh services/notifications&quot;
 ---</code></pre>
+<p>Note <code>Bash</code> is gone too. That is the twist, covered below. Restart <code>claude</code> (agent files are discovered at session start), then delegate something that cannot be done without a write:</p>
+<pre><code class="language-text">&gt; Use the notifications-implementer agent to create a new fixture
+  services/notifications/fixtures/notification_lab1.json containing one valid
+  NotificationEvent for a rejected refund.</code></pre>
+<p>Real result: no file created, and the agent&#x27;s report states it plainly:</p>
+<pre><code class="language-text">I read the contract and the service docs, and prepared the fixture — but I could
+not create it or run the checks: this session gave me a read-only toolset
+(Read, Grep, Glob only) — no Write/Edit and no shell. So nothing was written and
+neither contracts/validate.sh nor pytest was executed. I will not report a
+validation result I did not observe.</code></pre>
+<p>The blocked write includes in-scope paths: the fixture it could not create lives inside <code>services/notifications/</code>. That is the tier&#x27;s point made concrete: allowlists gate *tools*, not *paths*.</p>
+<p><strong>The Bash twist (observed live; teach it).</strong> The lab text says to remove only <code>Write</code> and <code>Edit</code>. Done literally (keeping <code>Bash</code>, as the payments template has), the same delegation *succeeds*: in the reference run the agent, denied the Edit and Write tools, wrote the fixture anyway with</p>
+<pre><code class="language-text">Bash: cat &gt; /private/tmp/refund-monorepo/services/notifications/fixtures/notification_lab1.json &lt;&lt;&#x27;EOF&#x27; ...</code></pre>
+<p>and validate.sh passed. Nothing malicious: the agent had a job, had a shell, and shells write files. This is the sharpest version of the lesson: the <code>tools</code> allowlist gates named tools, not effects; any agent with <code>Bash</code> can write, so a &quot;read-only&quot; agent must lose <code>Bash</code> too (or you rely on hooks, which is the Hard tier). Run both versions if time allows. The contrast lands hard.</p>
   </details>
-  <details><summary>Hard solution</summary>
-    <p>Restore the write tools and add the canonical `path_guard` block from the fragment,
-with the path argument changed to `services/notifications`. The full frontmatter:</p>
-    <pre><code>---
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>Restore the write tools and add the canonical <code>path_guard</code> block from the fragment, with the path argument changed to <code>services/notifications</code>. The full frontmatter:</p>
+<pre><code class="language-yaml">---
 name: notifications-implementer
 description: Implements features in services/notifications ONLY. Use for any notifications-service task.
 tools: Read, Grep, Glob, Edit, Write, Bash
@@ -846,8 +867,31 @@ hooks:
         - type: command
           command: &quot;bash \&quot;$CLAUDE_PROJECT_DIR\&quot;/contracts/validate.sh services/notifications&quot;
 ---</code></pre>
+<p>(Body: the shipped agent&#x27;s body is the model, with its scope statement, contract-first rule, tests, scope fence, and JSON completion report.)</p>
+<p>Restart, then delegate one task with both directions in it:</p>
+<pre><code class="language-text">&gt; Use the notifications-implementer agent to (1) add a comment line after the
+  docstring of services/notifications/src/events.py and (2) add the same line
+  after the docstring of services/gateway/src/main.py. Attempt BOTH edits and
+  report exactly what happened to each, including any hook output.</code></pre>
+<p>Real transcript evidence, both directions:</p>
+<pre><code class="language-text">Edit(services/notifications/src/events.py)   -&gt; succeeded, +1 line
+Edit(services/gateway/src/main.py)           -&gt; blocked:
+
+PreToolUse:Edit hook error: [python3 &quot;$CLAUDE_PROJECT_DIR&quot;/.claude/hooks/path_guard.py services/notifications]: BLOCKED path_guard: /private/tmp/refund-monorepo/services/gateway/src/main.py is outside your service scope (services/notifications)</code></pre>
+<p>The gateway file was untouched, the agent relayed the BLOCKED message in its report and suggested the gateway edit belongs to <code>gateway-implementer</code>, exactly the success line the lab asks for (&quot;the blocked attempt appears in the transcript with the hook&#x27;s BLOCKED message&quot;). Note the hook matched on the path *segment* <code>services/gateway/</code> inside an absolute path. That segment matching is why the guard also works unchanged inside worktrees.</p>
+<p>Fast pre-check that costs no session (same code path as the live event, executed 2026-07-24):</p>
+<pre><code class="language-text">$ python3 .claude/hooks/path_guard.py services/notifications --self-test services/gateway/src/main.py
+BLOCKED path_guard: services/gateway/src/main.py is outside your service scope (services/notifications)
+exit=2
+$ python3 .claude/hooks/path_guard.py services/notifications --self-test services/notifications/src/events.py
+exit=0</code></pre>
+<p>Wrap-up per the lab text: <code>diff</code> the rebuilt agent against <code>.claude/agents/notifications-implementer.md.bak</code>, discuss the deltas (the shipped one also carries <code>isolation: worktree</code>, Lab 2&#x27;s topic), then restore the shipped file. Verify the restore with <code>git diff</code>: clean means Demo 5 is safe.</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-1-service-agent.md">solutions/lab-1-service-agent.md</a></p>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>Leaving <code>Bash</code> in the Easy agent and concluding the exercise is broken</strong> when the &quot;write-blocked&quot; agent writes the file anyway via <code>cat &gt;</code>. That outcome is not failure, it is the finding, but students need the instructor to name it. Direct them to remove <code>Bash</code> (or compare both runs).</li><li><strong>Editing the agent file and testing in the same session.</strong> Agent definitions load at session start; the running session still has the old toolset and the student &quot;proves&quot; the wrong thing. Restart <code>claude</code> after every frontmatter change. (First file in a brand-new <code>agents/</code> directory has the same rule.)</li><li><strong>Forgetting to restore the shipped agent afterwards.</strong> Demo 5 and the capstone assume <code>notifications-implementer</code> has its full toolset, guard, and <code>isolation: worktree</code>. A leftover Lab 1 rebuild makes the parallel run fail in confusing ways two sections later. <code>git diff .claude/agents/</code> should be clean before moving on.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-1-service-agent.md">solutions/lab-1-service-agent.md</a></p>
 </div>
 </section>
 
@@ -1096,25 +1140,67 @@ git branch -D worktree-agent-ae1ac0745d7fc74a8</code></pre>
 </p>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-2-worktree.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>Add the isolation line to the rebuilt notifications agent&#x27;s frontmatter (or use the
-shipped `changelog-scribe`, which already carries it):</p>
-    <pre><code>---
+  <div class="callout-title">Instructor: Lab 2 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p>Add the isolation line to the rebuilt notifications agent&#x27;s frontmatter (or use the shipped <code>changelog-scribe</code>, which already carries it):</p>
+<pre><code class="language-yaml">---
 name: notifications-implementer
 ...
 isolation: worktree
 ---</code></pre>
+<p>Restart <code>claude</code>, delegate a small task, and while it runs, from a second terminal at the repo root:</p>
+<pre><code class="language-bash">git worktree list
+git branch --list &#x27;worktree-*&#x27;
+git status</code></pre>
+<p>Real output shape (captured mid-run, <code>materials/captured/demo2-worktree-list.txt</code>):</p>
+<pre><code class="language-text">$ git worktree list
+/private/tmp/refund-monorepo                                           cc106e8 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-a3643a1fcff8ba6e5 cc106e8 [worktree-agent-a3643a1fcff8ba6e5] locked
+
+$ git branch --list &#x27;worktree-*&#x27;
++ worktree-agent-a3643a1fcff8ba6e5
+
+$ git status
+On branch main
+nothing to commit, working tree clean</code></pre>
+<p>The three checks the student must call out:</p>
+<ol><li>The worktree lives under <code>.claude/worktrees/agent-&lt;id&gt;</code> on branch <code>worktree-agent-&lt;id&gt;</code> (the CLI names runs <code>agent-&lt;hash&gt;</code>, not after the agent).</li><li>Both checkouts point at the same commit: the worktree branched from the session&#x27;s HEAD because the shipped settings say <code>&quot;baseRef&quot;: &quot;head&quot;</code>.</li><li><code>git status</code> in the main checkout is clean while the agent is mid-edit; every change is inside the worktree.</li></ol>
+<p><strong>Observed deviation to teach (2.1.218):</strong> the fragment&#x27;s claim that a no-change run removes its worktree automatically did not hold in the captured run: the worktree survived holding only the <code>.venv</code> symlink. Cleanup is manual:</p>
+<pre><code class="language-bash">git worktree remove --force .claude/worktrees/agent-&lt;id&gt;
+git branch -D worktree-agent-&lt;id&gt;</code></pre>
+<p>Sometimes cleanup does happen (it did in the Lab 2 Hard reference run below), so teach &quot;check with <code>git worktree list</code>, clean what is left&quot; rather than either absolute.</p>
   </details>
-  <details><summary>Hard solution</summary>
-    <p>Reference run executed 2026-07-24 (claude 2.1.218) with the shipped
-`changelog-scribe` agent. Two setups matter: see the first failure mode for why.</p>
-    <pre><code>git checkout -b lab2-feature
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>Reference run executed 2026-07-24 (claude 2.1.218) with the shipped <code>changelog-scribe</code> agent. Two setups matter: see the first failure mode for why.</p>
+<p>Create the evidence commit:</p>
+<pre><code class="language-bash">git checkout -b lab2-feature
 echo &quot;Lab 2 marker: this commit exists ONLY on lab2-feature&quot; &gt; LAB2_MARKER.md
 git add LAB2_MARKER.md &amp;&amp; git commit -m &quot;lab2: marker commit that main does not have&quot;
 git log --oneline -2</code></pre>
+<pre><code class="language-text">a8ef117 lab2: marker commit that main does not have
+ce610db Merge notifications: require reason on NotificationEvent and log it   &lt;- main&#x27;s tip</code></pre>
+<p>Prediction to write down before running: <code>&quot;fresh&quot;</code> branches from the repository&#x27;s default branch, so its worktree must sit on <code>ce610db</code> and <code>LAB2_MARKER.md</code> must not exist there; <code>&quot;head&quot;</code> branches from the current checkout, so its worktree sits on <code>a8ef117</code> with the marker present.</p>
+<p>The trick that makes the proof cheap: a worktree-isolated agent&#x27;s <code>Bash</code> runs inside its own worktree, so the agent itself is the forensic instrument. Set <code>&quot;baseRef&quot;: &quot;fresh&quot;</code> in <code>.claude/settings.json</code>, then:</p>
+<pre><code class="language-text">&gt; Use the changelog-scribe agent for a forensic check: run exactly these commands
+  with Bash and report their raw output verbatim, changing nothing:
+  git log --oneline -2 ; ls LAB2_MARKER.md</code></pre>
+<p>Real result under <code>&quot;fresh&quot;</code>. The agent&#x27;s worktree log came back as:</p>
+<pre><code class="language-text">ce610db Merge notifications: require reason on NotificationEvent and log it
+9bfccf0 notifications: require reason on NotificationEvent and log it</code></pre>
+<p>and the agent itself flagged that <code>a8ef117</code> was missing from its checkout. The feature-branch commit is invisible: an agent asked to build on the marker would silently implement against code that does not contain it.</p>
+<p>Switch to <code>&quot;baseRef&quot;: &quot;head&quot;</code> and repeat the same delegation. Real result:</p>
+<pre><code class="language-text">a8ef117 lab2: marker commit that main does not have
+ce610db Merge notifications: require reason on NotificationEvent and log it
+
+$ ls LAB2_MARKER.md
+LAB2_MARKER.md</code></pre>
+<p>Same repo, same agent, same prompt: the only variable is <code>baseRef</code>, and the worktree base moved exactly as predicted. If the run leaves a <code>worktree-*</code> branch behind, <code>git log --oneline -1 worktree-agent-&lt;id&gt;</code> and <code>git merge-base main worktree-agent-&lt;id&gt;</code> give the same proof from outside.</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-2-worktree.md">solutions/lab-2-worktree.md</a></p>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>Running the Hard tier on an <code>init.sh</code> copy and seeing no difference.</strong> The shipped <code>init.sh</code> creates a local-only repo with no <code>origin</code> remote, and observed on 2.1.218: with no <code>origin</code> to resolve, <code>&quot;fresh&quot;</code> falls back to the current HEAD, so both settings behave identically and the student concludes the gotcha is a myth. The reference run above used a clone (<code>git clone ~/labs/refund-monorepo lab2-clone</code>) so <code>origin/main</code> exists. Have students do the same, or add a remote first.</li><li><strong>Editing <code>settings.json</code> mid-session and expecting the running session to honor it.</strong> Worktree settings are read when the agent spawns from a session that loaded them at start. Restart <code>claude</code> after each <code>baseRef</code> change.</li><li><strong>Forensics on the wrong branch.</strong> <code>git log</code> on <code>lab2-feature</code> instead of on the <code>worktree-*</code> branch (or inside the worktree) proves nothing about what the agent saw. The evidence is the worktree&#x27;s own log, via the agent&#x27;s Bash report or <code>git -C .claude/worktrees/agent-&lt;id&gt; log --oneline -2</code>.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-2-worktree.md">solutions/lab-2-worktree.md</a></p>
 </div>
 </section>
 
@@ -1318,20 +1404,47 @@ gateway CLAUDE.md never loaded</code></pre>
 </p>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-3-nested-claude-md.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>A model rewrite: different voice and ordering than the shipped file, same
-discipline. What matters for grading is the constraints, not the style:</p>
+  <div class="callout-title">Instructor: Lab 3 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p>A model rewrite: different voice and ordering than the shipped file, same discipline. What matters for grading is the constraints, not the style:</p>
+<pre><code class="language-markdown"># notifications — service context
+
+One job: turn accepted `NotificationEvent` payloads into lines of
+`notifications.log`. No sends, no queues — the log IS the product.</code></pre>
   </details>
-  <details><summary>Hard solution</summary>
-    <p>Part 1, sibling isolation over a whole session: register the Demo 3
-`InstructionsLoaded` hook in `.claude/settings.local.json`, work several turns
-strictly inside notifications (reads, small edits, tests), then:</p>
-    <pre><code>grep notifications instructions-loaded.log   # present — nested_traversal
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>Part 1, sibling isolation over a whole session: register the Demo 3 <code>InstructionsLoaded</code> hook in <code>.claude/settings.local.json</code>, work several turns strictly inside notifications (reads, small edits, tests), then:</p>
+<pre><code class="language-bash">grep notifications instructions-loaded.log   # present — nested_traversal
 grep gateway instructions-loaded.log || echo &quot;gateway CLAUDE.md never loaded&quot;
 grep payments instructions-loaded.log || echo &quot;payments CLAUDE.md never loaded&quot;</code></pre>
+<p>Real run (Demo 3 capture plus the 2026-07-24 re-runs): the sibling greps come back empty every time: rule three holds for as long as you never read a sibling&#x27;s file.</p>
+<p>Part 2: <code>claudeMdExcludes</code>. Add the exclusion to <code>.claude/settings.local.json</code> alongside the hook:</p>
+<pre><code class="language-json">{
+  &quot;claudeMdExcludes&quot;: [&quot;**/services/gateway/CLAUDE.md&quot;],
+  &quot;hooks&quot;: {
+    &quot;InstructionsLoaded&quot;: [
+      { &quot;matcher&quot;: &quot;*&quot;,
+        &quot;hooks&quot;: [ { &quot;type&quot;: &quot;command&quot;,
+                     &quot;command&quot;: &quot;cat &gt;&gt; \&quot;$CLAUDE_PROJECT_DIR\&quot;/instructions-loaded.log&quot; } ] }
+    ]
+  }
+}</code></pre>
+<p>Restart, then force the load that rule two would normally trigger:</p>
+<pre><code class="language-text">&gt; Read services/gateway/README.md and summarize the service in one sentence.</code></pre>
+<p>Real result: the summary comes back, and the log shows the exclusion held.</p>
+<pre><code class="language-text">$ grep -c gateway instructions-loaded.log
+0
+$ grep -o &#x27;&quot;file_path&quot;:&quot;[^&quot;]*CLAUDE.md&quot;&#x27; instructions-loaded.log
+&quot;file_path&quot;:&quot;/private/tmp/refund-monorepo/CLAUDE.md&quot;        # root only</code></pre>
+<p>Control from the same day, same machine, without the exclusion: the identical gateway read produced a <code>nested_traversal</code> event for <code>services/gateway/CLAUDE.md</code>. One setting, one suppressed load.</p>
+<p><strong>The pattern form matters (observed live, 2.1.218).</strong> Two plausible-looking values failed before the glob succeeded: <code>&quot;services/gateway/CLAUDE.md&quot;</code> (bare relative path) and <code>&quot;services/gateway&quot;</code> / <code>&quot;services/gateway/<strong>&quot;</code> (directory forms). With each of those the gateway file still loaded. The loader matches patterns against the file&#x27;s absolute path, so use a <code></strong>/</code>-anchored glob: <code>&quot;**/services/gateway/CLAUDE.md&quot;</code>. This is the single most likely reason a student&#x27;s exclusion &quot;does not work&quot;.</p>
+<p>Clean up after the lab: delete <code>.claude/settings.local.json</code> and <code>instructions-loaded.log</code> (both are local-only; nothing to commit).</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-3-nested-claude-md.md">solutions/lab-3-nested-claude-md.md</a></p>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>A <code>claudeMdExcludes</code> entry that silently never matches.</strong> Bare relative paths and directory forms fail; only the <code>**/</code> glob held in the reference runs. The hook log turns &quot;it seems excluded&quot; into a checkable 0-vs-1 grep.</li><li><strong>Duplicating root rules into the service file</strong> (&quot;just to be safe&quot;). It defeats the token math the next lab measures, and duplicated rules drift: the copy Claude reads last wins unpredictably. The per-rule audit question (&quot;does this apply to every service?&quot;) catches it fast.</li><li><strong>Proving lazy loading with a contaminated session.</strong> If the session already read a notifications file in an earlier turn, the &quot;before&quot; <code>/context</code> reading already contains the nested file and the before/after shows nothing. <code>/clear</code> first, then measure, then read, then measure.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-3-nested-claude-md.md">solutions/lab-3-nested-claude-md.md</a></p>
 </div>
 </section>
 
@@ -1561,21 +1674,64 @@ claude
 </p>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-4-context-measurement.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>Run both measurements on the student&#x27;s initialized copy (`~/labs/refund-monorepo`; the reference run below used the instructor scratch copy at `/private/tmp/refund-monorepo`).</p>
-    <pre><code>cd ~/labs/refund-monorepo
+  <div class="callout-title">Instructor: Lab 4 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p>Run both measurements on the student&#x27;s initialized copy (<code>~/labs/refund-monorepo</code>; the reference run below used the instructor scratch copy at <code>/private/tmp/refund-monorepo</code>).</p>
+<p>Flat layout first:</p>
+<pre><code class="language-bash">cd ~/labs/refund-monorepo
 git checkout flat-claude-md
 claude</code></pre>
-  </details>
-  <details><summary>Hard solution</summary>
-    <p>All on `main`. Keep the Demo 3 `InstructionsLoaded` hook registered in
-`.claude/settings.local.json` for this tier: it is the reliable witness (see the
-caveat below).</p>
-    <pre><code>&gt; Read services/payments/README.md and summarize the service in two sentences.
+<pre><code class="language-text">&gt; /clear
 &gt; /context</code></pre>
+<p>Real output (re-run on 2026-07-24, claude 2.1.218; print-mode equivalent <code>claude -p --setting-sources project,local &quot;/context&quot;</code>, which excludes user-level memory so the numbers show only what the repo layout costs):</p>
+<pre><code class="language-text">| Category      | Tokens | Percentage |
+| Memory files  | 2.6k   | 0.3%       |
+
+### Memory Files
+| Type    | Path                                   | Tokens |
+| Project | /private/tmp/refund-monorepo/CLAUDE.md | 2.6k   |</code></pre>
+<p>One entry: the fat root file, all three services&#x27; rules loaded up front whether the session needs them or not.</p>
+<p>Nested layout second:</p>
+<pre><code class="language-bash">git checkout main
+claude</code></pre>
+<pre><code class="language-text">&gt; /clear
+&gt; /context</code></pre>
+<p>Real output, same day, same machine:</p>
+<pre><code class="language-text">| Category      | Tokens | Percentage |
+| Memory files  | 817    | 0.1%       |
+
+### Memory Files
+| Type    | Path                                   | Tokens |
+| Project | /private/tmp/refund-monorepo/CLAUDE.md | 817    |</code></pre>
+<p>Root <code>CLAUDE.md</code> only: <code>services/*/CLAUDE.md</code> all exist on disk, none are loaded.</p>
+<p>The number the lab asks for:</p>
+<pre><code class="language-text">saving = (2600 - 817) / 2600 = 68.6%  →  &quot;about 69% on the Memory-files category&quot;</code></pre>
+<p>Students&#x27; absolute numbers will differ (their user-level memory and MCP servers load too); the ratio between the two runs on one machine is the honest measurement. Anyone whose two numbers are identical almost certainly measured the same branch twice; have them run <code>git branch --show-current</code> inside the session with <code>!</code>.</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-4-context-measurement.md">solutions/lab-4-context-measurement.md</a></p>
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>All on <code>main</code>. Keep the Demo 3 <code>InstructionsLoaded</code> hook registered in <code>.claude/settings.local.json</code> for this tier: it is the reliable witness (see the caveat below).</p>
+<pre><code class="language-text">&gt; Read services/payments/README.md and summarize the service in two sentences.
+&gt; /context</code></pre>
+<p>The read triggers the lazy load. Evidence from the real run (<code>materials/captured/demo3-instructions-log.txt</code>):</p>
+<pre><code class="language-text">{…,&quot;hook_event_name&quot;:&quot;InstructionsLoaded&quot;,&quot;file_path&quot;:&quot;.../services/payments/CLAUDE.md&quot;,
+ &quot;memory_type&quot;:&quot;Project&quot;,&quot;load_reason&quot;:&quot;nested_traversal&quot;,
+ &quot;trigger_file_path&quot;:&quot;.../services/payments/README.md&quot;}</code></pre>
+<p>Now generate enough conversation to make compaction meaningful (a few more reads or small edits), then:</p>
+<pre><code class="language-text">&gt; /compact
+&gt; /context</code></pre>
+<p>After <code>/compact</code>, the Memory Files table lists the root <code>CLAUDE.md</code> only: it is re-injected from disk. <code>services/payments/CLAUDE.md</code> is gone as a live file; whatever of it survives is paraphrase inside the compaction summary. That is the loss the fragment&#x27;s warning table describes.</p>
+<p>Recover:</p>
+<pre><code class="language-text">&gt; /clear
+&gt; /catchup
+&gt; /context</code></pre>
+<p><code>/catchup</code> (shipped in <code>.claude/commands/catchup.md</code>) diffs the branch, re-reads the changed files, and re-reads the <code>CLAUDE.md</code> of each service whose files appear in the diff, re-triggering the lazy load as a real file, not summary residue. The hook log gains a fresh <code>nested_traversal</code> entry for <code>services/payments/CLAUDE.md</code>; that entry is the proof it is back.</p>
+<p><strong>Observed CLI caveat (2.1.218, from the captured runs; see <code>materials/captured/demo4-context-after.txt</code>):</strong> in a continued print-mode session the lazily loaded file does not reappear as its own row in the <code>/context</code> Memory Files table; its tokens are carried in the Messages category (Messages grew 8 → 4.2k after the read in the captured run). Interactive sessions behave better, but teach students to treat the <code>InstructionsLoaded</code> hook log as the source of truth and <code>/context</code> as the budget view.</p>
+  </details>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>No <code>/clear</code> before a <code>/context</code> reading.</strong> The Messages category from earlier turns contaminates the comparison and both branches look the same. Every reading in this lab starts with <code>/clear</code>.</li><li><strong>Comparing across machines or setups.</strong> One student measures with three MCP servers loaded, another with none, and they argue about whose &quot;saving&quot; is right. The delta is only meaningful between two runs on the same machine, same session sources.</li><li><strong>Looking for the recovered file in the wrong place.</strong> After <code>/catchup</code>, students stare at the Memory Files table, see only the root file, and conclude recovery failed, even though the hook log already shows the <code>nested_traversal</code> re-load. Point them at <code>instructions-loaded.log</code>.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-4-context-measurement.md">solutions/lab-4-context-measurement.md</a></p>
 </div>
 </section>
 
@@ -1838,21 +1994,59 @@ $ git worktree list
         </p>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-5-parallel-run.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>Estimate first (typical student answer: three sequential agent runs at 3–5 minutes
-each ≈ 10–15 minutes). Then:</p>
-    <pre><code>cd ~/labs/refund-monorepo
+  <div class="callout-title">Instructor: Lab 5 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p>Estimate first (typical student answer: three sequential agent runs at 3–5 minutes each ≈ 10–15 minutes). Then:</p>
+<pre><code class="language-bash">cd ~/labs/refund-monorepo
 claude
 &gt; /implement-across-services specs/feature-refunds.md</code></pre>
+<p>Real wall clock from the captured run (<code>materials/captured/demo5-git-graph.txt</code>): about 4 minutes end to end: first agent tool call 02:42:56Z, last logged tool call 02:46:09Z, plus the merge/report turns. Roughly the time of the slowest single agent, i.e. a third of the sequential estimate.</p>
+<p>While it runs, <code>tail -f logs/tool_usage.jsonl</code> in a second terminal shows the three streams interleaving within the same seconds, each line attributable by the <code>agent-&lt;id&gt;</code> segment of its <code>target</code> path (<code>materials/captured/demo5-activity-tail.txt</code>; note the observed 2.1.218 caveat: the <code>agent</code> field logs <code>main</code> for every entry, so the worktree path in <code>target</code> is the attribution, exactly as the fragment narrates).</p>
+<p>Verification, branch by branch. History shape after the run (real capture):</p>
+<pre><code class="language-text">$ git log --oneline --graph
+*   42cb63f Merge gateway: proxy GET /refunds/{refund_id} to payments
+|\
+| * ceb70c8 gateway: proxy GET /refunds/{refund_id} to payments
+* |   f547c09 Merge notifications: filter GET /events by optional refund_id
+|\ \
+| * | c2bc908 notifications: filter GET /events by optional refund_id
+| |/
+* |   64c29df Merge payments: GET /refunds/{refund_id} status lookup
+...</code></pre>
+<p>Each branch touches only its own service, checked with <code>git show --stat</code> on the three agent commits (re-run 2026-07-24 on the scratch copy):</p>
+<pre><code class="language-text">0514a5e payments: add GET /refunds/{refund_id} status lookup
+ services/payments/README.md | fixtures/refund_result_rejected.json |
+ src/refunds.py | src/store.py | tests/test_refund_lookup.py        # payments/ only
+
+c2bc908 notifications: filter GET /events by optional refund_id
+ services/notifications/{CLAUDE.md, README.md, fixtures/..., src/events.py,
+ tests/test_events.py}                                              # notifications/ only
+
+ceb70c8 gateway: proxy GET /refunds/{refund_id} to payments
+ services/gateway/{CLAUDE.md, README.md, fixtures/refund_result.json,
+ src/refunds.py, tests/test_refunds.py}                             # gateway/ only</code></pre>
+<p>Success gate, re-executed 2026-07-24 on the merged result:</p>
+<pre><code class="language-text">$ for s in services/*/; do (cd &quot;$s&quot; &amp;&amp; ../../.venv/bin/python3 -m pytest -q); done
+gateway:        7 passed
+notifications: 11 passed
+payments:      13 passed
+
+$ for s in payments notifications gateway; do bash contracts/validate.sh services/$s; done
+all fixtures PASS, exit=0 for all three services</code></pre>
+<p>(Immediately after the captured Lab 5-scope run the counts were 8/8/7; the scratch copy has since absorbed the Part 2 team work, hence 13/11/7 today. Students&#x27; numbers right after their run should match the captured 8/8/7.)</p>
   </details>
-  <details><summary>Hard solution</summary>
-    <p>The edit: in `specs/feature-refunds.md` Part 1.5, require a shared contract change,
-for example a required `requested_at` string on `RefundResult` that payments must
-emit and notifications must record with its events. Two services now depend on one
-schema edit.</p>
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>The edit: in <code>specs/feature-refunds.md</code> Part 1.5, require a shared contract change, for example a required <code>requested_at</code> string on <code>RefundResult</code> that payments must emit and notifications must record with its events. Two services now depend on one schema edit.</p>
+<p>The trap the tier is built around: the implementer agents cannot make the contract change. Their <code>path_guard</code> PreToolUse hook fences each one inside its own <code>services/&lt;name&gt;/</code>: an agent that tries to edit <code>contracts/refund.schema.json</code> gets <code>BLOCKED path_guard: ... outside your service scope</code> (this exact conflict was observed for real in the Demo 8 captured run, where the teammate flagged it and handed the schema edit up to the lead). The design intent: contract changes belong to the lead, settled *before* the fan-out.</p>
+<p>Working sequence:</p>
+<ol><li><strong>Lead commits the schema change first</strong>, on the base branch, before or right after spawning: add <code>requested_at</code> to <code>RefundResult</code>&#x27;s <code>required</code> and <code>properties</code>. Every agent worktree branches from HEAD (<code>baseRef: &quot;head&quot;</code>), so all three agents see the tightened contract from the start.</li><li>Run <code>/implement-across-services specs/feature-refunds.md</code> as before. Payments&#x27; slice includes emitting the field; notifications&#x27; slice includes recording it; gateway proxies unchanged.</li><li>Merge in dependency order (payments, notifications, gateway), running <code>bash contracts/validate.sh services/&lt;name&gt;</code> after each merge. Because the schema landed at the base, validation passes at every intermediate point, not just the last one.</li></ol>
+<p>What it looks like when done wrong (the point of the tier): if the schema change instead rides inside one agent&#x27;s branch (or the lead merges notifications before the schema commit is reachable), the intermediate validate fails with exactly the Lab 6-style line, e.g. <code>FAIL fixtures/refund_result.json: field &quot;requested_at&quot; is required but missing.</code> (mechanism executed for real in the Lab 6 Hard reference run). The fix is never &quot;let the notifications agent merge first&quot;; agents never merge. The fix is reordering the lead&#x27;s merges so the providing commit lands before the consuming one, exactly like the real Part 2 landing order in the scratch history: <code>e5b2fa4 contracts: ...</code> → merge payments → merge notifications.</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-5-parallel-run.md">solutions/lab-5-parallel-run.md</a></p>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>The fan-out silently degrades to sequential.</strong> If the three Agent calls do not go out in a single message, the run still &quot;works&quot; but takes the sequential time and the race is meaningless. The <code>CRITICAL: run these in PARALLEL</code> line in the command file is what prevents this; students who paraphrase the command into their own prompt usually lose it. Check <code>logs/tool_usage.jsonl</code>: interleaved timestamps are the proof of parallelism.</li><li><strong>Expecting parallel to be cheaper in tokens.</strong> It is cheaper in wall clock only; three contexts each load the spec and contracts. Students comparing <code>/usage</code> before and after conclude something is broken. Wall-clock vs tokens is the fragment&#x27;s explicit trade.</li><li><strong>In the Hard tier, letting an agent &quot;just fix&quot; the contract.</strong> Either the path_guard blocks it (and the student weakens the guard to push through, which is exactly backwards), or with a weakened guard two agents guess different schema shapes and merge time becomes negotiation. The contract change is settled once, by the lead, at the base.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-5-parallel-run.md">solutions/lab-5-parallel-run.md</a></p>
 </div>
 </section>
 
@@ -2006,27 +2200,62 @@ $ .venv/bin/python3 -m pytest services/notifications -q
 </ul>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-6-contract-gate.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>Plant the violation (an enum break is ideal: obviously wrong to the validator,
-plausible-looking to a human):</p>
-    <pre><code>cd ~/labs/refund-monorepo
+  <div class="callout-title">Instructor: Lab 6 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p>Plant the violation (an enum break is ideal: obviously wrong to the validator, plausible-looking to a human):</p>
+<pre><code class="language-bash">cd ~/labs/refund-monorepo
 # in services/payments/fixtures/refund_result.json change:
 #   &quot;status&quot;: &quot;approved&quot;   -&gt;   &quot;status&quot;: &quot;refunded&quot;</code></pre>
+<p>Confirm the gate will fire before involving the agent: this is the same command the Stop hook runs (executed 2026-07-24 on the scratch copy):</p>
+<pre><code class="language-bash">$ bash contracts/validate.sh services/payments; echo &quot;exit=$?&quot;
+PASS fixtures/notification_approved.json
+PASS fixtures/payment_completed.json
+FAIL fixtures/refund_result.json: field &quot;status&quot; value &quot;refunded&quot; not in enum [approved, rejected].
+PASS fixtures/refund_result_rejected.json
+exit=2</code></pre>
+<p>Exit 2 is what blocks a stop. Now run the agent without hinting at the bug:</p>
+<pre><code class="language-text">claude
+&gt; Use the payments-implementer agent to verify your fixtures against the contract.</code></pre>
+<p>Expected transcript shape, matching the real Demo 6 run of the identical mechanism on the notifications side (<code>materials/captured/demo6-gate-fail.txt</code>): the agent inspects the fixtures, believes it is done, tries to stop, and its frontmatter <code>Stop</code> hook runs <code>validate.sh services/payments</code> in the agent&#x27;s own worktree:</p>
+<pre><code class="language-text">Stop hook feedback:
+[bash &quot;$CLAUDE_PROJECT_DIR&quot;/contracts/validate.sh services/payments]: FAIL fixtures/refund_result.json: field &quot;status&quot; value &quot;refunded&quot; not in enum [approved, rejected].</code></pre>
+<p>The FAIL line lands in the agent&#x27;s session verbatim; the agent edits the fixture back to a legal enum value and its next stop attempt passes the gate (<code>materials/captured/demo6-gate-pass.txt</code> shows the pass side):</p>
+<pre><code class="language-text">PASS fixtures/refund_result.json</code></pre>
+<p>Success criteria from the fragment, checked in the transcript: a blocked stop, the FAIL feedback visible in-session, and a passing re-validation on the next attempt, with the student never saying what was wrong.</p>
+<p>After the run, <code>git diff</code> should show the fixture restored and nothing else; commit or discard as the class prefers.</p>
   </details>
-  <details><summary>Hard solution</summary>
-    <p>Executed 2026-07-24 in a throwaway worktree pinned to the pre-Part-2 state
-(`git worktree add /tmp/lab6-hard 165d144 --detach`) so the tightened contract could
-be watched failing and then passing. On students&#x27; repos the state is whatever their
-Demo/Lab progress left; the sequence is identical.</p>
-    <pre><code>   &quot;required&quot;: [&quot;event_type&quot;, &quot;payment_id&quot;, &quot;refund_id&quot;, &quot;recipient&quot;],
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>Executed 2026-07-24 in a throwaway worktree pinned to the pre-Part-2 state (<code>git worktree add /tmp/lab6-hard 165d144 --detach</code>) so the tightened contract could be watched failing and then passing. On students&#x27; repos the state is whatever their Demo/Lab progress left; the sequence is identical.</p>
+<p>Step 1: tighten the contract in <code>contracts/notification.schema.json</code>:</p>
+<pre><code class="language-diff">   &quot;required&quot;: [&quot;event_type&quot;, &quot;payment_id&quot;, &quot;refund_id&quot;, &quot;recipient&quot;],
 +  &quot;required&quot;: [&quot;event_type&quot;, &quot;payment_id&quot;, &quot;refund_id&quot;, &quot;recipient&quot;, &quot;reason&quot;],
    &quot;properties&quot;: {
 +    &quot;reason&quot;: {
 +      &quot;type&quot;: &quot;string&quot;
 +    },</code></pre>
+<p>Step 2: the &quot;extend <code>contracts/validate.py</code>&quot; step is a trick, because no code change is needed. <code>validate.py</code> reads <code>required</code>, <code>type</code>, <code>enum</code>, and <code>minimum</code> generically from whatever schema it loads, so the tightened schema is enforced the moment it is saved. Real run against the untouched fixtures:</p>
+<pre><code class="language-bash">$ bash contracts/validate.sh services/notifications; echo &quot;exit=$?&quot;
+FAIL fixtures/notification_event.json: field &quot;reason&quot; is required but missing.
+exit=2</code></pre>
+<p>Students who dive into <code>validate.py</code> to add a special case should be redirected to read <code>validate()</code> first: recognizing that the validator is schema-driven IS the lesson of this tier. (If they instead added <code>reason</code> with an <code>enum</code> of allowed identifiers, the enum check also enforces itself for free; same reasoning.)</p>
+<p>Step 3: make the fixtures carry a reason:</p>
+<pre><code class="language-diff">   &quot;event_type&quot;: &quot;refund.approved&quot;,
+   &quot;payment_id&quot;: &quot;pay_001&quot;,
+   &quot;refund_id&quot;: &quot;ref_001&quot;,
+-  &quot;recipient&quot;: &quot;customer@example.com&quot;
++  &quot;recipient&quot;: &quot;customer@example.com&quot;,
++  &quot;reason&quot;: &quot;refund_approved&quot;</code></pre>
+<pre><code class="language-bash">$ bash contracts/validate.sh services/notifications; echo &quot;exit=$?&quot;
+PASS fixtures/notification_event.json
+exit=0</code></pre>
+<p>Run end to end through the agent exactly as in the Easy tier: the notifications agent&#x27;s Stop hook now blocks until its fixtures (and any code emitting events) carry the field.</p>
+<p>Instructor reference: the scratch copy&#x27;s history contains the full-scale version of this change landed by the Demo 8 agent team (<code>e5b2fa4 contracts: add required reason field to NotificationEvent</code>, followed by the payments and notifications adaptations), so the end state is inspectable with <code>git show e5b2fa4</code> if students want to compare.</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-6-contract-gate.md">solutions/lab-6-contract-gate.md</a></p>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>Breaking a field the validator does not check.</strong> Renaming a fixture file or breaking a field with no <code>enum</code>/<code>type</code>/<code>minimum</code> rule gets <code>SKIP</code> (no schema matches the name) or <code>PASS</code>, and the student concludes gates do not work. The fixture must keep its <code>payment_*</code>/<code>refund_result*</code>/<code>notification_*</code> name and break a constraint the schema actually declares.</li><li><strong>Expecting the session to stop dead at the first FAIL.</strong> The gate blocks the *agent&#x27;s stop*, not the conversation; the agent keeps working until it satisfies the validator (at most 8 blocked stops; the cap was observed for real in the captured runs). Students who kill the session mid-loop never see the pass.</li><li><strong>In the Hard tier, editing schema and fixtures in one go.</strong> Doing both at once means the gate never visibly fails, and the student has no evidence the tightened contract was ever enforced. Tighten first, run the validator, watch it fail, then fix the fixtures.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-6-contract-gate.md">solutions/lab-6-contract-gate.md</a></p>
 </div>
 </section>
 
@@ -2262,29 +2491,61 @@ $ du -sh "$WT"
 </p>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-7-sparse-paths.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>The thinking step first: what does payments work actually need?</p>
-    <pre><code>{
+  <div class="callout-title">Instructor: Lab 7 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p>The thinking step first: what does payments work actually need?</p>
+<ul><li><code>services/payments</code>: the code under change.</li><li><code>contracts</code>: the schemas the Stop-hook validator reads; without them <code>validate.sh</code> dies.</li><li><code>.claude</code>: settings, hooks (<code>path_guard.py</code>, <code>agent_activity.py</code>), agents; rule 3 says a root-level *directory* only exists if listed.</li><li>Nothing else: <code>specs/</code> is nice-to-have reading, <code>services/gateway</code> and <code>services/notifications</code> are exactly what we want off disk.</li></ul>
+<p>Edit <code>.claude/settings.json</code> so the <code>worktree</code> block reads:</p>
+<pre><code class="language-json">{
   &quot;worktree&quot;: {
     &quot;baseRef&quot;: &quot;head&quot;,
     &quot;symlinkDirectories&quot;: [&quot;.venv&quot;],
     &quot;sparsePaths&quot;: [&quot;.claude&quot;, &quot;services/payments&quot;, &quot;contracts&quot;]
   }
 }</code></pre>
+<p>Restart <code>claude</code>, spawn a worktree agent on a payments pretext task (&quot;add a docstring to services/payments; I want to inspect its checkout&quot;), then verify from a second terminal. Real outputs: agent-created worktree from the captured Demo 7 run (<code>materials/captured/demo7-du.txt</code>), cross-checked 2026-07-24 by creating the same sparse checkout with git directly (<code>git worktree add --no-checkout</code> + <code>git sparse-checkout set --cone .claude services/payments contracts</code>):</p>
+<pre><code class="language-text">$ git worktree list        # find $WT = .claude/worktrees/agent-&lt;id&gt;
+$ ls -A &quot;$WT&quot;
+.claude  .env  .gitignore  .venv  .worktreeinclude
+CHANGELOG.md  CLAUDE.md  README.md  contracts  init.sh  services
+
+$ ls -A &quot;$WT/services&quot;
+payments          # notifications/ and gateway/ are NOT on disk
+
+$ git -C &quot;$WT&quot; sparse-checkout list
+.claude
+contracts
+services/payments
+
+$ ls &quot;$WT/specs&quot;
+ls: .../specs: No such file or directory</code></pre>
+<p>Score the prediction against the three rules: root-level *files* (<code>init.sh</code>, <code>.gitignore</code>, <code>CHANGELOG.md</code>, <code>README.md</code>, root <code>CLAUDE.md</code>) came along for free; <code>.env</code> arrived via <code>.worktreeinclude</code> and <code>.venv</code> via <code>symlinkDirectories</code> (both are Claude Code machinery; a bare git sparse worktree has neither); <code>specs/</code> and the two unlisted services simply do not exist.</p>
+<p>Size check (2026-07-24, scratch copy; BSD <code>du</code> uses <code>-I</code>, GNU uses <code>--exclude</code>):</p>
+<pre><code class="language-text">$ du -sh -I .venv -I .git .        # main checkout, working files only
+1.1M    .
+$ du -sh &quot;$WT&quot;
+144K    &lt;worktree&gt;</code></pre>
+<p>About 8x smaller on a deliberately tiny repo; the ratio is the lesson, and it grows with every package a real monorepo adds.</p>
   </details>
-  <details><summary>Hard solution</summary>
-    <p>Set the list to `[&quot;services/payments&quot;, &quot;contracts&quot;]` (`.claude` omitted), restart,
-and spawn a fresh worktree agent. What is on disk (real output, git-level sparse
-worktree without `.claude`, 2026-07-24):</p>
-    <pre><code>$ ls -A &quot;$WT&quot;
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>Set the list to <code>[&quot;services/payments&quot;, &quot;contracts&quot;]</code> (<code>.claude</code> omitted), restart, and spawn a fresh worktree agent. What is on disk (real output, git-level sparse worktree without <code>.claude</code>, 2026-07-24):</p>
+<pre><code class="language-text">$ ls -A &quot;$WT&quot;
 .git  .gitignore  .worktreeinclude
 CHANGELOG.md  CLAUDE.md  README.md  contracts  init.sh  services
 
 $ ls &quot;$WT/.claude&quot;
 ls: .../.claude: No such file or directory</code></pre>
+<p>Diagnosis to elicit from students: everything project-level that lives under <code>.claude/</code> is missing in the worktree session:</p>
+<ul><li><code>settings.json</code> is gone: the <code>permissions.deny</code> rules (<code>dist/</code>, <code>build/</code>, <code>__pycache__/</code> reads) no longer apply, and the <code>PostToolUse</code> <code>agent_activity</code> hook is not registered; the agent&#x27;s tool calls stop appearing in <code>logs/tool_usage.jsonl</code>, which is usually the first symptom students notice.</li><li><code>.claude/hooks/path_guard.py</code> is gone: an agent whose frontmatter wires the guard has a hook command pointing at a file that does not exist in its checkout. The write-fence the whole module relies on silently stops guarding.</li><li><code>.claude/agents/</code> and <code>.claude/commands/</code> are gone: no agent definitions, no <code>/catchup</code>, no <code>/implement-across-services</code> inside that worktree.</li></ul>
+<p>The failure is quiet, not loud: nothing errors at spawn time; protections are just absent. That is why the fragment calls <code>.claude</code> the one path you must never leave off the list.</p>
+<p>Fix: restore <code>&quot;.claude&quot;</code> as the first entry, restart, respawn. The worktree now shows <code>.claude</code> in <code>ls -A</code> and <code>git -C &quot;$WT&quot; sparse-checkout list</code>, the activity log resumes, and the hooks fire again, same checks as the Easy tier.</p>
+<p>Afterwards have students revert <code>settings.json</code> (or commit the Easy-tier list deliberately): later labs assume the shipped settings shape.</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-7-sparse-paths.md">solutions/lab-7-sparse-paths.md</a></p>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>Leaving <code>.claude</code> off the list without noticing</strong> (the Hard tier makes it deliberate, but students do it accidentally in the Easy tier too). Nothing crashes; hooks, deny rules, and commands are just missing in every worktree. If a worktree session behaves &quot;less guarded&quot; than the main one, check <code>ls &quot;$WT/.claude&quot;</code> first.</li><li><strong>Expecting <code>specs/</code> or another root directory to be present.</strong> Rule 3 cuts both ways: root files come along, root *directories* do not. An agent that needs the spec must have <code>specs</code> on the list; remember the list is one union shared by every worktree in the session (rule 2), so adding it affects all agents.</li><li><strong>Testing the change without restarting the session.</strong> <code>sparsePaths</code> is read at session start; a list edited mid-session produces a worktree with the old shape and students conclude the setting does nothing. Restart <code>claude</code> after every settings change.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-7-sparse-paths.md">solutions/lab-7-sparse-paths.md</a></p>
 </div>
 </section>
 
@@ -2610,11 +2871,10 @@ payments-implementer:
 </p>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-8-agent-team.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>Reference run executed 2026-07-24 (claude 2.1.218, flag on, scratch copy with the
-refunds feature merged). The kickoff prompt:</p>
-    <pre><code>Create an agent team to review the refunds feature (specs/feature-refunds.md, all
+  <div class="callout-title">Instructor: Lab 8 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p>Reference run executed 2026-07-24 (claude 2.1.218, flag on, scratch copy with the refunds feature merged). The kickoff prompt:</p>
+<pre><code class="language-text">Create an agent team to review the refunds feature (specs/feature-refunds.md, all
 three services). Spawn exactly 2 teammates in review-only mode - they must not
 create, edit, or delete any file. Teammate 1 reviews contract compliance: fixtures
 and emitted payloads against contracts/*.schema.json. Teammate 2 reviews error
@@ -2623,15 +2883,31 @@ one direct peer message to the OTHER teammate (not to you) challenging or
 confirming one specific finding, and wait for the reply before finishing. Then
 collect both reviews, note where they disagreed and how it resolved, write nothing
 to disk, shut the team down, and report a combined summary.</code></pre>
+<p>What happened, from the run&#x27;s event stream: the lead spawned <code>contract-reviewer</code> and <code>error-reviewer</code>, each ran its own review (reads, greps, and in-process reproduction attempts via the venv), and four teammate-to-teammate messages crossed the mailbox, the lab&#x27;s success criterion, observed for real:</p>
+<pre><code class="language-text">✉ contract-reviewer → error-reviewer
+   &quot;Challenge: notify() swallows 422 contract rejections … httpx.HTTPStatusError
+    is a subclass of httpx.HTTPError, so a 4xx from notifications is caught by
+    the same except as a network failure — please agree or disagree.&quot;
+✉ error-reviewer → contract-reviewer
+   &quot;Rulings on your 2 claims + empty-reason challenge … CLAIM 1 — AGREE, and it&#x27;s
+    in my lane. Verified the hierarchy on the installed httpx 0.28.1 …&quot;
+✉ contract-reviewer → error-reviewer
+   &quot;Ruling: empty reason is mine; minLength won&#x27;t be enforced by the gate —
+    contracts/validate.py implements only required/type/enum/minimum, so your
+    proposed schema fix would be decorative.&quot;
+✉ error-reviewer → contract-reviewer
+   &quot;Closing: accept your rulings, one retraction, one gift. RETRACTION, mine …
+    I implied a malformed NOTIFICATIONS_URL would 500 the refund. I tested it —
+    it does not.&quot;</code></pre>
+<p>The exchange did exactly what the fragment promises teams are for: a cross-examination. One reviewer challenged the other&#x27;s finding with a concrete class-hierarchy argument, the other verified it against the installed library and conceded; a proposed fix was rejected because the *gate* would not enforce it; one claim was retracted after an actual test. No lead arbitration was needed: the disagreements resolved peer-to-peer.</p>
+<p>The lead&#x27;s synthesis (trimmed) reported findings the existing gate and suite do not catch (all 31 tests passing and 8/8 fixtures green at the time), including: payments crashes surfacing as gateway 500s instead of 502s (<code>response.json()</code> outside the <code>try</code>), no <code>NotificationEvent</code> producer for the <code>refund.rejected</code> enum value, no idempotency (three consecutive full refunds all approved), and <code>contracts/validate.py</code> enforcing only <code>required</code>/<code>type</code>/<code>enum</code>/<code>minimum</code> so most schema tightenings would be decorative. It then shut both teammates down and confirmed a clean tree.</p>
+<p>Run economics for planning the session: about 13 minutes wall clock, roughly $3.4 of Sonnet-teammate tokens for a two-reviewer team, consistent with the fragment&#x27;s &quot;a team is a multiple of a single session&quot; warning. Two observed deviations worth narrating (2.1.218, print mode): the shared task board from Demo 8&#x27;s interactive run did not materialize: the lead assigned each reviewer its lens at spawn and closed them with <code>TaskStop</code>, so &quot;claimed/completed tasks&quot; evidence comes from the lead&#x27;s board summary rather than <code>TaskCreate</code> events; and &quot;review-only&quot; held for tracked files but pytest runs still created gitignored <code>.pytest_cache/</code>; the constraint is a prompt convention, not a mechanism (a <code>PreToolUse</code> guard is the mechanical version, which is exactly the Hard tier&#x27;s territory).</p>
   </details>
-  <details><summary>Hard solution</summary>
-    <p>Do not run this per-student in class (three Sonnet teammates plus a lead for
-10–15 minutes per attempt, on top of Demo 8&#x27;s own run, so coordinate
-tokens-per-minute with the org admin even for a single instructor run). The
-reference for the transcript shape is the captured instructor run,
-`materials/captured/demo8-team-transcript.txt`, which implemented the same Part 2
-change this tier targets. Expected shape, in order:</p>
-    <pre><code>{
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>Do not run this per-student in class (three Sonnet teammates plus a lead for 10–15 minutes per attempt, on top of Demo 8&#x27;s own run, so coordinate tokens-per-minute with the org admin even for a single instructor run). The reference for the transcript shape is the captured instructor run, <code>materials/captured/demo8-team-transcript.txt</code>, which implemented the same Part 2 change this tier targets. Expected shape, in order:</p>
+<ol><li><strong>Board setup:</strong> three tasks (schema+payments emit, notifications require+log, gateway pass-through+e2e), with the schema task blocking the other two, one owner each.</li><li><strong>Plan-approval gate:</strong> the schema owner stops at the gate and presents its plan; the lead approves with scope adjustments.</li><li><strong>Unblocking cascade:</strong> schema lands (<code>e5b2fa4</code> in the captured run), the two dependent tasks unblock, teammates sync their worktrees to the new base.</li><li><strong>Gated completion:</strong> with the <code>TaskCompleted</code> hook wired (below), a completion whose service tests fail is reopened; students should watch at least one task bounce before the team converges.</li><li><strong>Synthesis:</strong> one combined report; in the captured run, 31 tests green across the three services, 8/8 fixtures PASS, and a live end-to-end POST producing a logged notification carrying <code>&quot;reason&quot;:&quot;refund_approved&quot;</code>.</li></ol>
+<p>The quality-gate hook, in the shape the fragment&#x27;s table describes: same JSON wiring as the contract gates, new event name, exit 2 reopens instead of blocking a stop:</p>
+<pre><code class="language-json">{
   &quot;hooks&quot;: {
     &quot;TaskCompleted&quot;: [
       {
@@ -2645,8 +2921,16 @@ change this tier targets. Expected shape, in order:</p>
     ]
   }
 }</code></pre>
+<p>where <code>team_gate.sh</code> runs the completing service&#x27;s tests (derive the service from the task description or run all three suites; on this repo the full sweep is seconds) and exits 2 with the failure on stderr.</p>
+<p>Two real-run corrections to fold into any Hard-tier briefing, both observed in the captured Demo 8 run:</p>
+<ul><li><strong>Teammates spawned from the shipped implementer definitions have no team tools</strong>: their <code>tools</code> allowlist is <code>Read, Grep, Glob, Edit, Write, Bash</code>, so they cannot <code>SendMessage</code> or update the board; every coordination hop relays through the lead. For the peer-messaging behavior the lab wants, add the team tools to the teammate definitions for this lab (the Easy reference run&#x27;s teammates had them, and messaged directly).</li><li><strong>Ownership partitioning collides with path_guard:</strong> &quot;payments-implementer owns <code>contracts/notification.schema.json</code>&quot; conflicts with its own PreToolUse fence on <code>services/payments</code>. In the captured run the teammate flagged it and the lead applied the approved schema diff itself. Either hand the schema task to the lead explicitly, or relax the guard for this lab; decide before the run, not during.</li></ul>
+<p>Success check, both tiers: the task list (or the lead&#x27;s board summary) shows claimed and completed tasks, and at least one teammate-to-teammate message exists; the Easy reference run has four.</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-8-agent-team.md">solutions/lab-8-agent-team.md</a></p>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>Expecting worktree isolation from a team.</strong> Teammates share the working directory; two teammates editing one file corrupt each other exactly like two developers on one checkout. Partition ownership in the task descriptions and say so explicitly; worktrees are the subagent story, not the team story.</li><li><strong>Spawning teammates from the implementer agent definitions and waiting for peer messages that never come.</strong> The definitions&#x27; tool allowlist has no SendMessage. If the mailbox stays empty, check the teammates&#x27; tools before blaming the feature.</li><li><strong>Not shutting the team down.</strong> Teammates idle at full-session weight, resume is blocked while in-process teammates run, and the next lab inherits a stale team (one team per session). &quot;Shut the team down&quot; belongs in the kickoff prompt, and students should verify the teammates are gone before moving on.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-8-agent-team.md">solutions/lab-8-agent-team.md</a></p>
 </div>
 </section>
 
@@ -2789,26 +3073,41 @@ flowchart LR
 </p>
 
 <div class="callout callout-solution">
-  <div class="callout-title">Instructor: Solution (lab-9-capstone.md)</div>
-  <details><summary>Easy solution</summary>
-    <p>**Step 1: Detect the stack.** `/detect-stack` at the repo root. The report must
-say: Python / FastAPI, three services under `services/` (gateway, payments,
-notifications), tests via pytest through the repo venv, one service per pytest run.
-Gate check against ground truth rather than vibes: the run and test commands in the
-root `CLAUDE.md` port map and the suites in step 4 below. If the report misses the
-one-pytest-run-per-service constraint (each service has its own `src` package), fix
-the generated context before moving on.</p>
-    <pre><code>$ python3 .claude/hooks/path_guard.py services/notifications --self-test services/gateway/src/main.py
+  <div class="callout-title">Instructor: Lab 9 Solutions</div>
+  <details><summary>Step-by-step: Easy solution</summary>
+<p><strong>Step 1: Detect the stack.</strong> <code>/detect-stack</code> at the repo root. The report must say: Python / FastAPI, three services under <code>services/</code> (gateway, payments, notifications), tests via pytest through the repo venv, one service per pytest run. Gate check against ground truth rather than vibes: the run and test commands in the root <code>CLAUDE.md</code> port map and the suites in step 4 below. If the report misses the one-pytest-run-per-service constraint (each service has its own <code>src</code> package), fix the generated context before moving on.</p>
+<p><strong>Step 2: Nested CLAUDE.md files.</strong> Already authored for all three services in the sample repo; the gate is proving the loading behavior. Line budget check (executed 2026-07-24): root 55 lines, notifications 40, gateway 42, payments 66, all inside the 200/150 budgets, zero duplicated rules between levels. Loading gate, from the real captured run (<code>materials/captured/demo3-instructions-log.txt</code>): root file loads at <code>session_start</code>; <code>services/payments/CLAUDE.md</code> loads with <code>load_reason: &quot;nested_traversal&quot;</code> only after a payments file is read; grep for the gateway file returns nothing. Memory-files cost of the layout (re-measured 2026-07-24): 817 tokens on <code>main</code> vs 2.6k on <code>flat-claude-md</code>.</p>
+<p><strong>Step 3: Scoped agents + path_guard.</strong> The three implementer agents ship with the guard wired; the gate is watching a cross-service edit die. Executed 2026-07-24 with the hook&#x27;s own self-test (same code path as a live <code>PreToolUse</code> event, also verified with real event JSON on stdin):</p>
+<pre><code class="language-text">$ python3 .claude/hooks/path_guard.py services/notifications --self-test services/gateway/src/main.py
 BLOCKED path_guard: services/gateway/src/main.py is outside your service scope (services/notifications)
 exit=2
 $ python3 .claude/hooks/path_guard.py services/notifications --self-test services/notifications/src/events.py
 exit=0</code></pre>
+<p><strong>Step 4: Worktree settings.</strong> The shipped <code>settings.json</code> already carries <code>&quot;baseRef&quot;: &quot;head&quot;</code> and <code>symlinkDirectories: [&quot;.venv&quot;]</code>. Gate (a fresh worktree runs the suite green without reinstalling dependencies) executed 2026-07-24: created a fresh worktree, <code>.venv</code> symlinked in (as <code>symlinkDirectories</code> does per agent run), <code>.env</code> copied (as <code>.worktreeinclude</code> does):</p>
+<pre><code class="language-text">$ (cd &lt;worktree&gt;/services/payments &amp;&amp; ../../.venv/bin/python3 -m pytest -q)
+13 passed</code></pre>
+<p>No pip install, immediate green: the survival-kit settings are what make that true.</p>
+<p><strong>Step 5: Parallel implementation.</strong> Performed as the captured Demo 5 run: <code>/implement-across-services specs/feature-refunds.md</code> implementing Part 1.5, three agents in one message, ~4 minutes wall clock. Gate: each agent finished on its own <code>worktree-*</code> branch and each branch touched only its own service; per-commit stats in <code>materials/captured/demo5-git-graph.txt</code> and the Lab 5 solution file.</p>
+<p><strong>Step 6: Merge and measure.</strong> Merged payments → notifications → gateway with <code>contracts/validate.sh</code> after each merge (the graph with three merge commits is in the same capture). Gate outputs re-executed 2026-07-24 on the merged result:</p>
+<pre><code class="language-text">$ for s in services/*/; do (cd &quot;$s&quot; &amp;&amp; ../../.venv/bin/python3 -m pytest -q); done
+gateway 7 passed · notifications 11 passed · payments 13 passed
+
+$ for s in payments notifications gateway; do bash contracts/validate.sh services/$s; done
+8/8 fixtures PASS, exit=0 for all three
+
+Token number: Memory files 817 (nested) vs 2.6k (flat) = ~69% saved on the category.</code></pre>
+<p>All six gates green: that is the finished Easy tier. The success line of the lab (&quot;two agents implemented in parallel on separate branches and both merged cleanly&quot;) is steps 5–6&#x27;s gates.</p>
   </details>
-  <details><summary>Hard solution</summary>
-    <p>Same six steps; what changes is captured by the fragment&#x27;s adaptation table. The
-instructor-relevant judgment calls per step:</p>
+  <details><summary>Step-by-step: Hard solution</summary>
+<p>Same six steps; what changes is captured by the fragment&#x27;s adaptation table. The instructor-relevant judgment calls per step:</p>
+<ol><li><code>/detect-stack</code> matters more here: its report decides which adaptation row applies. Most common correction needed: monorepos whose services do not live under a uniform <code>services/</code> root; fix the generated context before anything else.</li><li>Two services minimum, root file under 200 lines, service files under 150, zero duplication. The gate is the same <code>/context</code> (or <code>InstructionsLoaded</code> log) check as the sample repo.</li><li>Copy <code>path_guard.py</code> verbatim; the only edit is the service path argument in each agent&#x27;s frontmatter hook. The self-test invocation above is the fastest gate on any repo; no session needed.</li><li>The row that bites: java-spring must *not* symlink <code>target/</code> (each worktree builds its own; <code>~/.m2</code> is already per-user), go-gin usually needs no symlink at all. The gate is unchanged: fresh worktree, test suite green, no dependency reinstall.</li><li>A real two-service ticket, <code>/implement-across-services</code> adapted to the repo&#x27;s service names. Watch the activity log, not the agents. Gate: separate branches, each service&#x27;s tests green on its own branch.</li><li>Provider service merges before consumer. Gate: clean merge, full suite green, and a concrete before/after Memory-files number against the pre-capstone baseline the student recorded in Lab 4.</li></ol>
+<p>Time-box guidance: steps 1–4 are ~20 minutes on a cooperative repo; if a student&#x27;s repo fights step 1 or 4 (exotic layout, heavyweight builds), have them finish the Easy tier in class and take the Hard tier home; the take-home card in the fragment covers exactly that.</p>
   </details>
-  <p>Full walkthrough: <a href="solutions/lab-9-capstone.md">solutions/lab-9-capstone.md</a></p>
+  <details><summary>What students get wrong</summary>
+<ol><li><strong>Ticking a step whose gate did not pass</strong>: usually step 2 (the nested file &quot;should&quot; load; nobody checked the log) or step 4 (the worktree ran tests green because the student ran them in the main checkout by accident; check the cwd in the test output path). A skipped gate here resurfaces as a debugging session in step 5, which is the most expensive place to discover it.</li><li><strong>Adapting path_guard by rewriting it</strong> instead of changing the path argument. The hook matches path *segments* precisely so worktree-absolute paths still match; rewrites regularly break that and either block everything or fence nothing. Copy verbatim, change only the argument, prove it with <code>--self-test</code> in both directions.</li><li><strong>Picking a step-5 ticket with contract churn in it.</strong> If the two services need to negotiate a payload shape mid-flight, parallel agents guess differently and merge time turns into arbitration; that is Lab 5 Hard&#x27;s lesson. For the capstone, pick a ticket whose contract is already settled; settle it first if not.</li></ol>
+<p>Verified: 2026-07-24 against sample-monorepo/python-fastapi</p>
+  </details>
+  <p>Source walkthrough: <a href="solutions/lab-9-capstone.md">solutions/lab-9-capstone.md</a></p>
 </div>
 </section>
 

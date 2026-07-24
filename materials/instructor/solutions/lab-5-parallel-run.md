@@ -1,11 +1,11 @@
-# Lab 5 solution — Run It and Race It (parallel implementation)
+# Lab 5 solution: Run It and Race It (parallel implementation)
 
 Source lab: `materials/fragments/parallel-implementation.html`. The work item is
-**Part 1.5 — your turn** of `specs/feature-refunds.md` (refund status lookup across
+**Part 1.5 (your turn)** of `specs/feature-refunds.md` (refund status lookup across
 all three services); Part 1 ships implemented, Part 2 is reserved for Lab 8.
 
 - **Easy:** write down a sequential-time estimate, run `/implement-across-services specs/feature-refunds.md`, time it, and verify each agent's changes landed on its own branch touching only its own service.
-- **Hard:** edit the spec so two services need the same contract change, re-run, and land the merges so `contracts/validate.sh` passes after *every* merge — without ever letting an agent merge its own branch.
+- **Hard:** edit the spec so two services need the same contract change, re-run, and land the merges so `contracts/validate.sh` passes after *every* merge, without ever letting an agent merge its own branch.
 
 ## Easy solution
 
@@ -19,14 +19,14 @@ claude
 ```
 
 Real wall clock from the captured run (`materials/captured/demo5-git-graph.txt`):
-about 4 minutes end to end — first agent tool call 02:42:56Z, last logged tool call
+about 4 minutes end to end: first agent tool call 02:42:56Z, last logged tool call
 02:46:09Z, plus the merge/report turns. Roughly the time of the slowest single agent,
 i.e. a third of the sequential estimate.
 
 While it runs, `tail -f logs/tool_usage.jsonl` in a second terminal shows the three
 streams interleaving within the same seconds, each line attributable by the
 `agent-<id>` segment of its `target` path
-(`materials/captured/demo5-activity-tail.txt`; note the observed 2.1.218 caveat — the
+(`materials/captured/demo5-activity-tail.txt`; note the observed 2.1.218 caveat: the
 `agent` field logs `main` for every entry, so the worktree path in `target` is the
 attribution, exactly as the fragment narrates).
 
@@ -45,7 +45,7 @@ $ git log --oneline --graph
 ...
 ```
 
-Each branch touches only its own service — checked with `git show --stat` on the
+Each branch touches only its own service, checked with `git show --stat` on the
 three agent commits (re-run 2026-07-24 on the scratch copy):
 
 ```text
@@ -87,7 +87,7 @@ schema edit.
 
 The trap the tier is built around: the implementer agents cannot make the contract
 change. Their `path_guard` PreToolUse hook fences each one inside its own
-`services/<name>/` — an agent that tries to edit `contracts/refund.schema.json` gets
+`services/<name>/`: an agent that tries to edit `contracts/refund.schema.json` gets
 `BLOCKED path_guard: ... outside your service scope` (this exact conflict was
 observed for real in the Demo 8 captured run, where the teammate flagged it and
 handed the schema edit up to the lead). The design intent: contract changes belong to
@@ -102,18 +102,18 @@ Working sequence:
 2. Run `/implement-across-services specs/feature-refunds.md` as before. Payments'
    slice includes emitting the field; notifications' slice includes recording it;
    gateway proxies unchanged.
-3. Merge in dependency order — payments, notifications, gateway — running
+3. Merge in dependency order (payments, notifications, gateway), running
    `bash contracts/validate.sh services/<name>` after each merge. Because the schema
    landed at the base, validation passes at every intermediate point, not just the
    last one.
 
 What it looks like when done wrong (the point of the tier): if the schema change
-instead rides inside one agent's branch — or the lead merges notifications before the
-schema commit is reachable — the intermediate validate fails with exactly the
+instead rides inside one agent's branch (or the lead merges notifications before the
+schema commit is reachable), the intermediate validate fails with exactly the
 Lab 6-style line, e.g.
 `FAIL fixtures/refund_result.json: field "requested_at" is required but missing.`
 (mechanism executed for real in the Lab 6 Hard reference run). The fix is never "let
-the notifications agent merge first" — agents never merge. The fix is reordering the
+the notifications agent merge first"; agents never merge. The fix is reordering the
 lead's merges so the providing commit lands before the consuming one, exactly like
 the real Part 2 landing order in the scratch history: `e5b2fa4 contracts: ...` →
 merge payments → merge notifications.
@@ -124,15 +124,15 @@ merge payments → merge notifications.
    go out in a single message, the run still "works" but takes the sequential time
    and the race is meaningless. The `CRITICAL: run these in PARALLEL` line in the
    command file is what prevents this; students who paraphrase the command into their
-   own prompt usually lose it. Check `logs/tool_usage.jsonl` — interleaved timestamps
+   own prompt usually lose it. Check `logs/tool_usage.jsonl`: interleaved timestamps
    are the proof of parallelism.
 2. **Expecting parallel to be cheaper in tokens.** It is cheaper in wall clock only;
    three contexts each load the spec and contracts. Students comparing `/usage`
    before and after conclude something is broken. Wall-clock vs tokens is the
    fragment's explicit trade.
 3. **In the Hard tier, letting an agent "just fix" the contract.** Either the
-   path_guard blocks it (and the student weakens the guard to push through — exactly
-   backwards), or with a weakened guard two agents guess different schema shapes and
+   path_guard blocks it (and the student weakens the guard to push through, which is
+   exactly backwards), or with a weakened guard two agents guess different schema shapes and
    merge time becomes negotiation. The contract change is settled once, by the lead,
    at the base.
 

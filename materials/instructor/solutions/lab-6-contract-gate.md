@@ -1,4 +1,4 @@
-# Lab 6 solution — Break It Yourself (contract gates)
+# Lab 6 solution: Break It Yourself (contract gates)
 
 Source lab: `materials/fragments/contract-hooks.html` (Demo 6 shows the shipped
 violation; this lab has students plant their own).
@@ -17,7 +17,7 @@ cd ~/labs/refund-monorepo
 #   "status": "approved"   ->   "status": "refunded"
 ```
 
-Confirm the gate will fire before involving the agent — this is the same command the
+Confirm the gate will fire before involving the agent: this is the same command the
 Stop hook runs (executed 2026-07-24 on the scratch copy):
 
 ```bash
@@ -55,7 +55,7 @@ PASS fixtures/refund_result.json
 ```
 
 Success criteria from the fragment, checked in the transcript: a blocked stop, the
-FAIL feedback visible in-session, and a passing re-validation on the next attempt —
+FAIL feedback visible in-session, and a passing re-validation on the next attempt,
 with the student never saying what was wrong.
 
 After the run, `git diff` should show the fixture restored and nothing else; commit
@@ -68,7 +68,7 @@ Executed 2026-07-24 in a throwaway worktree pinned to the pre-Part-2 state
 be watched failing and then passing. On students' repos the state is whatever their
 Demo/Lab progress left; the sequence is identical.
 
-Step 1 — tighten the contract in `contracts/notification.schema.json`:
+Step 1: tighten the contract in `contracts/notification.schema.json`:
 
 ```diff
    "required": ["event_type", "payment_id", "refund_id", "recipient"],
@@ -79,7 +79,7 @@ Step 1 — tighten the contract in `contracts/notification.schema.json`:
 +    },
 ```
 
-Step 2 — the "extend `contracts/validate.py`" step is a trick: no code change is
+Step 2: the "extend `contracts/validate.py`" step is a trick, because no code change is
 needed. `validate.py` reads `required`, `type`, `enum`, and `minimum` generically
 from whatever schema it loads, so the tightened schema is enforced the moment it is
 saved. Real run against the untouched fixtures:
@@ -91,11 +91,11 @@ exit=2
 ```
 
 Students who dive into `validate.py` to add a special case should be redirected to
-read `validate()` first — recognizing that the validator is schema-driven IS the
+read `validate()` first: recognizing that the validator is schema-driven IS the
 lesson of this tier. (If they instead added `reason` with an `enum` of allowed
-identifiers, the enum check also enforces itself for free — same reasoning.)
+identifiers, the enum check also enforces itself for free; same reasoning.)
 
-Step 3 — make the fixtures carry a reason:
+Step 3: make the fixtures carry a reason:
 
 ```diff
    "event_type": "refund.approved",
@@ -117,9 +117,9 @@ agent's Stop hook now blocks until its fixtures (and any code emitting events) c
 the field.
 
 Instructor reference: the scratch copy's history contains the full-scale version of
-this change landed by the Demo 8 agent team — `e5b2fa4 contracts: add required
+this change landed by the Demo 8 agent team (`e5b2fa4 contracts: add required
 reason field to NotificationEvent`, followed by the payments and notifications
-adaptations — so the end state is inspectable with
+adaptations), so the end state is inspectable with
 `git show e5b2fa4` if students want to compare.
 
 ## What students get wrong
@@ -131,7 +131,7 @@ adaptations — so the end state is inspectable with
    a constraint the schema actually declares.
 2. **Expecting the session to stop dead at the first FAIL.** The gate blocks the
    *agent's stop*, not the conversation; the agent keeps working until it satisfies
-   the validator (at most 8 blocked stops — the cap was observed for real in the
+   the validator (at most 8 blocked stops; the cap was observed for real in the
    captured runs). Students who kill the session mid-loop never see the pass.
 3. **In the Hard tier, editing schema and fixtures in one go.** Doing both at once
    means the gate never visibly fails, and the student has no evidence the tightened

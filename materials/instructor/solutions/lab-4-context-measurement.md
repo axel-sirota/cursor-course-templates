@@ -1,4 +1,4 @@
-# Lab 4 solution — Your Own Numbers (token-budget measurement)
+# Lab 4 solution: Your Own Numbers (token-budget measurement)
 
 Source lab: `materials/fragments/token-budget.html` (Demo 4 is the template for the Easy tier).
 
@@ -22,7 +22,7 @@ claude
 > /context
 ```
 
-Real output (re-run on 2026-07-24, claude 2.1.218 — print-mode equivalent
+Real output (re-run on 2026-07-24, claude 2.1.218; print-mode equivalent
 `claude -p --setting-sources project,local "/context"`, which excludes user-level
 memory so the numbers show only what the repo layout costs):
 
@@ -61,7 +61,7 @@ Real output, same day, same machine:
 | Project | /private/tmp/refund-monorepo/CLAUDE.md | 817    |
 ```
 
-Root `CLAUDE.md` only — `services/*/CLAUDE.md` all exist on disk, none are loaded.
+Root `CLAUDE.md` only: `services/*/CLAUDE.md` all exist on disk, none are loaded.
 
 The number the lab asks for:
 
@@ -71,7 +71,7 @@ saving = (2600 - 817) / 2600 = 68.6%  →  "about 69% on the Memory-files catego
 
 Students' absolute numbers will differ (their user-level memory and MCP servers load
 too); the ratio between the two runs on one machine is the honest measurement. Anyone
-whose two numbers are identical almost certainly measured the same branch twice —
+whose two numbers are identical almost certainly measured the same branch twice;
 have them run `git branch --show-current` inside the session with `!`.
 
 ## Hard solution
@@ -102,7 +102,7 @@ small edits), then:
 > /context
 ```
 
-After `/compact`, the Memory Files table lists the root `CLAUDE.md` only — it is
+After `/compact`, the Memory Files table lists the root `CLAUDE.md` only: it is
 re-injected from disk. `services/payments/CLAUDE.md` is gone as a live file; whatever
 of it survives is paraphrase inside the compaction summary. That is the loss the
 fragment's warning table describes.
@@ -117,11 +117,11 @@ Recover:
 
 `/catchup` (shipped in `.claude/commands/catchup.md`) diffs the branch, re-reads the
 changed files, and re-reads the `CLAUDE.md` of each service whose files appear in the
-diff — re-triggering the lazy load as a real file, not summary residue. The hook log
+diff, re-triggering the lazy load as a real file, not summary residue. The hook log
 gains a fresh `nested_traversal` entry for `services/payments/CLAUDE.md`; that entry
 is the proof it is back.
 
-**Observed CLI caveat (2.1.218, from the captured runs — see
+**Observed CLI caveat (2.1.218, from the captured runs; see
 `materials/captured/demo4-context-after.txt`):** in a continued print-mode session the
 lazily loaded file does not reappear as its own row in the `/context` Memory Files
 table; its tokens are carried in the Messages category (Messages grew 8 → 4.2k after
@@ -140,7 +140,7 @@ the budget view.
    sources.
 3. **Looking for the recovered file in the wrong place.** After `/catchup`, students
    stare at the Memory Files table, see only the root file, and conclude recovery
-   failed — when the hook log already shows the `nested_traversal` re-load. Point
+   failed, even though the hook log already shows the `nested_traversal` re-load. Point
    them at `instructions-loaded.log`.
 
 Verified: 2026-07-24 against sample-monorepo/python-fastapi

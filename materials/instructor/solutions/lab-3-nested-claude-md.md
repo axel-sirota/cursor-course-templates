@@ -1,4 +1,4 @@
-# Lab 3 solution — Author a Service Context (nested CLAUDE.md)
+# Lab 3 solution: Author a Service Context (nested CLAUDE.md)
 
 Source lab: `materials/fragments/nested-claude-md.html`.
 
@@ -45,11 +45,11 @@ Constraint checks the instructor should demand:
 - `wc -l services/notifications/CLAUDE.md` well under 150 (the model above is ~28;
   the shipped file is 40).
 - Zero duplication against root: the root file (55 lines) owns the contract-first
-  rule, the venv/pytest conventions, the port map, and commit style — none of those
+  rule, the venv/pytest conventions, the port map, and commit style. None of those
   may reappear in the service file. The rewrite above references the schema by path
   (that is pointing, not duplicating) and states only notifications-specific rules.
   A quick audit: for each rule in the service file ask "does this apply to gateway
-  too?" — if yes, it is misplaced.
+  too?"; if yes, it is misplaced.
 
 Lazy-loading proof. Fresh session at the repo root, then:
 
@@ -71,7 +71,7 @@ and before it, only the root file's `session_start` event existed. In interactiv
 sessions the `/context` Memory-files list shows the same two states; in print-mode
 continued sessions the hook log is the reliable witness (see the Lab 4 solution's
 caveat). A behavioral cross-check that needs no instrumentation: the rewritten
-service file changes the agent's answers — in the live control run the session
+service file changes the agent's answers: in the live control run the session
 quoted the service `CLAUDE.md`'s command conventions when critiquing the README,
 proof the lazy-loaded rules were actually in play.
 
@@ -88,9 +88,9 @@ grep payments instructions-loaded.log || echo "payments CLAUDE.md never loaded"
 ```
 
 Real run (Demo 3 capture plus the 2026-07-24 re-runs): the sibling greps come back
-empty every time — rule three holds for as long as you never read a sibling's file.
+empty every time: rule three holds for as long as you never read a sibling's file.
 
-Part 2 — `claudeMdExcludes`. Add the exclusion to
+Part 2: `claudeMdExcludes`. Add the exclusion to
 `.claude/settings.local.json` alongside the hook:
 
 ```json
@@ -112,7 +112,7 @@ Restart, then force the load that rule two would normally trigger:
 > Read services/gateway/README.md and summarize the service in one sentence.
 ```
 
-Real result: the summary comes back, and the log shows the exclusion held —
+Real result: the summary comes back, and the log shows the exclusion held.
 
 ```text
 $ grep -c gateway instructions-loaded.log
@@ -127,7 +127,7 @@ gateway read produced a `nested_traversal` event for
 
 **The pattern form matters (observed live, 2.1.218).** Two plausible-looking values
 failed before the glob succeeded: `"services/gateway/CLAUDE.md"` (bare relative
-path) and `"services/gateway"` / `"services/gateway/**"` (directory forms) — with
+path) and `"services/gateway"` / `"services/gateway/**"` (directory forms). With
 each of those the gateway file still loaded. The loader matches patterns against
 the file's absolute path, so use a `**/`-anchored glob:
 `"**/services/gateway/CLAUDE.md"`. This is the single most likely reason a
@@ -138,11 +138,11 @@ Clean up after the lab: delete `.claude/settings.local.json` and
 
 ## What students get wrong
 
-1. **A `claudeMdExcludes` entry that silently never matches** — bare relative
+1. **A `claudeMdExcludes` entry that silently never matches.** Bare relative
    paths and directory forms fail; only the `**/` glob held in the reference runs.
    The hook log turns "it seems excluded" into a checkable 0-vs-1 grep.
 2. **Duplicating root rules into the service file** ("just to be safe"). It
-   defeats the token math the next lab measures, and duplicated rules drift — the
+   defeats the token math the next lab measures, and duplicated rules drift: the
    copy Claude reads last wins unpredictably. The per-rule audit question ("does
    this apply to every service?") catches it fast.
 3. **Proving lazy loading with a contaminated session.** If the session already

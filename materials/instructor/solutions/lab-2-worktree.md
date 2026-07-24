@@ -1,4 +1,4 @@
-# Lab 2 solution — Base Branch Forensics (worktree isolation)
+# Lab 2 solution: Base Branch Forensics (worktree isolation)
 
 Source lab: `materials/fragments/worktree-isolation.html`.
 
@@ -46,13 +46,13 @@ The three checks the student must call out:
 
 1. The worktree lives under `.claude/worktrees/agent-<id>` on branch
    `worktree-agent-<id>` (the CLI names runs `agent-<hash>`, not after the agent).
-2. Both checkouts point at the same commit — the worktree branched from the session's
+2. Both checkouts point at the same commit: the worktree branched from the session's
    HEAD because the shipped settings say `"baseRef": "head"`.
 3. `git status` in the main checkout is clean while the agent is mid-edit; every
    change is inside the worktree.
 
 **Observed deviation to teach (2.1.218):** the fragment's claim that a no-change run
-removes its worktree automatically did not hold in the captured run — the worktree
+removes its worktree automatically did not hold in the captured run: the worktree
 survived holding only the `.venv` symlink. Cleanup is manual:
 
 ```bash
@@ -98,7 +98,7 @@ its own worktree, so the agent itself is the forensic instrument. Set
   git log --oneline -2 ; ls LAB2_MARKER.md
 ```
 
-Real result under `"fresh"` — the agent's worktree log came back as:
+Real result under `"fresh"`. The agent's worktree log came back as:
 
 ```text
 ce610db Merge notifications: require reason on NotificationEvent and log it
@@ -119,7 +119,7 @@ $ ls LAB2_MARKER.md
 LAB2_MARKER.md
 ```
 
-Same repo, same agent, same prompt — the only variable is `baseRef`, and the worktree
+Same repo, same agent, same prompt: the only variable is `baseRef`, and the worktree
 base moved exactly as predicted. If the run leaves a `worktree-*` branch behind,
 `git log --oneline -1 worktree-agent-<id>` and
 `git merge-base main worktree-agent-<id>` give the same proof from outside.
@@ -128,8 +128,8 @@ base moved exactly as predicted. If the run leaves a `worktree-*` branch behind,
 
 1. **Running the Hard tier on an `init.sh` copy and seeing no difference.** The
    shipped `init.sh` creates a local-only repo with no `origin` remote, and observed
-   on 2.1.218: with no `origin` to resolve, `"fresh"` falls back to the current HEAD
-   — both settings behave identically and the student concludes the gotcha is a myth.
+   on 2.1.218: with no `origin` to resolve, `"fresh"` falls back to the current HEAD,
+   so both settings behave identically and the student concludes the gotcha is a myth.
    The reference run above used a clone (`git clone ~/labs/refund-monorepo lab2-clone`)
    so `origin/main` exists. Have students do the same, or add a remote first.
 2. **Editing `settings.json` mid-session and expecting the running session to honor
@@ -137,7 +137,7 @@ base moved exactly as predicted. If the run leaves a `worktree-*` branch behind,
    them at start. Restart `claude` after each `baseRef` change.
 3. **Forensics on the wrong branch.** `git log` on `lab2-feature` instead of on the
    `worktree-*` branch (or inside the worktree) proves nothing about what the agent
-   saw. The evidence is the worktree's own log — via the agent's Bash report or
+   saw. The evidence is the worktree's own log, via the agent's Bash report or
    `git -C .claude/worktrees/agent-<id> log --oneline -2`.
 
 Verified: 2026-07-24 against sample-monorepo/python-fastapi

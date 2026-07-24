@@ -1,7 +1,7 @@
-# Lab 7 solution — Scope the Checkout (sparse worktrees)
+# Lab 7 solution: Scope the Checkout (sparse worktrees)
 
 Source lab: `materials/fragments/sparse-checkout.html` (Demo 7 is the Easy tier's
-template; the sample monorepo intentionally ships without `sparsePaths` — this lab
+template; the sample monorepo intentionally ships without `sparsePaths`, and this lab
 adds it).
 
 - **Easy:** configure `sparsePaths` so a payments worktree checks out only what payments work needs, then verify the worktree contents directory by directory against a written prediction.
@@ -11,10 +11,10 @@ adds it).
 
 The thinking step first: what does payments work actually need?
 
-- `services/payments` — the code under change.
-- `contracts` — the schemas the Stop-hook validator reads; without them
+- `services/payments`: the code under change.
+- `contracts`: the schemas the Stop-hook validator reads; without them
   `validate.sh` dies.
-- `.claude` — settings, hooks (`path_guard.py`, `agent_activity.py`), agents; rule 3
+- `.claude`: settings, hooks (`path_guard.py`, `agent_activity.py`), agents; rule 3
   says a root-level *directory* only exists if listed.
 - Nothing else: `specs/` is nice-to-have reading, `services/gateway` and
   `services/notifications` are exactly what we want off disk.
@@ -32,8 +32,8 @@ Edit `.claude/settings.json` so the `worktree` block reads:
 ```
 
 Restart `claude`, spawn a worktree agent on a payments pretext task ("add a docstring
-to services/payments — I want to inspect its checkout"), then verify from a second
-terminal. Real outputs — agent-created worktree from the captured Demo 7 run
+to services/payments; I want to inspect its checkout"), then verify from a second
+terminal. Real outputs: agent-created worktree from the captured Demo 7 run
 (`materials/captured/demo7-du.txt`), cross-checked 2026-07-24 by creating the same
 sparse checkout with git directly (`git worktree add --no-checkout` +
 `git sparse-checkout set --cone .claude services/payments contracts`):
@@ -59,7 +59,7 @@ ls: .../specs: No such file or directory
 Score the prediction against the three rules: root-level *files* (`init.sh`,
 `.gitignore`, `CHANGELOG.md`, `README.md`, root `CLAUDE.md`) came along for free;
 `.env` arrived via `.worktreeinclude` and `.venv` via `symlinkDirectories` (both are
-Claude Code machinery — a bare git sparse worktree has neither); `specs/` and the two
+Claude Code machinery; a bare git sparse worktree has neither); `specs/` and the two
 unlisted services simply do not exist.
 
 Size check (2026-07-24, scratch copy; BSD `du` uses `-I`, GNU uses `--exclude`):
@@ -89,12 +89,12 @@ $ ls "$WT/.claude"
 ls: .../.claude: No such file or directory
 ```
 
-Diagnosis to elicit from students — everything project-level that lives under
+Diagnosis to elicit from students: everything project-level that lives under
 `.claude/` is missing in the worktree session:
 
 - `settings.json` is gone: the `permissions.deny` rules (`dist/`, `build/`,
   `__pycache__/` reads) no longer apply, and the `PostToolUse` `agent_activity` hook
-  is not registered — the agent's tool calls stop appearing in
+  is not registered; the agent's tool calls stop appearing in
   `logs/tool_usage.jsonl`, which is usually the first symptom students notice.
 - `.claude/hooks/path_guard.py` is gone: an agent whose frontmatter wires the guard
   has a hook command pointing at a file that does not exist in its checkout. The
@@ -102,13 +102,13 @@ Diagnosis to elicit from students — everything project-level that lives under
 - `.claude/agents/` and `.claude/commands/` are gone: no agent definitions, no
   `/catchup`, no `/implement-across-services` inside that worktree.
 
-The failure is quiet, not loud — nothing errors at spawn time; protections are just
+The failure is quiet, not loud: nothing errors at spawn time; protections are just
 absent. That is why the fragment calls `.claude` the one path you must never leave
 off the list.
 
 Fix: restore `".claude"` as the first entry, restart, respawn. The worktree now shows
 `.claude` in `ls -A` and `git -C "$WT" sparse-checkout list`, the activity log
-resumes, and the hooks fire again — same checks as the Easy tier.
+resumes, and the hooks fire again, same checks as the Easy tier.
 
 Afterwards have students revert `settings.json` (or commit the Easy-tier list
 deliberately): later labs assume the shipped settings shape.
@@ -122,7 +122,7 @@ deliberately): later labs assume the shipped settings shape.
    `ls "$WT/.claude"` first.
 2. **Expecting `specs/` or another root directory to be present.** Rule 3 cuts both
    ways: root files come along, root *directories* do not. An agent that needs the
-   spec must have `specs` on the list — remember the list is one union shared by
+   spec must have `specs` on the list; remember the list is one union shared by
    every worktree in the session (rule 2), so adding it affects all agents.
 3. **Testing the change without restarting the session.** `sparsePaths` is read at
    session start; a list edited mid-session produces a worktree with the old shape
