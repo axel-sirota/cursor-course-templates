@@ -456,7 +456,7 @@
 
       <!-- ==================== SECTION 1: Introduction ==================== -->
       <section id="intro">
-<h2>Parallel Development: Subagents, Worktrees &amp; Monorepos <span class="timing-tag">&#9201; 15 min</span></h2>
+<h2>1. Parallel Development: Subagents, Worktrees &amp; Monorepos <span class="timing-tag">&#9201; 15 min</span></h2>
 
 <p>
   Here is the situation this course is built around: your feature touches three services in
@@ -803,8 +803,8 @@ claude</code></pre>
 </div>
 
 <p>
-  You succeeded when: the blocked attempt appears in the transcript with the hook&rsquo;s BLOCKED
-  message.
+  <strong>You succeeded when:</strong> the blocked attempt appears in the transcript with the
+  hook&rsquo;s BLOCKED message.
 </p>
 
 <div class="callout callout-solution">
@@ -1086,6 +1086,9 @@ git branch -D worktree-agent-ae1ac0745d7fc74a8</code></pre>
     Using <code>git log</code> on each run&rsquo;s <code>worktree-*</code> branch, prove which
     commit each worktree branched from &mdash; and predict, before looking, which run can see
     your feature-branch commit.
+    Run this tier in a clone of your copy (<code>git clone ~/labs/refund-monorepo lab2-clone</code>)
+    so <code>origin/main</code> exists; without a remote, baseRef <code>"fresh"</code> silently
+    falls back to <code>HEAD</code> and the contrast vanishes.
   </p>
 </div>
 <p>
@@ -1305,6 +1308,8 @@ gateway CLAUDE.md never loaded</code></pre>
     services&rsquo; <code>CLAUDE.md</code> files never appear in <code>/context</code>. Then add
     <code>claudeMdExcludes</code> to your settings to suppress one service&rsquo;s file entirely,
     read a file in that service, and verify with <code>/context</code> that the exclusion held.
+    If no new row appears in <code>/context</code>&rsquo;s Memory Files table (observed on 2.1.218
+    for mid-session lazy loads), the <code>InstructionsLoaded</code> log from Demo 3 is the witness.
   </p>
 </div>
 <p>
@@ -1388,16 +1393,19 @@ grep payments instructions-loaded.log || echo &quot;payments CLAUDE.md never loa
   course ships in <code>.claude/commands/catchup.md</code>) rebuilds exactly the working state you
   need by re-reading what changed &mdash; and because reading a service's files re-triggers that
   service's lazy <code>CLAUDE.md</code> load, the right nested rules come back as real files, not as
-  summary residue. The command runs four steps:
+  summary residue. The command runs five steps:
 </p>
 <ol class="steps">
   <li><code>git diff main...HEAD --name-only</code> to list the files changed on this branch
-      (falling back to <code>git status --short</code> when already on <code>main</code>).</li>
-  <li>Read each changed file.</li>
+      (falling back to <code>git status --short</code> when already on <code>main</code> or the
+      diff is empty).</li>
+  <li>Read each changed file in full.</li>
   <li>Read the <code>CLAUDE.md</code> of any service whose files appear in that list &mdash;
       re-triggering the lazy load of exactly the rules the work needs.</li>
-  <li>Summarize the state of the work in at most 10 bullets and state which memory files are now
-      loaded &mdash; which you verify with <code>/context</code>.</li>
+  <li>Summarize the state of the work in at most 10 bullets: what changed relative to
+      <code>main</code>, and what is in flight.</li>
+  <li>Declare which memory files are now loaded &mdash; which you verify with
+      <code>/context</code>.</li>
 </ol>
 
 <div class="callout callout-tip">
@@ -1409,9 +1417,9 @@ grep payments instructions-loaded.log || echo &quot;payments CLAUDE.md never loa
     flat layout vs. scoped layout, before compaction vs. after recovery.
   </p>
   <p>
-    Published real-world savings from scoping memory range from 40% to 92%. Your number is yours:
-    it depends on how much of your context was rule text to begin with. The lab below has you
-    measure it rather than quote it.
+    The captured runs below measured a 68.6% Memory-files reduction on this course&rsquo;s tiny
+    repo. Your number is yours: it depends on how much of your context was rule text to begin
+    with. The lab below has you measure it rather than quote it.
   </p>
 </div>
 
@@ -1543,6 +1551,8 @@ claude
     <code>/compact</code> mid-session, and show from the <code>/context</code> output that the
     nested rule file is no longer loaded. Then recover it with <code>/clear</code> +
     <code>/catchup</code> and prove from <code>/context</code> that it is back.
+    If no new row appears in <code>/context</code>&rsquo;s Memory Files table (observed on 2.1.218
+    for mid-session lazy loads), the <code>InstructionsLoaded</code> log from Demo 3 is the witness.
   </p>
 </div>
 <p>
@@ -1621,17 +1631,25 @@ caveat below).</p>
           </li>
         </ol>
         <p>
-          Two lines in the command file carry most of the weight. The first forces the fan-out to
-          actually be parallel:
+          Two passages in the command file carry most of the weight, quoted here as shipped. The
+          first forces the fan-out to actually be parallel:
         </p>
-        <pre><code class="language-markdown">CRITICAL: run these in PARALLEL using multiple Agent tool calls in a single message, not sequentially</code></pre>
+        <pre><code class="language-markdown">**CRITICAL**: Run these in PARALLEL using multiple Agent tool calls in a
+single message, not sequentially.</code></pre>
         <p>
           Without that line, the model will happily launch agent one, wait for it to finish, launch
           agent two, and so on &mdash; technically using subagents, practically sequential. Parallel
-          tool calls in a single message are what make three agents run at once. The second line
+          tool calls in a single message are what make three agents run at once. The second passage
           governs the way back:
         </p>
-        <pre><code class="language-markdown">MERGE PHASE (you are the sole merger): merge each agent's worktree branch back sequentially in dependency order — payments, then notifications, then gateway — running contracts/validate.sh &lt;service-dir&gt; after EACH merge</code></pre>
+        <pre><code class="language-markdown">**4. MERGE PHASE (you are the sole merger)**
+- Merge each agent's worktree branch back **sequentially**, in dependency
+  order:
+  1. `payments`
+  2. `notifications`
+  3. `gateway`
+- After EACH merge, run `contracts/validate.sh &lt;service-dir&gt;` for the service
+  just merged (e.g. `bash contracts/validate.sh services/payments`).</code></pre>
         <div class="callout callout-warning">
           <div class="callout-title">One Merger, Always</div>
           <p>
@@ -1814,13 +1832,10 @@ $ git worktree list
             last one. Resolve it without ever letting an agent merge its own branch.
           </p>
         </div>
-        <div class="callout callout-tip">
-          <div class="callout-title">You Succeeded When&hellip;</div>
-          <p>
-            You succeeded when: <code>git log --oneline --graph</code> shows three merged branches
-            and <code>validate.sh</code> passes for all services.
-          </p>
-        </div>
+        <p>
+          <strong>You succeeded when:</strong> <code>git log --oneline --graph</code> shows three
+          merged branches and <code>validate.sh</code> passes for all services.
+        </p>
 
 <div class="callout callout-solution">
   <div class="callout-title">Instructor: Solution (lab-5-parallel-run.md)</div>
@@ -2588,9 +2603,10 @@ payments-implementer:
 
 <p>
   <strong>You succeeded when:</strong> the task list shows claimed and completed tasks, and the
-  lead relayed at least one teammate report. If your environment delivers true peer-to-peer
-  messages (teammate definitions with team tools), note the difference from the relay pattern
-  you saw in Demo 8.
+  lead relayed at least one teammate report. Default teammates &mdash; the Easy tier&rsquo;s, spawned
+  without a restricted agent definition &mdash; have the team tools and do message each other
+  peer-to-peer; only teammates spawned from the restricted implementer definitions relay through
+  the lead. If you see true peer messages, note the difference from the relay pattern in Demo 8.
 </p>
 
 <div class="callout callout-solution">
@@ -2887,7 +2903,7 @@ flowchart TD
   <li id="ref-7"><a href="https://code.claude.com/docs/en/context-window" target="_blank" rel="noopener">Explore the context window</a></li>
   <li id="ref-8"><a href="https://code.claude.com/docs/en/costs" target="_blank" rel="noopener">Manage costs effectively</a></li>
   <li id="ref-9"><a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Hooks reference</a></li>
-  <li id="ref-10"><a href="claude-code-guide.html">Course 101 guide</a></li>
+  <li id="ref-10"><a href="../claude-code-guide.html">Course 101 guide</a></li>
 </ol>
 
 <div class="callout callout-tip">

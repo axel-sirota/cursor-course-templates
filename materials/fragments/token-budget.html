@@ -55,16 +55,19 @@
   course ships in <code>.claude/commands/catchup.md</code>) rebuilds exactly the working state you
   need by re-reading what changed &mdash; and because reading a service's files re-triggers that
   service's lazy <code>CLAUDE.md</code> load, the right nested rules come back as real files, not as
-  summary residue. The command runs four steps:
+  summary residue. The command runs five steps:
 </p>
 <ol class="steps">
   <li><code>git diff main...HEAD --name-only</code> to list the files changed on this branch
-      (falling back to <code>git status --short</code> when already on <code>main</code>).</li>
-  <li>Read each changed file.</li>
+      (falling back to <code>git status --short</code> when already on <code>main</code> or the
+      diff is empty).</li>
+  <li>Read each changed file in full.</li>
   <li>Read the <code>CLAUDE.md</code> of any service whose files appear in that list &mdash;
       re-triggering the lazy load of exactly the rules the work needs.</li>
-  <li>Summarize the state of the work in at most 10 bullets and state which memory files are now
-      loaded &mdash; which you verify with <code>/context</code>.</li>
+  <li>Summarize the state of the work in at most 10 bullets: what changed relative to
+      <code>main</code>, and what is in flight.</li>
+  <li>Declare which memory files are now loaded &mdash; which you verify with
+      <code>/context</code>.</li>
 </ol>
 
 <div class="callout callout-tip">
@@ -76,9 +79,9 @@
     flat layout vs. scoped layout, before compaction vs. after recovery.
   </p>
   <p>
-    Published real-world savings from scoping memory range from 40% to 92%. Your number is yours:
-    it depends on how much of your context was rule text to begin with. The lab below has you
-    measure it rather than quote it.
+    The captured runs below measured a 68.6% Memory-files reduction on this course&rsquo;s tiny
+    repo. Your number is yours: it depends on how much of your context was rule text to begin
+    with. The lab below has you measure it rather than quote it.
   </p>
 </div>
 
@@ -210,6 +213,8 @@ claude
     <code>/compact</code> mid-session, and show from the <code>/context</code> output that the
     nested rule file is no longer loaded. Then recover it with <code>/clear</code> +
     <code>/catchup</code> and prove from <code>/context</code> that it is back.
+    If no new row appears in <code>/context</code>&rsquo;s Memory Files table (observed on 2.1.218
+    for mid-session lazy loads), the <code>InstructionsLoaded</code> log from Demo 3 is the witness.
   </p>
 </div>
 <p>

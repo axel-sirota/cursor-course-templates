@@ -49,17 +49,25 @@
           </li>
         </ol>
         <p>
-          Two lines in the command file carry most of the weight. The first forces the fan-out to
-          actually be parallel:
+          Two passages in the command file carry most of the weight, quoted here as shipped. The
+          first forces the fan-out to actually be parallel:
         </p>
-        <pre><code class="language-markdown">CRITICAL: run these in PARALLEL using multiple Agent tool calls in a single message, not sequentially</code></pre>
+        <pre><code class="language-markdown">**CRITICAL**: Run these in PARALLEL using multiple Agent tool calls in a
+single message, not sequentially.</code></pre>
         <p>
           Without that line, the model will happily launch agent one, wait for it to finish, launch
           agent two, and so on &mdash; technically using subagents, practically sequential. Parallel
-          tool calls in a single message are what make three agents run at once. The second line
+          tool calls in a single message are what make three agents run at once. The second passage
           governs the way back:
         </p>
-        <pre><code class="language-markdown">MERGE PHASE (you are the sole merger): merge each agent's worktree branch back sequentially in dependency order — payments, then notifications, then gateway — running contracts/validate.sh &lt;service-dir&gt; after EACH merge</code></pre>
+        <pre><code class="language-markdown">**4. MERGE PHASE (you are the sole merger)**
+- Merge each agent's worktree branch back **sequentially**, in dependency
+  order:
+  1. `payments`
+  2. `notifications`
+  3. `gateway`
+- After EACH merge, run `contracts/validate.sh &lt;service-dir&gt;` for the service
+  just merged (e.g. `bash contracts/validate.sh services/payments`).</code></pre>
         <div class="callout callout-warning">
           <div class="callout-title">One Merger, Always</div>
           <p>
@@ -242,10 +250,7 @@ $ git worktree list
             last one. Resolve it without ever letting an agent merge its own branch.
           </p>
         </div>
-        <div class="callout callout-tip">
-          <div class="callout-title">You Succeeded When&hellip;</div>
-          <p>
-            You succeeded when: <code>git log --oneline --graph</code> shows three merged branches
-            and <code>validate.sh</code> passes for all services.
-          </p>
-        </div>
+        <p>
+          <strong>You succeeded when:</strong> <code>git log --oneline --graph</code> shows three
+          merged branches and <code>validate.sh</code> passes for all services.
+        </p>

@@ -187,6 +187,8 @@ gateway CLAUDE.md never loaded</code></pre>
     services&rsquo; <code>CLAUDE.md</code> files never appear in <code>/context</code>. Then add
     <code>claudeMdExcludes</code> to your settings to suppress one service&rsquo;s file entirely,
     read a file in that service, and verify with <code>/context</code> that the exclusion held.
+    If no new row appears in <code>/context</code>&rsquo;s Memory Files table (observed on 2.1.218
+    for mid-session lazy loads), the <code>InstructionsLoaded</code> log from Demo 3 is the witness.
   </p>
 </div>
 <p>
