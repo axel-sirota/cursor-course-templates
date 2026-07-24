@@ -154,6 +154,10 @@ database/local/
 # Planning docs (not checked in unless explicitly requested)
 plans/
 
+# Course-build tooling kept local (skills are tracked; the canonical wave workflow is not)
+.claude/workflows/
+.worktree-snapshots/
+
 # Terraform
 terraform_plans/
 *.tfstate
