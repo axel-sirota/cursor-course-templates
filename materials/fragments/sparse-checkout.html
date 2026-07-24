@@ -24,7 +24,7 @@
 
 <h3 id="sparse-three-rules">The Three Rules</h3>
 
-<p>Three rules govern how the list behaves, and each one bites if you forget it:</p>
+<p>Three rules govern how the list behaves,<sup><a href="#ref-3">[3]</a></sup> and each one bites if you forget it:</p>
 
 <ol>
   <li>
@@ -90,7 +90,7 @@ flowchart TB
         FSV --> FP["payments/"]
         FSV --> FN["notifications/"]
         FSV --> FG["gateway/"]
-        FDU(["du -sh: full size &mdash; see demo7-du capture"])
+        FDU(["du -sh, working files: 548K"])
     end
     subgraph SPARSE["Sparse worktree &mdash; sparsePaths: .claude, services/payments, contracts"]
         direction TB
@@ -100,7 +100,7 @@ flowchart TB
         SR --> SSV["services/"]
         SSV --> SP["payments/ &mdash; listed"]
         SGONE(["specs/, notifications/, gateway/<br/>NOT on disk"])
-        SDU(["du -sh: a fraction of full &mdash; see demo7-du capture"])
+        SDU(["du -sh, working files: 136K &mdash; ~4&times; smaller"])
     end
     FULL -.->|"worktree.sparsePaths"| SPARSE
     classDef absent stroke-dasharray: 5 5;
@@ -181,10 +181,22 @@ services/payments</code></pre>
     <h4>Measure the difference</h4>
     <pre><code class="language-bash">du -sh .
 du -sh "$WT"</code></pre>
-    <!-- CAPTURE: demo7-du -->
+    <p>The captured measurement:</p>
+    <pre><code class="language-text">$ du -sh .          # main checkout, everything included
+ 47M    .           # (.venv 46M + .git dominate)
+
+$ du -sh --exclude=.venv --exclude=.git .
+# --exclude is GNU du; BSD/macOS du lacks it — use: du -sh -I .venv -I .git .
+548K    .           # main checkout, working files only
+
+$ du -sh "$WT"
+136K    .claude/worktrees/agent-af28436fac63da09f</code></pre>
     <p>
-      The captured numbers go on Diagram D9. The absolute sizes depend on your machine;
-      the ratio is the lesson &mdash; and it grows with every package the repo adds.
+      The sparse worktree shares <code>.venv</code> (a symlink) and <code>.git</code> (worktree
+      machinery), so the honest comparison is working files: 548K full vs 136K sparse &mdash;
+      about 4&times; smaller on this deliberately tiny repo. Those numbers are on Diagram D9. The
+      absolute sizes depend on your machine; the ratio is the lesson &mdash; and it grows with
+      every package the repo adds.
     </p>
   </li>
 </ol>

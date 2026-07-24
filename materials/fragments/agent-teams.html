@@ -24,7 +24,7 @@
 
 <h3 id="team-architecture">The four moving parts</h3>
 
-<p>A team has exactly four pieces:</p>
+<p>A team has exactly four pieces:<sup><a href="#ref-4">[4]</a></sup></p>
 
 <ul>
   <li><strong>Team lead</strong> &mdash; your session. It breaks the goal into tasks, spawns
@@ -149,7 +149,8 @@ flowchart LR
   <div class="callout-title">Cost: a team is roughly 7&times; a single session</div>
   <p>
     Every teammate burns tokens like a full session, so a team multiplies your spend by roughly
-    the team size plus coordination overhead &mdash; about 7&times; for a typical setup. Keep
+    the team size plus coordination overhead &mdash; about 7&times; for a typical
+    setup.<sup><a href="#ref-8">[8]</a></sup> Keep
     teams at 3&ndash;5 teammates, run teammates on Sonnet, and shut the team down as soon as the
     work lands.
   </p>
@@ -161,6 +162,8 @@ flowchart LR
 </div>
 
 <h3 id="team-limitations">Known limitations</h3>
+
+<p>All documented, all real:<sup><a href="#ref-4">[4]</a></sup></p>
 
 <ul>
   <li>No session resume while in-process teammates are running &mdash; finish or shut down the team first.</li>
@@ -184,13 +187,18 @@ flowchart LR
   The demo implements <strong>Part 2 of <code>specs/feature-refunds.md</code></strong>: adding a
   required <code>reason</code> field to <code>NotificationEvent</code>. It is the ideal team job
   &mdash; a contract change that all three services consume, where the workers genuinely need to
-  talk to each other. With the flag enabled, the instructor starts from the monorepo root:
+  coordinate. One ownership detail learned from the live run: the schema file edit goes to the
+  <em>lead</em>, because the shipped <code>path_guard</code> hook fences payments-implementer
+  inside <code>services/payments/</code> &mdash; hand it <code>contracts/</code> and the hook
+  blocks the edit. With the flag enabled, the instructor starts from the monorepo root:
 </p>
 
 <pre><code class="language-text">Create an agent team to implement Part 2 of specs/feature-refunds.md.
 Spawn three teammates from the payments-implementer, notifications-implementer and
 gateway-implementer agent definitions. Partition ownership strictly:
-- payments-implementer owns contracts/notification.schema.json and services/payments/
+- you, the lead, own contracts/notification.schema.json — apply the approved
+  schema diff yourself (path_guard fences the teammates into their services)
+- payments-implementer owns services/payments/ and designs the schema change
 - notifications-implementer owns services/notifications/
 - gateway-implementer owns services/gateway/ and the end-to-end check
 The schema task blocks the other tasks. Require plan approval on the
@@ -205,11 +213,14 @@ schema task before any code is written.</code></pre>
     until the schema task completes, then unblock on their own.
   </li>
   <li>
-    <strong>A teammate challenging a teammate.</strong> In the captured run, payments-implementer
-    populated <code>reason</code> with free-form prose; notifications-implementer messaged it directly to
-    demand the machine-readable identifiers the spec requires
-    (<code>refund_approved</code>, <code>refund_rejected_amount_exceeds_payment</code>) &mdash;
-    and payments-implementer changed its implementation. No lead involvement, no human involvement.
+    <strong>Coordination through the lead.</strong> Peer-to-peer messaging is the documented
+    design, but the shipped implementer definitions allowlist only Read, Grep, Glob, Edit, Write,
+    and Bash &mdash; no team tools &mdash; so in the captured run every one of the 31 messages was
+    a lead&ndash;teammate relay. Watch the lead carry the coordination: payments-implementer
+    surfaces its blockers at the plan gate, the lead approves with a scope cut, concedes a
+    correction (&ldquo;you were right about path_guard and I was wrong&rdquo;), and relays the
+    unblocks as each dependency lands. Give the teammate definitions the team tools and you get
+    true peer messages instead.
   </li>
   <li>
     <strong>The lead&rsquo;s synthesis.</strong> When the last task completes, the lead verifies
@@ -218,24 +229,44 @@ schema task before any code is written.</code></pre>
   </li>
 </ol>
 
-<!-- CAPTURE: demo8-team-transcript -->
-<pre><code class="language-text">[transcript excerpt from the captured run]
+<pre><code class="language-text"># Captured run, claude 2.1.218 — verbatim excerpts, trimmed with "…"
 
-● Task claimed: "Add required reason to notification.schema.json" (payments-implementer)
-● Plan approved by lead — payments-implementer may edit the schema
-● Task completed: schema change — 2 dependent tasks unblocked
-● Task claimed: "Reject events without reason; log it" (notifications-implementer)
-● Task claimed: "Verify gateway pass-through + e2e" (gateway-implementer)
-✉ notifications-implementer → payments-implementer:
-    "Your emitted reason is prose ('the refund was approved because…').
-     The spec calls for machine-readable values like refund_approved.
-     I am validating against identifiers — please emit those."
-✉ payments-implementer → notifications-implementer:
-    "Agreed — switching to refund_approved /
-     refund_rejected_amount_exceeds_payment. Re-check after my next push."
-● Task completed: notifications validation + logging
-● Task completed: gateway e2e — all Part 1 criteria still pass
-● Lead: synthesis — Part 2 acceptance criteria met across all three services</code></pre>
+## Task board — creation, ownership, dependencies
+● TaskCreate #1 "Add required `reason` to NotificationEvent schema + emit it from payments"
+● TaskCreate #2 "Make notifications require and log the `reason` field"
+● TaskCreate #3 "Verify gateway is unaffected and run the end-to-end Part 2 check"
+● TaskUpdate #1 owner: payments-implementer, blocks: [#2, #3]
+● TaskUpdate #2 owner: notifications-implementer, blocks: [#3]
+● TaskUpdate #3 owner: gateway-implementer
+● Lead: "Task board is set up with the dependency chain. Now spawning the three teammates."
+
+## Plan-approval gate on the schema task (teammate → lead)
+payments-implementer:
+    "I've completed the read-only investigation and am stopping at the
+     plan-approval gate. Two blockers to surface first. …
+     Blocker 1 — I have no team tools: my toolset in this session is only
+     Read / Edit / Write / Bash … please treat this final message as the
+     SendMessage to main, approve or revise it in your reply."
+
+## Mailbox — every message is a lead ↔ teammate relay (31 in total)
+✉ lead → payments-implementer:
+    "PLAN APPROVED, with one scope cut. Both your blockers are resolved …
+     I will do all board updates and all teammate relays. Task #1 is now in_progress"
+✉ lead → payments-implementer:
+    "CORRECTION — you were right about path_guard and I was wrong. …
+     the hook is actually wired in your own agent definition frontmatter"
+✉ lead → notifications-implementer:
+    "UNBLOCKED — the schema has landed on `main` as commit `e5b2fa4`."
+✉ lead → gateway-implementer:
+    "UNBLOCKED — tasks #1 and #2 have both landed on `main`. Task #3 is now
+     in_progress under your name. Run the real Part 2 end-to-end verification."
+
+## Lead synthesis
+    "Part 2 is complete and verified. Working tree clean, all three tasks closed.
+     One service per commit, merged in dependency order: schema → payments →
+     notifications. 31 passed, 0 failed (gateway 7, payments 13, notifications 11);
+     8/8 fixtures PASS. … a live POST /refunds through the gateway produced a real
+     logged notification carrying \"reason\":\"refund_approved\", end to end."</code></pre>
 
 <h3 id="lab-agent-team">Lab 8 &mdash; a small team of your own</h3>
 
@@ -266,6 +297,8 @@ schema task before any code is written.</code></pre>
 </div>
 
 <p>
-  <strong>You succeeded when:</strong> the task list shows claimed and completed tasks, and at
-  least one teammate-to-teammate message exists.
+  <strong>You succeeded when:</strong> the task list shows claimed and completed tasks, and the
+  lead relayed at least one teammate report. If your environment delivers true peer-to-peer
+  messages (teammate definitions with team tools), note the difference from the relay pattern
+  you saw in Demo 8.
 </p>

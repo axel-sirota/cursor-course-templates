@@ -25,8 +25,11 @@
     a stray <code>rm</code> or test command cannot touch your main checkout.
   </li>
   <li>
-    If the run ends with <em>no changes</em>, the worktree and its branch are removed
-    automatically. Nothing to clean up.
+    The docs describe auto-cleanup: a run that ends with <em>no changes</em> should have its
+    worktree and branch removed automatically. On CLI 2.1.218 we observed the worktree
+    <em>persisting</em> after a no-change run &mdash; holding only the <code>.venv</code> symlink
+    &mdash; so budget for manual cleanup with <code>git worktree remove</code>. Demo&nbsp;2 shows
+    it live.
   </li>
   <li>
     If the agent did commit work, the worktree stays behind so you can inspect, cherry-pick, or
@@ -49,7 +52,7 @@
   <p>
     By default, a new agent worktree branches from the repository&rsquo;s <strong>default
     branch</strong> (usually <code>main</code>) &mdash; <em>not</em> from your current
-    <code>HEAD</code>. If your feature spec, contracts, or scaffolding live on a feature branch,
+    <code>HEAD</code>.<sup><a href="#ref-2">[2]</a></sup> If your feature spec, contracts, or scaffolding live on a feature branch,
     every worktree-isolated agent silently implements against code that does not contain them.
     The agents look busy, the diffs look plausible, and the result is wrong.
   </p>
@@ -161,16 +164,17 @@ entry to CHANGELOG.md. Keep entries to one line each.</code></pre>
     <p>While the agent runs, list worktrees and branches from the repo root:</p>
     <pre><code class="language-bash">git worktree list
 git branch --list 'worktree-*'</code></pre>
-    <!-- CAPTURE: demo2-worktree-list -->
     <pre><code class="language-text">$ git worktree list
-/Users/you/sample-monorepo                                    3f2a1c9 [main]
-/Users/you/sample-monorepo/.claude/worktrees/changelog-scribe 3f2a1c9 [worktree-changelog-scribe]
+/private/tmp/refund-monorepo                                           cc106e8 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-a3643a1fcff8ba6e5 cc106e8 [worktree-agent-a3643a1fcff8ba6e5] locked
 
 $ git branch --list 'worktree-*'
-  worktree-changelog-scribe</code></pre>
++ worktree-agent-a3643a1fcff8ba6e5</code></pre>
     <p>
-      Both checkouts point at the same base commit &mdash; the agent branched from your
-      <code>HEAD</code> because <code>baseRef</code> is <code>"head"</code>.
+      Both checkouts point at the same commit, <code>cc106e8</code> &mdash; a commit made minutes
+      earlier on <code>main</code>. The agent branched from your <code>HEAD</code> because
+      <code>baseRef</code> is <code>"head"</code>; a default-branch worktree would sit on the
+      older initial commit.
     </p>
   </li>
 
@@ -182,26 +186,30 @@ $ git branch --list 'worktree-*'
 nothing to commit, working tree clean</code></pre>
     <p>
       The agent is editing files <em>right now</em>, and your working tree shows nothing. All of
-      its changes live in <code>.claude/worktrees/changelog-scribe</code>.
+      its changes live in the <code>.claude/worktrees/agent-&hellip;</code> directory you just saw
+      in <code>git worktree list</code>.
     </p>
   </li>
 
   <li>
-    <h4>Watch a no-change run vanish</h4>
+    <h4>See what a no-change run leaves behind</h4>
     <p>
       Run the agent again with a task that produces no edits (&ldquo;check whether the changelog
-      already covers the refunds feature &mdash; change nothing&rdquo;). When it finishes:
+      already covers the refunds feature &mdash; change nothing&rdquo;). The docs describe
+      auto-cleanup for this case; on CLI 2.1.218 we observed the worktree persisting instead,
+      holding only the <code>.venv</code> symlink that <code>symlinkDirectories</code> put there:
     </p>
-    <pre><code class="language-bash">git worktree list
-git branch --list 'worktree-*'</code></pre>
     <pre><code class="language-text">$ git worktree list
-/Users/you/sample-monorepo  3f2a1c9 [main]
+/private/tmp/refund-monorepo                                           1632699 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-ae1ac0745d7fc74a8 1632699 [worktree-agent-ae1ac0745d7fc74a8]
 
-$ git branch --list 'worktree-*'</code></pre>
+$ git status --short   # run inside the leftover worktree
+?? .venv               # only the .venv symlink from worktree.symlinkDirectories</code></pre>
     <p>
-      No changes, no worktree, no branch. The isolation machinery cleans up after itself when
-      there is nothing worth keeping.
+      So treat cleanup as manual until your CLI version proves otherwise:
     </p>
+    <pre><code class="language-bash">git worktree remove --force .claude/worktrees/agent-ae1ac0745d7fc74a8
+git branch -D worktree-agent-ae1ac0745d7fc74a8</code></pre>
   </li>
 </ol>
 

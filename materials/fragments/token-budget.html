@@ -28,11 +28,12 @@
 </table>
 <p>
   The row that matters for this module is <strong>Memory files</strong>. It is not just a number
-  &mdash; it lists each loaded file by path. That list is the verification surface for everything in
-  the previous section: after <code>/clear</code> on a scoped layout you should see the root
-  <code>CLAUDE.md</code> only; after touching a payments file you should see
-  <code>services/payments/CLAUDE.md</code> appear. If a nested file shows up before you touched its
-  service, your scoping is wrong &mdash; the list tells you so immediately.
+  &mdash; it lists each loaded file by path. That list is the verification surface for the
+  launch-time half of the previous section&rsquo;s rules: after <code>/clear</code> on a scoped
+  layout you should see the root <code>CLAUDE.md</code> only; on the flat layout, the one fat file.
+  One caveat, measured in Demo&nbsp;4: on CLI 2.1.218 the table shows the files loaded at session
+  launch &mdash; a mid-session lazy load is proven by the <code>InstructionsLoaded</code> hook log
+  from Demo&nbsp;3, not by a new row here.
 </p>
 <p>
   Do not confuse the two budget commands. <code>/context</code> shows what is occupying the current
@@ -82,22 +83,20 @@
 </div>
 
 <p>
-  Diagram D6 shows the shape of the result you are about to produce: two context windows measured
-  right after <code>/clear</code>, one per layout. The Memory-files segment is the only one that
-  moves &mdash; and it is the one you control.
+  Diagram D6 shows the result, with the real numbers from the captured runs below: two context
+  windows measured on the same machine, one per layout. The Memory-files segment is the only one
+  that moves &mdash; and it is the one you control.
 </p>
 
-<!-- D6 segment counts are placeholders — swap in the real values from the
-     demo4-context-before / demo4-context-after captured runs. -->
 <div class="mermaid">
 flowchart TB
-    subgraph FLAT["flat-claude-md branch &mdash; /context after /clear"]
+    subgraph FLAT["flat-claude-md branch &mdash; /context, 20.9k total"]
         direction LR
-        F1["System prompt<br/>~3k"] --- F2["System tools<br/>~12k"] --- F3["MCP tools<br/>~5k"] --- F4["Memory files<br/>~18k<br/>(one fat root file)"] --- F5["Messages<br/>~0k"] --- F6["Free space"]
+        F1["System prompt<br/>3.4k"] --- F2["System tools<br/>13k"] --- F3["Agents + skills<br/>1.8k"] --- F4["Memory files<br/>2.6k<br/>(one fat root file)"] --- F5["Messages<br/>8"] --- F6["Free space<br/>979.1k"]
     end
-    subgraph NESTED["nested + scoped (main) &mdash; /context after /clear"]
+    subgraph NESTED["nested + scoped (main) &mdash; /context, 19k total"]
         direction LR
-        N1["System prompt<br/>~3k"] --- N2["System tools<br/>~12k"] --- N3["MCP tools<br/>~5k"] --- N4["Memory files<br/>~2k<br/>(root only)"] --- N5["Messages<br/>~0k"] --- N6["Free space"]
+        N1["System prompt<br/>3.4k"] --- N2["System tools<br/>13k"] --- N3["Agents + skills<br/>1.8k"] --- N4["Memory files<br/>817<br/>(root only)<br/>&minus;68.6% vs flat"] --- N5["Messages<br/>8"] --- N6["Free space<br/>981k"]
     end
     FLAT ~~~ NESTED
     style F4 fill:#e65100,color:#fff
@@ -122,12 +121,27 @@ claude
 &gt; /context
 </code></pre>
 <p>
-  Record the Memory files line &mdash; one entry, the fat root <code>CLAUDE.md</code>, every rule for
-  every service loaded whether this session needs them or not:
+  Record the Memory files category &mdash; one entry, the fat root <code>CLAUDE.md</code>, every
+  rule for every service loaded whether this session needs them or not. The captured run (trimmed
+  to the two tables that matter):
 </p>
-<!-- CAPTURE: demo4-context-before -->
-<pre><code class="language-text">Memory files: <em>(captured run goes here)</em>
-</code></pre>
+<pre><code class="language-text">## Context Usage — flat-claude-md
+**Tokens:** 20.9k / 1m (2%)
+
+| Category      | Tokens | Percentage |
+|---------------|--------|------------|
+| System prompt | 3.4k   | 0.3%       |
+| System tools  | 13k    | 1.3%       |
+| Custom agents | 114    | 0.0%       |
+| Memory files  | 2.6k   | 0.3%       |
+| Skills        | 1.7k   | 0.2%       |
+| Messages      | 8      | 0.0%       |
+| Free space    | 979.1k | 97.9%      |
+
+### Memory Files
+| Type    | Path                                   | Tokens |
+|---------|----------------------------------------|--------|
+| Project | /private/tmp/refund-monorepo/CLAUDE.md | 2.6k   |</code></pre>
 <p>Now the scoped layout. Exit, switch branches, and repeat the measurement:</p>
 <pre><code class="language-bash">git checkout main
 claude
@@ -137,22 +151,47 @@ claude
 </code></pre>
 <p>
   The Memory files list now shows the root <code>CLAUDE.md</code> only &mdash; the service files
-  exist on disk but none are loaded. Then touch one payments file to trigger the lazy load and
-  measure a third time:
+  exist on disk but none are loaded. Same machine, same session setup, captured minutes apart:
+</p>
+<pre><code class="language-text">## Context Usage — main (nested + scoped)
+**Tokens:** 19k / 1m (2%)
+
+| Category      | Tokens | Percentage |
+|---------------|--------|------------|
+| System prompt | 3.4k   | 0.3%       |
+| System tools  | 13k    | 1.3%       |
+| Custom agents | 114    | 0.0%       |
+| Memory files  | 817    | 0.1%       |
+| Skills        | 1.7k   | 0.2%       |
+| Messages      | 8      | 0.0%       |
+| Free space    | 981k   | 98.1%      |
+
+### Memory Files
+| Type    | Path                                   | Tokens |
+|---------|----------------------------------------|--------|
+| Project | /private/tmp/refund-monorepo/CLAUDE.md | 817    |</code></pre>
+<p>
+  That is the measured delta: <strong>2.6k flat vs 817 scoped &mdash; the Memory-files category is
+  68.6% smaller</strong> before any work has happened. Then touch one payments file to trigger the
+  lazy load:
 </p>
 <pre><code class="language-text">&gt; Read services/payments/README.md and summarize what this service does.
 &gt; /context
 </code></pre>
 <p>
-  <code>services/payments/CLAUDE.md</code> has joined the list &mdash; and only it. Gateway and
-  notifications rules stay on disk, unloaded:
+  Here the instrument has a blind spot, and it is worth teaching precisely. On CLI 2.1.218 the
+  lazily loaded <code>services/payments/CLAUDE.md</code> does <em>not</em> appear in
+  <code>/context</code>&rsquo;s Memory Files table &mdash; that table shows the files loaded at
+  session launch. The proof that the lazy load happened is the <code>InstructionsLoaded</code> hook
+  log from Demo&nbsp;3 (<code>load_reason: "nested_traversal"</code>, triggered by the payments
+  README), and <code>/context</code> shows the cost indirectly: the Messages category grew from 8
+  to 4.2k tokens after the read, because the freshly loaded rules ride there. Gateway and
+  notifications rules stay on disk, unloaded &mdash; the hook log stays silent about both.
 </p>
-<!-- CAPTURE: demo4-context-after -->
-<pre><code class="language-text">Memory files: <em>(captured run goes here)</em>
-</code></pre>
 <p>
-  Three readings, one story: the flat branch pays the full rule bill up front; the scoped branch
-  pays a small baseline and then only for the service in play.
+  Two <code>/context</code> readings plus one hook log, one story: the flat branch pays the full
+  rule bill at launch; the scoped branch pays a small baseline &mdash; 68.6% less &mdash; and then
+  only for the service in play, at the moment it comes into play.
 </p>
 
 <h3 id="lab-context-measurement">Lab 4 &mdash; Your Own Numbers</h3>

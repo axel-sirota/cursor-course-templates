@@ -53,7 +53,8 @@ flowchart TB
 
 <p>
   Everything about an agent is declared in the YAML frontmatter of its
-  <code>.claude/agents/&lt;name&gt;.md</code> file. These are the fields you will use in this course:
+  <code>.claude/agents/&lt;name&gt;.md</code> file.<sup><a href="#ref-1">[1]</a></sup> These are the
+  fields you will use in this course:
 </p>
 
 <table>
@@ -158,29 +159,47 @@ claude</code></pre>
 
 <p>
   In the transcript, every read may roam (the agent is allowed to <em>look at</em> contracts and
-  neighbors), but every <code>Edit</code> and <code>Write</code> stays inside <code>services/payments/</code>:
+  neighbors), but every <code>Edit</code> and <code>Write</code> stays inside <code>services/payments/</code>.
+  This is the captured run &mdash; the agent ran in its own worktree, so paths carry a
+  <code>.claude/worktrees/agent-&hellip;</code> prefix, elided here as <code>&hellip;/worktrees/</code>:
 </p>
 
-<!-- CAPTURE: demo1-transcript -->
-<pre><code class="language-text">⏺ Task(payments-implementer): add an amount-format check to payments
-  ⎿ Read(services/payments/README.md)
-  ⎿ Read(contracts/payment.schema.json)
-  ⎿ Edit(services/payments/src/refunds.py)
-  ⎿ Bash(.venv/bin/python3 -m pytest services/payments -q)
-      12 passed
+<pre><code class="language-text">⏺ Task(payments-implementer): Add an amount-format check to the payments service
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/services/payments/CLAUDE.md)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/contracts/refund.schema.json)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/contracts/payment.schema.json)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/specs/feature-refunds.md)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/refunds.py)
+  ⎿ Edit(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/refunds.py)
+  ⎿ Write(…/worktrees/agent-af6b4c6ff73787998/services/payments/tests/test_amount_format.py)
+  ⎿ Edit(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/main.py)
+  ⎿ Bash(cd …/worktrees/agent-af6b4c6ff73787998/services/payments &amp;&amp; ../../.venv/bin/python3 -m pytest -q)
+      27 passed (23 new)
+  ⎿ Bash(contracts/validate.sh services/payments; echo "exit=$?")
+      3 PASS, exit=0
   ⎿ Agent reply (final message):
       {
         "agent": "payments-implementer",
-        "task": "add an amount-format check to payments",
+        "task": "Add a contract-derived amount-format check to services/payments,
+                 run before the approve/reject decision, with tests and contract validation",
         "status": "green",
-        "files_changed": ["services/payments/src/refunds.py"],
-        "tests_run": ".venv/bin/python3 -m pytest services/payments — 12 passed",
-        "notes": ""
+        "files_changed": [
+          "services/payments/src/refunds.py",
+          "services/payments/src/main.py",
+          "services/payments/tests/test_amount_format.py",
+          "services/payments/fixtures/refund_request.json",
+          "services/payments/CLAUDE.md",
+          "services/payments/README.md"
+        ],
+        "tests_run": "pytest -&gt; 27 passed, 0 failed (23 new);
+                      contracts/validate.sh services/payments -&gt; 3 PASS, exit 0",
+        "notes": "Rules taken from contracts/refund.schema.json definitions.RefundRequest"
       }</code></pre>
 
 <p>
   Two things to point at in the real run: the only files under <code>Edit</code>/<code>Write</code> are
-  payments files, and the final message is exactly the machine-checkable report the agent&rsquo;s
+  payments files (reads roamed to <code>contracts/</code> and the spec; the write fence never had to
+  fire), and the final message is exactly the machine-checkable report the agent&rsquo;s
   system prompt demanded.
 </p>
 
