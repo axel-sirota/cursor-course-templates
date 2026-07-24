@@ -1,0 +1,2957 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parallel Development: Subagents, Worktrees &amp; Monorepos &mdash; INSTRUCTOR EDITION</title>
+
+  <!-- Pico.css v2 classless indigo variant -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.indigo.min.css" />
+
+  <!-- Google Fonts: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js: Tomorrow theme + core languages -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+  <style>
+    /* ===== Base Overrides ===== */
+    :root {
+      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-family-monospace: 'JetBrains Mono', 'Fira Code', monospace;
+      --toc-width: 260px;
+      --header-height: 0px;
+      --callout-tip: #2e7d32;
+      --callout-warning: #e65100;
+      --callout-info: #1565c0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --callout-tip: #66bb6a;
+        --callout-warning: #ff9800;
+        --callout-info: #42a5f5;
+      }
+    }
+
+    [data-theme="dark"] {
+      --callout-tip: #66bb6a;
+      --callout-warning: #ff9800;
+      --callout-info: #42a5f5;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-family);
+      margin: 0;
+      padding: 0;
+    }
+
+    code, pre, kbd, samp {
+      font-family: var(--font-family-monospace);
+    }
+
+    /* ===== Hero Header ===== */
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem 2rem;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #4a1a6b 100%);
+      color: #e0e0e0;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .hero .subtitle {
+      font-size: 1.15rem;
+      opacity: 0.85;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-indigo { background: #7c4dff; color: #fff; }
+    .badge-teal { background: #00897b; color: #fff; }
+    .badge-amber { background: #ff8f00; color: #fff; }
+    .badge-beta {
+      background: #7c4dff;
+      color: #fff;
+      font-size: 0.7rem;
+      vertical-align: super;
+      padding: 0.15rem 0.5rem;
+    }
+
+    /* ===== Layout: Sidebar + Main ===== */
+    .page-wrapper {
+      display: block;
+    }
+
+    @media (min-width: 992px) {
+      .page-wrapper {
+        display: grid;
+        grid-template-columns: var(--toc-width) 1fr;
+        min-height: 100vh;
+      }
+    }
+
+    /* ===== Sidebar / TOC ===== */
+    .sidebar {
+      display: none;
+    }
+
+    @media (min-width: 992px) {
+      .sidebar {
+        display: block;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 1.5rem 1rem;
+        border-right: 1px solid var(--pico-muted-border-color, #ddd);
+        font-size: 0.85rem;
+        background: var(--pico-background-color, #fff);
+      }
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar nav ul li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .sidebar nav ul li a {
+      display: block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      text-decoration: none;
+      color: var(--pico-color, #333);
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.4;
+    }
+
+    .sidebar nav ul li a:hover,
+    .sidebar nav ul li a.active {
+      background: var(--pico-primary-background, #7c4dff);
+      color: var(--pico-primary-inverse, #fff);
+    }
+
+    .sidebar nav ul li.sub a {
+      padding-left: 1.5rem;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .sidebar-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.75rem;
+      color: var(--pico-muted-color, #666);
+    }
+
+    /* Mobile TOC */
+    .mobile-toc {
+      display: block;
+      margin: 1rem;
+    }
+
+    @media (min-width: 992px) {
+      .mobile-toc {
+        display: none;
+      }
+    }
+
+    .mobile-toc summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .mobile-toc ul {
+      list-style: none;
+      padding-left: 0.5rem;
+    }
+
+    .mobile-toc ul li a {
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    /* ===== Main Content ===== */
+    .main-content {
+      max-width: 54rem;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .main-content section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 1rem;
+    }
+
+    .main-content h2 {
+      border-bottom: 2px solid var(--pico-primary, #7c4dff);
+      padding-bottom: 0.4rem;
+      margin-top: 2.5rem;
+    }
+
+    .main-content h3 {
+      margin-top: 1.8rem;
+    }
+
+    /* ===== Callout Boxes ===== */
+    .callout {
+      border-left: 4px solid;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 6px 6px 0;
+      background: color-mix(in srgb, var(--callout-color) 8%, transparent);
+    }
+
+    .callout-tip    { --callout-color: var(--callout-tip);     border-color: var(--callout-tip); }
+    .callout-warning { --callout-color: var(--callout-warning); border-color: var(--callout-warning); }
+    .callout-info   { --callout-color: var(--callout-info);    border-color: var(--callout-info); }
+
+    .callout .callout-title {
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      color: var(--callout-color);
+    }
+
+    .callout p { margin: 0.3rem 0; }
+
+    /* ===== Quote ===== */
+    blockquote.philosophy {
+      border-left: 4px solid var(--pico-primary, #7c4dff);
+      font-style: italic;
+      font-size: 1.1rem;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    /* ===== Tables ===== */
+    .main-content table {
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      font-weight: 600;
+    }
+
+    /* ===== Screenshot Placeholder ===== */
+    .screenshot-placeholder {
+      border: 2px dashed var(--pico-muted-border-color, #ccc);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      color: var(--pico-muted-color, #999);
+      font-style: italic;
+      margin: 1rem 0;
+      background: color-mix(in srgb, var(--pico-muted-color, #999) 5%, transparent);
+    }
+
+    /* ===== Steps List ===== */
+    .steps {
+      counter-reset: step-counter;
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .steps li {
+      counter-increment: step-counter;
+      position: relative;
+      padding-left: 3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .steps li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--pico-primary, #7c4dff);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    /* ===== Mermaid ===== */
+    .mermaid {
+      text-align: center;
+      margin: 1.5rem 0;
+    }
+
+    /* ===== Footer ===== */
+    footer.site-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--pico-muted-color, #999);
+      border-top: 1px solid var(--pico-muted-border-color, #ddd);
+    }
+
+    /* ===== Print ===== */
+    @media print {
+      .sidebar, .mobile-toc, .hero .badge-row { display: none; }
+      .page-wrapper { display: block; }
+      .hero { padding: 1rem; }
+      .hero h1 { font-size: 1.5rem; }
+      pre { white-space: pre-wrap; word-wrap: break-word; }
+      .mermaid { break-inside: avoid; }
+      section { break-inside: avoid; }
+    }
+
+    /* ===== Code Blocks ===== */
+    pre[class*="language-"] {
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    code:not([class*="language-"]) {
+      background: color-mix(in srgb, var(--pico-muted-color, #999) 12%, transparent);
+      padding: 0.15rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.88em;
+    }
+
+    /* ===== Command table highlight ===== */
+    .cmd-name {
+      font-family: var(--font-family-monospace);
+      font-weight: 600;
+      color: var(--pico-primary, #7c4dff);
+    }
+
+    /* ===== Lifecycle table category header ===== */
+    .lifecycle-category {
+      background: color-mix(in srgb, var(--pico-primary, #7c4dff) 10%, transparent);
+      font-weight: 700;
+    }
+
+    /* Dark mode auto-switch for Pico */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        color-scheme: dark;
+      }
+      .hero {
+        background: linear-gradient(135deg, #0d0520 0%, #1a0e30 50%, #2d0f45 100%);
+      }
+    }
+  
+/* ---- instructor edition additions ---- */
+.instructor-banner { background: #14532d; color: #dcfce7; padding: 10px 18px;
+  font-weight: 600; letter-spacing: .03em; text-align: center; }
+.instructor-banner small { display: block; font-weight: 400; opacity: .85; }
+.callout-solution { border-left: 4px solid #16a34a; background: rgba(22,163,74,.08); }
+.callout-solution .callout-title { color: #16a34a; }
+.callout-solution details summary { cursor: pointer; font-weight: 600; margin: .3em 0; }
+.timing-tag { font-size: .55em; font-weight: 600; vertical-align: middle;
+  background: rgba(22,163,74,.15); color: #16a34a; border-radius: 10px;
+  padding: 2px 10px; margin-left: 10px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="instructor-banner">INSTRUCTOR EDITION &mdash; do not distribute to participants
+<small>Timing tags on every section &middot; if running late, cut in this order: Lab 7 Hard &rarr; Lab 8 Hard &rarr; Demo 7 &middot; solutions in green callouts after each lab</small></div>
+
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <h1>Parallel Development</h1>
+    <p class="subtitle">Subagents, Worktrees &amp; Monorepos with Claude Code</p>
+    <div class="badge-row">
+      <span class="badge badge-indigo">Subagents</span>
+      <span class="badge badge-teal">Worktrees</span>
+      <span class="badge badge-amber">Monorepos</span>
+      <span class="badge badge-indigo">Agent Teams</span>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE TOC ===== -->
+  <details class="mobile-toc">
+    <summary>Table of Contents</summary>
+    <ul>
+      <li><a href="#intro">1. Introduction</a></li>
+      <li><a href="#subagent-architecture">2. Subagent Architecture</a></li>
+      <li><a href="#worktree-isolation">3. Worktree Isolation</a></li>
+      <li><a href="#nested-claude-md">4. Nested CLAUDE.md</a></li>
+      <li><a href="#token-budget">5. Token Budget</a></li>
+      <li><a href="#parallel-implementation">6. Parallel Implementation</a></li>
+      <li><a href="#contract-hooks">7. Contract Hooks</a></li>
+      <li><a href="#sparse-checkout">8. Sparse Checkout</a></li>
+      <li><a href="#agent-teams">9. Agent Teams</a></li>
+      <li><a href="#capstone">10. Capstone</a></li>
+      <li><a href="#references">11. References</a></li>
+    </ul>
+  </details>
+
+  <div class="page-wrapper">
+
+    <!-- ===== SIDEBAR TOC ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">Contents</div>
+      <nav>
+        <ul>
+          <li><a href="#intro">1. Introduction</a></li>
+          <li class="sub"><a href="#workflow-recap">The 101 workflow recap</a></li>
+          <li><a href="#subagent-architecture">2. Subagent Architecture</a></li>
+          <li class="sub"><a href="#lab-service-agent">Lab 1 &mdash; Notifications agent</a></li>
+          <li><a href="#worktree-isolation">3. Worktree Isolation</a></li>
+          <li class="sub"><a href="#lab-worktree">Lab 2 &mdash; Base branch forensics</a></li>
+          <li><a href="#nested-claude-md">4. Nested CLAUDE.md</a></li>
+          <li class="sub"><a href="#lab-nested-claude-md">Lab 3 &mdash; Author a service context</a></li>
+          <li><a href="#token-budget">5. Token Budget</a></li>
+          <li class="sub"><a href="#lab-context-measurement">Lab 4 &mdash; Your own numbers</a></li>
+          <li><a href="#parallel-implementation">6. Parallel Implementation</a></li>
+          <li class="sub"><a href="#lab-parallel-run">Lab 5 &mdash; Run it and race it</a></li>
+          <li><a href="#contract-hooks">7. Contract Hooks</a></li>
+          <li class="sub"><a href="#lab-contract-gate">Lab 6 &mdash; Break it yourself</a></li>
+          <li><a href="#sparse-checkout">8. Sparse Checkout</a></li>
+          <li class="sub"><a href="#lab-sparse-paths">Lab 7 &mdash; Scope the checkout</a></li>
+          <li><a href="#agent-teams">9. Agent Teams</a></li>
+          <li class="sub"><a href="#lab-agent-team">Lab 8 &mdash; A small team of your own</a></li>
+          <li><a href="#capstone">10. Capstone</a></li>
+          <li class="sub"><a href="#lab-capstone">Lab 9 &mdash; The real thing</a></li>
+          <li><a href="#references">11. References</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+      <!-- ==================== SECTION 1: Introduction ==================== -->
+      <section id="intro">
+<h2>Parallel Development: Subagents, Worktrees &amp; Monorepos <span class="timing-tag">&#9201; 15 min</span></h2>
+
+<p>
+  Here is the situation this course is built around: your feature touches three services in
+  one monorepo &mdash; <code>gateway/</code>, <code>payments/</code>, and
+  <code>notifications/</code>. Load the whole repo into a single Claude session and two things
+  go wrong at once. You burn tokens on code the current task never touches, and the context
+  cross-contaminates: payments conventions leak into gateway edits, a notifications helper gets
+  &ldquo;reused&rdquo; where it does not belong, and review time goes to undoing confusion
+  rather than shipping. Over the next three hours you will build the alternative:
+  service-scoped subagents that each see exactly one service, git worktrees that give each
+  agent an isolated checkout, nested <code>CLAUDE.md</code> files that load the right rules at
+  the right level, and Agent Teams that coordinate the whole thing against a shared contract.
+</p>
+
+<div class="callout callout-info">
+  <div class="callout-title">From a 101 callout to a full class</div>
+  <p>
+    In 101, the &ldquo;Parallel Development Pattern&rdquo; callout teased this in three
+    sentences: <code>/batch</code> decomposes a large change into parallel subtasks, each in
+    its own git worktree with a dedicated subagent. In 101 you saw the pattern in one callout;
+    today it is the whole class &mdash; how the decomposition works, why worktrees keep agents
+    from stepping on each other, and how to run it on a real monorepo.
+  </p>
+</div>
+
+<div class="mermaid">
+flowchart LR
+    subgraph ONE["One session, whole monorepo"]
+        G1["gateway/"] -->|"20k tokens"| CTX["Single context window<br/>all three services loaded"]
+        P1["payments/"] -->|"25k tokens"| CTX
+        N1["notifications/"] -->|"15k tokens"| CTX
+    end
+    subgraph THREE["Three scoped subagents"]
+        G2["gateway/"] -->|"8k tokens"| AG["Gateway agent"]
+        P2["payments/"] -->|"9k tokens"| AP["Payments agent"]
+        N2["notifications/"] -->|"7k tokens"| AN["Notifications agent"]
+    end
+    ONE -.->|"same feature,<br/>a third of the context each"| THREE
+
+    style CTX fill:#c62828,color:#fff
+    style AG fill:#2e7d32,color:#fff
+    style AP fill:#2e7d32,color:#fff
+    style AN fill:#2e7d32,color:#fff
+</div>
+
+<h3 id="workflow-recap">The 101 workflow in 60 seconds</h3>
+
+<p>
+  Everything in 102 runs on top of the 101 command chain. Each parallel agent you launch today
+  executes this same loop &mdash; just scoped to one service:
+</p>
+
+<table class="comparison-table">
+  <thead>
+    <tr>
+      <th>Command</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="cmd-name">/setup-stack</td>
+      <td>Configures the project's stack, rules, and context so every later command knows what it is building with.</td>
+    </tr>
+    <tr>
+      <td class="cmd-name">/architect</td>
+      <td>Runs Phase 0: designs the contract and skeleton before any implementation code exists.</td>
+    </tr>
+    <tr>
+      <td class="cmd-name">/start-session</td>
+      <td>Opens a focused implementation session against the current phase plan.</td>
+    </tr>
+    <tr>
+      <td class="cmd-name">/next-session</td>
+      <td>Closes the session with a transition summary, so the next <code>/start-session</code> picks up with fresh context and zero re-explaining.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Took 101? Skim and move on.</div>
+  <p>
+    New to the workflow? The full Workflow Reference is <code>student_runbook.md</code> in this
+    repo &mdash; read it before the first lab, because every parallel agent in 102 runs this
+    exact loop.
+  </p>
+</div>
+
+<div class="mermaid">
+flowchart LR
+    A["/setup-stack"] --> B["/architect"]
+    B --> C["/start-session"]
+    C --> D["/next-session"]
+    D -->|"next phase"| C
+    C --> E["102: parallel<br/>implementation"]
+
+    style E fill:#7c4dff,color:#fff
+</div>
+
+<p>
+  The three hours map onto that highlighted branch. Module&nbsp;1 builds the scoped agents and
+  the context discipline behind them &mdash; subagent architecture, worktree isolation, nested
+  <code>CLAUDE.md</code>, and token budgets. Module&nbsp;2 turns those agents loose in
+  parallel &mdash; orchestrated implementation, contract hooks that keep services honest, and
+  Agent Teams. Module&nbsp;3 is the capstone: you apply the whole pattern to your monorepo.
+</p>
+</section>
+
+      <!-- ==================== SECTION 2: Subagent Architecture ==================== -->
+      <section id="subagent-architecture">
+<h2>2. Service-Scoped Subagents <span class="timing-tag">&#9201; 10 min</span></h2>
+
+<p>
+  A subagent is a separate Claude instance that the lead session spawns to do one job with its
+  own fresh context window. In a monorepo, the natural unit of delegation is the service: one
+  agent that knows the payments service, one for the gateway, one for notifications. Each agent
+  is a Markdown file in <code>.claude/agents/</code> &mdash; the frontmatter configures it, and
+  <strong>the body of the file is the agent&rsquo;s system prompt</strong>. The lead session reads the
+  <code>description</code> field to decide when to delegate, hands the agent a task, and gets back
+  a report instead of a wall of intermediate tool calls.
+</p>
+
+<div class="mermaid">
+flowchart TB
+    LEAD["Lead session<br/>plans the work, delegates via Task,<br/>keeps the big-picture context"]
+
+    subgraph PAY["payments-implementer"]
+        PCTX["Own context window"]
+        PSCOPE["tools: Read, Grep, Glob,<br/>Edit, Write, Bash"]
+    end
+
+    subgraph GWA["gateway-implementer"]
+        GCTX["Own context window"]
+        GSCOPE["tools: Read, Grep, Glob,<br/>Edit, Write, Bash"]
+    end
+
+    subgraph NOTIF["notifications-implementer"]
+        NCTX["Own context window"]
+        NSCOPE["tools: Read, Grep, Glob,<br/>Edit, Write, Bash"]
+    end
+
+    PAYDIR["services/payments/"]
+    GWDIR["services/gateway/"]
+    NOTDIR["services/notifications/"]
+
+    LEAD --> PAY
+    LEAD --> GWA
+    LEAD --> NOTIF
+    PAY --> PAYDIR
+    GWA --> GWDIR
+    NOTIF --> NOTDIR
+    PAY -. "✗ path_guard: exit 2" .-> GWDIR
+
+    style LEAD fill:#7c4dff,color:#fff
+    style PAYDIR fill:#00897b,color:#fff
+    style GWDIR fill:#00897b,color:#fff
+    style NOTDIR fill:#00897b,color:#fff
+    linkStyle 6 stroke:#d32f2f,color:#d32f2f,stroke-width:2px
+</div>
+
+<h3 id="agent-frontmatter">The agent file: frontmatter reference</h3>
+
+<p>
+  Everything about an agent is declared in the YAML frontmatter of its
+  <code>.claude/agents/&lt;name&gt;.md</code> file.<sup><a href="#ref-1">[1]</a></sup> These are the
+  fields you will use in this course:
+</p>
+
+<table>
+  <thead>
+    <tr><th>Field</th><th>Meaning</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>Unique identifier; how the lead session (and you, in prompts) refer to the agent.</td></tr>
+    <tr><td><code>description</code></td><td>When to use this agent &mdash; the lead reads this to decide whether to delegate a task here.</td></tr>
+    <tr><td><code>tools</code></td><td>Strict allowlist of tool names the agent may call. A tool not on the list simply does not exist for this agent.</td></tr>
+    <tr><td><code>disallowedTools</code></td><td>Explicit denylist subtracted from the allowlist; useful to inherit defaults but carve out exceptions.</td></tr>
+    <tr><td><code>model</code></td><td>Which model runs the agent (<code>sonnet</code>, <code>opus</code>, <code>haiku</code>, or <code>inherit</code> to match the lead).</td></tr>
+    <tr><td><code>effort</code></td><td>Reasoning-effort level for the agent&rsquo;s model &mdash; dial down for mechanical tasks, up for design work.</td></tr>
+    <tr><td><code>maxTurns</code></td><td>Hard cap on the agent&rsquo;s turns before it is stopped &mdash; a runaway-loop budget.</td></tr>
+    <tr><td><code>color</code></td><td>Accent color for the agent&rsquo;s entries in the transcript, so parallel agents are tellable apart.</td></tr>
+    <tr><td><code>isolation</code></td><td>Execution isolation for the agent (e.g. running in its own worktree) so its edits stay off your checkout.</td></tr>
+    <tr><td><code>hooks</code></td><td>Per-agent lifecycle hooks (e.g. <code>PreToolUse</code>) that fire only for this agent&rsquo;s tool calls.</td></tr>
+    <tr><td><code>memory</code></td><td>Persistent memory directory for the agent, carried across sessions instead of starting blank each time.</td></tr>
+  </tbody>
+</table>
+
+<p>
+  Below the frontmatter comes plain Markdown: the agent&rsquo;s system prompt. That is where you
+  state its scope (&ldquo;you own <code>services/payments</code> and nothing else&rdquo;), its working rules,
+  and its reporting format.
+</p>
+
+<h3 id="completion-report">The completion-report contract</h3>
+
+<p>
+  A subagent&rsquo;s final message is the only thing the lead session keeps, so make it
+  machine-checkable. The pattern used throughout this course: the agent&rsquo;s system prompt ends
+  with an instruction to close every task with a fenced JSON block in a fixed shape.
+</p>
+
+<pre><code class="language-json">{
+  "agent": "payments-implementer",
+  "task": "add an amount-format check to payments",
+  "status": "green",
+  "files_changed": ["services/payments/src/refunds.py"],
+  "tests_run": ".venv/bin/python3 -m pytest services/payments — 12 passed",
+  "notes": ""
+}</code></pre>
+
+<p>
+  The lead (or a script in CI) can parse this block instead of re-reading the agent&rsquo;s whole
+  transcript: <code>status</code> (<code>green</code> or <code>red</code>) gates the merge,
+  <code>files_changed</code> is checked against the agent&rsquo;s declared scope, and
+  <code>notes</code> carries anything the orchestrator needs for the merge &mdash; including any
+  blocked attempts worth looking at.
+</p>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Write-scoping is a hook, not a permission</div>
+  <p>
+    Subagents inherit the session&rsquo;s permissions and have <strong>no per-agent cwd</strong>. The
+    <code>tools</code> allowlist is all-or-nothing per <em>tool</em>, never per <em>path</em>: you can take
+    <code>Edit</code> away from an agent entirely, but you cannot tell <code>Edit</code> &ldquo;only inside
+    <code>services/payments</code>&rdquo; with the allowlist alone. The mechanism that stops the payments
+    agent from editing gateway files is a per-agent <code>PreToolUse</code> hook that inspects the
+    target path and exits <code>2</code> to block the call:
+  </p>
+<pre><code class="language-yaml">hooks:
+  PreToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: command
+          command: "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/path_guard.py services/payments"</code></pre>
+  <p>
+    This block is the canonical wiring used by every scoped agent in the sample monorepo &mdash;
+    copy it verbatim and change only the service path argument.
+  </p>
+</div>
+
+<div class="callout callout-tip">
+  <div class="callout-title">New agents/ directory? Restart the session</div>
+  <p>
+    Agent files are discovered at session start. The first file you add to a brand-new
+    <code>.claude/agents/</code> directory will not load into the running session &mdash; restart
+    <code>claude</code> and it appears. Subsequent edits to existing agents are picked up normally.
+  </p>
+</div>
+
+<h3 id="demo-scoped-agent">Demo 1 &mdash; a scoped agent in action</h3>
+
+<p>
+  Open your copy of the sample monorepo (python variant) and look at the payments agent that
+  ships with it, then delegate a small change and watch where the edits land.
+</p>
+
+<pre><code class="language-bash">cd ~/labs/refund-monorepo        # your copy of sample-monorepo/python-fastapi
+cat .claude/agents/payments-implementer.md
+claude</code></pre>
+
+<p>
+  The <code>cat</code> shows the pattern from this section in one file: a <code>tools</code> allowlist, the
+  canonical <code>path_guard</code> hook pointed at <code>services/payments</code>, and a body that pins the
+  agent&rsquo;s scope and demands the JSON completion report. Inside the session, delegate:
+</p>
+
+<pre><code class="language-text">&gt; Use the payments-implementer agent to add an amount-format check to payments</code></pre>
+
+<p>
+  In the transcript, every read may roam (the agent is allowed to <em>look at</em> contracts and
+  neighbors), but every <code>Edit</code> and <code>Write</code> stays inside <code>services/payments/</code>.
+  This is the captured run &mdash; the agent ran in its own worktree, so paths carry a
+  <code>.claude/worktrees/agent-&hellip;</code> prefix, elided here as <code>&hellip;/worktrees/</code>:
+</p>
+
+<pre><code class="language-text">⏺ Task(payments-implementer): Add an amount-format check to the payments service
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/services/payments/CLAUDE.md)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/contracts/refund.schema.json)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/contracts/payment.schema.json)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/specs/feature-refunds.md)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/refunds.py)
+  ⎿ Edit(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/refunds.py)
+  ⎿ Write(…/worktrees/agent-af6b4c6ff73787998/services/payments/tests/test_amount_format.py)
+  ⎿ Edit(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/main.py)
+  ⎿ Bash(cd …/worktrees/agent-af6b4c6ff73787998/services/payments &amp;&amp; ../../.venv/bin/python3 -m pytest -q)
+      27 passed (23 new)
+  ⎿ Bash(contracts/validate.sh services/payments; echo "exit=$?")
+      3 PASS, exit=0
+  ⎿ Agent reply (final message):
+      {
+        "agent": "payments-implementer",
+        "task": "Add a contract-derived amount-format check to services/payments,
+                 run before the approve/reject decision, with tests and contract validation",
+        "status": "green",
+        "files_changed": [
+          "services/payments/src/refunds.py",
+          "services/payments/src/main.py",
+          "services/payments/tests/test_amount_format.py",
+          "services/payments/fixtures/refund_request.json",
+          "services/payments/CLAUDE.md",
+          "services/payments/README.md"
+        ],
+        "tests_run": "pytest -&gt; 27 passed, 0 failed (23 new);
+                      contracts/validate.sh services/payments -&gt; 3 PASS, exit 0",
+        "notes": "Rules taken from contracts/refund.schema.json definitions.RefundRequest"
+      }</code></pre>
+
+<p>
+  Two things to point at in the real run: the only files under <code>Edit</code>/<code>Write</code> are
+  payments files (reads roamed to <code>contracts/</code> and the spec; the write fence never had to
+  fire), and the final message is exactly the machine-checkable report the agent&rsquo;s
+  system prompt demanded.
+</p>
+
+<h3 id="lab-service-agent">Lab 1 &mdash; rebuild the notifications agent</h3>
+
+<p>
+  The monorepo ships a notifications agent too &mdash; but you will rebuild it from scratch to
+  feel the difference between tool-level and path-level scoping. Move the shipped one aside first
+  (<code>mv .claude/agents/notifications-implementer.md .claude/agents/notifications-implementer.md.bak</code>),
+  then rebuild it from the payments agent as a template, twice &mdash; once per tier below. When
+  you finish, compare your version with the shipped one and restore it &mdash; Demo 5 needs the
+  shipped agent back in place.
+</p>
+
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Create <code>notifications-implementer</code> from the payments agent as a template, with
+    <code>Write</code> and <code>Edit</code> <strong>removed</strong> from its <code>tools</code> list. Delegate a change to
+    the notifications service and prove the allowlist blocks <em>all</em> writes &mdash; including ones
+    inside <code>services/notifications</code>. That is the point: allowlists gate tools, not paths.
+  </p>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    Restore <code>Write</code> and <code>Edit</code>, then wire <code>path_guard.py</code> into the agent&rsquo;s
+    frontmatter <code>hooks</code> scoped to <code>services/notifications</code>. Prove both directions: an
+    attempted gateway edit dies with exit <code>2</code>, while a notifications edit goes through.
+    Path-scoping is the hook&rsquo;s job.
+  </p>
+</div>
+
+<p>
+  You succeeded when: the blocked attempt appears in the transcript with the hook&rsquo;s BLOCKED
+  message.
+</p>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-1-service-agent.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>Start from the payments agent, change the name/description/paths to notifications,
+and cut the write tools from the frontmatter. Two deltas from the shipped file:
+no `Write`/`Edit` in `tools`, and no `PreToolUse` block (there is nothing left for
+`path_guard` to guard). Keep the `Stop` validate hook. Leave `isolation` out —
+Lab 2 adds it.</p>
+    <pre><code>---
+name: notifications-implementer
+description: Implements features in services/notifications ONLY. Use for any notifications-service task.
+tools: Read, Grep, Glob
+color: orange
+hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: &quot;bash \&quot;$CLAUDE_PROJECT_DIR\&quot;/contracts/validate.sh services/notifications&quot;
+---</code></pre>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>Restore the write tools and add the canonical `path_guard` block from the fragment,
+with the path argument changed to `services/notifications` — the full frontmatter:</p>
+    <pre><code>---
+name: notifications-implementer
+description: Implements features in services/notifications ONLY. Use for any notifications-service task.
+tools: Read, Grep, Glob, Edit, Write, Bash
+color: orange
+hooks:
+  PreToolUse:
+    - matcher: &quot;Edit|Write&quot;
+      hooks:
+        - type: command
+          command: &quot;python3 \&quot;$CLAUDE_PROJECT_DIR\&quot;/.claude/hooks/path_guard.py services/notifications&quot;
+  Stop:
+    - hooks:
+        - type: command
+          command: &quot;bash \&quot;$CLAUDE_PROJECT_DIR\&quot;/contracts/validate.sh services/notifications&quot;
+---</code></pre>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-1-service-agent.md">solutions/lab-1-service-agent.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 3: Worktree Isolation ==================== -->
+      <section id="worktree-isolation">
+<h2>3. Worktree Isolation <span class="timing-tag">&#9201; 10 min</span></h2>
+<p>
+  Subagents that share your checkout also share your uncommitted state. Two agents editing the
+  same tree can trample each other&rsquo;s files, and a half-finished agent run leaves debris in
+  <code>git status</code> that you have to untangle by hand. Worktree isolation removes the
+  problem at the git layer: each agent gets its own checkout, its own branch, and its own blast
+  radius.
+</p>
+
+<h3 id="worktree-semantics">What <code>isolation: worktree</code> Actually Does</h3>
+<p>
+  Setting <code>isolation: worktree</code> in an agent definition changes where that agent runs.
+  Instead of operating on your checkout, each run gets a temporary
+  <a href="https://git-scm.com/docs/git-worktree" target="_blank" rel="noopener">git worktree</a>:
+</p>
+<ul>
+  <li>
+    The worktree is created under <code>.claude/worktrees/&lt;name&gt;</code>, on a dedicated
+    branch named <code>worktree-&lt;name&gt;</code>.
+  </li>
+  <li>
+    Every file the agent reads, writes, or executes lives inside that directory. Since
+    v2.1.203, the agent&rsquo;s <code>Bash</code> tool is confined to the worktree as well &mdash;
+    a stray <code>rm</code> or test command cannot touch your main checkout.
+  </li>
+  <li>
+    The docs describe auto-cleanup: a run that ends with <em>no changes</em> should have its
+    worktree and branch removed automatically. On CLI 2.1.218 we observed the worktree
+    <em>persisting</em> after a no-change run &mdash; holding only the <code>.venv</code> symlink
+    &mdash; so budget for manual cleanup with <code>git worktree remove</code>. Demo&nbsp;2 shows
+    it live.
+  </li>
+  <li>
+    If the agent did commit work, the worktree stays behind so you can inspect, cherry-pick, or
+    merge the <code>worktree-&lt;name&gt;</code> branch on your own terms.
+  </li>
+</ul>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Housekeeping: gitignore the worktree root</div>
+  <p>
+    Add <code>.claude/worktrees/</code> to your <code>.gitignore</code>. Worktrees are nested
+    <em>inside</em> the repo directory, and without the ignore entry every agent run pollutes
+    <code>git status</code> in your main checkout &mdash; the exact noise isolation is supposed to
+    remove. The sample monorepo ships this entry already.
+  </p>
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-title">The #1 Gotcha: Worktrees Branch from the DEFAULT Branch</div>
+  <p>
+    By default, a new agent worktree branches from the repository&rsquo;s <strong>default
+    branch</strong> (usually <code>main</code>) &mdash; <em>not</em> from your current
+    <code>HEAD</code>.<sup><a href="#ref-2">[2]</a></sup> If your feature spec, contracts, or scaffolding live on a feature branch,
+    every worktree-isolated agent silently implements against code that does not contain them.
+    The agents look busy, the diffs look plausible, and the result is wrong.
+  </p>
+  <p>
+    The fix is one setting in <code>.claude/settings.json</code>, which the sample monorepo
+    ships:
+  </p>
+  <pre><code class="language-json">{
+  "worktree": {
+    "baseRef": "head"
+  }
+}</code></pre>
+  <p>
+    With <code>"baseRef": "head"</code>, worktrees branch from whatever commit you have checked
+    out &mdash; agents see the same code you see. Leave the default (<code>"fresh"</code>) only
+    when you deliberately want agents to start from a clean default-branch state.
+  </p>
+</div>
+
+<h3 id="fresh-checkout-kit">The Fresh-Checkout Survival Kit</h3>
+<p>
+  A worktree is a <em>fresh checkout</em>: it contains only tracked files. Two categories of
+  things your project depends on are therefore missing, and without them every agent&rsquo;s
+  first test run fails before it does any useful work:
+</p>
+<ol>
+  <li>
+    <strong>Gitignored files the code needs</strong> &mdash; <code>.env</code> is the classic
+    case. A <code>.worktreeinclude</code> file at the repo root lists gitignored paths that
+    should be <em>copied</em> into each new worktree:
+    <pre><code class="language-text"># .worktreeinclude &mdash; gitignored files every agent worktree still needs
+.env</code></pre>
+  </li>
+  <li>
+    <strong>Heavy dependency directories</strong> &mdash; <code>.venv</code>,
+    <code>node_modules</code>. Copying gigabytes per agent is a non-starter;
+    <code>worktree.symlinkDirectories</code> <em>symlinks</em> them from the main checkout
+    instead, so every worktree shares one installed set:
+    <pre><code class="language-json">{
+  "worktree": {
+    "baseRef": "head",
+    "symlinkDirectories": [".venv"]
+  }
+}</code></pre>
+    <p>
+      For the Node variant of the sample monorepo the list is
+      <code>["node_modules"]</code> instead. Symlinked directories are shared state &mdash; fine
+      for read-mostly dependency trees, wrong for anything agents should mutate independently.
+    </p>
+  </li>
+</ol>
+
+<p>
+  With <code>baseRef</code>, <code>.worktreeinclude</code>, and <code>symlinkDirectories</code>
+  in place, the picture looks like this: three agents branch from the same base in parallel,
+  work in complete isolation, and their branches merge back one at a time.
+</p>
+
+<div class="mermaid">
+gitGraph
+    commit id: "contracts"
+    commit id: "base (HEAD)"
+    branch worktree-payments
+    commit id: "payments work"
+    checkout main
+    branch worktree-notifications
+    commit id: "notifications work"
+    checkout main
+    branch worktree-gateway
+    commit id: "gateway work"
+    checkout main
+    merge worktree-payments
+    merge worktree-notifications
+    merge worktree-gateway
+</div>
+
+<h3 id="demo-worktree">Demo 2 &mdash; Watch the Isolation</h3>
+<p>
+  This demo makes the invisible machinery visible: you spawn a worktree-isolated agent, then
+  watch git from a second terminal while it works.
+</p>
+
+<ol class="steps">
+  <li>
+    <h4>Give an agent worktree isolation</h4>
+    <p>
+      In the sample monorepo, add <code>isolation: worktree</code> to a small agent&rsquo;s
+      frontmatter &mdash; for example a docs agent that only touches one file:
+    </p>
+    <pre><code class="language-markdown">---
+name: changelog-scribe
+description: Adds a dated entry to CHANGELOG.md summarizing recent changes.
+tools: Read, Edit, Bash
+isolation: worktree
+---
+Read the git log since the last CHANGELOG entry and append a new dated
+entry to CHANGELOG.md. Keep entries to one line each.</code></pre>
+  </li>
+
+  <li>
+    <h4>Spawn it on a small task</h4>
+    <p>In Claude Code:</p>
+    <pre><code class="language-text">&gt; Use the changelog-scribe agent to add a changelog entry
+  for the refunds feature.</code></pre>
+  </li>
+
+  <li>
+    <h4>In a second terminal: catch the worktree in the act</h4>
+    <p>While the agent runs, list worktrees and branches from the repo root:</p>
+    <pre><code class="language-bash">git worktree list
+git branch --list 'worktree-*'</code></pre>
+    <pre><code class="language-text">$ git worktree list
+/private/tmp/refund-monorepo                                           cc106e8 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-a3643a1fcff8ba6e5 cc106e8 [worktree-agent-a3643a1fcff8ba6e5] locked
+
+$ git branch --list 'worktree-*'
++ worktree-agent-a3643a1fcff8ba6e5</code></pre>
+    <p>
+      Both checkouts point at the same commit, <code>cc106e8</code> &mdash; a commit made minutes
+      earlier on <code>main</code>. The agent branched from your <code>HEAD</code> because
+      <code>baseRef</code> is <code>"head"</code>; a default-branch worktree would sit on the
+      older initial commit.
+    </p>
+  </li>
+
+  <li>
+    <h4>Confirm your checkout stays clean</h4>
+    <p>Still in the second terminal:</p>
+    <pre><code class="language-bash">git status</code></pre>
+    <pre><code class="language-text">On branch main
+nothing to commit, working tree clean</code></pre>
+    <p>
+      The agent is editing files <em>right now</em>, and your working tree shows nothing. All of
+      its changes live in the <code>.claude/worktrees/agent-&hellip;</code> directory you just saw
+      in <code>git worktree list</code>.
+    </p>
+  </li>
+
+  <li>
+    <h4>See what a no-change run leaves behind</h4>
+    <p>
+      Run the agent again with a task that produces no edits (&ldquo;check whether the changelog
+      already covers the refunds feature &mdash; change nothing&rdquo;). The docs describe
+      auto-cleanup for this case; on CLI 2.1.218 we observed the worktree persisting instead,
+      holding only the <code>.venv</code> symlink that <code>symlinkDirectories</code> put there:
+    </p>
+    <pre><code class="language-text">$ git worktree list
+/private/tmp/refund-monorepo                                           1632699 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-ae1ac0745d7fc74a8 1632699 [worktree-agent-ae1ac0745d7fc74a8]
+
+$ git status --short   # run inside the leftover worktree
+?? .venv               # only the .venv symlink from worktree.symlinkDirectories</code></pre>
+    <p>
+      So treat cleanup as manual until your CLI version proves otherwise:
+    </p>
+    <pre><code class="language-bash">git worktree remove --force .claude/worktrees/agent-ae1ac0745d7fc74a8
+git branch -D worktree-agent-ae1ac0745d7fc74a8</code></pre>
+  </li>
+</ol>
+
+<h3 id="lab-worktree">Lab 2 &mdash; Base Branch Forensics</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Take the agent you built in Lab 1 and give it <code>isolation: worktree</code>. Run it on a
+    small task, then &mdash; while it runs or right after &mdash; locate its worktree directory
+    and its <code>worktree-*</code> branch using git commands, and verify that your main
+    checkout&rsquo;s <code>git status</code> stayed clean the whole time.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    Create a feature branch with at least one commit that <code>main</code> does not have. Run
+    your worktree-isolated agent twice from that branch: once with
+    <code>worktree.baseRef</code> set to <code>"fresh"</code> and once with <code>"head"</code>.
+    Using <code>git log</code> on each run&rsquo;s <code>worktree-*</code> branch, prove which
+    commit each worktree branched from &mdash; and predict, before looking, which run can see
+    your feature-branch commit.
+  </p>
+</div>
+<p>
+  <strong>You succeeded when:</strong> you can explain which base commit the agent saw and why.
+</p>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-2-worktree.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>Add the isolation line to the rebuilt notifications agent&#x27;s frontmatter (or use the
+shipped `changelog-scribe`, which already carries it):</p>
+    <pre><code>---
+name: notifications-implementer
+...
+isolation: worktree
+---</code></pre>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>Reference run executed 2026-07-24 (claude 2.1.218) with the shipped
+`changelog-scribe` agent. Two setups matter — see the first failure mode for why.</p>
+    <pre><code>git checkout -b lab2-feature
+echo &quot;Lab 2 marker: this commit exists ONLY on lab2-feature&quot; &gt; LAB2_MARKER.md
+git add LAB2_MARKER.md &amp;&amp; git commit -m &quot;lab2: marker commit that main does not have&quot;
+git log --oneline -2</code></pre>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-2-worktree.md">solutions/lab-2-worktree.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 4: Nested CLAUDE.md ==================== -->
+      <section id="nested-claude-md">
+<h2>4. Nested CLAUDE.md: Hierarchical Context <span class="timing-tag">&#9201; 10 min</span></h2>
+<p>
+  A monorepo has one repo but many contexts. The payments service cares about idempotency keys and
+  migration order; the gateway cares about routing tables and rate limits. Stuffing all of it into
+  one root <code>CLAUDE.md</code> means every session pays for every team&rsquo;s notes. Claude Code
+  solves this with <strong>hierarchical context</strong>: a <code>CLAUDE.md</code> per directory
+  level, each loaded only when it is relevant.
+</p>
+
+<h3>The loading rules</h3>
+<p>Three rules govern which files reach the context window:<sup><a href="#ref-6">[6]</a></sup></p>
+<table>
+  <thead>
+    <tr><th>Where the CLAUDE.md lives</th><th>When it loads</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Repo root, or any ancestor of your working directory</td>
+      <td>In full, at session launch</td>
+    </tr>
+    <tr>
+      <td>A subdirectory below you (e.g. <code>services/payments/</code>)</td>
+      <td>Lazily &mdash; the first time Claude reads a file in that subtree</td>
+    </tr>
+    <tr>
+      <td>A sibling directory you never touch</td>
+      <td>Never</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  The third rule is the one that makes monorepos workable: a session focused on the gateway never
+  sees the payments migration notes, no matter how long it runs. Context isolation between services
+  is free &mdash; you get it just by putting the notes where the code is.
+</p>
+
+<div class="mermaid">
+flowchart TD
+    root["CLAUDE.md (repo root)<br/>always loaded at launch"]
+    services["services/"]
+    payments["services/payments/CLAUDE.md<br/>loads on first read"]
+    gateway["services/gateway/CLAUDE.md<br/>never in a payments session"]
+
+    root --> services
+    services --> payments
+    services --> gateway
+
+    classDef always fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20;
+    classDef lazy fill:#fff9c4,stroke:#f9a825,color:#795500;
+    classDef never fill:#eeeeee,stroke:#9e9e9e,color:#616161;
+    class root always;
+    class payments lazy;
+    class gateway never;
+</div>
+
+<h3>Size discipline</h3>
+<p>
+  Lazy loading only pays off if each level stays small. The working budget: root
+  <code>CLAUDE.md</code> under <strong>200 lines</strong>, each service file under
+  <strong>150 lines</strong>, and <strong>zero duplication</strong> between levels. If a rule
+  applies to every service, it belongs at the root; if it applies to one service, it belongs in
+  that service&rsquo;s file &mdash; never both. Duplicated rules drift, and the copy Claude reads
+  last wins in ways you can&rsquo;t predict.
+</p>
+<p>
+  For packages owned by other teams that you never want in your sessions at all, add their paths to
+  <code>claudeMdExcludes</code> in your settings<sup><a href="#ref-3">[3]</a></sup> &mdash; their
+  <code>CLAUDE.md</code> files then stay out of context even if Claude reads a file there.
+</p>
+
+<div class="callout callout-warning">
+  <div class="callout-title">What /compact forgets</div>
+  <p>
+    Compaction does not treat all context sources equally. After a
+    <code>/compact</code>:<sup><a href="#ref-7">[7]</a></sup>
+  </p>
+  <table>
+    <thead>
+      <tr><th>Context source</th><th>After /compact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Project-root <code>CLAUDE.md</code></td><td>Re-injected from disk &mdash; survives</td></tr>
+      <tr><td>Nested <code>CLAUDE.md</code> files</td><td><strong>Lost</strong> until a matching file is read again</td></tr>
+      <tr><td>Path-scoped rules</td><td><strong>Lost</strong> until a matching file is read again</td></tr>
+    </tbody>
+  </table>
+  <p>
+    So a long payments session that compacts mid-task silently drops the payments conventions it
+    started with. This is the principled reason the next section prefers
+    <code>/clear</code> + <code>/catchup</code> over <code>/compact</code> in monorepos: a fresh
+    session replays the loading rules deterministically instead of hoping the summary kept the
+    right notes.
+  </p>
+</div>
+
+<h3 id="demo-lazy-load">Demo 3 &mdash; watch the lazy load happen</h3>
+<p>
+  The loading rules are easy to state and easy to disbelieve. The <code>InstructionsLoaded</code>
+  hook fires every time a context file enters the session, so a two-line hook turns the rules into
+  a visible log.
+</p>
+<ol class="steps">
+  <li>
+    <p>
+      In your copy of the sample monorepo, register the hook in
+      <code>.claude/settings.local.json</code> (local settings, so the shared
+      <code>settings.json</code> stays untouched):
+    </p>
+<pre><code class="language-json">{
+  "hooks": {
+    "InstructionsLoaded": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat &gt;&gt; \"$CLAUDE_PROJECT_DIR\"/instructions-loaded.log"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  </li>
+  <li>
+    <p>Open a second terminal and watch the log:</p>
+<pre><code class="language-bash">cd sample-monorepo/python-fastapi
+touch instructions-loaded.log
+tail -f instructions-loaded.log</code></pre>
+  </li>
+  <li>
+    <p>
+      Launch <code>claude</code> at the monorepo root. The root <code>CLAUDE.md</code> event
+      appears in the log immediately &mdash; that is rule one. Now touch the payments service:
+    </p>
+<pre><code class="language-bash">claude
+&gt; Read services/payments/README.md and summarize the service in two sentences.</code></pre>
+    <p>
+      The moment Claude reads a payments file, a second event lands in the log:
+      <code>services/payments/CLAUDE.md</code> has lazy-loaded. That is rule two.
+    </p>
+  </li>
+  <li>
+    <p>
+      Keep working inside payments for a few more turns, then check for the sibling:
+    </p>
+<pre><code class="language-bash">grep payments instructions-loaded.log
+grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"</code></pre>
+    <p>
+      The captured run, all three rules on the record (long identifier fields &mdash;
+      <code>session_id</code>, <code>transcript_path</code>, <code>cwd</code> &mdash; elided as
+      <code>&hellip;</code>):
+    </p>
+<pre><code class="language-text">$ cat instructions-loaded.log        # immediately after session launch — rule one
+{…,"hook_event_name":"InstructionsLoaded","file_path":"/private/tmp/refund-monorepo/CLAUDE.md","memory_type":"Project","load_reason":"session_start"}
+
+$ grep payments instructions-loaded.log       # after Claude read one payments file — rule two
+{…,"hook_event_name":"InstructionsLoaded","file_path":"/private/tmp/refund-monorepo/services/payments/CLAUDE.md","memory_type":"Project","load_reason":"nested_traversal","trigger_file_path":"/private/tmp/refund-monorepo/services/payments/README.md"}
+
+$ grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"
+gateway CLAUDE.md never loaded</code></pre>
+    <p>
+      Read the <code>load_reason</code> fields: <code>session_start</code> for the root file,
+      <code>nested_traversal</code> &mdash; with the payments README as
+      <code>trigger_file_path</code> &mdash; for the service file. Rules one and two, straight
+      from the hook; the empty gateway grep is rule three.
+    </p>
+  </li>
+</ol>
+
+<h3 id="lab-nested-claude-md">Lab 3 &mdash; author a service context</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    The sample monorepo&rsquo;s <code>services/notifications/CLAUDE.md</code> is yours: rewrite it
+    for your own style and stack conventions. Constraints: under 150 lines, and nothing duplicated
+    from the root <code>CLAUDE.md</code>. Then prove lazy loading &mdash; run <code>/context</code>
+    and note the &ldquo;Memory files&rdquo; list <em>before</em> touching notifications, have
+    Claude read one notifications file, and run <code>/context</code> again.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    First prove sibling isolation: work an entire session inside one service and show the other
+    services&rsquo; <code>CLAUDE.md</code> files never appear in <code>/context</code>. Then add
+    <code>claudeMdExcludes</code> to your settings to suppress one service&rsquo;s file entirely,
+    read a file in that service, and verify with <code>/context</code> that the exclusion held.
+  </p>
+</div>
+<p>
+  <strong>You succeeded when:</strong> <code>/context</code>&rsquo;s Memory files list shows exactly
+  the files you predicted, in both states &mdash; before and after the read.
+</p>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-3-nested-claude-md.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>A model rewrite — different voice and ordering than the shipped file, same
+discipline. What matters for grading is the constraints, not the style:</p>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>Part 1 — sibling isolation over a whole session: register the Demo 3
+`InstructionsLoaded` hook in `.claude/settings.local.json`, work several turns
+strictly inside notifications (reads, small edits, tests), then:</p>
+    <pre><code>grep notifications instructions-loaded.log   # present — nested_traversal
+grep gateway instructions-loaded.log || echo &quot;gateway CLAUDE.md never loaded&quot;
+grep payments instructions-loaded.log || echo &quot;payments CLAUDE.md never loaded&quot;</code></pre>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-3-nested-claude-md.md">solutions/lab-3-nested-claude-md.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 5: Token Budget ==================== -->
+      <section id="token-budget">
+<h2>5. Reading Your Token Budget <span class="timing-tag">&#9201; 10 min</span></h2>
+<p>
+  The previous section made a claim you should not take on faith: nested <code>CLAUDE.md</code> files
+  load lazily, so a scoped layout keeps most of its instructions out of the window until a file in
+  that service is actually touched. Claude Code ships the instrument to check that claim:
+  <code>/context</code>. This section teaches you to read it, and to re-measure after every change
+  you make to your memory layout.
+</p>
+
+<h3 id="reading-context">What <code>/context</code> Shows</h3>
+<p>
+  Run <code>/context</code> inside any session and you get a breakdown of the context window,
+  category by category:
+</p>
+<table>
+  <thead>
+    <tr><th>Category</th><th>What it contains</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>System prompt</strong></td><td>Claude Code's own operating instructions &mdash; fixed per version, not yours to tune</td></tr>
+    <tr><td><strong>System tools</strong></td><td>Definitions of the built-in tools (Read, Edit, Bash, &hellip;)</td></tr>
+    <tr><td><strong>MCP tools</strong></td><td>Tool schemas from every connected MCP server &mdash; grows with each server you add</td></tr>
+    <tr><td><strong>Memory files</strong></td><td>Every <code>CLAUDE.md</code> and rule file currently loaded &mdash; listed by path</td></tr>
+    <tr><td><strong>Messages</strong></td><td>The conversation so far: your prompts, Claude's replies, tool results</td></tr>
+    <tr><td><strong>Free space</strong></td><td>What remains before the window fills and compaction kicks in</td></tr>
+  </tbody>
+</table>
+<p>
+  The row that matters for this module is <strong>Memory files</strong>. It is not just a number
+  &mdash; it lists each loaded file by path. That list is the verification surface for the
+  launch-time half of the previous section&rsquo;s rules: after <code>/clear</code> on a scoped
+  layout you should see the root <code>CLAUDE.md</code> only; on the flat layout, the one fat file.
+  One caveat, measured in Demo&nbsp;4: on CLI 2.1.218 the table shows the files loaded at session
+  launch &mdash; a mid-session lazy load is proven by the <code>InstructionsLoaded</code> hook log
+  from Demo&nbsp;3, not by a new row here.
+</p>
+<p>
+  Do not confuse the two budget commands. <code>/context</code> shows what is occupying the current
+  session's context window right now. <code>/usage</code> shows how much of your plan's rate limits
+  (session and weekly) you have consumed &mdash; a billing view, not a window view.
+</p>
+
+<h3 id="clear-catchup">The <code>/clear</code> + <code>/catchup</code> Pattern</h3>
+<p>
+  When a long session bloats the Messages category, the reflex is <code>/compact</code>. In a
+  nested-memory monorepo that reflex has a hidden cost: compaction summarizes the conversation, and
+  lazily loaded <code>CLAUDE.md</code> files ride along in that summarization &mdash; the payments
+  rules you triggered two hours ago may survive only as a vague paraphrase, or not at all. The
+  window looks healthy; the instructions are gone.
+</p>
+<p>
+  The pattern that preserves correctness is <code>/clear</code> followed by <code>/catchup</code>.
+  <code>/clear</code> drops the window to its baseline. <code>/catchup</code> (a custom command this
+  course ships in <code>.claude/commands/catchup.md</code>) rebuilds exactly the working state you
+  need by re-reading what changed &mdash; and because reading a service's files re-triggers that
+  service's lazy <code>CLAUDE.md</code> load, the right nested rules come back as real files, not as
+  summary residue. The command runs four steps:
+</p>
+<ol class="steps">
+  <li><code>git diff main...HEAD --name-only</code> to list the files changed on this branch
+      (falling back to <code>git status --short</code> when already on <code>main</code>).</li>
+  <li>Read each changed file.</li>
+  <li>Read the <code>CLAUDE.md</code> of any service whose files appear in that list &mdash;
+      re-triggering the lazy load of exactly the rules the work needs.</li>
+  <li>Summarize the state of the work in at most 10 bullets and state which memory files are now
+      loaded &mdash; which you verify with <code>/context</code>.</li>
+</ol>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Measure the delta, not the total</div>
+  <p>
+    Absolute <code>/context</code> numbers are not comparable across machines: your MCP servers,
+    plugins, and Claude Code version all shift the totals. The honest measurement is the
+    <strong>Memory files category compared between two runs on the same machine</strong> &mdash;
+    flat layout vs. scoped layout, before compaction vs. after recovery.
+  </p>
+  <p>
+    Published real-world savings from scoping memory range from 40% to 92%. Your number is yours:
+    it depends on how much of your context was rule text to begin with. The lab below has you
+    measure it rather than quote it.
+  </p>
+</div>
+
+<p>
+  Diagram D6 shows the result, with the real numbers from the captured runs below: two context
+  windows measured on the same machine, one per layout. The Memory-files segment is the only one
+  that moves &mdash; and it is the one you control.
+</p>
+
+<div class="mermaid">
+flowchart TB
+    subgraph FLAT["flat-claude-md branch &mdash; /context, 20.9k total"]
+        direction LR
+        F1["System prompt<br/>3.4k"] --- F2["System tools<br/>13k"] --- F3["Agents + skills<br/>1.8k"] --- F4["Memory files<br/>2.6k<br/>(one fat root file)"] --- F5["Messages<br/>8"] --- F6["Free space<br/>979.1k"]
+    end
+    subgraph NESTED["nested + scoped (main) &mdash; /context, 19k total"]
+        direction LR
+        N1["System prompt<br/>3.4k"] --- N2["System tools<br/>13k"] --- N3["Agents + skills<br/>1.8k"] --- N4["Memory files<br/>817<br/>(root only)<br/>&minus;68.6% vs flat"] --- N5["Messages<br/>8"] --- N6["Free space<br/>981k"]
+    end
+    FLAT ~~~ NESTED
+    style F4 fill:#e65100,color:#fff
+    style N4 fill:#2e7d32,color:#fff
+    style F6 fill:#eeeeee,color:#333
+    style N6 fill:#eeeeee,color:#333
+</div>
+
+<h3 id="demo-context-measurement">Demo 4 &mdash; the Before/After Measurement</h3>
+<p>
+  The sample monorepo's <code>init.sh</code> built a branch for exactly this comparison:
+  <code>flat-claude-md</code> squashes the root <code>CLAUDE.md</code> and every
+  <code>services/*/CLAUDE.md</code> into one fat root file &mdash; the layout most teams start with.
+  <code>main</code> keeps the nested, scoped layout. Same rules, two shapes.
+</p>
+<p>Measure the flat layout first:</p>
+<pre><code class="language-bash">cd ~/labs/refund-monorepo
+git checkout flat-claude-md
+claude
+</code></pre>
+<pre><code class="language-text">&gt; /clear
+&gt; /context
+</code></pre>
+<p>
+  Record the Memory files category &mdash; one entry, the fat root <code>CLAUDE.md</code>, every
+  rule for every service loaded whether this session needs them or not. The captured run (trimmed
+  to the two tables that matter):
+</p>
+<pre><code class="language-text">## Context Usage — flat-claude-md
+**Tokens:** 20.9k / 1m (2%)
+
+| Category      | Tokens | Percentage |
+|---------------|--------|------------|
+| System prompt | 3.4k   | 0.3%       |
+| System tools  | 13k    | 1.3%       |
+| Custom agents | 114    | 0.0%       |
+| Memory files  | 2.6k   | 0.3%       |
+| Skills        | 1.7k   | 0.2%       |
+| Messages      | 8      | 0.0%       |
+| Free space    | 979.1k | 97.9%      |
+
+### Memory Files
+| Type    | Path                                   | Tokens |
+|---------|----------------------------------------|--------|
+| Project | /private/tmp/refund-monorepo/CLAUDE.md | 2.6k   |</code></pre>
+<p>Now the scoped layout. Exit, switch branches, and repeat the measurement:</p>
+<pre><code class="language-bash">git checkout main
+claude
+</code></pre>
+<pre><code class="language-text">&gt; /clear
+&gt; /context
+</code></pre>
+<p>
+  The Memory files list now shows the root <code>CLAUDE.md</code> only &mdash; the service files
+  exist on disk but none are loaded. Same machine, same session setup, captured minutes apart:
+</p>
+<pre><code class="language-text">## Context Usage — main (nested + scoped)
+**Tokens:** 19k / 1m (2%)
+
+| Category      | Tokens | Percentage |
+|---------------|--------|------------|
+| System prompt | 3.4k   | 0.3%       |
+| System tools  | 13k    | 1.3%       |
+| Custom agents | 114    | 0.0%       |
+| Memory files  | 817    | 0.1%       |
+| Skills        | 1.7k   | 0.2%       |
+| Messages      | 8      | 0.0%       |
+| Free space    | 981k   | 98.1%      |
+
+### Memory Files
+| Type    | Path                                   | Tokens |
+|---------|----------------------------------------|--------|
+| Project | /private/tmp/refund-monorepo/CLAUDE.md | 817    |</code></pre>
+<p>
+  That is the measured delta: <strong>2.6k flat vs 817 scoped &mdash; the Memory-files category is
+  68.6% smaller</strong> before any work has happened. Then touch one payments file to trigger the
+  lazy load:
+</p>
+<pre><code class="language-text">&gt; Read services/payments/README.md and summarize what this service does.
+&gt; /context
+</code></pre>
+<p>
+  Here the instrument has a blind spot, and it is worth teaching precisely. On CLI 2.1.218 the
+  lazily loaded <code>services/payments/CLAUDE.md</code> does <em>not</em> appear in
+  <code>/context</code>&rsquo;s Memory Files table &mdash; that table shows the files loaded at
+  session launch. The proof that the lazy load happened is the <code>InstructionsLoaded</code> hook
+  log from Demo&nbsp;3 (<code>load_reason: "nested_traversal"</code>, triggered by the payments
+  README), and <code>/context</code> shows the cost indirectly: the Messages category grew from 8
+  to 4.2k tokens after the read, because the freshly loaded rules ride there. Gateway and
+  notifications rules stay on disk, unloaded &mdash; the hook log stays silent about both.
+</p>
+<p>
+  Two <code>/context</code> readings plus one hook log, one story: the flat branch pays the full
+  rule bill at launch; the scoped branch pays a small baseline &mdash; 68.6% less &mdash; and then
+  only for the service in play, at the moment it comes into play.
+</p>
+
+<h3 id="lab-context-measurement">Lab 4 &mdash; Your Own Numbers</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Reproduce the Demo 4 comparison on your machine: measure the Memory-files category on
+    <code>flat-claude-md</code> and on <code>main</code> (after <code>/clear</code>, before touching
+    any service), and compute your percentage saving on that category.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    On <code>main</code>, trigger a nested <code>CLAUDE.md</code> load, work until you can run
+    <code>/compact</code> mid-session, and show from the <code>/context</code> output that the
+    nested rule file is no longer loaded. Then recover it with <code>/clear</code> +
+    <code>/catchup</code> and prove from <code>/context</code> that it is back.
+  </p>
+</div>
+<p>
+  <strong>You succeeded when:</strong> you have two Memory-files numbers &mdash; flat and scoped
+  &mdash; and can explain the delta between them.
+</p>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-4-context-measurement.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>Run both measurements on the student&#x27;s initialized copy (`~/labs/refund-monorepo`; the reference run below used the instructor scratch copy at `/private/tmp/refund-monorepo`).</p>
+    <pre><code>cd ~/labs/refund-monorepo
+git checkout flat-claude-md
+claude</code></pre>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>All on `main`. Keep the Demo 3 `InstructionsLoaded` hook registered in
+`.claude/settings.local.json` for this tier — it is the reliable witness (see the
+caveat below).</p>
+    <pre><code>&gt; Read services/payments/README.md and summarize the service in two sentences.
+&gt; /context</code></pre>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-4-context-measurement.md">solutions/lab-4-context-measurement.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 6: Parallel Implementation ==================== -->
+      <section id="parallel-implementation">
+        <h2>6. Parallel Implementation Across Services <span class="timing-tag">&#9201; 25 min</span></h2>
+        <p>
+          Everything so far &mdash; subagents, worktrees, per-service <code>CLAUDE.md</code> files,
+          token budgets &mdash; has been building toward this section. The sample monorepo ships a
+          custom command, <code>/implement-across-services</code>, that takes one feature spec and
+          implements it across all three services <em>at the same time</em>: one subagent per
+          service, each in its own worktree, coordinated by the lead session you are typing into.
+        </p>
+        <p>
+          The spec&rsquo;s <strong>Part 1.5 &mdash; your turn</strong> section in
+          <code>specs/feature-refunds.md</code> is the test case. The baseline refund flow
+          (Part 1) already ships working; Part 1.5 &mdash; a refund status lookup &mdash; is
+          deliberately unimplemented and touches every service: <code>payments</code> stores and
+          serves <code>GET /refunds/{id}</code>, <code>gateway</code> proxies it,
+          <code>notifications</code> filters its events by <code>refund_id</code>. The services
+          only meet at the JSON Schemas in <code>contracts/</code>. Three agents can build three
+          services independently precisely because the contract, not conversation, defines where
+          they touch.
+        </p>
+
+        <h3 id="parallel-command-anatomy">Anatomy of the Command</h3>
+        <p>
+          <code>/implement-across-services &lt;spec-file&gt;</code> runs in four phases. The command
+          file spells each one out so the lead session cannot improvise its way into a mess:
+        </p>
+        <ol class="steps">
+          <li>
+            <strong>Read the spec.</strong> The lead session reads the feature spec in full and
+            extracts each service&rsquo;s responsibilities and acceptance criteria. It does
+            <em>not</em> start implementing anything itself.
+          </li>
+          <li>
+            <strong>Spawn all three service agents in one message.</strong> The lead issues three
+            Agent tool calls &mdash; payments, notifications, gateway &mdash; in a single response
+            block. Each agent gets its own worktree, its own service directory, and only the slice
+            of the spec it owns.
+          </li>
+          <li>
+            <strong>Collect completion reports.</strong> Each agent finishes by returning a small
+            JSON report: which branch it worked on, which files it touched, and whether its
+            service&rsquo;s tests pass. The lead does not proceed until all three reports are in.
+          </li>
+          <li>
+            <strong>Merge sequentially, in dependency order.</strong> The lead &mdash; and only the
+            lead &mdash; merges the three worktree branches back one at a time: payments, then
+            notifications, then gateway, running <code>contracts/validate.sh</code> after each
+            merge so a contract break is caught at the merge that introduced it.
+          </li>
+        </ol>
+        <p>
+          Two lines in the command file carry most of the weight. The first forces the fan-out to
+          actually be parallel:
+        </p>
+        <pre><code class="language-markdown">CRITICAL: run these in PARALLEL using multiple Agent tool calls in a single message, not sequentially</code></pre>
+        <p>
+          Without that line, the model will happily launch agent one, wait for it to finish, launch
+          agent two, and so on &mdash; technically using subagents, practically sequential. Parallel
+          tool calls in a single message are what make three agents run at once. The second line
+          governs the way back:
+        </p>
+        <pre><code class="language-markdown">MERGE PHASE (you are the sole merger): merge each agent's worktree branch back sequentially in dependency order — payments, then notifications, then gateway — running contracts/validate.sh &lt;service-dir&gt; after EACH merge</code></pre>
+        <div class="callout callout-warning">
+          <div class="callout-title">One Merger, Always</div>
+          <p>
+            The fan-out is parallel; the merge never is. Agents never merge their own branches
+            &mdash; they report and stop. If three agents raced to merge into <code>main</code>,
+            you would trade file conflicts (which worktrees solved) for merge conflicts (which
+            nothing solves for free). One merger, a fixed dependency order, and a contract check
+            between merges turns integration from a race into a pipeline.
+          </p>
+        </div>
+
+        <h3 id="parallel-wall-clock">Wall-Clock vs. Tokens</h3>
+        <p>
+          Be clear about what parallelism buys you. Three agents working at once finish in roughly
+          the time of the slowest one, so a feature that would take three sequential agent runs
+          lands in about a third of the wall-clock time. What it does <em>not</em> buy you is
+          tokens: three agents means three separate contexts, each loading its own instructions,
+          its own service files, and its own conversation &mdash; and each billed separately. If
+          anything, parallel runs cost slightly <em>more</em> tokens than one careful sequential
+          session, because shared context (the spec, the contracts) is loaded three times instead
+          of once.
+        </p>
+        <p>
+          You are spending tokens to buy wall-clock time. On a three-service feature with an
+          afternoon deadline, that is an excellent trade. It is not always the right one.
+        </p>
+        <div class="callout callout-tip">
+          <div class="callout-title">When Sequential Is Still Right</div>
+          <p>
+            <strong>Tiny changes.</strong> If the whole feature is a two-line edit per service, the
+            worktree setup and triple context load cost more than they save. One session editing
+            three files wins.
+          </p>
+          <p>
+            <strong>Heavy cross-service coupling.</strong> If the services need to negotiate as they
+            go &mdash; the payload shape is still being discovered, or a contract change is part of
+            the work &mdash; parallel agents will each guess differently and you will pay for it at
+            merge time. Settle the contract first, or work sequentially in one context that sees
+            all three services.
+          </p>
+        </div>
+
+        <p>
+          Here is the whole flow &mdash; parallel fan-out, isolated work, sequential merge &mdash;
+          in one picture:
+        </p>
+        <div class="mermaid">
+sequenceDiagram
+    participant L as Lead session
+    participant P as payments agent
+    participant N as notifications agent
+    participant G as gateway agent
+    L->>L: read specs/feature-refunds.md
+    par payments
+        L->>P: Agent call (single message)
+        P->>P: implement in own worktree
+        P-->>L: JSON completion report
+    and notifications
+        L->>N: Agent call (single message)
+        N->>N: implement in own worktree
+        N-->>L: JSON completion report
+    and gateway
+        L->>G: Agent call (single message)
+        G->>G: implement in own worktree
+        G-->>L: JSON completion report
+    end
+    L->>L: merge payments branch
+    L->>L: contracts/validate.sh services/payments
+    L->>L: merge notifications branch
+    L->>L: contracts/validate.sh services/notifications
+    L->>L: merge gateway branch
+    L->>L: contracts/validate.sh services/gateway
+        </div>
+
+        <h3 id="demo-parallel-run">Demo 5 &mdash; The Parallel Run</h3>
+        <p>
+          Full walkthrough &mdash; run this in your copy of the Python monorepo. You need two
+          terminals: one for the lead session, one to watch the agents work.
+        </p>
+        <div class="callout callout-warning">
+          <div class="callout-title">Expect One Contract-Gate Bounce</div>
+          <p>
+            Running Demo 5 before Demo 6 trips the notifications agent&rsquo;s Stop gate once on
+            the shipped intentional fixture violation &mdash; section 7 is about exactly this.
+            Fix the fixture when prompted and continue; the run then proceeds normally.
+          </p>
+        </div>
+        <p><strong>Terminal 1</strong> &mdash; start the lead session and kick off the run:</p>
+        <pre><code class="language-bash">cd ~/labs/refund-monorepo
+claude</code></pre>
+        <pre><code class="language-markdown">/implement-across-services specs/feature-refunds.md</code></pre>
+        <p>
+          The lead reads the spec, then fires all three Agent calls in one message. From this
+          point on, terminal 1 is mostly quiet until the reports come back.
+        </p>
+        <p>
+          <strong>Terminal 2</strong> &mdash; watch the three agents interleave. Every tool call
+          any agent makes passes through the <code>agent_activity</code> PostToolUse hook, which
+          appends one JSON line to <code>logs/tool_usage.jsonl</code>:
+        </p>
+        <pre><code class="language-bash">tail -f logs/tool_usage.jsonl</code></pre>
+        <pre><code class="language-text"># Three implementer agents inside the same 8 seconds, identifiable by worktree path:
+#   agent-a6cbfbf7f41c7a0e5 = payments   agent-add810dca40113442 = notifications
+#   agent-a4c07923e58b3a851 = gateway
+# ("agent" field elided — on 2.1.218 it logs "main" for every entry; the worktree
+#  path in "target" is the per-agent attribution. Worktree prefix shortened to "…".)
+
+{"ts": "2026-07-24T02:43:28+00:00", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/services/payments/src/store.py", "success": true}
+{"ts": "2026-07-24T02:43:28+00:00", "tool_name": "Read", "target": "…/agent-add810dca40113442/specs/feature-refunds.md", "success": true}
+{"ts": "2026-07-24T02:43:29+00:00", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/services/payments/tests/test_refund_logic.py", "success": true}
+{"ts": "2026-07-24T02:43:31+00:00", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/src/main.py", "success": true}
+{"ts": "2026-07-24T02:43:32+00:00", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/src/events.py", "success": true}
+{"ts": "2026-07-24T02:43:34+00:00", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/contracts/validate.sh", "success": true}
+{"ts": "2026-07-24T02:43:35+00:00", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/fixtures/notification_event.json", "success": true}
+{"ts": "2026-07-24T02:43:36+00:00", "tool_name": "Read", "target": "…/agent-a4c07923e58b3a851/services/gateway/CLAUDE.md", "success": true}
+
+# Mid-run worktree list, from the second terminal at the same moment:
+$ git worktree list
+/private/tmp/refund-monorepo                                           165d144 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-a6cbfbf7f41c7a0e5 165d144 [worktree-agent-a6cbfbf7f41c7a0e5] locked
+/private/tmp/refund-monorepo/.claude/worktrees/agent-add810dca40113442 165d144 [worktree-agent-add810dca40113442] locked</code></pre>
+        <p>
+          This is the moment the section is named after: three streams of Read/Write/Bash events,
+          tagged with different worktree paths, interleaved in real time. No agent ever touches a
+          file outside its own service directory &mdash; the worktree isolation from section 3 is
+          doing its job while you watch.
+        </p>
+        <p>
+          When all three reports are in, the lead merges the branches back &mdash; payments, then
+          notifications, then gateway &mdash; running <code>contracts/validate.sh</code> after each
+          one. Afterwards, look at the shape of the history:
+        </p>
+        <pre><code class="language-bash">git log --oneline --graph</code></pre>
+        <pre><code class="language-text">*   42cb63f Merge gateway: proxy GET /refunds/{refund_id} to payments
+|\
+| * ceb70c8 gateway: proxy GET /refunds/{refund_id} to payments
+* |   f547c09 Merge notifications: filter GET /events by optional refund_id
+|\ \
+| * | c2bc908 notifications: filter GET /events by optional refund_id
+| |/
+* |   64c29df Merge payments: GET /refunds/{refund_id} status lookup
+|\ \
+| |/
+|/|
+| * 0514a5e payments: add GET /refunds/{refund_id} status lookup
+|/
+* 165d144 fix: notification fixture event_type per contract gate (Demo 6)
+
+# Post-merge verification, all three suites (Part 1 + new Part 1.5 tests):
+#   services/payments       8 passed   (was 4 before the run)
+#   services/notifications  8 passed   (was 5 before the run)
+#   services/gateway        7 passed   (was 4 before the run)
+# contracts/validate.sh: PASS for payments, notifications, and gateway.
+# Wall clock for the whole parallel run: ~4 minutes.</code></pre>
+        <p>
+          Three short-lived branches, one per service, each merged into <code>main</code> by a
+          single merger in a fixed order. That graph is the signature of a healthy parallel run
+          &mdash; keep a mental picture of it, because in Lab 5 you produce it yourself.
+        </p>
+
+        <h3 id="lab-parallel-run">Lab 5 &mdash; Run It and Race It</h3>
+        <div class="callout callout-info">
+          <div class="callout-title">Easy</div>
+          <p>
+            Before you start, write down your estimate: how long would implementing the spec&rsquo;s
+            Part 1.5 take as three sequential agent runs? Then run
+            <code>/implement-across-services specs/feature-refunds.md</code> and time it. When it
+            finishes, verify that each agent&rsquo;s changes landed on a separate branch and that
+            each branch touches only its own service&rsquo;s directory. Compare wall-clock reality
+            against your sequential estimate.
+          </p>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">Hard</div>
+          <p>
+            Edit the spec so that two services need the same contract change &mdash; for example,
+            a new field that payments must emit and notifications must record. Re-run the command
+            and deal with what happens at merge time: the contract change has to land in the right
+            order for <code>contracts/validate.sh</code> to pass after every merge, not just the
+            last one. Resolve it without ever letting an agent merge its own branch.
+          </p>
+        </div>
+        <div class="callout callout-tip">
+          <div class="callout-title">You Succeeded When&hellip;</div>
+          <p>
+            You succeeded when: <code>git log --oneline --graph</code> shows three merged branches
+            and <code>validate.sh</code> passes for all services.
+          </p>
+        </div>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-5-parallel-run.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>Estimate first (typical student answer: three sequential agent runs at 3–5 minutes
+each ≈ 10–15 minutes). Then:</p>
+    <pre><code>cd ~/labs/refund-monorepo
+claude
+&gt; /implement-across-services specs/feature-refunds.md</code></pre>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>The edit: in `specs/feature-refunds.md` Part 1.5, require a shared contract change —
+for example, `RefundResult` gains a required `requested_at` string that payments must
+emit and notifications must record with its events. Two services now depend on one
+schema edit.</p>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-5-parallel-run.md">solutions/lab-5-parallel-run.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 7: Contract Hooks ==================== -->
+      <section id="contract-hooks">
+<h2>7. Contract Gates: Hooks That Push Back <span class="timing-tag">&#9201; 15 min</span></h2>
+<p>
+  Everything so far trusts the agent to notice its own mistakes. That trust runs out the moment
+  two agents build against the same contract: the payments agent can emit an event the
+  notifications agent never expected, and both will happily report success. A contract gate fixes
+  this by validating the agent&rsquo;s work <em>at the moment it tries to finish</em> &mdash; and
+  refusing to let it stop until the contract holds.
+</p>
+
+<h3 id="subagentstop-mechanics">SubagentStop: the exit that can say no</h3>
+<p>
+  The gate is built on one hook event: <code>SubagentStop</code>.<sup><a href="#ref-9">[9]</a></sup>
+  It fires when a subagent believes it is done, and unlike most hooks it can overrule that belief.
+</p>
+<ul>
+  <li><strong>When it fires:</strong> the moment a subagent finishes its turn and tries to return control.</li>
+  <li><strong>What it receives:</strong> input JSON on stdin carrying <code>agent_type</code> and
+    <code>last_assistant_message</code> &mdash; enough to know who is stopping and what they claimed.</li>
+  <li><strong>Exit code 0:</strong> the stop goes through; the subagent is done.</li>
+  <li><strong>Exit code 2:</strong> the stop is <em>blocked</em>. Whatever the hook wrote to stderr is fed
+    back to the agent as feedback, and the agent keeps working on it.</li>
+  <li><strong>The cap:</strong> a stop can be blocked at most 8 times. After that the agent stops
+    regardless, so a broken validator cannot trap an agent forever.</li>
+</ul>
+<p>
+  That exit-code-2 path is the whole trick. The validator does not warn, log, or hope &mdash; it
+  bounces the agent back into its own session with the failure text in hand.
+</p>
+
+<h3 id="gate-placement">Why the gate lives in the agent&rsquo;s frontmatter</h3>
+<p>
+  You could wire a <code>Stop</code> hook at the session level, but there is a placement detail
+  that matters: a hook declared in an <em>agent&rsquo;s</em> frontmatter runs with that agent&rsquo;s
+  worktree as its working directory, and is auto-converted to <code>SubagentStop</code> when the
+  agent runs as a subagent. That means <code>validate.sh</code> checks the agent&rsquo;s actual
+  work &mdash; the fixtures it just edited in its own worktree. A session-level hook runs from the
+  main checkout and cannot easily find which worktree the finishing subagent was working in.
+</p>
+<p>This is the canonical block, exactly as the payments agent ships it:</p>
+<pre><code class="language-yaml">Stop:
+  - hooks:
+      - type: command
+        command: "bash \"$CLAUDE_PROJECT_DIR\"/contracts/validate.sh services/payments"</code></pre>
+<p>
+  Each service agent carries the same block pointing at its own service directory. The script is
+  the shared validator from section 2&rsquo;s monorepo: it loads every fixture under
+  <code>services/&lt;name&gt;/fixtures/</code> and checks it against the schemas in
+  <code>contracts/</code>.
+</p>
+
+<div class="callout callout-tip">
+  <div class="callout-title">You Wire Hooks, You Don&rsquo;t Write Them</div>
+  <p>
+    The hooks in this course are shipped, not hand-written in class. The sample monorepo provides
+    <code>path_guard.py</code>, <code>agent_activity.py</code>, and <code>validate.sh</code> ready
+    to use &mdash; the class is about <em>wiring</em> them into agents and <em>observing</em> what
+    they do, not about hook authoring.
+  </p>
+</div>
+
+<!-- D8: contract gate lifecycle -->
+<div class="mermaid">
+stateDiagram-v2
+    [*] --> Working
+    Working --> StopRequested: agent finishes its turn
+    StopRequested --> HookValidates: SubagentStop fires validate.sh
+    HookValidates --> Working: FAIL &mdash; exit 2, feedback fed back
+    HookValidates --> Done: PASS &mdash; exit 0
+    Done --> [*]
+</div>
+
+<h3 id="demo-contract-gate">Demo 6 &mdash; the gate fires for real</h3>
+<p>
+  The python monorepo ships with an intentional contract violation: a notifications fixture uses
+  <code>event_type</code> <code>"refund.done"</code>, which is not in the
+  <code>NotificationEvent</code> enum (<code>refund.approved</code>, <code>refund.rejected</code>).
+  Nobody planted a bug in code &mdash; the data itself is out of contract, which is exactly the
+  kind of drift a reviewer skims past and a gate does not.
+</p>
+<div class="callout callout-tip">
+  <div class="callout-title">Run Demo 6 Before the First Full Parallel Run</div>
+  <p>
+    Demo 6 depends on the intentional violation still being in place. If an earlier parallel run
+    already fixed it, re-break it first: restore the shipped fixture with
+    <code>git checkout &lt;initial-commit&gt; -- services/notifications/fixtures/notification_event.json</code>,
+    or simply re-edit its <code>event_type</code> back to <code>"refund.done"</code>. Sequence
+    note: Demo 6 is designed to run before the first full parallel run.
+  </p>
+</div>
+<p>Point the notifications agent at its own fixtures:</p>
+<pre><code class="language-bash">cd sample-monorepo/python-fastapi
+claude
+&gt; Use the notifications agent to verify your fixtures against the contract.</code></pre>
+<p>
+  The agent inspects the fixtures, concludes they look reasonable, and tries to stop. Its
+  <code>Stop</code> hook runs <code>validate.sh services/notifications</code>, the validator hits
+  the bad enum value, and the stop is blocked:
+</p>
+<pre><code class="language-text">Stop hook feedback:
+[bash "$CLAUDE_PROJECT_DIR"/contracts/validate.sh services/notifications]: FAIL fixtures/notification_event.json: field "event_type" value "refund.done" not in enum [refund.approved, refund.rejected].</code></pre>
+<p>
+  That FAIL line is delivered straight back into the agent&rsquo;s session as feedback. The agent
+  is not done anymore &mdash; it reads the message, opens the fixture, and makes the smallest fix
+  that satisfies the contract:
+</p>
+<pre><code class="language-text">-  "event_type": "refund.done",
++  "event_type": "refund.approved",</code></pre>
+<p>
+  On its second attempt to stop, the hook runs again &mdash; and this time the gate opens. The
+  agent&rsquo;s own re-validation before that stop attempt, from the captured run:
+</p>
+<pre><code class="language-text">$ ./contracts/validate.sh services/notifications; echo "validate exit=$?"
+PASS fixtures/notification_event.json
+validate exit=0
+
+$ .venv/bin/python3 -m pytest services/notifications -q
+5 passed</code></pre>
+<p>
+  Two stop attempts, one blocked, zero human intervention. The agent was forced to fix its own
+  work because the gate would not let it leave otherwise.
+</p>
+
+<h3 id="lab-contract-gate">Lab 6 &mdash; break it yourself</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Break a payments fixture so it violates <code>contracts/refund.schema.json</code>, then run
+    the payments agent and ask it to verify its fixtures. Watch the gate block the stop and force
+    the fix &mdash; without you saying what is wrong.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    Add a required <code>"reason"</code> field to <code>NotificationEvent</code> in
+    <code>contracts/notification.schema.json</code>, and extend
+    <code>contracts/validate.py</code> so the gate enforces the tightened contract end to end.
+    The existing notifications fixtures should now fail the gate until they carry a reason.
+  </p>
+</div>
+<p><strong>You succeeded when:</strong></p>
+<ul>
+  <li>the transcript shows a blocked stop,</li>
+  <li>the hook&rsquo;s FAIL feedback appears in the agent&rsquo;s session,</li>
+  <li>and a re-validation passes on the next stop attempt.</li>
+</ul>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-6-contract-gate.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>Plant the violation (an enum break is ideal — obviously wrong to the validator,
+plausible-looking to a human):</p>
+    <pre><code>cd ~/labs/refund-monorepo
+# in services/payments/fixtures/refund_result.json change:
+#   &quot;status&quot;: &quot;approved&quot;   -&gt;   &quot;status&quot;: &quot;refunded&quot;</code></pre>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>Executed 2026-07-24 in a throwaway worktree pinned to the pre-Part-2 state
+(`git worktree add /tmp/lab6-hard 165d144 --detach`) so the tightened contract could
+be watched failing and then passing. On students&#x27; repos the state is whatever their
+Demo/Lab progress left; the sequence is identical.</p>
+    <pre><code>   &quot;required&quot;: [&quot;event_type&quot;, &quot;payment_id&quot;, &quot;refund_id&quot;, &quot;recipient&quot;],
++  &quot;required&quot;: [&quot;event_type&quot;, &quot;payment_id&quot;, &quot;refund_id&quot;, &quot;recipient&quot;, &quot;reason&quot;],
+   &quot;properties&quot;: {
++    &quot;reason&quot;: {
++      &quot;type&quot;: &quot;string&quot;
++    },</code></pre>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-6-contract-gate.md">solutions/lab-6-contract-gate.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 8: Sparse Checkout ==================== -->
+      <section id="sparse-checkout">
+<h2>8. Sparse Worktrees for Big Monorepos <span class="timing-tag">&#9201; 10 min</span></h2>
+
+<p>
+  Every worktree an agent spawns is, by default, a <em>full</em> checkout: every service,
+  every package, every asset in the repo gets written to disk again. On the sample monorepo
+  that is cheap. On a real 50-package monorepo it is not &mdash; each agent pays the full
+  checkout cost in disk and in startup time, and five parallel agents pay it five times.
+</p>
+
+<p>
+  <code>worktree.sparsePaths</code> in <code>.claude/settings.json</code> fixes this. When
+  the list is present, Claude Code creates its worktrees with git sparse-checkout in cone
+  mode: only the listed directories, plus root-level files, are written to disk. Worktrees
+  start faster and use a fraction of the disk. In a 50-package monorepo this is the
+  difference between seconds and minutes per agent.
+</p>
+
+<pre><code class="language-json">{
+  "worktree": {
+    "sparsePaths": [".claude", "services/payments", "contracts"]
+  }
+}</code></pre>
+
+<h3 id="sparse-three-rules">The Three Rules</h3>
+
+<p>Three rules govern how the list behaves,<sup><a href="#ref-3">[3]</a></sup> and each one bites if you forget it:</p>
+
+<ol>
+  <li>
+    <strong>Paths are repo-root-relative.</strong> <code>services/payments</code> means
+    <em>the</em> <code>services/payments</code> under the repo root &mdash; not &ldquo;any
+    directory named payments&rdquo; and not a glob.
+  </li>
+  <li>
+    <strong>All of a session&rsquo;s worktrees share ONE list.</strong> There is no
+    per-agent list. If one agent needs <code>services/payments</code> and another needs
+    <code>services/notifications</code>, list both &mdash; every worktree in the session
+    gets the union.
+  </li>
+  <li>
+    <strong>Root-level FILES always come along; root-level DIRECTORIES do not.</strong>
+    Cone mode keeps files like <code>init.sh</code> and <code>.gitignore</code> in every
+    worktree for free, but a root-level directory only exists if it is on the list. That
+    includes <code>.claude</code> itself: leave it off and worktree sessions lose their
+    settings, deny rules, and hooks.
+  </li>
+</ol>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Pair with symlinkDirectories</div>
+  <p>
+    Sparse paths decide what git <em>checks out</em>; <code>symlinkDirectories</code>
+    decides which untracked directories (like <code>.venv</code> or
+    <code>node_modules</code>) are <em>shared</em> into each worktree instead of being
+    rebuilt. The sample monorepo already symlinks <code>.venv</code> &mdash; together the
+    two settings keep a worktree both small and immediately runnable.
+  </p>
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Files Outside sparsePaths Do Not Exist</div>
+  <p>
+    A sparse worktree does not hide excluded files &mdash; they simply are not on disk.
+    An agent asked to read <code>services/gateway/README.md</code> in a worktree that only
+    lists <code>services/payments</code> fails, exactly as if the file had never been
+    committed. Keep this feature observational in class: there are known path-resolution
+    quirks in sparse worktrees, so we watch what happens rather than build labs on top of
+    the edge cases. The sample monorepo intentionally ships <em>without</em>
+    <code>sparsePaths</code> &mdash; Lab 7 is where you add it.
+  </p>
+</div>
+
+<h3 id="sparse-diagram">Full vs. Sparse, Side by Side</h3>
+
+<p>
+  Diagram D9 contrasts the two checkouts of the same repo. The <code>du -sh</code> numbers
+  are captured live in Demo 7 &mdash; the shape of the difference is what matters here.
+</p>
+
+<div class="mermaid">
+flowchart TB
+    subgraph FULL["Full checkout &mdash; default worktree"]
+        direction TB
+        FR["repo root<br/>init.sh &middot; .env.example &middot; .gitignore"]
+        FR --> FCL[".claude/"]
+        FR --> FCO["contracts/"]
+        FR --> FSP["specs/"]
+        FR --> FSV["services/"]
+        FSV --> FP["payments/"]
+        FSV --> FN["notifications/"]
+        FSV --> FG["gateway/"]
+        FDU(["du -sh, working files: 548K"])
+    end
+    subgraph SPARSE["Sparse worktree &mdash; sparsePaths: .claude, services/payments, contracts"]
+        direction TB
+        SR["repo root<br/>root-level files still present"]
+        SR --> SCL[".claude/ &mdash; listed"]
+        SR --> SCO["contracts/ &mdash; listed"]
+        SR --> SSV["services/"]
+        SSV --> SP["payments/ &mdash; listed"]
+        SGONE(["specs/, notifications/, gateway/<br/>NOT on disk"])
+        SDU(["du -sh, working files: 136K &mdash; ~4&times; smaller"])
+    end
+    FULL -.->|"worktree.sparsePaths"| SPARSE
+    classDef absent stroke-dasharray: 5 5;
+    class SGONE absent;
+</div>
+
+<h3 id="demo-sparse">Demo 7 &mdash; Disk on a Diet</h3>
+
+<p>
+  We add <code>sparsePaths</code> to the sample monorepo, spawn a worktree agent, and
+  compare the worktree against the main checkout with <code>ls</code> and
+  <code>du -sh</code>. Run this from your initialized copy of the monorepo.
+</p>
+
+<ol class="steps">
+  <li>
+    <h4>Add sparsePaths to the settings</h4>
+    <p>
+      Edit <code>.claude/settings.json</code> so the <code>worktree</code> block carries
+      the list alongside the existing keys:
+    </p>
+    <pre><code class="language-json">{
+  "worktree": {
+    "baseRef": "head",
+    "symlinkDirectories": [".venv"],
+    "sparsePaths": [".claude", "services/payments", "contracts"]
+  }
+}</code></pre>
+    <p>
+      Leave the <code>permissions</code> and <code>hooks</code> blocks untouched &mdash;
+      only the <code>worktree</code> object changes.
+    </p>
+  </li>
+
+  <li>
+    <h4>Spawn a worktree agent</h4>
+    <p>
+      Start <code>claude</code> and launch a worktree-isolated agent exactly as in
+      Section 3, with a small payments-scoped task:
+    </p>
+    <pre><code class="language-text">&gt; Spawn an agent in a worktree to add a docstring to
+  services/payments &mdash; I want to inspect its checkout.</code></pre>
+    <p>
+      The task itself is a pretext; we want the worktree on disk so we can measure it.
+    </p>
+  </li>
+
+  <li>
+    <h4>Find the worktree and inspect it</h4>
+    <p>
+      From a second terminal in the main checkout, git knows every worktree it manages:
+    </p>
+    <pre><code class="language-bash">git worktree list
+WT=&lt;path-of-the-agent-worktree-from-the-list&gt;
+
+ls -A "$WT"
+git -C "$WT" sparse-checkout list</code></pre>
+    <p>Expected: root-level files, the three listed paths, and nothing else.</p>
+    <pre><code class="language-text">$ ls -A "$WT"
+.claude  .env  .env.example  .git  .gitignore  .worktreeinclude
+CLAUDE.md  README.md  contracts  init.sh  services
+
+$ ls -A "$WT/services"
+payments          # notifications/ and gateway/ are NOT on disk
+
+$ git -C "$WT" sparse-checkout list
+.claude
+contracts
+services/payments</code></pre>
+    <p>
+      Note what rule 3 predicted: <code>init.sh</code> and <code>.gitignore</code> came
+      along automatically (root-level files), but <code>specs/</code> did not
+      (root-level directory, not listed).
+    </p>
+  </li>
+
+  <li>
+    <h4>Measure the difference</h4>
+    <pre><code class="language-bash">du -sh .
+du -sh "$WT"</code></pre>
+    <p>The captured measurement:</p>
+    <pre><code class="language-text">$ du -sh .          # main checkout, everything included
+ 47M    .           # (.venv 46M + .git dominate)
+
+$ du -sh --exclude=.venv --exclude=.git .
+# --exclude is GNU du; BSD/macOS du lacks it — use: du -sh -I .venv -I .git .
+548K    .           # main checkout, working files only
+
+$ du -sh "$WT"
+136K    .claude/worktrees/agent-af28436fac63da09f</code></pre>
+    <p>
+      The sparse worktree shares <code>.venv</code> (a symlink) and <code>.git</code> (worktree
+      machinery), so the honest comparison is working files: 548K full vs 136K sparse &mdash;
+      about 4&times; smaller on this deliberately tiny repo. Those numbers are on Diagram D9. The
+      absolute sizes depend on your machine; the ratio is the lesson &mdash; and it grows with
+      every package the repo adds.
+    </p>
+  </li>
+</ol>
+
+<h3 id="lab-sparse-paths">Lab 7 &mdash; Scope the Checkout</h3>
+
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Configure <code>sparsePaths</code> so a payments worktree checks out only what the
+    payments work actually needs &mdash; think through which directories that is before
+    you write the list. Spawn a worktree agent and verify the worktree contents match
+    your prediction, directory by directory.
+  </p>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    Deliberately OMIT <code>.claude</code> from your list, spawn a fresh worktree agent,
+    and observe what breaks in the worktree session. Diagnose the failure from what you
+    see &mdash; which settings, rules, and hooks the session is missing and why &mdash;
+    then fix the list and show the same session behaving correctly.
+  </p>
+</div>
+
+<p>
+  <strong>You succeeded when:</strong> you can state exactly which paths a sparse worktree
+  contains and why <code>.claude</code> must be listed.
+</p>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-7-sparse-paths.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>The thinking step first — what does payments work actually need?</p>
+    <pre><code>{
+  &quot;worktree&quot;: {
+    &quot;baseRef&quot;: &quot;head&quot;,
+    &quot;symlinkDirectories&quot;: [&quot;.venv&quot;],
+    &quot;sparsePaths&quot;: [&quot;.claude&quot;, &quot;services/payments&quot;, &quot;contracts&quot;]
+  }
+}</code></pre>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>Set the list to `[&quot;services/payments&quot;, &quot;contracts&quot;]` — `.claude` omitted — restart,
+and spawn a fresh worktree agent. What is on disk (real output, git-level sparse
+worktree without `.claude`, 2026-07-24):</p>
+    <pre><code>$ ls -A &quot;$WT&quot;
+.git  .gitignore  .worktreeinclude
+CHANGELOG.md  CLAUDE.md  README.md  contracts  init.sh  services
+
+$ ls &quot;$WT/.claude&quot;
+ls: .../.claude: No such file or directory</code></pre>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-7-sparse-paths.md">solutions/lab-7-sparse-paths.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 9: Agent Teams ==================== -->
+      <section id="agent-teams">
+<h2>9. Agent Teams: Coordinated Parallel Work <span class="timing-tag">&#9201; 30 min</span></h2>
+
+<p>
+  Everything in this module so far follows one shape: a main session that farms work out and
+  collects results. Subagents research and implement, worktrees keep them from stepping on each
+  other, hooks keep the contract honest &mdash; but the workers never speak to one another. Agent
+  teams change that shape. A team is a group of full Claude Code sessions that share a task list,
+  message each other directly, and coordinate under a lead. Teams launched alongside Opus 4.6
+  (February 2026), but they are not tied to any model &mdash; the official guidance in fact
+  recommends Sonnet for teammates, and everything in this section works that way.
+</p>
+
+<p>
+  Teams are experimental and off by default. Enable them with an environment variable in your
+  project&rsquo;s <code>.claude/settings.json</code>:
+</p>
+
+<pre><code class="language-json">{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}</code></pre>
+
+<h3 id="team-architecture">The four moving parts</h3>
+
+<p>A team has exactly four pieces:<sup><a href="#ref-4">[4]</a></sup></p>
+
+<ul>
+  <li><strong>Team lead</strong> &mdash; your session. It breaks the goal into tasks, spawns
+    teammates, arbitrates disagreements, and synthesizes the result.</li>
+  <li><strong>Teammates</strong> &mdash; full, independent Claude Code sessions, not lightweight
+    subagents. Each has its own context window and works through tasks on its own.</li>
+  <li><strong>Shared task list</strong> &mdash; the coordination backbone. Teammates claim tasks
+    with file locking, so two teammates can never grab the same one. Tasks can declare
+    dependencies; when a blocking task completes, its dependents unblock automatically.</li>
+  <li><strong>Mailbox</strong> &mdash; peer-to-peer messages. Teammates can question each
+    other&rsquo;s decisions, share findings, and negotiate interfaces without routing everything
+    through the lead.</li>
+</ul>
+
+<p>
+  Teammates can be spawned from the subagent definitions you already wrote in the Subagent
+  Architecture section: mention the agent by name when you ask the lead to build the team. The
+  definition&rsquo;s <code>tools</code> and <code>model</code> fields are honored; its
+  <code>skills</code> and <code>mcpServers</code> fields are <em>not</em> &mdash; teammates do not
+  inherit those, so anything a teammate needs from a skill has to go into the task description
+  instead.
+</p>
+
+<p>
+  Two control mechanisms keep a team from running away from you. First, the
+  <strong>plan-approval flow</strong>: you can require that a teammate present its plan and get
+  the lead&rsquo;s approval before touching code &mdash; use it for any task you would not hand to
+  a new hire without a design review. Second, <strong>quality-gate hooks</strong>: three team
+  events are hookable, and an exit code of 2 pushes the work back instead of letting it through.
+</p>
+
+<table>
+  <thead>
+    <tr><th>Hook event</th><th>Fires when</th><th>Exit 2 means</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="cmd-name">TeammateIdle</td><td>A teammate runs out of claimed work</td><td>Send it back for more &mdash; e.g. its tests do not pass yet</td></tr>
+    <tr><td class="cmd-name">TaskCreated</td><td>A new task lands on the shared list</td><td>Reject the task &mdash; e.g. it is missing acceptance criteria</td></tr>
+    <tr><td class="cmd-name">TaskCompleted</td><td>A teammate marks a task done</td><td>Reopen the task &mdash; e.g. the contract validator fails</td></tr>
+  </tbody>
+</table>
+
+<p>
+  A <code>TaskCompleted</code> gate that reruns the service tests looks just like the contract
+  hooks from earlier in this module &mdash; same JSON shape, new event name, and exit 2 instead of
+  a block message. You will wire one up in the Hard tier of Lab 8.
+</p>
+
+<div class="mermaid">
+flowchart LR
+  subgraph hub ["Subagents: hub-and-spoke"]
+    direction TB
+    MAIN["Main session"]
+    S1["payments subagent"] -- "report back" --> MAIN
+    S2["notifications subagent"] -- "report back" --> MAIN
+    S3["gateway subagent"] -- "report back" --> MAIN
+  end
+  subgraph mesh ["Agent team: mesh"]
+    direction TB
+    LEAD["Team lead (your session)"]
+    TASKS[("Shared task list")]
+    T1["Teammate: payments"]
+    T2["Teammate: notifications"]
+    T3["Teammate: gateway"]
+    LEAD --- TASKS
+    T1 --- TASKS
+    T2 --- TASKS
+    T3 --- TASKS
+    T1 &lt;-. "peer message" .-&gt; T2
+    T2 &lt;-. "peer message" .-&gt; T3
+  end
+</div>
+
+<h3 id="subagents-vs-teams">Subagents or a team?</h3>
+
+<p>
+  This is the decision the whole module has been building toward. The two models are not rivals
+  &mdash; they answer different questions.
+</p>
+
+<table class="comparison-table">
+  <thead>
+    <tr><th></th><th>Subagents</th><th>Agent team</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Who coordinates</td>
+      <td>The main session orchestrates everything itself</td>
+      <td>The lead sets direction; teammates self-claim from the shared task list</td>
+    </tr>
+    <tr>
+      <td>Do workers talk to each other</td>
+      <td>No &mdash; each reports back to the caller only</td>
+      <td>Yes &mdash; peer-to-peer messages through the mailbox</td>
+    </tr>
+    <tr>
+      <td>Token cost</td>
+      <td>Lower &mdash; only condensed results return to your context</td>
+      <td>High &mdash; every teammate is a full session running in parallel</td>
+    </tr>
+    <tr>
+      <td>Best for</td>
+      <td>Parallel research and well-scoped tasks where only the result matters</td>
+      <td>Work that needs discussion between workers: cross-service changes, reviews that challenge each other</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Teams do not isolate teammates in worktrees</div>
+  <p>
+    Every teammate shares the working directory. Two teammates editing the same file will corrupt
+    each other&rsquo;s work exactly like two developers editing one checkout. The fix is
+    partitioning, not isolation: give each teammate <em>ownership</em> of a different
+    service&rsquo;s files and say so in the task descriptions. Worktrees are the
+    <strong>subagent</strong> story; teams are the <strong>coordination</strong> story &mdash; do
+    not expect one to do the other&rsquo;s job.
+  </p>
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Cost: a team is roughly 7&times; a single session</div>
+  <p>
+    Every teammate burns tokens like a full session, so a team multiplies your spend by roughly
+    the team size plus coordination overhead &mdash; about 7&times; for a typical
+    setup.<sup><a href="#ref-8">[8]</a></sup> Keep
+    teams at 3&ndash;5 teammates, run teammates on Sonnet, and shut the team down as soon as the
+    work lands.
+  </p>
+  <p>
+    <strong>Live-training note:</strong> a classroom of concurrent teams needs a generous
+    tokens-per-minute limit &mdash; coordinate with your org admin before the session. That is why
+    the instructor runs Demo 8 while you run the scaled-down lab.
+  </p>
+</div>
+
+<h3 id="team-limitations">Known limitations</h3>
+
+<p>All documented, all real:<sup><a href="#ref-4">[4]</a></sup></p>
+
+<ul>
+  <li>No session resume while in-process teammates are running &mdash; finish or shut down the team first.</li>
+  <li>Task status can lag reality &mdash; nudge the lead to refresh if the list looks stale.</li>
+  <li>The lead may stop early with tasks still open &mdash; tell it to keep going.</li>
+  <li>One team per session &mdash; you cannot run two teams side by side.</li>
+  <li>No nested teams &mdash; a teammate cannot spawn a team of its own.</li>
+</ul>
+
+<h3 id="demo-agent-team">Demo 8 &mdash; a real team, instructor-driven</h3>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Instructor runs this &mdash; token-heavy</div>
+  <p>
+    This demo runs three Sonnet teammates plus a lead for 10&ndash;15 minutes. Watch it happen on
+    the shared screen; you will build a smaller team yourself in Lab 8.
+  </p>
+</div>
+
+<p>
+  The demo implements <strong>Part 2 of <code>specs/feature-refunds.md</code></strong>: adding a
+  required <code>reason</code> field to <code>NotificationEvent</code>. It is the ideal team job
+  &mdash; a contract change that all three services consume, where the workers genuinely need to
+  coordinate. One ownership detail learned from the live run: the schema file edit goes to the
+  <em>lead</em>, because the shipped <code>path_guard</code> hook fences payments-implementer
+  inside <code>services/payments/</code> &mdash; hand it <code>contracts/</code> and the hook
+  blocks the edit. With the flag enabled, the instructor starts from the monorepo root:
+</p>
+
+<pre><code class="language-text">Create an agent team to implement Part 2 of specs/feature-refunds.md.
+Spawn three teammates from the payments-implementer, notifications-implementer and
+gateway-implementer agent definitions. Partition ownership strictly:
+- you, the lead, own contracts/notification.schema.json — apply the approved
+  schema diff yourself (path_guard fences the teammates into their services)
+- payments-implementer owns services/payments/ and designs the schema change
+- notifications-implementer owns services/notifications/
+- gateway-implementer owns services/gateway/ and the end-to-end check
+The schema task blocks the other tasks. Require plan approval on the
+schema task before any code is written.</code></pre>
+
+<p>Three things are worth watching for as the team runs:</p>
+
+<ol class="steps">
+  <li>
+    <strong>Task claiming and unblocking.</strong> The teammates claim tasks from the shared list
+    &mdash; file locking guarantees no double-claims &mdash; and the two service tasks sit blocked
+    until the schema task completes, then unblock on their own.
+  </li>
+  <li>
+    <strong>Coordination through the lead.</strong> Peer-to-peer messaging is the documented
+    design, but the shipped implementer definitions allowlist only Read, Grep, Glob, Edit, Write,
+    and Bash &mdash; no team tools &mdash; so in the captured run every one of the 31 messages was
+    a lead&ndash;teammate relay. Watch the lead carry the coordination: payments-implementer
+    surfaces its blockers at the plan gate, the lead approves with a scope cut, concedes a
+    correction (&ldquo;you were right about path_guard and I was wrong&rdquo;), and relays the
+    unblocks as each dependency lands. Give the teammate definitions the team tools and you get
+    true peer messages instead.
+  </li>
+  <li>
+    <strong>The lead&rsquo;s synthesis.</strong> When the last task completes, the lead verifies
+    the Part 2 acceptance criteria &mdash; schema, payments, and notifications landed as a
+    coherent set &mdash; and reports one combined summary.
+  </li>
+</ol>
+
+<pre><code class="language-text"># Captured run, claude 2.1.218 — verbatim excerpts, trimmed with "…"
+
+## Task board — creation, ownership, dependencies
+● TaskCreate #1 "Add required `reason` to NotificationEvent schema + emit it from payments"
+● TaskCreate #2 "Make notifications require and log the `reason` field"
+● TaskCreate #3 "Verify gateway is unaffected and run the end-to-end Part 2 check"
+● TaskUpdate #1 owner: payments-implementer, blocks: [#2, #3]
+● TaskUpdate #2 owner: notifications-implementer, blocks: [#3]
+● TaskUpdate #3 owner: gateway-implementer
+● Lead: "Task board is set up with the dependency chain. Now spawning the three teammates."
+
+## Plan-approval gate on the schema task (teammate → lead)
+payments-implementer:
+    "I've completed the read-only investigation and am stopping at the
+     plan-approval gate. Two blockers to surface first. …
+     Blocker 1 — I have no team tools: my toolset in this session is only
+     Read / Edit / Write / Bash … please treat this final message as the
+     SendMessage to main, approve or revise it in your reply."
+
+## Mailbox — every message is a lead ↔ teammate relay (31 in total)
+✉ lead → payments-implementer:
+    "PLAN APPROVED, with one scope cut. Both your blockers are resolved …
+     I will do all board updates and all teammate relays. Task #1 is now in_progress"
+✉ lead → payments-implementer:
+    "CORRECTION — you were right about path_guard and I was wrong. …
+     the hook is actually wired in your own agent definition frontmatter"
+✉ lead → notifications-implementer:
+    "UNBLOCKED — the schema has landed on `main` as commit `e5b2fa4`."
+✉ lead → gateway-implementer:
+    "UNBLOCKED — tasks #1 and #2 have both landed on `main`. Task #3 is now
+     in_progress under your name. Run the real Part 2 end-to-end verification."
+
+## Lead synthesis
+    "Part 2 is complete and verified. Working tree clean, all three tasks closed.
+     One service per commit, merged in dependency order: schema → payments →
+     notifications. 31 passed, 0 failed (gateway 7, payments 13, notifications 11);
+     8/8 fixtures PASS. … a live POST /refunds through the gateway produced a real
+     logged notification carrying \"reason\":\"refund_approved\", end to end."</code></pre>
+
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Demo 8 Run Notes</div>
+  <p><strong>Pre-class checklist:</strong> CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 set and smoke-tested
+  the morning of class; TPM headroom confirmed with your org admin (a live class multiplies
+  concurrent usage); the sample monorepo initialized and Demo 6 NOT yet run in your copy.</p>
+  <p><strong>Observed on 2.1.218:</strong> teammates spawned from the restricted implementer
+  definitions relay through the lead (no peer messages) and the schema change must be owned by the
+  lead &mdash; the transcript in this section shows exactly that; do not promise peer-messaging
+  theatrics with these definitions.</p>
+  <p><strong>Fallback if teams misbehave live:</strong> show the captured transcript below instead,
+  narrate the task-claiming order, and run Lab 8 Easy as a full-group exercise.</p>
+</div>
+
+<h3 id="lab-agent-team">Lab 8 &mdash; a small team of your own</h3>
+
+<p>
+  Time-boxed: <strong>15 minutes</strong>. Pick one tier. Keep the team small, use Sonnet
+  teammates, and shut the team down when you finish.
+</p>
+
+<div class="callout callout-info">
+  <div class="callout-title">Easy &mdash; a review-only team</div>
+  <p>
+    Enable the flag, then spawn a team of <strong>2 teammates in review-only mode</strong> (no
+    code changes) over the refunds feature you merged earlier in this module. Give each a
+    different lens &mdash; for example, contract compliance versus error handling. Read their
+    peer messages: where do the two reviews disagree, and how do they resolve it?
+  </p>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">Hard &mdash; implement Part 2 with a gated team</div>
+  <p>
+    Spawn <strong>3 teammates</strong> to implement the Part 2 contract change, with strict
+    file-ownership partitioning (each teammate owns a different service&rsquo;s files &mdash;
+    remember, no worktree isolation here). Add a <code>TaskCompleted</code> hook that runs your
+    service tests and exits 2 on failure, and watch it reopen at least one task before the team
+    converges.
+  </p>
+</div>
+
+<p>
+  <strong>You succeeded when:</strong> the task list shows claimed and completed tasks, and the
+  lead relayed at least one teammate report. If your environment delivers true peer-to-peer
+  messages (teammate definitions with team tools), note the difference from the relay pattern
+  you saw in Demo 8.
+</p>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-8-agent-team.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>Reference run executed 2026-07-24 (claude 2.1.218, flag on, scratch copy with the
+refunds feature merged). The kickoff prompt:</p>
+    <pre><code>Create an agent team to review the refunds feature (specs/feature-refunds.md, all
+three services). Spawn exactly 2 teammates in review-only mode - they must not
+create, edit, or delete any file. Teammate 1 reviews contract compliance: fixtures
+and emitted payloads against contracts/*.schema.json. Teammate 2 reviews error
+handling across gateway, payments, notifications. Each teammate must send at least
+one direct peer message to the OTHER teammate (not to you) challenging or
+confirming one specific finding, and wait for the reply before finishing. Then
+collect both reviews, note where they disagreed and how it resolved, write nothing
+to disk, shut the team down, and report a combined summary.</code></pre>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>Do not run this per-student in class (three Sonnet teammates plus a lead for
+10–15 minutes per attempt, on top of Demo 8&#x27;s own run — coordinate
+tokens-per-minute with the org admin even for a single instructor run). The
+reference for the transcript shape is the captured instructor run,
+`materials/captured/demo8-team-transcript.txt`, which implemented the same Part 2
+change this tier targets. Expected shape, in order:</p>
+    <pre><code>{
+  &quot;hooks&quot;: {
+    &quot;TaskCompleted&quot;: [
+      {
+        &quot;hooks&quot;: [
+          {
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;bash \&quot;$CLAUDE_PROJECT_DIR\&quot;/.claude/hooks/team_gate.sh&quot;
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-8-agent-team.md">solutions/lab-8-agent-team.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 10: Capstone ==================== -->
+      <section id="capstone">
+<h2>10. Capstone: Your Monorepo <span class="timing-tag">&#9201; 35 min</span></h2>
+<p>
+  Everything so far ran against the sample repo. This section runs the whole stack against
+  <em>your</em> monorepo &mdash; about 35 minutes, you drive, the instructor circulates.
+  Treat it as a runbook: six steps, each with a verification gate. Do not move to the next
+  step until the gate passes; a skipped gate here is a debugging session later.
+</p>
+
+<div class="mermaid">
+flowchart LR
+    S1["1. /detect-stack"] -->|"report matches<br/>your repo"| S2["2. Nested<br/>CLAUDE.md"]
+    S2 -->|"/context shows<br/>per-service memory"| S3["3. Scoped agents<br/>+ path_guard"]
+    S3 -->|"cross-service<br/>edit blocked"| S4["4. Worktree<br/>settings"]
+    S4 -->|"tests pass in a<br/>fresh worktree"| S5["5. Parallel<br/>implementation"]
+    S5 -->|"both branches<br/>green"| S6["6. Merge in<br/>dependency order"]
+    S6 --> M(["Measure your<br/>/context saving"])
+</div>
+
+<h3 id="capstone-checklist">The six-step checklist</h3>
+<ol class="steps">
+  <li>
+    <strong>Detect your stack.</strong> Run <code>/detect-stack</code> at the root of your
+    monorepo and read the report critically &mdash; it decides which adaptation row below applies.
+    <br /><em>Gate:</em> the detected stack, test runner, and service layout match what you know
+    to be true. If it misreads your repo, correct the generated context before continuing.
+  </li>
+  <li>
+    <strong>Write nested <code>CLAUDE.md</code> files.</strong> Cover at least two of your
+    services: root file holds shared conventions, each service file holds only what is unique
+    to that service &mdash; zero duplication between levels.
+    <br /><em>Gate:</em> <code>/context</code> lists the root file plus the service file under
+    Memory files when you work inside that service, and no rule appears twice.
+  </li>
+  <li>
+    <strong>Create two service-scoped agents.</strong> Each gets the isolation treatment: its
+    own worktree, a restricted tool list, and the <code>path_guard</code> hook copy-adapted
+    from the sample monorepo so its paths name <em>your</em> services.
+    <br /><em>Gate:</em> ask agent A to edit a file owned by agent B&rsquo;s service and watch
+    the hook block it.
+  </li>
+  <li>
+    <strong>Configure worktree settings.</strong> In <code>.claude/settings.json</code> set
+    <code>"baseRef": "head"</code> and <code>symlinkDirectories</code> for your dependency
+    directory (see the table). If your repo is large, add <code>sparsePaths</code> so each
+    agent checks out only its slice.
+    <br /><em>Gate:</em> a fresh worktree runs your test suite green without reinstalling
+    dependencies.
+  </li>
+  <li>
+    <strong>Run a real parallel implementation.</strong> Pick a real ticket that touches two
+    services, adapt <code>/implement-across-services</code> to your service names, and launch
+    it. Resist the urge to micromanage &mdash; watch the activity log instead.
+    <br /><em>Gate:</em> both agents finish on their own branches and each branch passes its
+    service&rsquo;s tests.
+  </li>
+  <li>
+    <strong>Merge and measure.</strong> Merge the branches in dependency order &mdash; provider
+    service first, consumer second &mdash; and rerun the full test suite on the result. Then
+    compare <code>/context</code> inside a service against your pre-capstone baseline.
+    <br /><em>Gate:</em> a clean merge, a green suite, and a concrete token number for what the
+    nested layout saved you.
+  </li>
+</ol>
+
+<h3 id="capstone-adaptation">Adapting to your stack</h3>
+<p>
+  The course ships worked templates for the python-fastapi and node-express variants. The
+  java-spring and go-gin rows are honest about that: you adapt the shipped templates rather
+  than copy a ready-made one.
+</p>
+<table class="comparison-table">
+  <thead>
+    <tr>
+      <th>Stack</th>
+      <th>Test command</th>
+      <th><code>symlinkDirectories</code> target</th>
+      <th>Service context files</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>python-fastapi</td>
+      <td><code>.venv/bin/python3 -m pytest</code></td>
+      <td><code>.venv</code></td>
+      <td><code>services/&lt;name&gt;/CLAUDE.md</code> (shipped template)</td>
+    </tr>
+    <tr>
+      <td>node-express</td>
+      <td><code>npm test --workspace=&lt;service&gt;</code></td>
+      <td><code>node_modules</code></td>
+      <td><code>services/&lt;name&gt;/CLAUDE.md</code> (shipped template)</td>
+    </tr>
+    <tr>
+      <td>java-spring</td>
+      <td><code>./mvnw test -pl &lt;module&gt;</code></td>
+      <td><code>~/.m2</code> is already shared per user; do <em>not</em> symlink
+          <code>target/</code> &mdash; each worktree builds its own</td>
+      <td><code>&lt;module&gt;/CLAUDE.md</code>, adapted from the python template</td>
+    </tr>
+    <tr>
+      <td>go-gin</td>
+      <td><code>go test ./services/&lt;name&gt;/...</code></td>
+      <td>usually none &mdash; the Go build cache lives in
+          <code>~/.cache/go-build</code>, outside the worktree</td>
+      <td><code>services/&lt;name&gt;/CLAUDE.md</code>, adapted from the node template</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Take It Home</div>
+  <p><strong>Finish the rollout.</strong> Add agents for your remaining services &mdash; the second one takes a fraction of the time the first did.</p>
+  <p><strong>Commit the <code>.claude/</code> config.</strong> Hooks, settings, and agents in version control mean your whole team inherits the setup instead of rebuilding it.</p>
+  <p><strong>Make <code>/catchup</code> a habit.</strong> After every <code>/clear</code>, it is the cheapest way back to full working context.</p>
+</div>
+
+<h3 id="lab-capstone">Lab 9 &mdash; the real thing</h3>
+<div class="callout callout-info">
+  <div class="callout-title">Easy</div>
+  <p>
+    Run the six-step checklist against the sample monorepo variant matching your stack.
+    Every gate must pass before you tick the step.
+  </p>
+</div>
+<div class="callout callout-info">
+  <div class="callout-title">Hard</div>
+  <p>
+    Run the checklist against <em>your actual repo</em> with a real ticket from your backlog
+    as the step-5 parallel implementation.
+  </p>
+</div>
+<p>
+  <strong>You succeeded when:</strong> two agents implemented in parallel on separate branches
+  and both merged cleanly.
+</p>
+
+<div class="callout callout-solution">
+  <div class="callout-title">Instructor: Solution (lab-9-capstone.md)</div>
+  <details><summary>Easy solution</summary>
+    <p>**Step 1 — Detect the stack.** `/detect-stack` at the repo root. The report must
+say: Python / FastAPI, three services under `services/` (gateway, payments,
+notifications), tests via pytest through the repo venv, one service per pytest run.
+Gate check against ground truth rather than vibes — the run and test commands in the
+root `CLAUDE.md` port map and the suites in step 4 below. If the report misses the
+one-pytest-run-per-service constraint (each service has its own `src` package), fix
+the generated context before moving on.</p>
+    <pre><code>$ python3 .claude/hooks/path_guard.py services/notifications --self-test services/gateway/src/main.py
+BLOCKED path_guard: services/gateway/src/main.py is outside your service scope (services/notifications)
+exit=2
+$ python3 .claude/hooks/path_guard.py services/notifications --self-test services/notifications/src/events.py
+exit=0</code></pre>
+  </details>
+  <details><summary>Hard solution</summary>
+    <p>Same six steps; what changes is captured by the fragment&#x27;s adaptation table. The
+instructor-relevant judgment calls per step:</p>
+  </details>
+  <p>Full walkthrough: <a href="solutions/lab-9-capstone.md">solutions/lab-9-capstone.md</a></p>
+</div>
+</section>
+
+      <!-- ==================== SECTION 11: References ==================== -->
+      <section id="references">
+<h2>11. The Decision Framework <span class="timing-tag">&#9201; 10 min</span></h2>
+<p>
+  Everything in this course reduces to one escalation ladder. Start at the cheapest rung and
+  climb only when the task forces you to:
+</p>
+
+<ol>
+  <li>
+    <strong>Scoped context</strong> (nested <code>CLAUDE.md</code>, sparse checkout,
+    <code>/context</code>) &mdash; the cheapest tool. One session, small window, no
+    coordination overhead. Most monorepo pain is solved right here.
+  </li>
+  <li>
+    <strong>Subagents + worktrees</strong> &mdash; parallel implementation. Each worker gets
+    its own context window and its own checkout, so N tasks run at once without stepping on
+    each other. You pay N context windows, but zero worker-to-worker coordination.
+  </li>
+  <li>
+    <strong>Agent teams</strong> &mdash; coordination. Workers share a task list and message
+    each other. This is the most powerful rung and the most expensive one: every message and
+    every shared-state read costs tokens on top of each worker's own window.
+  </li>
+</ol>
+
+<p>
+  You saw the full subagents-vs-teams comparison in the agent-teams section; here it is again
+  in compact form, because this is the distinction people mix up on Monday morning:
+</p>
+
+<table>
+  <thead>
+    <tr><th></th><th>Subagents</th><th>Agent teams</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Communication</strong></td><td>Report results to the parent only</td><td>Message each other directly</td></tr>
+    <tr><td><strong>Shared state</strong></td><td>None &mdash; each has its own context</td><td>Shared task list + mailboxes</td></tr>
+    <tr><td><strong>Token cost</strong></td><td>Lower &mdash; results summarized upward</td><td>Higher &mdash; coordination traffic on top</td></tr>
+    <tr><td><strong>Best for</strong></td><td>Independent, parallelizable tasks</td><td>Tasks that need mid-flight negotiation</td></tr>
+  </tbody>
+</table>
+
+<p>
+  When you are unsure which rung a task belongs on, walk this tree:
+</p>
+
+<div class="mermaid">
+flowchart TD
+    START(["New parallel task"]) --> Q1{"Tasks touch the<br/>same files?"}
+    Q1 -->|"Yes"| WT["Git worktrees<br/>one checkout per worker"]
+    Q1 -->|"No"| Q2{"Workers need to talk<br/>to each other?"}
+    Q2 -->|"Yes"| AT["Agent teams<br/>shared task list + messaging"]
+    Q2 -->|"No"| SA["Subagents<br/>independent, report to parent"]
+    WT -.-> ALWAYS["Always: nested CLAUDE.md + /context"]
+    AT -.-> ALWAYS
+    SA -.-> ALWAYS
+
+    style WT fill:#ff9800,color:#fff
+    style AT fill:#7c4dff,color:#fff
+    style SA fill:#4caf50,color:#fff
+    style ALWAYS fill:#2196f3,color:#fff
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">The Two Questions</div>
+  <p>
+    Notice the tree only asks two questions: <em>do the tasks collide on files?</em> and
+    <em>do the workers need to coordinate?</em> File collisions are an isolation problem
+    (worktrees). Coordination is a communication problem (teams). Everything else is a plain
+    subagent. And the leaf note applies to all three branches: scoped context via nested
+    <code>CLAUDE.md</code> plus a <code>/context</code> check is never optional &mdash; it is
+    the floor you stand on at every rung.
+  </p>
+</div>
+
+<h3 id="references-list">References</h3>
+<p>
+  Official documentation for every technique in this course, in the order you met them.
+</p>
+
+<ol class="references-list">
+  <li id="ref-1"><a href="https://code.claude.com/docs/en/sub-agents" target="_blank" rel="noopener">Create custom subagents</a></li>
+  <li id="ref-2"><a href="https://code.claude.com/docs/en/worktrees" target="_blank" rel="noopener">Run parallel sessions with worktrees</a></li>
+  <li id="ref-3"><a href="https://code.claude.com/docs/en/large-codebases" target="_blank" rel="noopener">Set up Claude Code in a monorepo</a></li>
+  <li id="ref-4"><a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener">Orchestrate teams of Claude Code sessions</a></li>
+  <li id="ref-5"><a href="https://code.claude.com/docs/en/agents" target="_blank" rel="noopener">Run agents in parallel</a></li>
+  <li id="ref-6"><a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener">How Claude remembers your project</a></li>
+  <li id="ref-7"><a href="https://code.claude.com/docs/en/context-window" target="_blank" rel="noopener">Explore the context window</a></li>
+  <li id="ref-8"><a href="https://code.claude.com/docs/en/costs" target="_blank" rel="noopener">Manage costs effectively</a></li>
+  <li id="ref-9"><a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener">Hooks reference</a></li>
+  <li id="ref-10"><a href="claude-code-guide.html">Course 101 guide</a></li>
+</ol>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Take It Home</div>
+  <p>
+    Course repo, sample monorepo, and student runbook: everything you used today is in this
+    repository &mdash; copy the <code>.claude/</code> patterns into your own monorepo tomorrow.
+  </p>
+</div>
+</section>
+
+    </main>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <p>
+      Claude Code Course Materials &mdash; Parallel Development: Subagents, Worktrees &amp; Monorepos
+      <br />
+      Built with <a href="https://picocss.com" target="_blank" rel="noopener">Pico.css</a>,
+      <a href="https://mermaid.js.org" target="_blank" rel="noopener">Mermaid.js</a>, and
+      <a href="https://prismjs.com" target="_blank" rel="noopener">Prism.js</a>.
+    </p>
+  </footer>
+
+  <!-- ===== JS: Prism.js ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+
+  <!-- ===== JS: Mermaid ===== -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+      sequence: { useMaxWidth: true },
+    });
+  </script>
+
+  <!-- ===== JS: Sidebar active link tracking ===== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.sidebar nav a');
+      const sections = document.querySelectorAll('main section, main h3[id]');
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            links.forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+            if (active) active.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-10% 0px -80% 0px' });
+
+      sections.forEach(s => { if (s.id) observer.observe(s); });
+    });
+  </script>
+
+</body>
+</html>
