@@ -20,6 +20,25 @@ Before you begin, ensure you have:
 
 ---
 
+## 102 Prerequisites
+
+Attending **Course 102 — Parallel Development**? Check these before the session (the base prerequisites above still apply):
+
+-   **Claude Code >= 2.1.203 recommended** — earlier versions do not confine a subagent's Bash commands to its worktree, which undermines the isolation labs. Check with `claude --version`.
+-   **git >= 2.5** — the first version with `git worktree`. Check with `git --version`.
+-   **Python 3.10+ and/or Node 18+** — matching the sample-monorepo variant you pick (`python-fastapi` needs Python, `node-express` needs Node; install both if you want to switch freely).
+-   **Workspace trust accepted in the sample monorepo directory** — copy the variant out of this repo, run `./init.sh`, then open `claude` there once and accept the trust prompt so it does not interrupt the labs.
+-   **Agent Teams availability** — Module 2 uses the experimental Agent Teams feature. Check what you currently have set:
+    ```bash
+    echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
+    ```
+    Empty output means the variable is not set; the guide covers enabling it during Module 2.
+-   **For live trainings — org admins**: a classroom running Claude Code concurrently needs higher token-per-minute (TPM) allocations than individual use. Per the official costs guidance, ask your org admin to raise the TPM allocation for the training window before the session.
+
+**Instructor-side prerequisite**: run the Demo captures beforehand (Wave-2 materials) so every demo has a real recorded output on hand if a live run misbehaves.
+
+---
+
 ## Three Core Workflows
 
 This template supports three distinct workflows depending on your needs. Choose the one that matches your situation.
