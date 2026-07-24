@@ -1,0 +1,13 @@
+# Demo 3 — InstructionsLoaded lazy-load log (real capture)
+# claude 2.1.218, scratch copy at /private/tmp/refund-monorepo
+# Session: claude -p "Read services/payments/README.md and summarize the service in two sentences."
+# Long identifier fields (session_id, transcript_path, cwd, prompt_id) elided as "…" for width.
+
+$ cat instructions-loaded.log        # immediately after session launch — rule one
+{…,"hook_event_name":"InstructionsLoaded","file_path":"/private/tmp/refund-monorepo/CLAUDE.md","memory_type":"Project","load_reason":"session_start"}
+
+$ grep payments instructions-loaded.log       # after Claude read one payments file — rule two
+{…,"hook_event_name":"InstructionsLoaded","file_path":"/private/tmp/refund-monorepo/services/payments/CLAUDE.md","memory_type":"Project","load_reason":"nested_traversal","trigger_file_path":"/private/tmp/refund-monorepo/services/payments/README.md"}
+
+$ grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"
+gateway CLAUDE.md never loaded

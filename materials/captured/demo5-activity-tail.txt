@@ -1,0 +1,31 @@
+# Demo 5 — tail -f logs/tool_usage.jsonl during the parallel run (real capture)
+# /implement-across-services specs/feature-refunds.md, claude 2.1.218.
+# Three implementer agents interleaving within the same 8 seconds, each identifiable
+# by its worktree path segment:
+#   agent-a6cbfbf7f41c7a0e5 = payments   agent-add810dca40113442 = notifications
+#   agent-a4c07923e58b3a851 = gateway
+# Lines trimmed for width: session_id elided, worktree prefix shortened to "…".
+
+{"ts": "2026-07-24T02:43:28+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/services/payments/src/store.py", "success": true}
+{"ts": "2026-07-24T02:43:28+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-add810dca40113442/specs/feature-refunds.md", "success": true}
+{"ts": "2026-07-24T02:43:29+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/services/payments/tests/test_refund_logic.py", "success": true}
+{"ts": "2026-07-24T02:43:31+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/src/main.py", "success": true}
+{"ts": "2026-07-24T02:43:32+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/src/events.py", "success": true}
+{"ts": "2026-07-24T02:43:33+00:00", "agent": "main", "tool_name": "Bash", "target": "find …/agent-add810dca40113442/services/notifications -type f -not -path '*", "success": true}
+{"ts": "2026-07-24T02:43:33+00:00", "agent": "main", "tool_name": "Agent", "target": "", "success": true}
+{"ts": "2026-07-24T02:43:34+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-a6cbfbf7f41c7a0e5/contracts/validate.sh", "success": true}
+{"ts": "2026-07-24T02:43:34+00:00", "agent": "main", "tool_name": "Bash", "target": "cat services/payments/fixtures/*.json && ls contracts/", "success": true}
+{"ts": "2026-07-24T02:43:35+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/tests/test_events.py", "success": true}
+{"ts": "2026-07-24T02:43:35+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-add810dca40113442/services/notifications/fixtures/notification_event.json", "success": true}
+{"ts": "2026-07-24T02:43:36+00:00", "agent": "main", "tool_name": "Read", "target": "…/agent-a4c07923e58b3a851/services/gateway/CLAUDE.md", "success": true}
+
+# Mid-run worktree list, from a second terminal at the same moment:
+$ git worktree list
+/private/tmp/refund-monorepo                                           165d144 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-a6cbfbf7f41c7a0e5 165d144 [worktree-agent-a6cbfbf7f41c7a0e5] locked
+/private/tmp/refund-monorepo/.claude/worktrees/agent-add810dca40113442 165d144 [worktree-agent-add810dca40113442] locked
+
+# CAVEAT for the guide (observed on 2.1.218): the "agent" field logs "main" for every
+# entry — CLAUDE_AGENT_NAME is not set for subagents in this CLI version, so
+# agent_activity.py's fallback fires. The per-agent attribution comes from the
+# worktree path in "target", exactly as the fragment's narration describes.

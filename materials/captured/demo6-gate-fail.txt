@@ -1,0 +1,20 @@
+# Demo 6 — the contract gate blocks a stop (real capture, claude 2.1.218)
+# Agent: notifications-implementer (Stop hook -> auto-converted to SubagentStop).
+# The agent made a small requested edit to the fixture, believed it was done, and
+# tried to stop. Its Stop-hook gate ran contracts/validate.sh services/notifications
+# in the agent's own worktree, hit the shipped intentional violation, exited 2, and
+# the stop was BLOCKED — this feedback landed in the agent's session verbatim:
+
+Stop hook feedback:
+[bash "$CLAUDE_PROJECT_DIR"/contracts/validate.sh services/notifications]: FAIL fixtures/notification_event.json: field "event_type" value "refund.done" not in enum [refund.approved, refund.rejected].
+
+# The agent's next turn, straight from the transcript:
+#   "The Stop hook caught a real violation — a different one than I expected.
+#    Let me look at the schema and confirm whether it predates my edit."
+#
+# It tried to stop once more without fixing (the violation predated its edit) and the
+# gate blocked a second time with the identical feedback — then it fixed the fixture.
+#
+# Cap note, observed for real: in a separate run where the agent was forbidden to
+# edit, the same gate fired 8 times and the agent was then released — matching the
+# documented at-most-8 blocked-stop cap.

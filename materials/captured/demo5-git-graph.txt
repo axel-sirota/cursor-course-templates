@@ -1,0 +1,31 @@
+# Demo 5 — git log --oneline --graph after the three merges (real capture)
+# The lead merged sequentially in dependency order (payments -> notifications ->
+# gateway), running contracts/validate.sh after each merge; all three passed.
+
+$ git log --oneline --graph
+*   42cb63f Merge gateway: proxy GET /refunds/{refund_id} to payments
+|\
+| * ceb70c8 gateway: proxy GET /refunds/{refund_id} to payments
+* |   f547c09 Merge notifications: filter GET /events by optional refund_id
+|\ \
+| * | c2bc908 notifications: filter GET /events by optional refund_id
+| |/
+* |   64c29df Merge payments: GET /refunds/{refund_id} status lookup
+|\ \
+| |/
+|/|
+| * 0514a5e payments: add GET /refunds/{refund_id} status lookup
+|/
+* 165d144 fix: notification fixture event_type per contract gate (Demo 6)
+* d20fea7 fix: validate.sh exits 2 with stderr report so Stop hooks actually block
+* 1632699 docs: changelog entry for refunds feature (changelog-scribe)
+* cc106e8 chore: changelog + changelog-scribe agent (Demo 2 setup)
+* 0416d96 chore: init sample monorepo
+
+# Post-merge verification, all three suites (Part 1 + new Part 1.5 tests):
+#   services/payments       8 passed   (was 4 before the run)
+#   services/notifications  8 passed   (was 5 before the run)
+#   services/gateway        7 passed   (was 4 before the run)
+# contracts/validate.sh: pass for payments, notifications, and gateway.
+# Wall clock for the whole parallel run: ~4 minutes (first agent tool call
+# 02:42:56Z, last logged tool call 02:46:09Z, plus the merge/report turns).
