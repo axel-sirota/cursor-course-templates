@@ -5,7 +5,7 @@
   A subagent is a separate Claude instance that the lead session spawns to do one job with its
   own fresh context window. In a monorepo, the natural unit of delegation is the service: one
   agent that knows the payments service, one for the gateway, one for notifications. Each agent
-  is a Markdown file in <code>.claude/agents/</code> &mdash; the frontmatter configures it, and
+  is a Markdown file in <code>.claude/agents/</code>: the frontmatter configures it, and
   <strong>the body of the file is the agent&rsquo;s system prompt</strong>. The lead session reads the
   <code>description</code> field to decide when to delegate, hands the agent a task, and gets back
   a report instead of a wall of intermediate tool calls.
@@ -63,12 +63,12 @@ flowchart TB
   </thead>
   <tbody>
     <tr><td><code>name</code></td><td>Unique identifier; how the lead session (and you, in prompts) refer to the agent.</td></tr>
-    <tr><td><code>description</code></td><td>When to use this agent &mdash; the lead reads this to decide whether to delegate a task here.</td></tr>
+    <tr><td><code>description</code></td><td>When to use this agent. The lead reads this to decide whether to delegate a task here.</td></tr>
     <tr><td><code>tools</code></td><td>Strict allowlist of tool names the agent may call. A tool not on the list simply does not exist for this agent.</td></tr>
     <tr><td><code>disallowedTools</code></td><td>Explicit denylist subtracted from the allowlist; useful to inherit defaults but carve out exceptions.</td></tr>
     <tr><td><code>model</code></td><td>Which model runs the agent (<code>sonnet</code>, <code>opus</code>, <code>haiku</code>, or <code>inherit</code> to match the lead).</td></tr>
-    <tr><td><code>effort</code></td><td>Reasoning-effort level for the agent&rsquo;s model &mdash; dial down for mechanical tasks, up for design work.</td></tr>
-    <tr><td><code>maxTurns</code></td><td>Hard cap on the agent&rsquo;s turns before it is stopped &mdash; a runaway-loop budget.</td></tr>
+    <tr><td><code>effort</code></td><td>Reasoning-effort level for the agent&rsquo;s model: dial down for mechanical tasks, up for design work.</td></tr>
+    <tr><td><code>maxTurns</code></td><td>Hard cap on the agent&rsquo;s turns before it is stopped (a runaway-loop budget).</td></tr>
     <tr><td><code>color</code></td><td>Accent color for the agent&rsquo;s entries in the transcript, so parallel agents are tellable apart.</td></tr>
     <tr><td><code>isolation</code></td><td>Execution isolation for the agent (e.g. running in its own worktree) so its edits stay off your checkout.</td></tr>
     <tr><td><code>hooks</code></td><td>Per-agent lifecycle hooks (e.g. <code>PreToolUse</code>) that fire only for this agent&rsquo;s tool calls.</td></tr>
@@ -103,7 +103,7 @@ flowchart TB
   The lead (or a script in CI) can parse this block instead of re-reading the agent&rsquo;s whole
   transcript: <code>status</code> (<code>green</code> or <code>red</code>) gates the merge,
   <code>files_changed</code> is checked against the agent&rsquo;s declared scope, and
-  <code>notes</code> carries anything the orchestrator needs for the merge &mdash; including any
+  <code>notes</code> carries anything the orchestrator needs for the merge, including any
   blocked attempts worth looking at.
 </p>
 
@@ -124,7 +124,7 @@ flowchart TB
         - type: command
           command: "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/path_guard.py services/payments"</code></pre>
   <p>
-    This block is the canonical wiring used by every scoped agent in the sample monorepo &mdash;
+    This block is the canonical wiring used by every scoped agent in the sample monorepo:
     copy it verbatim and change only the service path argument.
   </p>
 </div>
@@ -133,12 +133,12 @@ flowchart TB
   <div class="callout-title">New agents/ directory? Restart the session</div>
   <p>
     Agent files are discovered at session start. The first file you add to a brand-new
-    <code>.claude/agents/</code> directory will not load into the running session &mdash; restart
+    <code>.claude/agents/</code> directory will not load into the running session. Restart
     <code>claude</code> and it appears. Subsequent edits to existing agents are picked up normally.
   </p>
 </div>
 
-<h3 id="demo-scoped-agent">Demo 1 &mdash; a scoped agent in action</h3>
+<h3 id="demo-scoped-agent">Demo 1: a scoped agent in action</h3>
 
 <p>
   Open your copy of the sample monorepo (python variant) and look at the payments agent that
@@ -160,7 +160,7 @@ claude</code></pre>
 <p>
   In the transcript, every read may roam (the agent is allowed to <em>look at</em> contracts and
   neighbors), but every <code>Edit</code> and <code>Write</code> stays inside <code>services/payments/</code>.
-  This is the captured run &mdash; the agent ran in its own worktree, so paths carry a
+  This is the captured run: the agent ran in its own worktree, so paths carry a
   <code>.claude/worktrees/agent-&hellip;</code> prefix, elided here as <code>&hellip;/worktrees/</code>:
 </p>
 
@@ -203,14 +203,14 @@ claude</code></pre>
   system prompt demanded.
 </p>
 
-<h3 id="lab-service-agent">Lab 1 &mdash; rebuild the notifications agent</h3>
+<h3 id="lab-service-agent">Lab 1: rebuild the notifications agent</h3>
 
 <p>
-  The monorepo ships a notifications agent too &mdash; but you will rebuild it from scratch to
+  The monorepo ships a notifications agent too, but you will rebuild it from scratch to
   feel the difference between tool-level and path-level scoping. Move the shipped one aside first
   (<code>mv .claude/agents/notifications-implementer.md .claude/agents/notifications-implementer.md.bak</code>),
-  then rebuild it from the payments agent as a template, twice &mdash; once per tier below. When
-  you finish, compare your version with the shipped one and restore it &mdash; Demo 5 needs the
+  then rebuild it from the payments agent as a template, twice, once per tier below. When
+  you finish, compare your version with the shipped one and restore it: Demo 5 needs the
   shipped agent back in place.
 </p>
 
@@ -219,7 +219,7 @@ claude</code></pre>
   <p>
     Create <code>notifications-implementer</code> from the payments agent as a template, with
     <code>Write</code> and <code>Edit</code> <strong>removed</strong> from its <code>tools</code> list. Delegate a change to
-    the notifications service and prove the allowlist blocks <em>all</em> writes &mdash; including ones
+    the notifications service and prove the allowlist blocks <em>all</em> writes, including ones
     inside <code>services/notifications</code>. That is the point: allowlists gate tools, not paths.
   </p>
 </div>

@@ -4,7 +4,7 @@
   Everything so far trusts the agent to notice its own mistakes. That trust runs out the moment
   two agents build against the same contract: the payments agent can emit an event the
   notifications agent never expected, and both will happily report success. A contract gate fixes
-  this by validating the agent&rsquo;s work <em>at the moment it tries to finish</em> &mdash; and
+  this by validating the agent&rsquo;s work <em>at the moment it tries to finish</em>, and
   refusing to let it stop until the contract holds.
 </p>
 
@@ -16,7 +16,7 @@
 <ul>
   <li><strong>When it fires:</strong> the moment a subagent finishes its turn and tries to return control.</li>
   <li><strong>What it receives:</strong> input JSON on stdin carrying <code>agent_type</code> and
-    <code>last_assistant_message</code> &mdash; enough to know who is stopping and what they claimed.</li>
+    <code>last_assistant_message</code>: enough to know who is stopping and what they claimed.</li>
   <li><strong>Exit code 0:</strong> the stop goes through; the subagent is done.</li>
   <li><strong>Exit code 2:</strong> the stop is <em>blocked</em>. Whatever the hook wrote to stderr is fed
     back to the agent as feedback, and the agent keeps working on it.</li>
@@ -24,7 +24,7 @@
     regardless, so a broken validator cannot trap an agent forever.</li>
 </ul>
 <p>
-  That exit-code-2 path is the whole trick. The validator does not warn, log, or hope &mdash; it
+  That exit-code-2 path is the whole trick. The validator does not warn, log, or hope: it
   bounces the agent back into its own session with the failure text in hand.
 </p>
 
@@ -34,7 +34,7 @@
   that matters: a hook declared in an <em>agent&rsquo;s</em> frontmatter runs with that agent&rsquo;s
   worktree as its working directory, and is auto-converted to <code>SubagentStop</code> when the
   agent runs as a subagent. That means <code>validate.sh</code> checks the agent&rsquo;s actual
-  work &mdash; the fixtures it just edited in its own worktree. A session-level hook runs from the
+  work: the fixtures it just edited in its own worktree. A session-level hook runs from the
   main checkout and cannot easily find which worktree the finishing subagent was working in.
 </p>
 <p>This is the canonical block, exactly as the payments agent ships it:</p>
@@ -54,7 +54,7 @@
   <p>
     The hooks in this course are shipped, not hand-written in class. The sample monorepo provides
     <code>path_guard.py</code>, <code>agent_activity.py</code>, and <code>validate.sh</code> ready
-    to use &mdash; the class is about <em>wiring</em> them into agents and <em>observing</em> what
+    to use: the class is about <em>wiring</em> them into agents and <em>observing</em> what
     they do, not about hook authoring.
   </p>
 </div>
@@ -65,17 +65,17 @@ stateDiagram-v2
     [*] --> Working
     Working --> StopRequested: agent finishes its turn
     StopRequested --> HookValidates: SubagentStop fires validate.sh
-    HookValidates --> Working: FAIL &mdash; exit 2, feedback fed back
-    HookValidates --> Done: PASS &mdash; exit 0
+    HookValidates --> Working: FAIL (exit 2, feedback fed back)
+    HookValidates --> Done: PASS (exit 0)
     Done --> [*]
 </div>
 
-<h3 id="demo-contract-gate">Demo 6 &mdash; the gate fires for real</h3>
+<h3 id="demo-contract-gate">Demo 6: the gate fires for real</h3>
 <p>
   The python monorepo ships with an intentional contract violation: a notifications fixture uses
   <code>event_type</code> <code>"refund.done"</code>, which is not in the
   <code>NotificationEvent</code> enum (<code>refund.approved</code>, <code>refund.rejected</code>).
-  Nobody planted a bug in code &mdash; the data itself is out of contract, which is exactly the
+  Nobody planted a bug in code: the data itself is out of contract, which is exactly the
   kind of drift a reviewer skims past and a gate does not.
 </p>
 <div class="callout callout-tip">
@@ -101,13 +101,13 @@ claude
 [bash "$CLAUDE_PROJECT_DIR"/contracts/validate.sh services/notifications]: FAIL fixtures/notification_event.json: field "event_type" value "refund.done" not in enum [refund.approved, refund.rejected].</code></pre>
 <p>
   That FAIL line is delivered straight back into the agent&rsquo;s session as feedback. The agent
-  is not done anymore &mdash; it reads the message, opens the fixture, and makes the smallest fix
+  is not done anymore: it reads the message, opens the fixture, and makes the smallest fix
   that satisfies the contract:
 </p>
 <pre><code class="language-text">-  "event_type": "refund.done",
 +  "event_type": "refund.approved",</code></pre>
 <p>
-  On its second attempt to stop, the hook runs again &mdash; and this time the gate opens. The
+  On its second attempt to stop, the hook runs again, and this time the gate opens. The
   agent&rsquo;s own re-validation before that stop attempt, from the captured run:
 </p>
 <pre><code class="language-text">$ ./contracts/validate.sh services/notifications; echo "validate exit=$?"
@@ -121,13 +121,13 @@ $ .venv/bin/python3 -m pytest services/notifications -q
   work because the gate would not let it leave otherwise.
 </p>
 
-<h3 id="lab-contract-gate">Lab 6 &mdash; break it yourself</h3>
+<h3 id="lab-contract-gate">Lab 6: break it yourself</h3>
 <div class="callout callout-info">
   <div class="callout-title">Easy</div>
   <p>
     Break a payments fixture so it violates <code>contracts/refund.schema.json</code>, then run
     the payments agent and ask it to verify its fixtures. Watch the gate block the stop and force
-    the fix &mdash; without you saying what is wrong.
+    the fix, without you saying what is wrong.
   </p>
 </div>
 <div class="callout callout-info">

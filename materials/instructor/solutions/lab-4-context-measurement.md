@@ -77,7 +77,7 @@ have them run `git branch --show-current` inside the session with `!`.
 ## Hard solution
 
 All on `main`. Keep the Demo 3 `InstructionsLoaded` hook registered in
-`.claude/settings.local.json` for this tier — it is the reliable witness (see the
+`.claude/settings.local.json` for this tier: it is the reliable witness (see the
 caveat below).
 
 ```text

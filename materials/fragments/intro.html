@@ -3,8 +3,8 @@
 
 <p>
   Here is the situation this course is built around: your feature touches three services in
-  one monorepo &mdash; <code>gateway/</code>, <code>payments/</code>, and
-  <code>notifications/</code>. Load the whole repo into a single Claude session and two things
+  one monorepo (<code>gateway/</code>, <code>payments/</code>, and
+  <code>notifications/</code>). Load the whole repo into a single Claude session and two things
   go wrong at once. You burn tokens on code the current task never touches, and the context
   cross-contaminates: payments conventions leak into gateway edits, a notifications helper gets
   &ldquo;reused&rdquo; where it does not belong, and review time goes to undoing confusion
@@ -20,7 +20,7 @@
     In 101, the &ldquo;Parallel Development Pattern&rdquo; callout teased this in three
     sentences: <code>/batch</code> decomposes a large change into parallel subtasks, each in
     its own git worktree with a dedicated subagent. In 101 you saw the pattern in one callout;
-    today it is the whole class &mdash; how the decomposition works, why worktrees keep agents
+    today it is the whole class: how the decomposition works, why worktrees keep agents
     from stepping on each other, and how to run it on a real monorepo.
   </p>
 </div>
@@ -49,7 +49,7 @@ flowchart LR
 
 <p>
   Everything in 102 runs on top of the 101 command chain. Each parallel agent you launch today
-  executes this same loop &mdash; just scoped to one service:
+  executes this same loop, just scoped to one service:
 </p>
 
 <table class="comparison-table">
@@ -83,7 +83,7 @@ flowchart LR
   <div class="callout-title">Took 101? Skim and move on.</div>
   <p>
     New to the workflow? The full Workflow Reference is <code>student_runbook.md</code> in this
-    repo &mdash; read it before the first lab, because every parallel agent in 102 runs this
+    repo. Read it before the first lab, because every parallel agent in 102 runs this
     exact loop.
   </p>
 </div>
@@ -101,8 +101,8 @@ flowchart LR
 
 <p>
   The three hours map onto that highlighted branch. Module&nbsp;1 builds the scoped agents and
-  the context discipline behind them &mdash; subagent architecture, worktree isolation, nested
+  the context discipline behind them: subagent architecture, worktree isolation, nested
   <code>CLAUDE.md</code>, and token budgets. Module&nbsp;2 turns those agents loose in
-  parallel &mdash; orchestrated implementation, contract hooks that keep services honest, and
+  parallel: orchestrated implementation, contract hooks that keep services honest, and
   Agent Teams. Module&nbsp;3 is the capstone: you apply the whole pattern to your monorepo.
 </p>

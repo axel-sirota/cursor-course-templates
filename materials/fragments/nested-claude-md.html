@@ -21,7 +21,7 @@
     </tr>
     <tr>
       <td>A subdirectory below you (e.g. <code>services/payments/</code>)</td>
-      <td>Lazily &mdash; the first time Claude reads a file in that subtree</td>
+      <td>Lazily: the first time Claude reads a file in that subtree</td>
     </tr>
     <tr>
       <td>A sibling directory you never touch</td>
@@ -32,7 +32,7 @@
 <p>
   The third rule is the one that makes monorepos workable: a session focused on the gateway never
   sees the payments migration notes, no matter how long it runs. Context isolation between services
-  is free &mdash; you get it just by putting the notes where the code is.
+  is free: you get it just by putting the notes where the code is.
 </p>
 
 <div class="mermaid">
@@ -60,12 +60,12 @@ flowchart TD
   <code>CLAUDE.md</code> under <strong>200 lines</strong>, each service file under
   <strong>150 lines</strong>, and <strong>zero duplication</strong> between levels. If a rule
   applies to every service, it belongs at the root; if it applies to one service, it belongs in
-  that service&rsquo;s file &mdash; never both. Duplicated rules drift, and the copy Claude reads
+  that service&rsquo;s file, never both. Duplicated rules drift, and the copy Claude reads
   last wins in ways you can&rsquo;t predict.
 </p>
 <p>
   For packages owned by other teams that you never want in your sessions at all, add their paths to
-  <code>claudeMdExcludes</code> in your settings<sup><a href="#ref-3">[3]</a></sup> &mdash; their
+  <code>claudeMdExcludes</code> in your settings<sup><a href="#ref-3">[3]</a></sup>: their
   <code>CLAUDE.md</code> files then stay out of context even if Claude reads a file there.
 </p>
 
@@ -80,7 +80,7 @@ flowchart TD
       <tr><th>Context source</th><th>After /compact</th></tr>
     </thead>
     <tbody>
-      <tr><td>Project-root <code>CLAUDE.md</code></td><td>Re-injected from disk &mdash; survives</td></tr>
+      <tr><td>Project-root <code>CLAUDE.md</code></td><td>Re-injected from disk (survives)</td></tr>
       <tr><td>Nested <code>CLAUDE.md</code> files</td><td><strong>Lost</strong> until a matching file is read again</td></tr>
       <tr><td>Path-scoped rules</td><td><strong>Lost</strong> until a matching file is read again</td></tr>
     </tbody>
@@ -94,7 +94,7 @@ flowchart TD
   </p>
 </div>
 
-<h3 id="demo-lazy-load">Demo 3 &mdash; watch the lazy load happen</h3>
+<h3 id="demo-lazy-load">Demo 3: watch the lazy load happen</h3>
 <p>
   The loading rules are easy to state and easy to disbelieve. The <code>InstructionsLoaded</code>
   hook fires every time a context file enters the session, so a two-line hook turns the rules into
@@ -132,7 +132,7 @@ tail -f instructions-loaded.log</code></pre>
   <li>
     <p>
       Launch <code>claude</code> at the monorepo root. The root <code>CLAUDE.md</code> event
-      appears in the log immediately &mdash; that is rule one. Now touch the payments service:
+      appears in the log immediately. That is rule one. Now touch the payments service:
     </p>
 <pre><code class="language-bash">claude
 &gt; Read services/payments/README.md and summarize the service in two sentences.</code></pre>
@@ -148,8 +148,8 @@ tail -f instructions-loaded.log</code></pre>
 <pre><code class="language-bash">grep payments instructions-loaded.log
 grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"</code></pre>
     <p>
-      The captured run, all three rules on the record (long identifier fields &mdash;
-      <code>session_id</code>, <code>transcript_path</code>, <code>cwd</code> &mdash; elided as
+      The captured run, all three rules on the record (long identifier fields
+      <code>session_id</code>, <code>transcript_path</code>, and <code>cwd</code> elided as
       <code>&hellip;</code>):
     </p>
 <pre><code class="language-text">$ cat instructions-loaded.log        # immediately after session launch — rule one
@@ -162,20 +162,20 @@ $ grep gateway instructions-loaded.log || echo "gateway CLAUDE.md never loaded"
 gateway CLAUDE.md never loaded</code></pre>
     <p>
       Read the <code>load_reason</code> fields: <code>session_start</code> for the root file,
-      <code>nested_traversal</code> &mdash; with the payments README as
-      <code>trigger_file_path</code> &mdash; for the service file. Rules one and two, straight
+      <code>nested_traversal</code> (with the payments README as
+      <code>trigger_file_path</code>) for the service file. Rules one and two, straight
       from the hook; the empty gateway grep is rule three.
     </p>
   </li>
 </ol>
 
-<h3 id="lab-nested-claude-md">Lab 3 &mdash; author a service context</h3>
+<h3 id="lab-nested-claude-md">Lab 3: author a service context</h3>
 <div class="callout callout-info">
   <div class="callout-title">Easy</div>
   <p>
     The sample monorepo&rsquo;s <code>services/notifications/CLAUDE.md</code> is yours: rewrite it
     for your own style and stack conventions. Constraints: under 150 lines, and nothing duplicated
-    from the root <code>CLAUDE.md</code>. Then prove lazy loading &mdash; run <code>/context</code>
+    from the root <code>CLAUDE.md</code>. Then prove lazy loading: run <code>/context</code>
     and note the &ldquo;Memory files&rdquo; list <em>before</em> touching notifications, have
     Claude read one notifications file, and run <code>/context</code> again.
   </p>
@@ -193,5 +193,5 @@ gateway CLAUDE.md never loaded</code></pre>
 </div>
 <p>
   <strong>You succeeded when:</strong> <code>/context</code>&rsquo;s Memory files list shows exactly
-  the files you predicted, in both states &mdash; before and after the read.
+  the files you predicted, in both states, before and after the read.
 </p>

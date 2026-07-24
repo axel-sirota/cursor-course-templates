@@ -8,16 +8,16 @@
 <ol>
   <li>
     <strong>Scoped context</strong> (nested <code>CLAUDE.md</code>, sparse checkout,
-    <code>/context</code>) &mdash; the cheapest tool. One session, small window, no
+    <code>/context</code>): the cheapest tool. One session, small window, no
     coordination overhead. Most monorepo pain is solved right here.
   </li>
   <li>
-    <strong>Subagents + worktrees</strong> &mdash; parallel implementation. Each worker gets
+    <strong>Subagents + worktrees</strong>: parallel implementation. Each worker gets
     its own context window and its own checkout, so N tasks run at once without stepping on
     each other. You pay N context windows, but zero worker-to-worker coordination.
   </li>
   <li>
-    <strong>Agent teams</strong> &mdash; coordination. Workers share a task list and message
+    <strong>Agent teams</strong>: coordination. Workers share a task list and message
     each other. This is the most powerful rung and the most expensive one: every message and
     every shared-state read costs tokens on top of each worker's own window.
   </li>
@@ -34,8 +34,8 @@
   </thead>
   <tbody>
     <tr><td><strong>Communication</strong></td><td>Report results to the parent only</td><td>Message each other directly</td></tr>
-    <tr><td><strong>Shared state</strong></td><td>None &mdash; each has its own context</td><td>Shared task list + mailboxes</td></tr>
-    <tr><td><strong>Token cost</strong></td><td>Lower &mdash; results summarized upward</td><td>Higher &mdash; coordination traffic on top</td></tr>
+    <tr><td><strong>Shared state</strong></td><td>None: each has its own context</td><td>Shared task list + mailboxes</td></tr>
+    <tr><td><strong>Token cost</strong></td><td>Lower: results summarized upward</td><td>Higher: coordination traffic on top</td></tr>
     <tr><td><strong>Best for</strong></td><td>Independent, parallelizable tasks</td><td>Tasks that need mid-flight negotiation</td></tr>
   </tbody>
 </table>
@@ -68,7 +68,7 @@ flowchart TD
     <em>do the workers need to coordinate?</em> File collisions are an isolation problem
     (worktrees). Coordination is a communication problem (teams). Everything else is a plain
     subagent. And the leaf note applies to all three branches: scoped context via nested
-    <code>CLAUDE.md</code> plus a <code>/context</code> check is never optional &mdash; it is
+    <code>CLAUDE.md</code> plus a <code>/context</code> check is never optional. It is
     the floor you stand on at every rung.
   </p>
 </div>
@@ -95,6 +95,6 @@ flowchart TD
   <div class="callout-title">Take It Home</div>
   <p>
     Course repo, sample monorepo, and student runbook: everything you used today is in this
-    repository &mdash; copy the <code>.claude/</code> patterns into your own monorepo tomorrow.
+    repository. Copy the <code>.claude/</code> patterns into your own monorepo tomorrow.
   </p>
 </div>

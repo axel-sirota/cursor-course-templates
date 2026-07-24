@@ -17,7 +17,7 @@ copy; outputs below are real.
 Start from the payments agent, change the name/description/paths to notifications,
 and cut the write tools from the frontmatter. Two deltas from the shipped file:
 no `Write`/`Edit` in `tools`, and no `PreToolUse` block (there is nothing left for
-`path_guard` to guard). Keep the `Stop` validate hook. Leave `isolation` out —
+`path_guard` to guard). Keep the `Stop` validate hook. Leave `isolation` out.
 Lab 2 adds it.
 
 ```yaml
@@ -76,7 +76,7 @@ tier). Run both versions if time allows — the contrast lands hard.
 ## Hard solution
 
 Restore the write tools and add the canonical `path_guard` block from the fragment,
-with the path argument changed to `services/notifications` — the full frontmatter:
+with the path argument changed to `services/notifications`. The full frontmatter:
 
 ```yaml
 ---

@@ -77,7 +77,7 @@ mechanical version, which is exactly the Hard tier's territory).
 ## Hard solution — instructor-judgment: token-heavy
 
 Do not run this per-student in class (three Sonnet teammates plus a lead for
-10–15 minutes per attempt, on top of Demo 8's own run — coordinate
+10–15 minutes per attempt, on top of Demo 8's own run, so coordinate
 tokens-per-minute with the org admin even for a single instructor run). The
 reference for the transcript shape is the captured instructor run,
 `materials/captured/demo8-team-transcript.txt`, which implemented the same Part 2

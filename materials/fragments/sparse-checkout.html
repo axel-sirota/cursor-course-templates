@@ -4,7 +4,7 @@
 <p>
   Every worktree an agent spawns is, by default, a <em>full</em> checkout: every service,
   every package, every asset in the repo gets written to disk again. On the sample monorepo
-  that is cheap. On a real 50-package monorepo it is not &mdash; each agent pays the full
+  that is cheap. On a real 50-package monorepo it is not: each agent pays the full
   checkout cost in disk and in startup time, and five parallel agents pay it five times.
 </p>
 
@@ -29,13 +29,13 @@
 <ol>
   <li>
     <strong>Paths are repo-root-relative.</strong> <code>services/payments</code> means
-    <em>the</em> <code>services/payments</code> under the repo root &mdash; not &ldquo;any
+    <em>the</em> <code>services/payments</code> under the repo root, not &ldquo;any
     directory named payments&rdquo; and not a glob.
   </li>
   <li>
     <strong>All of a session&rsquo;s worktrees share ONE list.</strong> There is no
     per-agent list. If one agent needs <code>services/payments</code> and another needs
-    <code>services/notifications</code>, list both &mdash; every worktree in the session
+    <code>services/notifications</code>, list both: every worktree in the session
     gets the union.
   </li>
   <li>
@@ -53,7 +53,7 @@
     Sparse paths decide what git <em>checks out</em>; <code>symlinkDirectories</code>
     decides which untracked directories (like <code>.venv</code> or
     <code>node_modules</code>) are <em>shared</em> into each worktree instead of being
-    rebuilt. The sample monorepo already symlinks <code>.venv</code> &mdash; together the
+    rebuilt. The sample monorepo already symlinks <code>.venv</code>. Together the
     two settings keep a worktree both small and immediately runnable.
   </p>
 </div>
@@ -61,13 +61,13 @@
 <div class="callout callout-warning">
   <div class="callout-title">Files Outside sparsePaths Do Not Exist</div>
   <p>
-    A sparse worktree does not hide excluded files &mdash; they simply are not on disk.
+    A sparse worktree does not hide excluded files: they simply are not on disk.
     An agent asked to read <code>services/gateway/README.md</code> in a worktree that only
     lists <code>services/payments</code> fails, exactly as if the file had never been
     committed. Keep this feature observational in class: there are known path-resolution
     quirks in sparse worktrees, so we watch what happens rather than build labs on top of
     the edge cases. The sample monorepo intentionally ships <em>without</em>
-    <code>sparsePaths</code> &mdash; Lab 7 is where you add it.
+    <code>sparsePaths</code>: Lab 7 is where you add it.
   </p>
 </div>
 
@@ -75,12 +75,12 @@
 
 <p>
   Diagram D9 contrasts the two checkouts of the same repo. The <code>du -sh</code> numbers
-  are captured live in Demo 7 &mdash; the shape of the difference is what matters here.
+  are captured live in Demo 7. The shape of the difference is what matters here.
 </p>
 
 <div class="mermaid">
 flowchart TB
-    subgraph FULL["Full checkout &mdash; default worktree"]
+    subgraph FULL["Full checkout (default worktree)"]
         direction TB
         FR["repo root<br/>init.sh &middot; .env.example &middot; .gitignore"]
         FR --> FCL[".claude/"]
@@ -92,22 +92,22 @@ flowchart TB
         FSV --> FG["gateway/"]
         FDU(["du -sh, working files: 548K"])
     end
-    subgraph SPARSE["Sparse worktree &mdash; sparsePaths: .claude, services/payments, contracts"]
+    subgraph SPARSE["Sparse worktree (sparsePaths: .claude, services/payments, contracts)"]
         direction TB
         SR["repo root<br/>root-level files still present"]
-        SR --> SCL[".claude/ &mdash; listed"]
-        SR --> SCO["contracts/ &mdash; listed"]
+        SR --> SCL[".claude/ (listed)"]
+        SR --> SCO["contracts/ (listed)"]
         SR --> SSV["services/"]
-        SSV --> SP["payments/ &mdash; listed"]
+        SSV --> SP["payments/ (listed)"]
         SGONE(["specs/, notifications/, gateway/<br/>NOT on disk"])
-        SDU(["du -sh, working files: 136K &mdash; ~4&times; smaller"])
+        SDU(["du -sh, working files: 136K (~4&times; smaller)"])
     end
     FULL -.->|"worktree.sparsePaths"| SPARSE
     classDef absent stroke-dasharray: 5 5;
     class SGONE absent;
 </div>
 
-<h3 id="demo-sparse">Demo 7 &mdash; Disk on a Diet</h3>
+<h3 id="demo-sparse">Demo 7: Disk on a Diet</h3>
 
 <p>
   We add <code>sparsePaths</code> to the sample monorepo, spawn a worktree agent, and
@@ -130,7 +130,7 @@ flowchart TB
   }
 }</code></pre>
     <p>
-      Leave the <code>permissions</code> and <code>hooks</code> blocks untouched &mdash;
+      Leave the <code>permissions</code> and <code>hooks</code> blocks untouched:
       only the <code>worktree</code> object changes.
     </p>
   </li>
@@ -193,21 +193,21 @@ $ du -sh "$WT"
 136K    .claude/worktrees/agent-af28436fac63da09f</code></pre>
     <p>
       The sparse worktree shares <code>.venv</code> (a symlink) and <code>.git</code> (worktree
-      machinery), so the honest comparison is working files: 548K full vs 136K sparse &mdash;
+      machinery), so the honest comparison is working files: 548K full vs 136K sparse,
       about 4&times; smaller on this deliberately tiny repo. Those numbers are on Diagram D9. The
-      absolute sizes depend on your machine; the ratio is the lesson &mdash; and it grows with
+      absolute sizes depend on your machine; the ratio is the lesson, and it grows with
       every package the repo adds.
     </p>
   </li>
 </ol>
 
-<h3 id="lab-sparse-paths">Lab 7 &mdash; Scope the Checkout</h3>
+<h3 id="lab-sparse-paths">Lab 7: Scope the Checkout</h3>
 
 <div class="callout callout-info">
   <div class="callout-title">Easy</div>
   <p>
     Configure <code>sparsePaths</code> so a payments worktree checks out only what the
-    payments work actually needs &mdash; think through which directories that is before
+    payments work actually needs. Think through which directories that is before
     you write the list. Spawn a worktree agent and verify the worktree contents match
     your prediction, directory by directory.
   </p>
@@ -218,7 +218,7 @@ $ du -sh "$WT"
   <p>
     Deliberately OMIT <code>.claude</code> from your list, spawn a fresh worktree agent,
     and observe what breaks in the worktree session. Diagnose the failure from what you
-    see &mdash; which settings, rules, and hooks the session is missing and why &mdash;
+    see (which settings, rules, and hooks the session is missing and why),
     then fix the list and show the same session behaving correctly.
   </p>
 </div>

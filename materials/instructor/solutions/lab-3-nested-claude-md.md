@@ -10,7 +10,7 @@ against the scratch copy.
 
 ## Easy solution
 
-A model rewrite — different voice and ordering than the shipped file, same
+A model rewrite: different voice and ordering than the shipped file, same
 discipline. What matters for grading is the constraints, not the style:
 
 ```markdown
@@ -77,7 +77,7 @@ proof the lazy-loaded rules were actually in play.
 
 ## Hard solution
 
-Part 1 — sibling isolation over a whole session: register the Demo 3
+Part 1, sibling isolation over a whole session: register the Demo 3
 `InstructionsLoaded` hook in `.claude/settings.local.json`, work several turns
 strictly inside notifications (reads, small edits, tests), then:
 

@@ -8,7 +8,7 @@ violation; this lab has students plant their own).
 
 ## Easy solution
 
-Plant the violation (an enum break is ideal — obviously wrong to the validator,
+Plant the violation (an enum break is ideal: obviously wrong to the validator,
 plausible-looking to a human):
 
 ```bash

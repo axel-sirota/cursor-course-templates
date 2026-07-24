@@ -2,7 +2,7 @@
 <h2>10. Capstone: Your Monorepo</h2>
 <p>
   Everything so far ran against the sample repo. This section runs the whole stack against
-  <em>your</em> monorepo &mdash; about 35 minutes, you drive, the instructor circulates.
+  <em>your</em> monorepo: about 35 minutes, you drive, the instructor circulates.
   Treat it as a runbook: six steps, each with a verification gate. Do not move to the next
   step until the gate passes; a skipped gate here is a debugging session later.
 </p>
@@ -21,14 +21,14 @@ flowchart LR
 <ol class="steps">
   <li>
     <strong>Detect your stack.</strong> Run <code>/detect-stack</code> at the root of your
-    monorepo and read the report critically &mdash; it decides which adaptation row below applies.
+    monorepo and read the report critically: it decides which adaptation row below applies.
     <br /><em>Gate:</em> the detected stack, test runner, and service layout match what you know
     to be true. If it misreads your repo, correct the generated context before continuing.
   </li>
   <li>
     <strong>Write nested <code>CLAUDE.md</code> files.</strong> Cover at least two of your
     services: root file holds shared conventions, each service file holds only what is unique
-    to that service &mdash; zero duplication between levels.
+    to that service, zero duplication between levels.
     <br /><em>Gate:</em> <code>/context</code> lists the root file plus the service file under
     Memory files when you work inside that service, and no rule appears twice.
   </li>
@@ -50,13 +50,13 @@ flowchart LR
   <li>
     <strong>Run a real parallel implementation.</strong> Pick a real ticket that touches two
     services, adapt <code>/implement-across-services</code> to your service names, and launch
-    it. Resist the urge to micromanage &mdash; watch the activity log instead.
+    it. Resist the urge to micromanage: watch the activity log instead.
     <br /><em>Gate:</em> both agents finish on their own branches and each branch passes its
     service&rsquo;s tests.
   </li>
   <li>
-    <strong>Merge and measure.</strong> Merge the branches in dependency order &mdash; provider
-    service first, consumer second &mdash; and rerun the full test suite on the result. Then
+    <strong>Merge and measure.</strong> Merge the branches in dependency order (provider
+    service first, consumer second) and rerun the full test suite on the result. Then
     compare <code>/context</code> inside a service against your pre-capstone baseline.
     <br /><em>Gate:</em> a clean merge, a green suite, and a concrete token number for what the
     nested layout saved you.
@@ -95,13 +95,13 @@ flowchart LR
       <td>java-spring</td>
       <td><code>./mvnw test -pl &lt;module&gt;</code></td>
       <td><code>~/.m2</code> is already shared per user; do <em>not</em> symlink
-          <code>target/</code> &mdash; each worktree builds its own</td>
+          <code>target/</code>: each worktree builds its own</td>
       <td><code>&lt;module&gt;/CLAUDE.md</code>, adapted from the python template</td>
     </tr>
     <tr>
       <td>go-gin</td>
       <td><code>go test ./services/&lt;name&gt;/...</code></td>
-      <td>usually none &mdash; the Go build cache lives in
+      <td>usually none: the Go build cache lives in
           <code>~/.cache/go-build</code>, outside the worktree</td>
       <td><code>services/&lt;name&gt;/CLAUDE.md</code>, adapted from the node template</td>
     </tr>
@@ -110,12 +110,12 @@ flowchart LR
 
 <div class="callout callout-tip">
   <div class="callout-title">Take It Home</div>
-  <p><strong>Finish the rollout.</strong> Add agents for your remaining services &mdash; the second one takes a fraction of the time the first did.</p>
+  <p><strong>Finish the rollout.</strong> Add agents for your remaining services: the second one takes a fraction of the time the first did.</p>
   <p><strong>Commit the <code>.claude/</code> config.</strong> Hooks, settings, and agents in version control mean your whole team inherits the setup instead of rebuilding it.</p>
   <p><strong>Make <code>/catchup</code> a habit.</strong> After every <code>/clear</code>, it is the cheapest way back to full working context.</p>
 </div>
 
-<h3 id="lab-capstone">Lab 9 &mdash; the real thing</h3>
+<h3 id="lab-capstone">Lab 9: the real thing</h3>
 <div class="callout callout-info">
   <div class="callout-title">Easy</div>
   <p>

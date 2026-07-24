@@ -18,34 +18,34 @@
     <tr><th>Category</th><th>What it contains</th></tr>
   </thead>
   <tbody>
-    <tr><td><strong>System prompt</strong></td><td>Claude Code's own operating instructions &mdash; fixed per version, not yours to tune</td></tr>
+    <tr><td><strong>System prompt</strong></td><td>Claude Code's own operating instructions (fixed per version, not yours to tune)</td></tr>
     <tr><td><strong>System tools</strong></td><td>Definitions of the built-in tools (Read, Edit, Bash, &hellip;)</td></tr>
-    <tr><td><strong>MCP tools</strong></td><td>Tool schemas from every connected MCP server &mdash; grows with each server you add</td></tr>
-    <tr><td><strong>Memory files</strong></td><td>Every <code>CLAUDE.md</code> and rule file currently loaded &mdash; listed by path</td></tr>
+    <tr><td><strong>MCP tools</strong></td><td>Tool schemas from every connected MCP server, growing with each server you add</td></tr>
+    <tr><td><strong>Memory files</strong></td><td>Every <code>CLAUDE.md</code> and rule file currently loaded, listed by path</td></tr>
     <tr><td><strong>Messages</strong></td><td>The conversation so far: your prompts, Claude's replies, tool results</td></tr>
     <tr><td><strong>Free space</strong></td><td>What remains before the window fills and compaction kicks in</td></tr>
   </tbody>
 </table>
 <p>
-  The row that matters for this module is <strong>Memory files</strong>. It is not just a number
-  &mdash; it lists each loaded file by path. That list is the verification surface for the
+  The row that matters for this module is <strong>Memory files</strong>. It is not just a
+  number: it lists each loaded file by path. That list is the verification surface for the
   launch-time half of the previous section&rsquo;s rules: after <code>/clear</code> on a scoped
   layout you should see the root <code>CLAUDE.md</code> only; on the flat layout, the one fat file.
   One caveat, measured in Demo&nbsp;4: on CLI 2.1.218 the table shows the files loaded at session
-  launch &mdash; a mid-session lazy load is proven by the <code>InstructionsLoaded</code> hook log
+  launch. A mid-session lazy load is proven by the <code>InstructionsLoaded</code> hook log
   from Demo&nbsp;3, not by a new row here.
 </p>
 <p>
   Do not confuse the two budget commands. <code>/context</code> shows what is occupying the current
   session's context window right now. <code>/usage</code> shows how much of your plan's rate limits
-  (session and weekly) you have consumed &mdash; a billing view, not a window view.
+  (session and weekly) you have consumed: a billing view, not a window view.
 </p>
 
 <h3 id="clear-catchup">The <code>/clear</code> + <code>/catchup</code> Pattern</h3>
 <p>
   When a long session bloats the Messages category, the reflex is <code>/compact</code>. In a
   nested-memory monorepo that reflex has a hidden cost: compaction summarizes the conversation, and
-  lazily loaded <code>CLAUDE.md</code> files ride along in that summarization &mdash; the payments
+  lazily loaded <code>CLAUDE.md</code> files ride along in that summarization: the payments
   rules you triggered two hours ago may survive only as a vague paraphrase, or not at all. The
   window looks healthy; the instructions are gone.
 </p>
@@ -53,7 +53,7 @@
   The pattern that preserves correctness is <code>/clear</code> followed by <code>/catchup</code>.
   <code>/clear</code> drops the window to its baseline. <code>/catchup</code> (a custom command this
   course ships in <code>.claude/commands/catchup.md</code>) rebuilds exactly the working state you
-  need by re-reading what changed &mdash; and because reading a service's files re-triggers that
+  need by re-reading what changed. Because reading a service's files re-triggers that
   service's lazy <code>CLAUDE.md</code> load, the right nested rules come back as real files, not as
   summary residue. The command runs five steps:
 </p>
@@ -62,11 +62,11 @@
       (falling back to <code>git status --short</code> when already on <code>main</code> or the
       diff is empty).</li>
   <li>Read each changed file in full.</li>
-  <li>Read the <code>CLAUDE.md</code> of any service whose files appear in that list &mdash;
+  <li>Read the <code>CLAUDE.md</code> of any service whose files appear in that list,
       re-triggering the lazy load of exactly the rules the work needs.</li>
   <li>Summarize the state of the work in at most 10 bullets: what changed relative to
       <code>main</code>, and what is in flight.</li>
-  <li>Declare which memory files are now loaded &mdash; which you verify with
+  <li>Declare which memory files are now loaded, which you verify with
       <code>/context</code>.</li>
 </ol>
 
@@ -75,7 +75,7 @@
   <p>
     Absolute <code>/context</code> numbers are not comparable across machines: your MCP servers,
     plugins, and Claude Code version all shift the totals. The honest measurement is the
-    <strong>Memory files category compared between two runs on the same machine</strong> &mdash;
+    <strong>Memory files category compared between two runs on the same machine</strong>:
     flat layout vs. scoped layout, before compaction vs. after recovery.
   </p>
   <p>
@@ -88,16 +88,16 @@
 <p>
   Diagram D6 shows the result, with the real numbers from the captured runs below: two context
   windows measured on the same machine, one per layout. The Memory-files segment is the only one
-  that moves &mdash; and it is the one you control.
+  that moves, and it is the one you control.
 </p>
 
 <div class="mermaid">
 flowchart TB
-    subgraph FLAT["flat-claude-md branch &mdash; /context, 20.9k total"]
+    subgraph FLAT["flat-claude-md branch: /context, 20.9k total"]
         direction LR
         F1["System prompt<br/>3.4k"] --- F2["System tools<br/>13k"] --- F3["Agents + skills<br/>1.8k"] --- F4["Memory files<br/>2.6k<br/>(one fat root file)"] --- F5["Messages<br/>8"] --- F6["Free space<br/>979.1k"]
     end
-    subgraph NESTED["nested + scoped (main) &mdash; /context, 19k total"]
+    subgraph NESTED["nested + scoped (main): /context, 19k total"]
         direction LR
         N1["System prompt<br/>3.4k"] --- N2["System tools<br/>13k"] --- N3["Agents + skills<br/>1.8k"] --- N4["Memory files<br/>817<br/>(root only)<br/>&minus;68.6% vs flat"] --- N5["Messages<br/>8"] --- N6["Free space<br/>981k"]
     end
@@ -108,11 +108,11 @@ flowchart TB
     style N6 fill:#eeeeee,color:#333
 </div>
 
-<h3 id="demo-context-measurement">Demo 4 &mdash; the Before/After Measurement</h3>
+<h3 id="demo-context-measurement">Demo 4: the Before/After Measurement</h3>
 <p>
   The sample monorepo's <code>init.sh</code> built a branch for exactly this comparison:
   <code>flat-claude-md</code> squashes the root <code>CLAUDE.md</code> and every
-  <code>services/*/CLAUDE.md</code> into one fat root file &mdash; the layout most teams start with.
+  <code>services/*/CLAUDE.md</code> into one fat root file, the layout most teams start with.
   <code>main</code> keeps the nested, scoped layout. Same rules, two shapes.
 </p>
 <p>Measure the flat layout first:</p>
@@ -124,7 +124,7 @@ claude
 &gt; /context
 </code></pre>
 <p>
-  Record the Memory files category &mdash; one entry, the fat root <code>CLAUDE.md</code>, every
+  Record the Memory files category: one entry, the fat root <code>CLAUDE.md</code>, every
   rule for every service loaded whether this session needs them or not. The captured run (trimmed
   to the two tables that matter):
 </p>
@@ -153,7 +153,7 @@ claude
 &gt; /context
 </code></pre>
 <p>
-  The Memory files list now shows the root <code>CLAUDE.md</code> only &mdash; the service files
+  The Memory files list now shows the root <code>CLAUDE.md</code> only: the service files
   exist on disk but none are loaded. Same machine, same session setup, captured minutes apart:
 </p>
 <pre><code class="language-text">## Context Usage — main (nested + scoped)
@@ -174,7 +174,7 @@ claude
 |---------|----------------------------------------|--------|
 | Project | /private/tmp/refund-monorepo/CLAUDE.md | 817    |</code></pre>
 <p>
-  That is the measured delta: <strong>2.6k flat vs 817 scoped &mdash; the Memory-files category is
+  That is the measured delta: <strong>2.6k flat vs 817 scoped, a Memory-files category
   68.6% smaller</strong> before any work has happened. Then touch one payments file to trigger the
   lazy load:
 </p>
@@ -184,20 +184,20 @@ claude
 <p>
   Here the instrument has a blind spot, and it is worth teaching precisely. On CLI 2.1.218 the
   lazily loaded <code>services/payments/CLAUDE.md</code> does <em>not</em> appear in
-  <code>/context</code>&rsquo;s Memory Files table &mdash; that table shows the files loaded at
+  <code>/context</code>&rsquo;s Memory Files table: that table shows the files loaded at
   session launch. The proof that the lazy load happened is the <code>InstructionsLoaded</code> hook
   log from Demo&nbsp;3 (<code>load_reason: "nested_traversal"</code>, triggered by the payments
   README), and <code>/context</code> shows the cost indirectly: the Messages category grew from 8
   to 4.2k tokens after the read, because the freshly loaded rules ride there. Gateway and
-  notifications rules stay on disk, unloaded &mdash; the hook log stays silent about both.
+  notifications rules stay on disk, unloaded. The hook log stays silent about both.
 </p>
 <p>
   Two <code>/context</code> readings plus one hook log, one story: the flat branch pays the full
-  rule bill at launch; the scoped branch pays a small baseline &mdash; 68.6% less &mdash; and then
+  rule bill at launch; the scoped branch pays a small baseline (68.6% less) and then
   only for the service in play, at the moment it comes into play.
 </p>
 
-<h3 id="lab-context-measurement">Lab 4 &mdash; Your Own Numbers</h3>
+<h3 id="lab-context-measurement">Lab 4: Your Own Numbers</h3>
 <div class="callout callout-info">
   <div class="callout-title">Easy</div>
   <p>
@@ -218,6 +218,6 @@ claude
   </p>
 </div>
 <p>
-  <strong>You succeeded when:</strong> you have two Memory-files numbers &mdash; flat and scoped
-  &mdash; and can explain the delta between them.
+  <strong>You succeeded when:</strong> you have two Memory-files numbers, flat and scoped,
+  and can explain the delta between them.
 </p>

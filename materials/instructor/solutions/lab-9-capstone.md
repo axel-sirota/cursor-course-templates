@@ -11,10 +11,10 @@ reproduce this; the Hard tier transposes it to their own repo.
 
 ## Easy solution — the six steps as performed, with gate outputs
 
-**Step 1 — Detect the stack.** `/detect-stack` at the repo root. The report must
+**Step 1: Detect the stack.** `/detect-stack` at the repo root. The report must
 say: Python / FastAPI, three services under `services/` (gateway, payments,
 notifications), tests via pytest through the repo venv, one service per pytest run.
-Gate check against ground truth rather than vibes — the run and test commands in the
+Gate check against ground truth rather than vibes: the run and test commands in the
 root `CLAUDE.md` port map and the suites in step 4 below. If the report misses the
 one-pytest-run-per-service constraint (each service has its own `src` package), fix
 the generated context before moving on.

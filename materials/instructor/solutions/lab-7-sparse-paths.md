@@ -9,7 +9,7 @@ adds it).
 
 ## Easy solution
 
-The thinking step first — what does payments work actually need?
+The thinking step first: what does payments work actually need?
 
 - `services/payments` — the code under change.
 - `contracts` — the schemas the Stop-hook validator reads; without them
@@ -76,7 +76,7 @@ with every package a real monorepo adds.
 
 ## Hard solution
 
-Set the list to `["services/payments", "contracts"]` — `.claude` omitted — restart,
+Set the list to `["services/payments", "contracts"]` (`.claude` omitted), restart,
 and spawn a fresh worktree agent. What is on disk (real output, git-level sparse
 worktree without `.claude`, 2026-07-24):
 

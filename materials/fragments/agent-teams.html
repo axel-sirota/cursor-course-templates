@@ -4,10 +4,10 @@
 <p>
   Everything in this module so far follows one shape: a main session that farms work out and
   collects results. Subagents research and implement, worktrees keep them from stepping on each
-  other, hooks keep the contract honest &mdash; but the workers never speak to one another. Agent
+  other, hooks keep the contract honest, but the workers never speak to one another. Agent
   teams change that shape. A team is a group of full Claude Code sessions that share a task list,
   message each other directly, and coordinate under a lead. Teams launched alongside Opus 4.6
-  (February 2026), but they are not tied to any model &mdash; the official guidance in fact
+  (February 2026), but they are not tied to any model: the official guidance in fact
   recommends Sonnet for teammates, and everything in this section works that way.
 </p>
 
@@ -27,14 +27,14 @@
 <p>A team has exactly four pieces:<sup><a href="#ref-4">[4]</a></sup></p>
 
 <ul>
-  <li><strong>Team lead</strong> &mdash; your session. It breaks the goal into tasks, spawns
+  <li><strong>Team lead</strong>: your session. It breaks the goal into tasks, spawns
     teammates, arbitrates disagreements, and synthesizes the result.</li>
-  <li><strong>Teammates</strong> &mdash; full, independent Claude Code sessions, not lightweight
+  <li><strong>Teammates</strong>: full, independent Claude Code sessions, not lightweight
     subagents. Each has its own context window and works through tasks on its own.</li>
-  <li><strong>Shared task list</strong> &mdash; the coordination backbone. Teammates claim tasks
+  <li><strong>Shared task list</strong>: the coordination backbone. Teammates claim tasks
     with file locking, so two teammates can never grab the same one. Tasks can declare
     dependencies; when a blocking task completes, its dependents unblock automatically.</li>
-  <li><strong>Mailbox</strong> &mdash; peer-to-peer messages. Teammates can question each
+  <li><strong>Mailbox</strong>: peer-to-peer messages. Teammates can question each
     other&rsquo;s decisions, share findings, and negotiate interfaces without routing everything
     through the lead.</li>
 </ul>
@@ -43,7 +43,7 @@
   Teammates can be spawned from the subagent definitions you already wrote in the Subagent
   Architecture section: mention the agent by name when you ask the lead to build the team. The
   definition&rsquo;s <code>tools</code> and <code>model</code> fields are honored; its
-  <code>skills</code> and <code>mcpServers</code> fields are <em>not</em> &mdash; teammates do not
+  <code>skills</code> and <code>mcpServers</code> fields are <em>not</em>: teammates do not
   inherit those, so anything a teammate needs from a skill has to go into the task description
   instead.
 </p>
@@ -51,7 +51,7 @@
 <p>
   Two control mechanisms keep a team from running away from you. First, the
   <strong>plan-approval flow</strong>: you can require that a teammate present its plan and get
-  the lead&rsquo;s approval before touching code &mdash; use it for any task you would not hand to
+  the lead&rsquo;s approval before touching code. Use it for any task you would not hand to
   a new hire without a design review. Second, <strong>quality-gate hooks</strong>: three team
   events are hookable, and an exit code of 2 pushes the work back instead of letting it through.
 </p>
@@ -61,15 +61,15 @@
     <tr><th>Hook event</th><th>Fires when</th><th>Exit 2 means</th></tr>
   </thead>
   <tbody>
-    <tr><td class="cmd-name">TeammateIdle</td><td>A teammate runs out of claimed work</td><td>Send it back for more &mdash; e.g. its tests do not pass yet</td></tr>
-    <tr><td class="cmd-name">TaskCreated</td><td>A new task lands on the shared list</td><td>Reject the task &mdash; e.g. it is missing acceptance criteria</td></tr>
-    <tr><td class="cmd-name">TaskCompleted</td><td>A teammate marks a task done</td><td>Reopen the task &mdash; e.g. the contract validator fails</td></tr>
+    <tr><td class="cmd-name">TeammateIdle</td><td>A teammate runs out of claimed work</td><td>Send it back for more (e.g. its tests do not pass yet)</td></tr>
+    <tr><td class="cmd-name">TaskCreated</td><td>A new task lands on the shared list</td><td>Reject the task (e.g. it is missing acceptance criteria)</td></tr>
+    <tr><td class="cmd-name">TaskCompleted</td><td>A teammate marks a task done</td><td>Reopen the task (e.g. the contract validator fails)</td></tr>
   </tbody>
 </table>
 
 <p>
   A <code>TaskCompleted</code> gate that reruns the service tests looks just like the contract
-  hooks from earlier in this module &mdash; same JSON shape, new event name, and exit 2 instead of
+  hooks from earlier in this module: same JSON shape, new event name, and exit 2 instead of
   a block message. You will wire one up in the Hard tier of Lab 8.
 </p>
 
@@ -101,8 +101,8 @@ flowchart LR
 <h3 id="subagents-vs-teams">Subagents or a team?</h3>
 
 <p>
-  This is the decision the whole module has been building toward. The two models are not rivals
-  &mdash; they answer different questions.
+  This is the decision the whole module has been building toward. The two models are not
+  rivals: they answer different questions.
 </p>
 
 <table class="comparison-table">
@@ -117,13 +117,13 @@ flowchart LR
     </tr>
     <tr>
       <td>Do workers talk to each other</td>
-      <td>No &mdash; each reports back to the caller only</td>
-      <td>Yes &mdash; peer-to-peer messages through the mailbox</td>
+      <td>No: each reports back to the caller only</td>
+      <td>Yes: peer-to-peer messages through the mailbox</td>
     </tr>
     <tr>
       <td>Token cost</td>
-      <td>Lower &mdash; only condensed results return to your context</td>
-      <td>High &mdash; every teammate is a full session running in parallel</td>
+      <td>Lower: only condensed results return to your context</td>
+      <td>High: every teammate is a full session running in parallel</td>
     </tr>
     <tr>
       <td>Best for</td>
@@ -140,7 +140,7 @@ flowchart LR
     each other&rsquo;s work exactly like two developers editing one checkout. The fix is
     partitioning, not isolation: give each teammate <em>ownership</em> of a different
     service&rsquo;s files and say so in the task descriptions. Worktrees are the
-    <strong>subagent</strong> story; teams are the <strong>coordination</strong> story &mdash; do
+    <strong>subagent</strong> story; teams are the <strong>coordination</strong> story. Do
     not expect one to do the other&rsquo;s job.
   </p>
 </div>
@@ -149,14 +149,14 @@ flowchart LR
   <div class="callout-title">Cost: a team is roughly 7&times; a single session</div>
   <p>
     Every teammate burns tokens like a full session, so a team multiplies your spend by roughly
-    the team size plus coordination overhead &mdash; about 7&times; for a typical
+    the team size plus coordination overhead, about 7&times; for a typical
     setup.<sup><a href="#ref-8">[8]</a></sup> Keep
     teams at 3&ndash;5 teammates, run teammates on Sonnet, and shut the team down as soon as the
     work lands.
   </p>
   <p>
     <strong>Live-training note:</strong> a classroom of concurrent teams needs a generous
-    tokens-per-minute limit &mdash; coordinate with your org admin before the session. That is why
+    tokens-per-minute limit. Coordinate with your org admin before the session. That is why
     the instructor runs Demo 8 while you run the scaled-down lab.
   </p>
 </div>
@@ -166,17 +166,17 @@ flowchart LR
 <p>All documented, all real:<sup><a href="#ref-4">[4]</a></sup></p>
 
 <ul>
-  <li>No session resume while in-process teammates are running &mdash; finish or shut down the team first.</li>
-  <li>Task status can lag reality &mdash; nudge the lead to refresh if the list looks stale.</li>
-  <li>The lead may stop early with tasks still open &mdash; tell it to keep going.</li>
-  <li>One team per session &mdash; you cannot run two teams side by side.</li>
-  <li>No nested teams &mdash; a teammate cannot spawn a team of its own.</li>
+  <li>No session resume while in-process teammates are running: finish or shut down the team first.</li>
+  <li>Task status can lag reality: nudge the lead to refresh if the list looks stale.</li>
+  <li>The lead may stop early with tasks still open: tell it to keep going.</li>
+  <li>One team per session: you cannot run two teams side by side.</li>
+  <li>No nested teams: a teammate cannot spawn a team of its own.</li>
 </ul>
 
-<h3 id="demo-agent-team">Demo 8 &mdash; a real team, instructor-driven</h3>
+<h3 id="demo-agent-team">Demo 8: a real team, instructor-driven</h3>
 
 <div class="callout callout-warning">
-  <div class="callout-title">Instructor runs this &mdash; token-heavy</div>
+  <div class="callout-title">Instructor runs this (token-heavy)</div>
   <p>
     This demo runs three Sonnet teammates plus a lead for 10&ndash;15 minutes. Watch it happen on
     the shared screen; you will build a smaller team yourself in Lab 8.
@@ -185,11 +185,11 @@ flowchart LR
 
 <p>
   The demo implements <strong>Part 2 of <code>specs/feature-refunds.md</code></strong>: adding a
-  required <code>reason</code> field to <code>NotificationEvent</code>. It is the ideal team job
-  &mdash; a contract change that all three services consume, where the workers genuinely need to
+  required <code>reason</code> field to <code>NotificationEvent</code>. It is the ideal team
+  job: a contract change that all three services consume, where the workers genuinely need to
   coordinate. One ownership detail learned from the live run: the schema file edit goes to the
   <em>lead</em>, because the shipped <code>path_guard</code> hook fences payments-implementer
-  inside <code>services/payments/</code> &mdash; hand it <code>contracts/</code> and the hook
+  inside <code>services/payments/</code>: hand it <code>contracts/</code> and the hook
   blocks the edit. With the flag enabled, the instructor starts from the monorepo root:
 </p>
 
@@ -209,13 +209,13 @@ schema task before any code is written.</code></pre>
 <ol class="steps">
   <li>
     <strong>Task claiming and unblocking.</strong> The teammates claim tasks from the shared list
-    &mdash; file locking guarantees no double-claims &mdash; and the two service tasks sit blocked
+    (file locking guarantees no double-claims), and the two service tasks sit blocked
     until the schema task completes, then unblock on their own.
   </li>
   <li>
     <strong>Coordination through the lead.</strong> Peer-to-peer messaging is the documented
     design, but the shipped implementer definitions allowlist only Read, Grep, Glob, Edit, Write,
-    and Bash &mdash; no team tools &mdash; so in the captured run every one of the 31 messages was
+    and Bash (no team tools), so in the captured run every one of the 31 messages was
     a lead&ndash;teammate relay. Watch the lead carry the coordination: payments-implementer
     surfaces its blockers at the plan gate, the lead approves with a scope cut, concedes a
     correction (&ldquo;you were right about path_guard and I was wrong&rdquo;), and relays the
@@ -224,8 +224,8 @@ schema task before any code is written.</code></pre>
   </li>
   <li>
     <strong>The lead&rsquo;s synthesis.</strong> When the last task completes, the lead verifies
-    the Part 2 acceptance criteria &mdash; schema, payments, and notifications landed as a
-    coherent set &mdash; and reports one combined summary.
+    the Part 2 acceptance criteria (schema, payments, and notifications landed as a
+    coherent set) and reports one combined summary.
   </li>
 </ol>
 
@@ -268,7 +268,7 @@ payments-implementer:
      8/8 fixtures PASS. … a live POST /refunds through the gateway produced a real
      logged notification carrying \"reason\":\"refund_approved\", end to end."</code></pre>
 
-<h3 id="lab-agent-team">Lab 8 &mdash; a small team of your own</h3>
+<h3 id="lab-agent-team">Lab 8: a small team of your own</h3>
 
 <p>
   Time-boxed: <strong>15 minutes</strong>. Pick one tier. Keep the team small, use Sonnet
@@ -276,20 +276,20 @@ payments-implementer:
 </p>
 
 <div class="callout callout-info">
-  <div class="callout-title">Easy &mdash; a review-only team</div>
+  <div class="callout-title">Easy: a review-only team</div>
   <p>
     Enable the flag, then spawn a team of <strong>2 teammates in review-only mode</strong> (no
     code changes) over the refunds feature you merged earlier in this module. Give each a
-    different lens &mdash; for example, contract compliance versus error handling. Read their
+    different lens: for example, contract compliance versus error handling. Read their
     peer messages: where do the two reviews disagree, and how do they resolve it?
   </p>
 </div>
 
 <div class="callout callout-info">
-  <div class="callout-title">Hard &mdash; implement Part 2 with a gated team</div>
+  <div class="callout-title">Hard: implement Part 2 with a gated team</div>
   <p>
     Spawn <strong>3 teammates</strong> to implement the Part 2 contract change, with strict
-    file-ownership partitioning (each teammate owns a different service&rsquo;s files &mdash;
+    file-ownership partitioning (each teammate owns a different service&rsquo;s files:
     remember, no worktree isolation here). Add a <code>TaskCompleted</code> hook that runs your
     service tests and exits 2 on failure, and watch it reopen at least one task before the team
     converges.
@@ -298,8 +298,8 @@ payments-implementer:
 
 <p>
   <strong>You succeeded when:</strong> the task list shows claimed and completed tasks, and the
-  lead relayed at least one teammate report. Default teammates &mdash; the Easy tier&rsquo;s, spawned
-  without a restricted agent definition &mdash; have the team tools and do message each other
+  lead relayed at least one teammate report. Default teammates (the Easy tier&rsquo;s, spawned
+  without a restricted agent definition) have the team tools and do message each other
   peer-to-peer; only teammates spawned from the restricted implementer definitions relay through
   the lead. If you see true peer messages, note the difference from the relay pattern in Demo 8.
 </p>

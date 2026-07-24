@@ -67,7 +67,7 @@ absolute.
 ## Hard solution
 
 Reference run executed 2026-07-24 (claude 2.1.218) with the shipped
-`changelog-scribe` agent. Two setups matter — see the first failure mode for why.
+`changelog-scribe` agent. Two setups matter: see the first failure mode for why.
 
 Create the evidence commit:
 

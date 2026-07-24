@@ -80,8 +80,8 @@ right after their run should match the captured 8/8/7.)
 
 ## Hard solution
 
-The edit: in `specs/feature-refunds.md` Part 1.5, require a shared contract change —
-for example, `RefundResult` gains a required `requested_at` string that payments must
+The edit: in `specs/feature-refunds.md` Part 1.5, require a shared contract change,
+for example a required `requested_at` string on `RefundResult` that payments must
 emit and notifications must record with its events. Two services now depend on one
 schema edit.
 
