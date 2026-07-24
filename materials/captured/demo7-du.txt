@@ -1,0 +1,30 @@
+# Demo 7 — sparse worktree vs full checkout (real capture, claude 2.1.218)
+# .claude/settings.json worktree block used for this run:
+#   { "baseRef": "head", "symlinkDirectories": [".venv"],
+#     "sparsePaths": [".claude", "services/payments", "contracts"] }
+# WT=.claude/worktrees/agent-af28436fac63da09f (payments agent's worktree)
+
+$ ls -A "$WT"
+.claude  .env  .gitignore  .venv  .worktreeinclude
+CHANGELOG.md  CLAUDE.md  README.md  contracts  init.sh  services
+# Rule 3 on the record: root-level FILES came along (init.sh, .gitignore, README.md),
+# .env arrived via .worktreeinclude, .venv is the symlinkDirectories symlink —
+# but specs/ (a root-level DIRECTORY, not listed) is NOT on disk.
+
+$ ls -A "$WT/services"
+payments          # notifications/ and gateway/ are NOT on disk
+
+$ git -C "$WT" sparse-checkout list
+.claude
+contracts
+services/payments
+
+$ du -sh .          # main checkout, everything included
+ 47M    .           # (.venv 46M + .git dominate)
+$ du -sh --exclude=.venv --exclude=.git .
+548K    .           # main checkout, working files only
+$ du -sh "$WT"
+136K    .claude/worktrees/agent-af28436fac63da09f
+# The sparse worktree shares .venv (symlink) and .git (worktree machinery), so the
+# honest comparison is working files: 548K full vs 136K sparse — about 4x smaller on
+# this deliberately tiny repo. The ratio grows with every package a real monorepo adds.

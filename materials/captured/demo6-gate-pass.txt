@@ -1,0 +1,18 @@
+# Demo 6 — the gate opens after the fix (same real run as demo6-gate-fail)
+# Blocked twice, the agent traced the violation to the shipped fixture value,
+# confirmed the correct enum value from four in-service sources, and made the fix:
+
+-  "event_type": "refund.done",
++  "event_type": "refund.approved",
+
+# Its re-validation before the next stop attempt:
+
+$ ./contracts/validate.sh services/notifications; echo "validate exit=$?"
+PASS fixtures/notification_event.json
+validate exit=0
+
+$ .venv/bin/python3 -m pytest services/notifications -q
+5 passed
+
+# On this stop attempt the Stop-hook gate ran validate.sh again, got exit 0, and the
+# stop went through. Two blocked stops, one fix, zero human intervention.

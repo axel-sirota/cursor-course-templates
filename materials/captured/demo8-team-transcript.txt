@@ -1,0 +1,61 @@
+# Demo 8 — agent team, REAL RUN (claude 2.1.218, CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1)
+# Scenario: Part 2 of specs/feature-refunds.md (required `reason` on NotificationEvent),
+# 3 teammates spawned from the shipped implementer agent definitions, schema task
+# blocking the others, plan approval required on the schema task.
+# Transcript excerpts below are verbatim from the run's event stream, trimmed.
+
+## Task board — creation, ownership, dependencies
+● TaskCreate #1 "Add required `reason` to NotificationEvent schema + emit it from payments"
+● TaskCreate #2 "Make notifications require and log the `reason` field"
+● TaskCreate #3 "Verify gateway is unaffected and run the end-to-end Part 2 check"
+● TaskUpdate #1 owner: payments-implementer, blocks: [#2, #3]
+● TaskUpdate #2 owner: notifications-implementer, blocks: [#3]
+● TaskUpdate #3 owner: gateway-implementer
+● Lead: "Task board is set up with the dependency chain. Now spawning the three teammates."
+
+## Plan-approval gate on the schema task (teammate → lead, verbatim)
+payments-implementer:
+    "I've completed the read-only investigation and am stopping at the
+     plan-approval gate. Two blockers to surface first. …
+     Blocker 1 — I have no team tools: my toolset in this session is only
+     Read / Edit / Write / Bash … please treat this final message as the
+     SendMessage to main, approve or revise it in your reply."
+
+## Mailbox — lead ↔ teammates (verbatim, trimmed)
+✉ lead → payments-implementer:
+    "PLAN APPROVED, with one scope cut. Both your blockers are resolved …
+     I will do all board updates and all teammate relays. Task #1 is now in_progress"
+✉ lead → payments-implementer:
+    "CORRECTION — you were right about path_guard and I was wrong. …
+     the hook is actually wired in your own agent definition frontmatter,
+     .claude/agents/payments-implementer.md:12"
+✉ lead → notifications-implementer:
+    "UNBLOCKED — the schema has landed on `main` as commit `e5b2fa4`. …
+     FIRST, sync your worktree. Your worktree branch is still at `fe2b84a`"
+✉ lead → gateway-implementer:
+    "UNBLOCKED — tasks #1 and #2 have both landed on `main`. Task #3 is now
+     in_progress under your name. Run the real Part 2 end-to-end verification."
+
+## Lead synthesis (verbatim, trimmed)
+    "Part 2 is complete and verified. Working tree clean, all three tasks closed.
+     ce610db  Merge notifications: require reason on NotificationEvent and log it
+     42cf962  Merge payments: populate reason on emitted NotificationEvent
+     e5b2fa4  contracts: add required reason field to NotificationEvent
+     One service per commit, merged in dependency order: schema → payments →
+     notifications. 31 passed, 0 failed (gateway 7, payments 13, notifications 11);
+     8/8 fixtures PASS. … a live POST /refunds through the gateway produced a real
+     logged notification carrying \"reason\":\"refund_approved\", end to end."
+
+## Observed deviations to fold into the guide (real behavior on 2.1.218)
+# 1. Teammate-to-teammate DIRECT messages did not occur: the shipped implementer
+#    agent definitions allowlist only Read/Grep/Glob/Edit/Write/Bash, so teammates
+#    had no SendMessage/TaskUpdate tools. All coordination was relayed through the
+#    lead's mailbox (31 SendMessage events, all lead ↔ teammate). To reproduce the
+#    peer-message exchange the guide narrates, the teammate definitions need the
+#    team tools added for the teams lab.
+# 2. The demo prompt's ownership partition ("payments-implementer owns
+#    contracts/notification.schema.json") conflicts with the shipped path_guard
+#    PreToolUse hook, which fences payments-implementer inside services/payments/.
+#    The teammate flagged it; the lead applied the approved schema diff itself.
+#    The design decision stayed with the teammate — but the guide should either
+#    hand the schema task to the lead explicitly or relax the guard for this lab.

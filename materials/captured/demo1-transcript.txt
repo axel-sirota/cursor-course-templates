@@ -1,0 +1,45 @@
+# Demo 1 — scoped payments agent, real run (claude 2.1.218)
+# Session: claude -p "Use the payments-implementer agent to add an amount-format check to payments"
+# Transcript rendered from --output-format stream-json events; trimmed. The long worktree
+# prefix /private/tmp/refund-monorepo/.claude/worktrees/ is elided as "…/worktrees/".
+
+⏺ Task(payments-implementer): Add an amount-format check to the payments service
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/services/payments/CLAUDE.md)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/contracts/refund.schema.json)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/contracts/payment.schema.json)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/specs/feature-refunds.md)
+  ⎿ Read(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/refunds.py)
+  ⎿ Edit(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/refunds.py)
+  ⎿ Edit(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/refunds.py)
+  ⎿ Write(…/worktrees/agent-af6b4c6ff73787998/services/payments/tests/test_amount_format.py)
+  ⎿ Edit(…/worktrees/agent-af6b4c6ff73787998/services/payments/src/main.py)
+  ⎿ Bash(cd …/worktrees/agent-af6b4c6ff73787998/services/payments && ../../.venv/bin/python3 -m pytest -q)
+      27 passed (23 new)
+  ⎿ Bash(contracts/validate.sh services/payments; echo "exit=$?")
+      3 PASS, exit=0
+  ⎿ Agent reply (final message):
+      {
+        "agent": "payments-implementer",
+        "task": "Add a contract-derived amount-format check to services/payments, run before
+                 the approve/reject decision, with tests and contract validation",
+        "status": "green",
+        "files_changed": [
+          "services/payments/src/refunds.py",
+          "services/payments/src/main.py",
+          "services/payments/tests/test_amount_format.py",
+          "services/payments/fixtures/refund_request.json",
+          "services/payments/CLAUDE.md",
+          "services/payments/README.md"
+        ],
+        "tests_run": "cd services/payments && ../../.venv/bin/python3 -m pytest -> 27 passed,
+                      0 failed (23 new); contracts/validate.sh services/payments -> 3 PASS, exit 0",
+        "notes": "Rules taken from contracts/refund.schema.json definitions.RefundRequest… (trimmed)"
+      }
+
+# Points to make on the real run:
+# - every Edit/Write above lands inside services/payments/ — reads roamed to contracts/
+#   and the spec, writes never left the fence (path_guard never had to fire);
+# - the agent worked in an isolated worktree (agent-af6b4c6ff73787998), branch
+#   worktree-agent-af6b4c6ff73787998 — the main checkout stayed clean during the run;
+# - the final message is exactly the machine-checkable JSON report the agent's
+#   system prompt demands.

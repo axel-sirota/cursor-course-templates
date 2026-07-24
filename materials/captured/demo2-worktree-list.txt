@@ -1,0 +1,36 @@
+# Demo 2 — worktree isolation, real run (claude 2.1.218)
+# Agent: changelog-scribe (isolation: worktree), task: add a changelog entry for the
+# refunds feature. Captured from a second terminal while the agent was working.
+
+## Mid-run — the worktree caught in the act
+$ git worktree list
+/private/tmp/refund-monorepo                                           cc106e8 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-a3643a1fcff8ba6e5 cc106e8 [worktree-agent-a3643a1fcff8ba6e5] locked
+
+$ git branch --list 'worktree-*'
++ worktree-agent-a3643a1fcff8ba6e5
+
+# Both checkouts point at the same commit (cc106e8) — the agent branched from the
+# session's current HEAD, not from the initial commit, because baseRef is "head".
+# cc106e8 is a commit made minutes earlier on main; a "main"-based worktree would
+# sit on 0416d96.
+
+## Main checkout stays clean while the agent edits
+$ git status
+On branch main
+nothing to commit, working tree clean
+
+## After a no-change run ("check whether the changelog already covers the refunds
+## feature — change nothing")
+$ git worktree list
+/private/tmp/refund-monorepo                                           1632699 [main]
+/private/tmp/refund-monorepo/.claude/worktrees/agent-ae1ac0745d7fc74a8 1632699 [worktree-agent-ae1ac0745d7fc74a8]
+
+$ git status --short   # (run inside the leftover worktree)
+?? .venv               # only the .venv symlink from worktree.symlinkDirectories
+
+# OBSERVED DEVIATION from the drafted guide text (CLI 2.1.218): the worktree and its
+# branch were NOT auto-removed after the no-change run — the worktree survives holding
+# only the .venv symlink, and cleanup is manual:
+#   git worktree remove --force .claude/worktrees/agent-ae1ac0745d7fc74a8
+#   git branch -D worktree-agent-ae1ac0745d7fc74a8
