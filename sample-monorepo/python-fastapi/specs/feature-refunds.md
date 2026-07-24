@@ -88,6 +88,34 @@ for s in services/*/; do (cd "$s" && ../../.venv/bin/python3 -m pytest); done
 
 ---
 
+## Part 1.5 — your turn (Demo 5 / Lab 5)
+
+**Not implemented.** Everything above ships working; this section is what the
+parallel run builds. It touches all three services, so each agent has real
+work and each branch has real commits.
+
+Refund status lookup:
+
+- **Payments** keeps every issued `RefundResult` in its in-memory store and
+  exposes `GET /refunds/{refund_id}` returning that result (404 with a clear
+  detail when the id is unknown).
+- **Gateway** exposes `GET /refunds/{refund_id}` and proxies it to payments,
+  returning the payments response verbatim (502 when payments is down, same
+  contract as POST).
+- **Notifications** extends `GET /events` with an optional `refund_id` query
+  parameter that filters the logged events to that refund.
+
+**Acceptance criteria (Part 1.5)**
+
+- [ ] `POST /refunds` then `GET /refunds/{refund_id}` through the gateway
+      returns the same `RefundResult` the POST produced.
+- [ ] An unknown refund id returns 404 from payments and through the gateway.
+- [ ] `GET /events?refund_id=<id>` returns only that refund's events.
+- [ ] Each service's addition lands with a test, and all Part 1 tests still
+      pass.
+
+---
+
 ## Part 2 — teams lab only
 
 **Do not implement this in Lab 5.** This extension is reserved for the Agent

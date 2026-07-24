@@ -15,6 +15,10 @@ If no spec file is given, default to `specs/feature-refunds.md`.
 - Read `<spec-file>` IN FULL before spawning anything. Identify the slice that
   belongs to each service (Gateway / Payments / Notifications sections and
   their acceptance criteria).
+- Implement only what is NOT yet implemented: sections marked "your turn"
+  (e.g. Part 1.5) are the work; sections marked "teams lab only" (Part 2) are
+  out of scope for this command. If everything is already implemented, report
+  that instead of spawning agents.
 
 **2. Spawn the implementers**
 

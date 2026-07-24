@@ -8,12 +8,15 @@
           service, each in its own worktree, coordinated by the lead session you are typing into.
         </p>
         <p>
-          The refunds feature in <code>specs/feature-refunds.md</code> is the perfect test case.
-          It touches every service &mdash; <code>gateway</code> accepts <code>POST /refunds</code>,
-          <code>payments</code> makes the approve/reject decision, <code>notifications</code>
-          records the outcome &mdash; but the services only meet at the JSON Schemas in
-          <code>contracts/</code>. Three agents can build three services independently precisely
-          because the contract, not conversation, defines where they touch.
+          The spec&rsquo;s <strong>Part 1.5 &mdash; your turn</strong> section in
+          <code>specs/feature-refunds.md</code> is the test case. The baseline refund flow
+          (Part 1) already ships working; Part 1.5 &mdash; a refund status lookup &mdash; is
+          deliberately unimplemented and touches every service: <code>payments</code> stores and
+          serves <code>GET /refunds/{id}</code>, <code>gateway</code> proxies it,
+          <code>notifications</code> filters its events by <code>refund_id</code>. The services
+          only meet at the JSON Schemas in <code>contracts/</code>. Three agents can build three
+          services independently precisely because the contract, not conversation, defines where
+          they touch.
         </p>
 
         <h3 id="parallel-command-anatomy">Anatomy of the Command</h3>
@@ -174,8 +177,8 @@ claude</code></pre>
         <div class="callout callout-info">
           <div class="callout-title">Easy</div>
           <p>
-            Before you start, write down your estimate: how long would implementing the refunds
-            spec take as three sequential agent runs? Then run
+            Before you start, write down your estimate: how long would implementing the spec&rsquo;s
+            Part 1.5 take as three sequential agent runs? Then run
             <code>/implement-across-services specs/feature-refunds.md</code> and time it. When it
             finishes, verify that each agent&rsquo;s changes landed on a separate branch and that
             each branch touches only its own service&rsquo;s directory. Compare wall-clock reality
