@@ -1,7 +1,8 @@
 # Teacher runbook (not for students)
 teacher_runbook.md
 TEACHER_CHEAT_SHEET.md
-solutions/
+/solutions/
+!materials/instructor/solutions/
 
 # Claude Code local files (user-specific)
 CLAUDE.local.md
@@ -149,6 +150,9 @@ database/local/
 
 # Docker
 .docker/
+
+# Planning docs (not checked in unless explicitly requested)
+plans/
 
 # Terraform
 terraform_plans/
