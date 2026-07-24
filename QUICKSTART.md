@@ -28,6 +28,13 @@ Attending **Course 102 — Parallel Development**? Check these before the sessio
 -   **git >= 2.5** — the first version with `git worktree`. Check with `git --version`.
 -   **Python 3.10+ and/or Node 18+** — matching the sample-monorepo variant you pick (`python-fastapi` needs Python, `node-express` needs Node; install both if you want to switch freely).
 -   **Workspace trust accepted in the sample monorepo directory** — copy the variant out of this repo, run `./init.sh`, then open `claude` there once and accept the trust prompt so it does not interrupt the labs.
+-   **Service dependencies installed** — for the `python-fastapi` variant, after `init.sh` create the venv and install every service's requirements:
+    ```bash
+    python3 -m venv .venv
+    .venv/bin/python3 -m pip install -U pip
+    .venv/bin/python3 -m pip install -r services/gateway/requirements.txt -r services/payments/requirements.txt -r services/notifications/requirements.txt
+    ```
+    For the `node-express` variant, run `npm install` once at the monorepo root — the root `package.json` declares the services as npm workspaces, so one install covers all three.
 -   **Agent Teams availability** — Module 2 uses the experimental Agent Teams feature. Check what you currently have set:
     ```bash
     echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS

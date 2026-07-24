@@ -161,7 +161,7 @@ git -C "$WT" sparse-checkout list</code></pre>
     <p>Expected: root-level files, the three listed paths, and nothing else.</p>
     <pre><code class="language-text">$ ls -A "$WT"
 .claude  .env  .env.example  .git  .gitignore  .worktreeinclude
-contracts  init.sh  services
+CLAUDE.md  README.md  contracts  init.sh  services
 
 $ ls -A "$WT/services"
 payments          # notifications/ and gateway/ are NOT on disk

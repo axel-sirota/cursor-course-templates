@@ -8,7 +8,7 @@ const { createApp } = require("../src/index");
 const { createStore } = require("../src/store");
 
 // Local stub standing in for the notifications service: records every event
-// POSTed to /notifications so tests can assert on delivery without the real
+// POSTed to /events so tests can assert on delivery without the real
 // service running.
 const receivedEvents = [];
 const stubServer = http.createServer((req, res) => {
@@ -17,7 +17,7 @@ const stubServer = http.createServer((req, res) => {
     body += chunk;
   });
   req.on("end", () => {
-    if (req.method === "POST" && req.url === "/notifications") {
+    if (req.method === "POST" && req.url === "/events") {
       receivedEvents.push(JSON.parse(body));
       res.writeHead(202, { "content-type": "application/json" });
       res.end(JSON.stringify({ accepted: true }));

@@ -79,7 +79,7 @@ Record customer-facing notifications:
 ## Running checks (this variant)
 
 ```bash
-npm test                                  # all service tests
+npm test --workspaces                     # all service tests
 npm test --workspace services/payments    # one service
 ```
 

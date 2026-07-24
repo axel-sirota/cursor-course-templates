@@ -24,7 +24,7 @@ function decide(payment, amount) {
 // so every failure path here only logs.
 async function postNotification(notificationsUrl, event) {
   try {
-    const response = await fetch(`${notificationsUrl}/notifications`, {
+    const response = await fetch(`${notificationsUrl}/events`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(event),
