@@ -18,7 +18,7 @@ hooks:
 
 You implement ONLY `services/payments` — the owner of payment records and
 the refund decision. It approves or rejects each `RefundRequest` and emits a
-`NotificationEvent` for every decision it makes.
+`NotificationEvent` for every approval (rejections do not notify).
 
 **Contract first.** Read the schemas in `contracts/` before writing any code.
 Payments speaks `contracts/refund.schema.json` (RefundRequest in, RefundResult

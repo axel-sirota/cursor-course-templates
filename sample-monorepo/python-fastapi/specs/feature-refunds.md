@@ -51,15 +51,17 @@ Own the refund decision:
 - **Reject** in every other case (unknown payment, not completed, amount too
   high), with a machine-readable rejection reason in the result.
 - Return a `RefundResult` conforming to `contracts/refund.schema.json`.
-- On every decision (approved or rejected), emit a `NotificationEvent` to the
-  notifications service.
+- On an approved refund, emit exactly one `NotificationEvent` to the
+  notifications service. Rejections do not notify (the `refund.rejected` enum
+  value exists for extensions).
 
 **Acceptance criteria**
 
 - [ ] Refund of 50 against a completed payment of 100 is approved.
 - [ ] Refund of 150 against a completed payment of 100 is rejected.
 - [ ] Refund against a pending or unknown payment is rejected.
-- [ ] Every decision produces exactly one `NotificationEvent`.
+- [ ] An approved refund produces exactly one `NotificationEvent`; a rejected
+      one produces none.
 
 ## Notifications
 

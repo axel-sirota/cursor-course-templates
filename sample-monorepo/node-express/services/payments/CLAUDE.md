@@ -25,10 +25,11 @@ field — the schema lists required fields only and permits extras.
 
 ## Integration point
 
-Every decision, approved or rejected, emits exactly one
-`NotificationEvent` (`contracts/notification.schema.json`) to notifications
-at `http://localhost:${NOTIFICATIONS_PORT}/events`. `event_type` is
-`refund.approved` or `refund.rejected`; `recipient` is the payment's
+An approved refund emits exactly one `NotificationEvent`
+(`contracts/notification.schema.json`) to notifications; rejections do not
+notify. Events go to
+`http://localhost:${NOTIFICATIONS_PORT}/events`. `event_type` is
+`refund.approved` (`refund.rejected` stays reserved); `recipient` is the payment's
 `customer_email`. That is this service's only outbound call.
 
 ## Commands (from this directory)
