@@ -1,0 +1,35 @@
+# persona.yaml — pm
+#
+# Single source of truth that the universal commands read
+# (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
+# Commands never hardcode persona names or stack lists; they read this file.
+
+persona: pm
+title: Product Manager
+summary: Turns raw notes into validated PRDs and INVEST stories with testable acceptance criteria.
+
+workspace: workspaces/pm
+
+stacks:
+  - pm-prd-markdown
+
+exercises: exercises/pm
+
+session_context:
+  - "{workspace}/plans/sessions/session-overview.md"
+  - "{workspace}/plans/interface-contract.md"
+  - "{workspace}/plans/transitions/latest.md"
+  - "{workspace}/prds/"
+
+in_session_commands:
+  - name: /pm-decompose
+    use: split a PRD epic into INVEST stories
+  - name: /pm-validate
+    use: check stories meet INVEST and have Given/When/Then acceptance criteria
+  - name: /pm-report
+    use: produce a status summary of validated vs open stories
+
+quality_gate:
+  - Run the gap-detector agent on every PRD touched this session.
+  - If /pm-validate has never run on the active PRD, run it now.
+  - Record story counts (validated / open) in the transition doc.

@@ -1,0 +1,37 @@
+# persona.yaml — accountant
+#
+# Single source of truth that the universal commands read
+# (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
+# Commands never hardcode persona names or stack lists; they read this file.
+
+persona: accountant
+title: Corporate Accountant
+summary: Runs reconciliations, flux analysis and journal entry testing where every number ties to a source.
+
+workspace: workspaces/accountant
+
+stacks:
+  - python-accounting
+
+exercises: exercises/accountant
+
+session_context:
+  - "{workspace}/plans/sessions/session-overview.md"
+  - "{workspace}/plans/interface-contract.md"
+  - "{workspace}/plans/transitions/latest.md"
+  - "{workspace}/output/"
+
+in_session_commands:
+  - name: /acct-reconcile
+    use: match bank lines to GL lines and list every unmatched item
+  - name: /acct-variance
+    use: budget vs actual and month over month flux with explanations
+  - name: /acct-je-test
+    use: test journal entries for duplicates, weekend postings, round amounts, self-approval
+  - name: /acct-close-handoff
+    use: write the close memo with tie-outs and open items
+
+quality_gate:
+  - Run the tie-out-checker agent. Every number in output/ traces to a source file and row.
+  - Run the controls-checker agent on any journal entry analysis.
+  - Confirm nothing under data/raw/ was modified (git diff on that folder is empty).

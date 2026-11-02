@@ -67,6 +67,9 @@ alembic/versions/*.pyc
 # Docker
 docker-compose.override.yml
 
-# Local plans and tool state
-plans/
+# Template-dev plans (students' plans live in workspaces/<role>/plans/ and ARE committed)
+plans/_dev/
 .kryla/
+
+# Per-session marker written by /start-session
+.cursor/.active-session

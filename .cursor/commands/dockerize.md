@@ -10,11 +10,12 @@ Creates production-ready Docker configuration for the current project. Supports 
 
 **0. Stack Shape Guard**
 
-Read the active stack from `.cursor/context.md`.
+Pick the persona (argument, else `.cursor/.active-session`, else the only active persona, else ask) and read `Stack` from its `## Persona: <role>` block in `.cursor/context.md`. Build context is `workspaces/<role>/`.
 
 **Stacks where Docker is NOT the primary artifact** — if active stack is one of these, warn the user and stop:
-- `devops-terraform` — Terraform runs locally or in CI; the artifact is a `.tfplan`, not a container
-- `devops-ansible` — Ansible runs against remote hosts via SSH; no container needed for the control node
+- `pm-prd-markdown` — the deliverable is markdown PRDs and stories
+- `designer-react-tokens` — the deliverable is tokens, components and Storybook; run it with `npm run storybook`
+- `python-accounting` — the deliverable is reports in `output/`; run the scripts locally
 - `python-dbt-snowflake` — dbt runs as a CLI process connecting to Snowflake/BigQuery; containerizing dbt is unusual and rarely needed
 - `r-tidyverse` — R analysis renders to Quarto documents; Docker is not a primary deliverable
 
@@ -26,10 +27,9 @@ For these stacks, respond:
 - `python-mlops` — training image + serving image (two Dockerfiles)
 - `python-spark` — job runner image for cluster submission
 - `python-datascience` — optional: Jupyter server container
-- `devops-k8s-helm` — Docker image is the workload being deployed via Helm
 
 **1. Context Check**
-- Read `.cursor/context.md` to identify the **Active Stack**
+- Use the persona's **Stack** from Step 0
 - If no stack configured: "⚠️ Run @setup-stack first"
 
 **2. Detect Existing Docker Config**
@@ -218,7 +218,6 @@ docker-compose*
 README.md
 docs/
 tests/
-.claude/
 .cursor/
 ```
 

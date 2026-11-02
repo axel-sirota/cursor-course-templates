@@ -1,0 +1,45 @@
+# persona.yaml — engineer
+#
+# Single source of truth that the universal commands read
+# (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
+# Commands never hardcode persona names or stack lists; they read this file.
+
+persona: engineer
+title: Software Engineer
+summary: Ships service code behind tests, one TDD loop at a time.
+
+# Where this persona's work lives. Rules, hooks and /architect output are scoped here.
+workspace: workspaces/engineer
+
+# /setup-stack menu for this persona. First entry is the default.
+stacks:
+  - python-fastapi
+  - go-gin
+  - go-grpc
+  - java-spring
+  - node-express
+  - node-nestjs
+
+# Exercises the student runs after /architect (see exercises/engineer/README.md).
+exercises: exercises/engineer
+
+# What /start-session loads before asking for the goal.
+session_context:
+  - "{workspace}/plans/sessions/session-overview.md"
+  - "{workspace}/plans/interface-contract.md"
+  - "{workspace}/plans/transitions/latest.md"
+
+# Commands the student uses DURING a session (spokes of the session loop).
+in_session_commands:
+  - name: /engineer-tasks
+    use: decompose the session goal into TDD-ordered tasks
+  - name: /engineer-implement
+    use: drive red, green, refactor for one task at a time
+  - name: /code-review
+    use: review the diff against the active stack rules
+
+# What /next-session checks before writing the transition doc.
+quality_gate:
+  - Run the test suite (test-runner agent). All tests green, or the failure is recorded in the transition doc.
+  - Advance Active Phase only if every acceptance criterion in the current session file is met.
+  - If neither /engineer-tasks nor /engineer-implement ran this session, ask why and note it.

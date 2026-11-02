@@ -1,0 +1,37 @@
+# persona.yaml — designer
+#
+# Single source of truth that the universal commands read
+# (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
+# Commands never hardcode persona names or stack lists; they read this file.
+
+persona: designer
+title: Product Designer
+summary: Turns design tokens and screen specs into reusable components, no hardcoded values.
+
+workspace: workspaces/designer
+
+stacks:
+  - designer-react-tokens
+
+exercises: exercises/designer
+
+session_context:
+  - "{workspace}/plans/sessions/session-overview.md"
+  - "{workspace}/plans/interface-contract.md"
+  - "{workspace}/plans/transitions/latest.md"
+  - "{workspace}/tokens/"
+
+in_session_commands:
+  - name: /designer-extract
+    use: pull tokens from a Figma frame or a token JSON / screen spec file
+  - name: /designer-compose
+    use: build a component from tokens only
+  - name: /designer-iterate
+    use: apply review feedback to a component
+  - name: /designer-handoff
+    use: write the dev-ready spec for finished components
+
+quality_gate:
+  - Run the token-validator agent on every component touched. No hardcoded colors, spacing or font sizes.
+  - Run the responsive-checker agent if a layout changed.
+  - List components changed and open style questions in the transition doc.

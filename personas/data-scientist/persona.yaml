@@ -1,0 +1,42 @@
+# persona.yaml — data-scientist
+#
+# Single source of truth that the universal commands read
+# (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
+# Commands never hardcode persona names or stack lists; they read this file.
+
+persona: data-scientist
+title: Data Scientist
+summary: Runs reproducible experiments with seeds, baselines and tracked metrics.
+
+workspace: workspaces/data-scientist
+
+stacks:
+  - python-datascience
+  - python-mlops
+  - python-spark
+  - python-dbt-snowflake
+  - r-tidyverse
+
+exercises: exercises/data-scientist
+
+session_context:
+  - "{workspace}/plans/sessions/session-overview.md"
+  - "{workspace}/plans/interface-contract.md"
+  - "{workspace}/plans/transitions/latest.md"
+  - "{workspace}/docs/eda/"
+  - "{workspace}/experiments/log.md"
+
+in_session_commands:
+  - name: /ds-explore
+    use: EDA pass on a dataset
+  - name: /ds-experiment
+    use: run one tracked experiment
+  - name: /ds-validate
+    use: check seeds, leakage and baselines
+  - name: /ds-handoff
+    use: write the model card and serving spec
+
+quality_gate:
+  - Log this session's results with the experiment-tracker agent.
+  - If an experiment ran but /ds-validate did not, run it now.
+  - Notebooks must run top to bottom on a fresh kernel before handoff.

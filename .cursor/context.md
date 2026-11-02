@@ -1,18 +1,18 @@
 # Project Context
 
-> **Default persona: engineer.** Run `@set-persona` to switch to a different role, then `@setup-stack` (engineer / data-scientist / devops only), then `@start-session`.
+> **A persona is required.** Run `/set-persona` to add one (you can add several).
+> Per persona: `/setup-stack <role>` → `/architect <role>` → `/start-session <role>` → `/next-session`.
+> `/set-persona list` shows what is active. `/undo` reverses installs.
 
-## Active Persona
+## Active Personas
 (none)
 
-## Active Client
-(none)
+<!--
+/set-persona appends one block per active persona, for example:
 
-## Active Stack
-(unset)
-
-## Architecture Shape
-(unset — run @setup-stack)
-
-## Active Phase
-(unset)
+## Persona: pm
+Workspace: workspaces/pm
+Stack: pm-prd-markdown
+Architecture Shape: PRD Workspace (Problem → Goals → Epics → INVEST Stories → Acceptance Criteria)
+Active Phase: Phase 1
+-->

@@ -1,196 +1,202 @@
 ---
-description: Activate a persona pack (engineer, designer, pm, data-scientist). Detects client overlay automatically. Installs everything into .cursor/ and .claude/.
+description: Add, remove or list persona packs (engineer, pm, designer, data-scientist, accountant). Several personas can be active at once. Installs into .cursor/.
 ---
 
 # Set Persona Command
 
-**When to use:** Run this first — before `/setup-stack`. Re-run at any time to switch personas; the previous install is cleaned first.
+**When to use:** First, before `/setup-stack`. Run it again to add a second persona; nothing already installed is removed.
+
+```
+/set-persona                 # show menu, add the chosen persona
+/set-persona add <role>      # add a persona
+/set-persona remove <role>   # remove one persona (same as /undo persona <role>)
+/set-persona list            # show active personas, their stacks and phases
+```
+
+The pipeline per persona is: `/set-persona → /setup-stack → /architect → /start-session → /next-session`.
 
 ---
 
-## Execution Flow
+## Concepts
 
-### Step 1: Detect Existing Persona
+| Thing | Where | Purpose |
+|---|---|---|
+| Persona pack | `personas/<role>/` | Source files. Never edited by this command |
+| Persona contract | `personas/<role>/persona.yaml` | Workspace, allowed stacks, in-session commands, quality gate. Every command reads it |
+| Workspace | `workspaces/<role>/` | Where this persona's plans, code, data and docs live |
+| Installed files | `.cursor/{commands,agents}/`, `.cursor/rules/<role>/`, `.cursor/scripts/<role>/` | What Cursor loads |
+| Manifest | `.cursor/personas/<role>.manifest.json` | Every file and config entry this install wrote, used by remove |
 
-Read `.cursor/.persona-manifest.json`.
+---
 
-- If the file exists: read `base_files` and `client_files` arrays. Show the user which persona is currently installed and list the files that will be removed. Ask for confirmation before continuing.
-- If the file does not exist: proceed directly to Step 2 without prompting.
+## Execution Flow (add)
 
-### Step 2: Detect Client Config
+### Step 1: Read current state
 
-Check whether `client-config/client.md` exists.
+- Read `.cursor/context.md` → `## Active Personas` (comma-separated list, or `(none)`).
+- List `.cursor/personas/*.manifest.json`.
+- If the requested role is already active, say so and stop: "`{role}` is already active. Use `/set-persona remove {role}` first to reinstall."
 
-- If it exists: read the file and extract the value after the `## Client:` heading. Store this as `active_client`. Print: `"Client config detected: {active_client}"`
-- If it does not exist: set `active_client = null`. Continue silently — no error, no warning.
+### Step 2: Show menu (when no role was given)
 
-### Step 3: Show Persona Menu
-
-List the subdirectories inside the `personas/` directory dynamically (do not hardcode names). For each subdirectory found, read the first paragraph of its `README.md` to use as the description.
-
-Present the menu like this:
+List the subdirectories of `personas/` at runtime (never hardcode names). For each, read `title` and `summary` from `personas/<role>/persona.yaml`. Mark active ones.
 
 ```
 Available personas:
 
-1. {name}  — {first paragraph from personas/{name}/README.md}
-2. ...
+1. accountant      Corporate Accountant: Runs reconciliations, flux analysis ...
+2. data-scientist  Data Scientist: ...
+3. designer        Product Designer: ...   (active)
+...
 
-Which persona? (enter number or name)
+Which persona to add? (number or name)
 ```
 
-Wait for the user to enter a number or a persona name. Validate the input; if it does not match any discovered subdirectory, print an error and re-prompt.
+Validate input; re-prompt on an unknown value.
 
-### Step 4: Remove Previous Persona
+### Step 3: Pre-flight (abort before writing anything)
 
-If a previous manifest was found in Step 1:
+For the selected `<role>`, verify these exist. If any is missing, abort and report the path:
+- `personas/<role>/persona.yaml`, `persona.md`, `README.md`, `hooks.json`, `mcp.json`
+- `personas/<role>/commands/`, `agents/`, `rules/`, `scripts/`
 
-1. For each path listed in `base_files` and `client_files`, delete the file from disk. If a listed file no longer exists, warn: `"Warning: {path} was already removed — skipping."` but continue.
-2. Delete `.cursor/.persona-manifest.json` and `.claude/.persona-manifest.json`.
-3. Print: `"Previous persona ({name}) removed."`
+Check for collisions with OTHER active personas:
+- A file in `personas/<role>/commands/` or `agents/` whose name already exists in `.cursor/commands/` or `.cursor/agents/` and is NOT a universal command. Universal commands are the ones committed to the repo in `.cursor/commands/` (git tracked). Report the clash and abort.
+- An MCP server name in `personas/<role>/mcp.json` that already exists in `.cursor/mcp.json` with a DIFFERENT config. Show both and ask: keep existing / replace / abort.
 
-If no previous manifest existed, skip this step silently.
+### Step 4: Copy files
 
-### Step 5: Copy Base Persona Files
+Track every path written in `files`.
 
-For the selected `{role}`, copy files from `personas/{role}/` to both `.cursor/` and `.claude/`. Before copying any file, check whether the destination already exists AND was NOT listed in the previous manifest. If so, ask the user: "Destination {path} already exists and was not installed by set-persona. Overwrite or abort?" — respect their choice.
-
-If any source file listed below is missing, **abort immediately** and report the missing path. Do not perform a partial install.
-
-| Source path | Destination (.cursor/) | Destination (.claude/) |
+| Source | Destination | Transformation |
 |---|---|---|
-| `personas/{role}/commands/*.md` | `.cursor/commands/` | `.claude/commands/` |
-| `personas/{role}/agents/*.md` | `.cursor/agents/` | `.claude/agents/` |
-| `personas/{role}/scripts/*.sh` | `.cursor/scripts/` (chmod +x) | `.claude/scripts/` (chmod +x) |
-| `personas/{role}/rules/*.mdc` | `.cursor/rules/` | `.claude/rules/` |
-| `personas/{role}/hooks.json` | `.cursor/hooks.json` (verbatim) | `.claude/hooks.json` (paths rewritten — see below) |
-| `personas/{role}/mcp.json` | `.cursor/mcp.json` | `.claude/mcp.json` |
+| `personas/<role>/commands/*.md` | `.cursor/commands/` | none |
+| `personas/<role>/agents/*.md` | `.cursor/agents/` | none |
+| `personas/<role>/scripts/*.sh` | `.cursor/scripts/<role>/` | `chmod +x` |
+| `personas/<role>/rules/*.mdc` | `.cursor/rules/<role>/` | scope frontmatter (below) |
 
-**hooks.json path rewriting (Claude side only):**
-When writing to `.claude/hooks.json`, replace every occurrence of the string `".cursor/scripts/"` with `".claude/scripts/"` in the JSON content before writing. The `.cursor/hooks.json` receives the file verbatim without any substitution.
+**Rule scoping.** In each copied `.mdc`, replace the frontmatter keys so the rule attaches only to this persona's workspace:
 
-Track every destination path written in this step in a list called `base_files`.
+```yaml
+---
+description: <keep original>
+globs: workspaces/<role>/**
+alwaysApply: false
+---
+```
 
-### Step 6: Apply Client Overlay (if present)
+### Step 5: Merge hooks into `.cursor/hooks.json`
 
-Check whether `client-config/personas/{role}/` exists. If it does not exist, skip this step silently.
+1. Read `.cursor/hooks.json`. If missing, start from `{"version": 1, "hooks": {}}`.
+2. For each event in `personas/<role>/hooks.json`, for each entry `{"command": ".cursor/scripts/<name>.sh"}`, append to that event's array:
+   ```json
+   { "command": ".cursor/scripts/_scope.sh <role> .cursor/scripts/<role>/<name>.sh" }
+   ```
+3. Record each appended command string in the manifest under `hooks` as `{"event": "...", "command": "..."}`.
 
-If it exists, apply the following overlays in order:
+`_scope.sh` (committed in the repo) runs an `afterFileEdit` hook only for files under `workspaces/<role>/`, and a `stop` hook only when `.cursor/.active-session` is `<role>`. `beforeShellExecution` hooks always run. Never edit entries that belong to other personas.
 
-**mcp.json overlay:**
-- If `client-config/personas/{role}/mcp.json` exists, attempt to parse it as JSON.
-  - If valid: REPLACE `.cursor/mcp.json` and `.claude/mcp.json` entirely with this file's content (apply the same `.cursor/scripts/` → `.claude/scripts/` path rewriting for the `.claude/` copy). Add both paths to `client_files`.
-  - If invalid JSON: warn `"Warning: Client mcp.json failed to parse — using base persona MCP config instead."` and keep the base version.
+### Step 6: Merge MCP servers into `.cursor/mcp.json`
 
-**rules overlay:**
-- If any `*.mdc` files exist in `client-config/personas/{role}/rules/`, copy each one to `.cursor/rules/` and `.claude/rules/`. Prefix each filename with `900-client-` so client rules sort after base rules (e.g., `client-config/personas/{role}/rules/security.mdc` → `.cursor/rules/900-client-security.mdc`). Add all destination paths to `client_files`.
+1. Read `.cursor/mcp.json`. If missing, start from `{"mcpServers": {}}`.
+2. For each server in `personas/<role>/mcp.json`:
+   - Name not present → add it. Record in manifest `mcp_added`.
+   - Name present with identical config → leave it. Record in manifest `mcp_shared`.
+   - Name present with different config → apply the answer from Step 3.
 
-**env.example overlay:**
-- If `client-config/personas/{role}/env.example` exists, note its path in the summary output so the student knows to review it. Do NOT copy it to `.cursor/` — `.env.example` lives at the repo root.
-- If `client-config/env.example` also exists (top-level), note it in the summary as an additional source for client-specific environment variables.
+### Step 7: Create the workspace
 
-### Step 7: Update Context Files
-
-Update **both** `.cursor/context.md` and `CLAUDE.md`.
-
-For each file:
-- If the file exists, find the `## Active Persona` section and update its value to `{role}`. Find the `## Active Client` section and update its value to `{active_client}`. If either section is missing, add it.
-- If `active_client` is null, remove the `## Active Client` section (or set it to `"(none)"`).
-- If the file does not exist or contains only a placeholder, create it with:
+Create `workspaces/<role>/` with `plans/sessions/`, `plans/transitions/` and a `README.md`:
 
 ```markdown
-# Project Context
+# <title> workspace
 
-## Active Persona
-{role}
-
-## Active Client
-{active_client or "(none)"}
-
-## Active Stack
-(set by /setup-stack — engineer and data-scientist personas only)
+Everything the <role> persona produces lives here: plans, code, data, docs.
+Rules in .cursor/rules/<role>/ apply only to files in this folder.
 ```
 
-### Step 8: Write Manifests
+Do not overwrite an existing workspace (a student may be re-adding a persona). Record the workspace in the manifest but NOT its contents: remove never deletes student work.
 
-Write the following JSON to **both** `.cursor/.persona-manifest.json` and `.claude/.persona-manifest.json`:
+### Step 8: Update `.cursor/context.md`
+
+- Add `<role>` to `## Active Personas` (keep the list comma-separated, alphabetical).
+- Append a block if missing:
+
+```markdown
+## Persona: <role>
+Workspace: workspaces/<role>
+Stack: (unset, run /setup-stack <role>)
+Architecture Shape: (unset)
+Active Phase: (unset)
+```
+
+### Step 9: Write the manifest
+
+`.cursor/personas/<role>.manifest.json`:
 
 ```json
 {
-  "persona": "{role}",
-  "client": "{active_client or null}",
-  "installed_at": "{ISO 8601 timestamp}",
-  "base_files": [
-    ".cursor/commands/...",
-    ".claude/commands/...",
-    "... all base destination paths from Step 5 ..."
-  ],
-  "client_files": [
-    "... all client overlay destination paths from Step 6, if any ..."
-  ]
+  "persona": "<role>",
+  "installed_at": "<ISO 8601>",
+  "files": [".cursor/commands/...", ".cursor/agents/...", ".cursor/rules/<role>/...", ".cursor/scripts/<role>/..."],
+  "hooks": [{"event": "afterFileEdit", "command": ".cursor/scripts/_scope.sh <role> .cursor/scripts/<role>/lint.sh"}],
+  "mcp_added": ["github"],
+  "mcp_shared": ["context7"],
+  "workspace": "workspaces/<role>"
 }
 ```
 
-`base_files` must list every path written in Step 5. `client_files` must list every path written in Step 6. Both arrays should be flat lists of strings (relative paths from repo root).
-
-### Step 9: Print Confirmation Summary
-
-Print a summary in this format (adapt content to the actual persona and install):
+### Step 10: Confirm
 
 ```
-✅ Persona active: {role}
-   Client overlay: {active_client / "none"}
+✅ Persona added: <role>   (active: <full list>)
 
-📋 Commands installed:
-   {list of persona-specific commands copied in Step 5}
-   + universal commands: /architect /start-session /start-project /code-review /next-session /read
+Workspace:  workspaces/<role>/
+Commands:   <persona commands installed>
+Agents:     <agents installed>
+Hooks:      <event: script> (scoped to workspaces/<role>/)
+MCP:        <servers added>, shared: <servers shared>
+Env vars:   <vars referenced in mcp.json that are not set; "cp personas/<role>/.env.example .env" if one exists>
 
-🤖 Agents loaded:
-   {list of agent files copied}
-
-🪝 Hooks active:
-   afterFileEdit: {script names from hooks.json}
-   beforeShellExecution: {script names or "none"}
-   stop: {script names or "none"}
-
-🔌 MCP servers configured:
-   {list each MCP server name from mcp.json}
-   {for each: "no credentials needed" or "requires {VAR_NAME} in .env"}
-   {if client overlay was applied: "(client overlay applied)"}
-
-⚠️  Credentials needed before MCPs will work:
-   {list env vars not currently set in the shell, with instruction:
-    "Copy personas/{role}/.env.example to .env and fill in the values"}
-   {if client env.example exists, also note: "Review client-config/personas/{role}/env.example for additional vars"}
-
-➡️  Next step (the SDD pipeline is: /set-persona → /setup-stack → /architect → /start-session → /next-session):
-   engineer:       Run /setup-stack to pick your tech stack, then /architect to design your work.
-   data-scientist: Run /setup-stack to pick your tech stack, then /architect to design your work.
-   devops:         Run /setup-stack to pick your tech stack, then /architect to design your work.
-   designer:       No stack needed. Copy personas/designer/.env.example to .env (set FIGMA_ACCESS_TOKEN), then run /architect to design your work.
-   pm:             No stack needed. Copy personas/pm/.env.example to .env (set Atlassian credentials), then run /architect to design your work.
+Next: /setup-stack <role>
 ```
-
-The MCPs and rules listed above are ENFORCED for this persona — they are part of what `/set-persona` gives you. The persona-specific slash commands listed under "Commands installed" are the ones you'll use during a `/start-session` (not standalone).
 
 ---
 
-## Error Handling Reference
+## Execution Flow (remove)
+
+1. Read `.cursor/personas/<role>.manifest.json`. Missing → "`<role>` is not installed." Stop.
+2. Show what will be removed (file count, hook entries, MCP servers) and ask for confirmation.
+3. Delete every path in `files`. Missing file → warn and continue.
+4. Remove from `.cursor/hooks.json` exactly the command strings listed in `hooks`. Drop empty event arrays.
+5. Remove each server in `mcp_added` from `.cursor/mcp.json` UNLESS another active persona's manifest lists it in `mcp_added` or `mcp_shared`. In that case move ownership: add it to that persona's `mcp_added`.
+6. Delete `.cursor/rules/<role>/` and `.cursor/scripts/<role>/` if empty.
+7. Remove `<role>` from `## Active Personas` and delete the `## Persona: <role>` block in `.cursor/context.md`. If a stack manifest exists for this role (`.cursor/stacks/<role>.manifest.json`), run the stack removal from `/undo stack <role>` first.
+8. Delete the manifest. Leave `workspaces/<role>/` untouched and say so.
+
+---
+
+## Execution Flow (list)
+
+Read `.cursor/context.md` and print one table:
+
+| Persona | Stack | Architecture Shape | Active Phase | Workspace |
+|---|---|---|---|---|
+
+---
+
+## Error Handling
 
 | Situation | Action |
 |---|---|
-| Source file missing (e.g. `personas/engineer/mcp.json` not found) | Abort. Report the missing path. Do not write any files. |
-| Destination exists and NOT in previous manifest | Ask user: overwrite or abort? Respect their choice. |
-| Manifest lists files that no longer exist on disk | Warn per file, continue cleaning the rest. |
-| `client-config/` present but `mcp.json` is malformed JSON | Warn, keep base persona MCP config, continue. |
-| User enters invalid persona name/number | Print error, re-show the menu. |
+| Source file missing in the pack | Abort before writing. Report the path |
+| Command or agent name collides with another persona | Abort. Report both owners |
+| MCP server name collides with a different config | Ask: keep existing / replace / abort |
+| Manifest lists a file that is already gone | Warn, continue |
+| `.cursor/hooks.json` or `.cursor/mcp.json` is invalid JSON | Stop. Ask the user to fix or delete it |
 
----
+## Notes
 
-## Notes for Implementors
-
-- The persona list is always built by reading the `personas/` directory at runtime. Never hardcode persona names.
-- The hooks.json path rewriting is the only content transformation applied during install. All other files are copied verbatim.
-- Both manifest files (`.cursor/.persona-manifest.json` and `.claude/.persona-manifest.json`) must be written with identical content.
-- This command is idempotent: running it twice with the same persona should produce a clean install without duplicate files (Step 4 removes the previous install before Step 5 copies fresh files).
-- **Persona is MANDATORY.** Every other command (`/setup-stack`, `/architect`, `/start-session`, `/next-session`, `/start-project`) MUST stop with an error if no persona is set, telling the user to run `/set-persona` first. There is no "backwards compatible default" — persona-less is an error state.
+- Persona is mandatory. Every other pipeline command stops with "Run /set-persona first" when `## Active Personas` is empty.
+- Never hardcode persona names here. Read `personas/` and `persona.yaml`.
+- Removing a persona never deletes `workspaces/<role>/`.

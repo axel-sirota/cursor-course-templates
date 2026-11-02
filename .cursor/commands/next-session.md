@@ -1,96 +1,58 @@
 ---
-description: Generate a transition prompt for the next coding session
+description: Close the current persona's session, run its quality gate, and write the handoff for next time
 ---
 
 # Next Session Command
 
-Wraps up the current work and generates a "Context Beacon" for the next time you work.
+```
+/next-session
+```
+
+Wraps up the session started by `/start-session` and writes a transition doc.
 
 ## Execution Flow
 
-## Persona Detection (run first)
+### 1. Find the session persona
 
-Read the active persona from context:
-- Cursor: `.cursor/context.md` — look for `## Active Persona`
-- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+Read `.cursor/.active-session`. Missing → ask "Which persona's session are you closing? {active list}". Read `personas/<role>/persona.yaml`.
 
-If section missing or value is empty → **STOP**. Tell the user: "⚠️ No persona configured. Run **/set-persona** first." Do not proceed.
+### 2. Run the quality gate
 
-Branch to the appropriate preamble below, then continue with the standard execution flow.
+Run every item in `persona.yaml` → `quality_gate`, in order. Report each as ✅ / ❌ with one line of evidence (test output, agent verdict, file count). A ❌ does not block the handoff; it goes into the transition doc as the first next step.
 
-### Persona Preambles
+Then check which `in_session_commands` were used this session. If none were, ask why and note the answer. It usually means the session had no structure.
 
-Before generating the transition doc, run the persona's quality-gate check. Then ask whether the user has used the persona's in-session commands — if a session ended without using any of them, that's usually a sign the session was unfocused. Surface it.
+### 3. Update progress
 
-**engineer:**
-- Check test status (run `test-runner` subagent if available).
-- Advance `## Active Phase` in context if phase AC are met.
-- Ask: "Did you use `/engineer-tasks` and `/engineer-implement` during this session?" If no, ask why — it usually means the session lacked TDD structure. Recommend `/code-review` before wrap-up.
-- Generate transition doc with: session status, where stopped, next immediate step, files to load, which in-session commands to use next time.
+- Tick completed tasks and acceptance criteria in the current session file under `workspaces/<role>/plans/sessions/`.
+- If every acceptance criterion of the current session is met, advance `Active Phase` in the `## Persona: <role>` block of `.cursor/context.md`. Otherwise leave it.
 
-**designer:**
-- Prompt for screenshot comparison via `responsive-checker` if not yet done.
-- Update Figma context doc if design changed.
-- Ask: "Did you use `/designer-extract`, `/designer-compose`, or `/designer-iterate` this session?" Recommend `/designer-handoff` if components are ready for dev.
-- Generate transition doc with: components changed, open style questions, next frame to implement, which in-session commands to use next time.
+### 4. Write the transition doc
 
-**pm:**
-- Run `gap-detector` on active PRD if not yet run this session.
-- Update story count in context.
-- Ask: "Did you use `/pm-decompose` or `/pm-validate`?" If validation has never run on the active PRD, run `/pm-validate` now.
-- Generate transition doc with: stories validated, stories remaining, next three to work on, which in-session commands to use next time.
-
-**data-scientist:**
-- Invoke `experiment-tracker` to log session results if not yet done.
-- Update experiment log summary in context.
-- Ask: "Did you use `/ds-explore`, `/ds-experiment`, or `/ds-validate`?" If an experiment ran but `/ds-validate` hasn't, run it before wrap-up (seeds, leakage, baselines).
-- Generate transition doc with: hypothesis tested, metrics achieved, next experiment to run, which in-session commands to use next time.
-
-**devops:**
-- Check whether `terraform plan` / `ansible-lint` / `helm lint` was run this session.
-- Generate transition doc with: change scope, plan output (if any), apply status, next infra change to make.
-
----
-
-**1. Analyze Session**
-- What files were changed?
-- What tests are passing?
-- What is pending?
-
-**2. Update Context**
-- If `CLAUDE.md` tracks "Active Phase", suggest updating it if the phase is complete.
-
-**3. Generate Transition Prompt**
-
-Output a code block the user can copy-paste (or save to a file). Fill in the persona-specific block from the table below — DO NOT emit a generic template; the next-time commands change per persona.
+Write `workspaces/<role>/plans/transitions/<YYYY-MM-DD-HHMM>.md` and copy it to `workspaces/<role>/plans/transitions/latest.md`:
 
 ```markdown
-# Session Transition
-**Last Status**: [Success/Fail]
-**Stopped At**: [Function/File being worked on]
-**Next Step**: [Immediate action for next session]
+# Session Transition (<role>)
+**Date**: <ISO 8601>
+**Status**: <Done / Partial / Blocked>
+**Session file**: <path> (<done>/<total> tasks)
+**Stopped at**: <file / task>
+**Next step**: <one concrete action>
 
-**Context to Load**:
-- CLAUDE.md
-- [Relevant Source File]
+## Quality gate
+<each item ✅ / ❌ with evidence>
 
-**Next pipeline command**: `/start-session` (continues the session loop).
-Switch to `/architect` instead only if {Active Phase} just completed and you are starting a new phase.
+## Files changed
+<list, all under workspaces/<role>/>
 
-**In-session commands for next time** ({Active Persona}):
-{persona-specific block — see table below}
+## Next time
+- Run `/start-session <role>`
+- In-session commands: <from persona.yaml, the ones that fit the next step>
+- Run `/architect <role>` instead only if the last phase just finished.
 ```
 
-Persona-specific block to inline above (pick the row matching `## Active Persona`):
+### 5. Clear the session marker
 
-| Persona | In-session commands block |
-|---|---|
-| engineer | `- /engineer-tasks — decompose the next session goal into TDD-ordered tasks`<br>`- /engineer-implement — drive red→green→refactor for one task at a time`<br>`- /code-review and /research as needed` |
-| designer | `- /designer-extract — pull design tokens from Figma`<br>`- /designer-compose — assemble new components from tokens`<br>`- /designer-iterate — apply review feedback`<br>`- /designer-handoff — produce dev-ready spec (when components are ready)` |
-| pm | `- /pm-decompose — split a PRD epic into INVEST stories`<br>`- /pm-validate — check stories meet INVEST + have ACs`<br>`- /pm-report — produce a sprint status summary` |
-| data-scientist | `- /ds-explore — EDA pass on a dataset`<br>`- /ds-experiment — run a single trained-model experiment with tracked metrics`<br>`- /ds-validate — sanity-check results (seeds, leakage, baselines)`<br>`- /ds-handoff — model card + serving spec` |
-| devops | `- (no persona-specific commands yet) — use /code-review and /research, plus direct shell tools (terraform plan, ansible-lint, helm lint)` |
+Delete `.cursor/.active-session`. Print the path of the transition doc and the next step.
 
-## Usage
-`/next-session`
--> *Generates summary and next steps.*
+If other personas are active, list them with their Active Phase so the student can pick the next session.

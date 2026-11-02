@@ -1,50 +1,38 @@
 ---
-description: Read essential project context (Context-Aware)
+description: Read essential project context for every active persona
 ---
 
 # Read Command
 
-Read essential project files to load context for the AI. This command is "Stack Aware" and looks for the active configuration.
+```
+/read [<role>]
+```
 
-## What this command reads:
+Loads the project brain. With no argument, summarises every active persona; with `<role>`, only that one.
 
-1.  **Active Context**:
-    - `@.cursor/context.md` (The Source of Truth)
-    - `@.cursor/rules/*.mdc` (Active Rules)
+## What it reads
 
-2.  **Methodology**:
-    - `@METHODOLOGY.md` (Core Phase/TDD principles)
+1. `.cursor/context.md` → `## Active Personas` and each `## Persona: <role>` block. Empty → "⚠️ No persona configured. Run `/set-persona` first." Stop.
+2. `METHODOLOGY.md` (phase + TDD principles).
+3. For each persona:
+   - `personas/<role>/persona.yaml`
+   - rules in `.cursor/rules/<role>/` (count them)
+   - the paths in `persona.yaml` → `session_context` (`{workspace}` replaced; missing paths skipped)
+4. `.cursor/.active-session` if present.
 
-3.  **Current Status**:
-    - Checks for `plan/active-session.md` or similar session tracking files if they exist.
+## Output
 
-## Persona Detection (run first)
+One table, then one line per persona with the next step:
 
-Read the active persona from context:
-- Cursor: `.cursor/context.md` — look for `## Active Persona`
-- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+| Persona | Stack | Shape | Phase | Rules | Current session file | Last stopped at |
+|---|---|---|---|---|---|---|
 
-If section missing or value is empty → treat as `engineer` (backwards compatible default).
+Next step per persona, by the first thing that is missing:
 
-Branch to the appropriate preamble below, then continue with the standard execution flow.
+| Missing | Next step |
+|---|---|
+| Stack | `/setup-stack <role>` |
+| `plans/sessions/session-overview.md` | `/architect <role>` |
+| nothing | `/start-session <role>` (name the next unchecked task) |
 
-### Persona Preambles
-
-**engineer:** Read context (stack + phase) + active rules + last session transition doc. Output: Stack, Current Phase, Active Rules count, Next Step.
-
-**designer:** Read context (active persona) + active Figma context doc (if present). Output: Active Persona, Figma frame in progress, last iteration summary.
-
-**pm:** Read context + active PRD (if present). Output: Active Persona, PRD title, story count, validation status.
-
-**data-scientist:** Read context + active EDA doc + experiment log tail. Output: Active Persona, Dataset, Last experiment metrics, Next hypothesis.
-
----
-
-## Usage
-`@read` -> Loads the brain of the project.
-
-## Quick Summary Output
-After reading, provide:
-- **Stack**: {Language} / {Framework}
-- **Current Phase**: {Phase}
-- **Next Step**: What should be done next based on context?
+If a session is open (`.cursor/.active-session`), say which persona owns it.

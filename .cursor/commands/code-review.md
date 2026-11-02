@@ -4,17 +4,19 @@ description: Perform comprehensive code review based on active stack rules
 
 # Code Review Command
 
-Perform a systematic review of the codebase. This command adapts its checks based on the detected language and framework in `.cursor/context.md`.
+Perform a systematic review of one persona's workspace against that persona's rules and stack.
+
+```
+/code-review [<role>]
+```
 
 ## Persona Detection (run first)
 
-Read the active persona from context:
-- Cursor: `.cursor/context.md` — look for `## Active Persona`
-- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+- Role: the argument, else `.cursor/.active-session`, else the only active persona in `.cursor/context.md` → `## Active Personas`, else ask.
+- No active persona → "⚠️ No persona configured. Run `/set-persona` first." Stop.
+- Review scope is `workspaces/<role>/` only. Rules are `.cursor/rules/<role>/*.mdc`. Stack is in the `## Persona: <role>` block.
 
-If section missing or value is empty → treat as `engineer` (backwards compatible default).
-
-Branch to the appropriate preamble below, then continue with the standard execution flow.
+Use the matching preamble below, then the checklist.
 
 ### Persona Preambles
 
@@ -26,13 +28,15 @@ Branch to the appropriate preamble below, then continue with the standard execut
 
 **data-scientist:** Reproducibility (seed set, requirements pinned, no absolute paths), experiment logging (all runs tracked), model card completeness. Use `reproducibility-checker` subagent if available.
 
+**accountant:** Tie-outs (every reported number traces to a source file and row), no hardcoded amounts, `data/raw/` untouched, formulas visible, no personal data in outputs. Use `tie-out-checker` and `controls-checker` subagents if available.
+
 ---
 
 ## Review Checklist
 
 **1. Context Load**
-- Read `@.cursor/context.md` to identify the **Strictness Level** and **Stack**.
-- Read `@.cursor/rules/*.mdc` to load the style guide.
+- Read the `## Persona: <role>` block in `.cursor/context.md` for **Stack** and **Architecture Shape**.
+- Read `.cursor/rules/<role>/*.mdc` to load the style guide.
 
 **2. Security Audit**
 - **Secrets**: Check for hardcoded keys/tokens (Regex search).

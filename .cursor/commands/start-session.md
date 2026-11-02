@@ -1,85 +1,64 @@
 ---
-description: Begin a development session with active context
+description: Begin a work session for one persona, with its stack, rules and plan loaded
 ---
 
 # Start Session Command
 
-Initializes the AI context for the current work session. This command ensures the AI "knows" the project rules, stack, and current phase before writing any code.
+```
+/start-session [<role>]
+```
+
+Loads one persona's context before any work happens. The session loop is always:
+
+```
+/start-session <role> → [that persona's in-session commands] → /next-session
+```
 
 ## Execution Flow
 
-## Persona Detection (run first)
+### 1. Pick the persona
 
-Read the active persona from context:
-- Cursor: `.cursor/context.md` — look for `## Active Persona`
-- Claude Code: `CLAUDE.md` — look for `## Active Persona`
+- Read `## Active Personas` from `.cursor/context.md`. Empty → **STOP**: "⚠️ No persona configured. Run **/set-persona** first."
+- Role from the argument (must be active), else the only active persona, else ask "Which persona is this session for? {list}".
+- Write the role to `.cursor/.active-session` (one line, nothing else). Hooks use it to decide whose `stop` checks run.
 
-If section missing or value is empty → **STOP**. Tell the user: "⚠️ No persona configured. Run **/set-persona** first, then come back to `/start-session`." Do not proceed.
+### 2. Check the pipeline order
 
-Branch to the appropriate preamble below, then continue with the standard execution flow.
+From the `## Persona: <role>` block:
+- Stack unset → **STOP**: "Run `/setup-stack <role>` first."
+- `workspaces/<role>/plans/sessions/session-overview.md` missing → **STOP**: "Run `/architect <role>` first. A session needs a plan."
 
-### Persona Preambles
+### 3. Load context
 
-Each preamble lists the persona's "in-session" commands — those are the ones the user should call DURING this session to make progress. They are not standalone commands; they are spokes of the session loop. The session loop spine is always:
+Read, in order:
+1. `personas/<role>/persona.yaml`
+2. Every rule in `.cursor/rules/<role>/` (persona rules + `stack-*` rules). These govern every file written in this session.
+3. Each path in `persona.yaml` → `session_context`, replacing `{workspace}` with the persona's workspace. Skip missing paths silently.
+4. The lowest-numbered session file in `{workspace}/plans/sessions/` that still has unchecked tasks. That is the current session.
+
+### 4. Show the summary
 
 ```
-/start-session → [persona's in-session commands] → /next-session
+Session: <title> (<role>)
+Stack: <stack> (<Architecture Shape>)
+Phase: <Active Phase>
+Current session file: <path>  (<done>/<total> tasks)
+Last stopped at: <from plans/transitions/latest.md, or "first session">
+
+In-session commands:
+  <name>  <use>      (from persona.yaml → in_session_commands)
 ```
 
-**engineer:**
-- Load active stack from context + active rules.
-- Show: current stack, active phase, last session summary if present.
-- Ask for session goal.
-- **In-session commands available:** `/engineer-tasks` (decompose the session goal into TDD-ordered tasks), `/engineer-implement` (drive the red→green→refactor loop for one task at a time). Also: `/code-review` and `/research` as needed.
+### 5. Agree the goal
 
-**designer:**
-- Load active Figma context file if present (`docs/figma-context-*.md`).
-- Show: active design tokens summary, last session's prototype state.
-- Ask which frame or component to work on today.
-- **In-session commands available:** `/designer-extract` (pull design tokens from Figma), `/designer-compose` (assemble new components from tokens), `/designer-iterate` (apply review feedback), `/designer-handoff` (produce dev-ready spec).
+Ask: "What is the goal for this session?" Propose the next unchecked tasks from the current session file as the default. If the goal is outside the current session or outside `workspaces/<role>/`, say so and ask whether to continue.
 
-**pm:**
-- Load active PRD if present (`prds/` or `docs/`).
-- Show: PRD title, story count, validation status.
-- Ask which epic or story to focus on today.
-- **In-session commands available:** `/pm-decompose` (split a PRD epic into INVEST stories), `/pm-validate` (check stories meet INVEST + have ACs), `/pm-report` (produce a sprint status summary).
+### 6. Ready
 
-**data-scientist:**
-- Load active EDA doc + experiment log.
-- Show: dataset in use, last experiment's metrics, next hypothesis to test.
-- Ask for today's experiment goal.
-- **In-session commands available:** `/ds-explore` (EDA pass on a dataset), `/ds-experiment` (run a single trained-model experiment with tracked metrics), `/ds-validate` (sanity-check results — seeds, leakage, baselines), `/ds-handoff` (model card + serving spec).
+"Ready. Rules for <role> are active for files in workspaces/<role>/. Use the in-session commands above to make progress, and run `/next-session` when you stop."
 
-**devops:**
-- Load active infrastructure context.
-- Show: current stack (terraform / ansible / k8s-helm), active phase, last plan/apply state.
-- Ask for today's change scope.
-- **In-session commands available:** (no persona-specific commands yet — use universal `/code-review`, `/research`. Direct shell commands like `terraform plan`, `ansible-lint` are the primary tools for this persona.)
+## Rules for the whole session
 
----
-
-**1. Context Check**
-- Read `CLAUDE.md`.
-- **Condition**: If the file is missing or contains no `## Active Persona`:
-  - Stop.
-  - Tell the user: "⚠️ Project is not configured. Please run **/set-persona** first."
-
-**2. Context Loading**
-- Display a brief summary of the active context:
-  > "Context Loaded: **{Language} / {Framework}**"
-  > "Current Phase: **{Active Phase}**"
-  > "Strictness: **{Strictness Level}**"
-
-**3. Session Goal**
-- Ask: "What is the goal for this session?"
-- If the user provides a goal — e.g., "Implement POST /users" (web API), "Write Silver transform for sales pipeline" (Spark), "Add dim_customers dbt model" (dbt), "Write nginx Ansible role" (Ansible) — cross-reference it with the Active Phase in `CLAUDE.md`.
-
-**4. Rule Enforcement**
-- Remind the user (internally) to adhere to the active rules in `.claude/rules/`.
-- **Constraint**: Do not suggest code that violates the active style guide (e.g., don't use `camelCase` in Python if `snake_case` is mandated).
-
-**5. Ready State**
-- Confirm readiness: "I am ready. Guides are active. Let's build."
-- Remind the user how the session loop works:
-
-  > "**To make progress in this session, use the in-session commands listed in the preamble above** (e.g. `/engineer-tasks` then `/engineer-implement` for engineer). When you're done for today, run `/next-session` to log state and generate a handoff for next time."
+- Write only inside `workspaces/<role>/`. Reading other workspaces is fine (cross-persona exercises hand off through them); editing them is not.
+- Do not suggest anything that breaks the active rules. If a rule blocks the goal, say which rule and ask.
+- To switch persona mid-session, run `/next-session` first, then `/start-session <other-role>`.
