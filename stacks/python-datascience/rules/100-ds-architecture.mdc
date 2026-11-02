@@ -1,0 +1,78 @@
+---
+description: python-datascience architecture, notebook structure and the notebook to src/ split
+alwaysApply: true
+---
+
+# Data Science Architecture: Notebooks and src/
+
+## Purpose
+Notebooks explore. `src/` holds the logic that must be reused or tested. This rule defines how each notebook is laid out and when code moves out of it.
+
+## Notebook Cell Organization
+
+Notebooks MUST follow this top-to-bottom section order:
+
+1. **Imports**: all `import` statements at the very top, grouped (stdlib, third-party, local)
+2. **Config / Constants**: seeds, file paths, hyperparameter defaults, display settings
+3. **Data Loading**: read from `data/` using `pathlib.Path`; print shape and dtypes right after loading
+4. **EDA**: distributions, missing values, correlations, outliers
+5. **Modeling**: feature engineering, model definition, training
+6. **Evaluation**: metrics, confusion matrices, plots, residuals
+7. **Next Steps**: markdown cell summarizing findings and recommended follow-up
+
+Do NOT put imports in the middle of the notebook. Do NOT run modeling cells before EDA cells.
+
+## Markdown Headers Required
+
+Every major section MUST begin with a markdown cell containing an `##` header:
+
+```markdown
+## 1. Imports
+## 2. Config
+## 3. Data Loading
+## 4. EDA
+## 5. Modeling
+## 6. Evaluation
+## 7. Next Steps
+```
+
+The headers make the notebook navigable from the JupyterLab table of contents.
+
+## Notebook to src/ Split
+
+- A function used in two notebooks moves to `src/` (`data.py`, `features.py`, `evaluation.py`).
+- Functions in `src/` are pure where possible: DataFrame in, DataFrame or value out, no reading of globals.
+- Every `src/` function has a pytest test in `tests/` using `data/fixtures/`.
+- Notebooks import from `src/`; they do not copy its code.
+
+## No Global Mutable State Between Cells
+
+- Each section should be re-runnable after the cells above it have been run
+- Do NOT rely on variables defined in a cell that was run manually but appears out of order
+- Avoid in-place mutations of DataFrames across many cells; use intermediate variables
+
+## No Hardcoded File Paths
+
+Always use `pathlib.Path` relative to the workspace or an environment variable:
+
+```python
+from pathlib import Path
+
+DATA_DIR = Path(__file__).parent.parent / "data"   # in .py files
+# or in notebooks:
+DATA_DIR = Path.cwd().parent / "data"              # adjust depth as needed
+RAW_PATH = DATA_DIR / "raw" / "dataset.csv"
+```
+
+NEVER write:
+```python
+# BAD
+df = pd.read_csv("/Users/yourname/projects/myproject/data/raw/dataset.csv")
+df = pd.read_csv("C:\\Users\\yourname\\data\\dataset.csv")
+```
+
+## Outputs Go to artifacts/ and docs/
+
+- Saved models, metrics JSON and plots: `artifacts/<experiment-id>/`
+- EDA write-ups: `docs/eda/`
+- Never `plt.savefig()` to an arbitrary path; save under `artifacts/` or display inline

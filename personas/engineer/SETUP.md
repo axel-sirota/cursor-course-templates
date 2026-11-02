@@ -40,16 +40,18 @@ Install Docker Desktop: https://www.docker.com/products/docker-desktop/
 
 Verify: `docker --version` and `docker compose version`
 
-## 5. MCP credentials
+## 5. MCP servers
 
-Create a `.env` file in the repo root (if `personas/engineer/.env.example` exists, copy it: `cp personas/engineer/.env.example .env`) and fill in:
+The engineer pack ships two MCP servers, `playwright` and `context7`. Neither needs credentials. Node.js 20+ must be installed so `npx` can start them.
 
-- **Required:** `GITHUB_PAT`, a GitHub personal access token with `repo` scope
-  - Generate at: https://github.com/settings/tokens
-- **Optional:** `SENTRY_AUTH_TOKEN` and `SENTRY_ORG_SLUG`, only if your project uses Sentry
-- **Optional:** `DATABASE_URL`, only if you connect to an external Postgres instance
+### Optional MCP servers
 
-The course uses synthetic data only. Never point these at production systems.
+The course uses synthetic local data only. GitHub, Sentry and database integrations are not needed for any exercise. If you want them for your own work after class, use the vendors' official servers and follow their setup docs:
+
+- **GitHub:** the GitHub remote MCP server (`github/github-mcp-server` on GitHub)
+- **Sentry:** the Sentry remote MCP server (`getsentry/sentry-mcp` on GitHub)
+
+Never point an MCP server at production systems from the course repo.
 
 ## 6. Repository access
 

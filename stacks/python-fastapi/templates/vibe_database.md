@@ -2,7 +2,7 @@
 
 ## Purpose & Scope
 
-This guide provides rules, patterns, and instructions for AI coding assistants (Claude Code, Cursor, etc.) working on database-related tasks in projects using SQLAlchemy with the Repository Pattern. Reference this document when implementing database models, repositories, services, or migration tasks.
+This guide provides rules, patterns, and instructions for AI coding assistants (Cursor) working on database-related tasks in projects using SQLAlchemy with the Repository Pattern. Reference this document when implementing database models, repositories, services, or migration tasks.
 
 **Related Documents:**
 - [FastAPI Boilerplate Guide](vibe_fastapi_boilerplate.md) - For API model patterns and camelCase conventions

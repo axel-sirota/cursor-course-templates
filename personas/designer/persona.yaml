@@ -1,4 +1,4 @@
-# persona.yaml — designer
+# persona.yaml: designer
 #
 # Single source of truth that the universal commands read
 # (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
@@ -30,6 +30,12 @@ in_session_commands:
     use: apply review feedback to a component
   - name: /designer-handoff
     use: write the dev-ready spec for finished components
+
+# What /code-review checks for this persona, on top of the stack rules.
+review_focus:
+  - "Token discipline: no hardcoded colors, spacing or font sizes (token-validator agent)."
+  - "Logic preservation: no changes to handlers, routes or state when restyling."
+  - "Responsive behavior holds at every breakpoint (responsive-checker agent)."
 
 quality_gate:
   - Run the token-validator agent on every component touched. No hardcoded colors, spacing or font sizes.

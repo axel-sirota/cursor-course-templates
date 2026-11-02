@@ -1,0 +1,63 @@
+---
+description: python-datascience stack layout, tools and commands
+alwaysApply: true
+---
+
+# python-datascience Stack Workflow
+
+## Purpose
+This rule covers the stack: where files go and which tools run them. The workflow itself (seed discipline, no raw data in git, experiment logging, model card, subagent delegation) lives in the persona rule `000-ds-workflow.mdc`. Follow that rule for the how and why; follow this one for the where and with what.
+
+Paths are relative to the persona workspace, `workspaces/data-scientist/`.
+
+## Directory Structure
+
+```
+notebooks/
+  01_eda.ipynb          numbered sequence, run in order
+  02_features.ipynb
+  03_model.ipynb
+src/                    reusable functions extracted from notebooks
+  data.py
+  features.py
+  evaluation.py
+tests/                  pytest tests for src/
+data/
+  raw/                  read-only source data, gitignored
+  processed/            output of the feature pipeline, gitignored
+  fixtures/             tiny synthetic samples, committed
+experiments/
+  log.md                one row per experiment (written by experiment-tracker)
+artifacts/              saved models, metrics, plots per experiment (gitignored if large)
+docs/
+  eda/                  data-profiler output: <dataset>-profile.md
+  model-card-<name>.md  written by /ds-handoff
+  validation-<model>.md written by /ds-validate
+mlruns/                 MLflow local file store (gitignored)
+```
+
+## Tools and Commands
+
+| Task | Command |
+|---|---|
+| Install | `pip install -r requirements.txt` inside a virtualenv |
+| Open notebooks | `jupyter lab` |
+| Lint `.py` | `ruff check src tests` |
+| Lint notebooks | `nbqa ruff notebooks/` |
+| Unit tests | `pytest tests/` |
+| Notebook runs top to bottom | `pytest --nbval-lax notebooks/` |
+| Browse MLflow runs | `mlflow ui --backend-store-uri ./mlruns` |
+
+Pin every library version in `requirements.txt`. The versions in `context.md` are the baseline.
+
+## Phase Transition Checklist (stack checks)
+The persona rule lists the workflow checks. Before leaving a phase, also confirm:
+- [ ] `ruff check` and `nbqa ruff` pass
+- [ ] `pytest tests/` passes
+- [ ] `requirements.txt` matches what the notebooks import
+
+## Secrets and Credentials
+
+The course uses synthetic local data and needs no credentials. If you add any:
+- Keep them in `.env` (gitignored), loaded with `python-dotenv`
+- Never put a key or connection string in a notebook cell

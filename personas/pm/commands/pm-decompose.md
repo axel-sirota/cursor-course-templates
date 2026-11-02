@@ -1,6 +1,6 @@
 # /pm-decompose
 
-**Purpose:** Break a validated PRD into dependency-ordered tickets ready for the issue tracker.
+**Purpose:** Break a validated PRD into dependency-ordered tickets in a markdown file.
 
 Paths are relative to `workspaces/pm/`.
 
@@ -26,6 +26,7 @@ Paths are relative to `workspaces/pm/`.
    - **Edge Cases:** Any edge cases explicitly listed for this story.
    - **Size Estimate:** S / M / L / unknown (use the dev-perspective output if available).
    - **Dependencies:** Which other tickets must be complete before this one can start.
+   - **Status:** Not Started (the PM updates this field by hand; `/pm-report` reads it).
 
 4. **Build the dependency graph**
    - Identify which tickets block which.
@@ -41,10 +42,11 @@ Paths are relative to `workspaces/pm/`.
    - An ordered ticket list (each ticket in the format above).
    - A dependency graph section showing which ticket IDs block which.
 
-6. **Optional: create tickets in Jira**
-   - If the Atlassian MCP is configured: ask the user "Shall I create these tickets in Jira under epic [epic-name]?"
-   - If confirmed: use the Atlassian MCP to create each ticket in the correct order, setting blockers as Jira issue links.
-   - If not confirmed or MCP is not available: skip this step silently.
+6. **Optional: push tickets to Jira, if you configured an Atlassian MCP**
+   - The course pack ships no Atlassian MCP. The markdown file from step 5 is the deliverable.
+   - Only if an Atlassian MCP is configured in Cursor: ask the user "Shall I create these tickets in Jira under epic [epic-name]?"
+   - If confirmed: create each ticket in the correct order, setting blockers as Jira issue links.
+   - Otherwise: skip this step silently.
 
 ## Constraints
 

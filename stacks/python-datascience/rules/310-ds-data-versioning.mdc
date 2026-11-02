@@ -1,0 +1,47 @@
+---
+description: Data versioning and raw data hygiene
+alwaysApply: true
+---
+
+# Data Versioning and Raw Data Hygiene
+
+## DVC is the standard
+
+Use DVC to version raw datasets. Commit `.dvc` pointer files, never the data files themselves. In the course the data is synthetic and local, so a local DVC remote (a folder outside the repo) is enough; on a real project, `dvc push` to the team's remote storage (S3, GCS or Azure Blob).
+
+```bash
+# Add raw data to DVC tracking
+dvc add data/raw/
+
+# Push to the configured remote
+dvc push
+
+# Commit the pointer files (not the data)
+git add data/raw.dvc data/.gitignore
+git commit -m "track raw dataset v1 with DVC"
+```
+
+## No raw data in git
+
+`data/raw/` and `data/processed/` are gitignored. Only `.dvc` pointer files, `data/README.md` and `data/fixtures/` are committed.
+
+Add to `.gitignore`:
+```
+data/raw/
+data/processed/
+*.csv
+*.parquet
+*.feather
+!data/fixtures/*.csv
+```
+
+Keep in git:
+```
+data/raw.dvc
+data/README.md
+data/fixtures/
+```
+
+## data/README.md
+
+Every dataset gets an entry: source (or generator script), date range, row count, and the sha256 of each raw file. A dataset without an entry is not used in an experiment.

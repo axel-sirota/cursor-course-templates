@@ -16,19 +16,15 @@ Perform a systematic review of one persona's workspace against that persona's ru
 - No active persona → "⚠️ No persona configured. Run `/set-persona` first." Stop.
 - Review scope is `workspaces/<role>/` only. Rules are `.cursor/rules/<role>/*.mdc`. Stack is in the `## Persona: <role>` block.
 
-Use the matching preamble below, then the checklist.
+## Persona Focus (from persona.yaml)
 
-### Persona Preambles
+Read `personas/<role>/persona.yaml`:
 
-**engineer:** Security (secret leaks, injection), style (naming, types), testing (coverage, assertion quality). Use `code-reviewer` and `security-auditor` subagents if available.
+- `review_focus`: the persona-specific things to check. Review every item and report each one with a verdict and evidence.
+- `quality_gate`: run every agent named there (for example `test-runner`, `token-validator`, `gap-detector`, `tie-out-checker`) against the review scope, if it is installed in `.cursor/agents/`. Skip agents that are not installed and say so in the report. Agents that write records rather than check them (for example `experiment-tracker`) are not run during a review; list them as "not run (writes records)".
+- Agents named inside `review_focus` items run the same way.
 
-**designer:** Token discipline (no hardcoded values), logic preservation (no handler/route/state changes), responsive behavior (breakpoints). Use `token-validator` subagent if available.
-
-**pm:** INVEST compliance (all stories), Given/When/Then format (all ACs), NFR completeness. Use `gap-detector` subagent if available.
-
-**data-scientist:** Reproducibility (seed set, requirements pinned, no absolute paths), experiment logging (all runs tracked), model card completeness. Use `reproducibility-checker` subagent if available.
-
-**accountant:** Tie-outs (every reported number traces to a source file and row), no hardcoded amounts, `data/raw/` untouched, formulas visible, no personal data in outputs. Use `tie-out-checker` and `controls-checker` subagents if available.
+Never hardcode persona names or focus lists in this command. persona.yaml is the source.
 
 ---
 
@@ -40,8 +36,8 @@ Use the matching preamble below, then the checklist.
 
 **2. Security Audit**
 - **Secrets**: Check for hardcoded keys/tokens (Regex search).
-- **Injection / Input Trust**: Check DB queries for raw string concatenation (web/DB stacks). Check template injection in Ansible (Jinja2), Helm (Go templates), and Terraform (string interpolation) where applicable.
-- **Dependencies**: Check for known vulnerable or unpinned versions using the stack's tool: pip-audit / pip check (Python), npm audit (Node), govulncheck (Go), tflint + checkov (Terraform), renv::status() (R), dbt parse (dbt). Skip if not applicable to stack.
+- **Injection / Input Trust**: Check DB queries for raw string concatenation (web/DB stacks).
+- **Dependencies**: Check for known vulnerable or unpinned versions using the stack's tool: pip-audit / pip check (Python), npm audit (Node), govulncheck (Go), renv::status() (R), dbt parse (dbt). Skip if not applicable to the stack.
 
 **3. Style & Standards**
 - **Naming**: Does code match the Active Rule (CamelCase vs Snake_case)?
@@ -52,11 +48,18 @@ Use the matching preamble below, then the checklist.
   - *Java/Go*: Are interfaces used correctly?
   - *R*: Are function arguments documented with roxygen2 `@param` type annotations?
   - *SQL/dbt*: Are column types cast explicitly in staging models (no implicit type coercion)?
-  - *Ansible*: Are variable types and allowed values documented in `defaults/main.yml` comments?
 
 **4. Testing Gaps**
 - Verify critical paths have corresponding tests in `tests/`.
 - Check if tests are actually asserting values (not just running).
+
+Skip checklist items that do not apply to the persona's stack (a PRD workspace has no type hints).
+
+## Report
+
+1. `review_focus` results: one row per item, ✅ / ❌ with evidence.
+2. Agent results: one row per `quality_gate` agent run.
+3. Checklist violations and suggestions, grouped by severity.
 
 ## Usage
 `@code-review` -> *Runs the audit and outputs a report of violations and suggestions.*

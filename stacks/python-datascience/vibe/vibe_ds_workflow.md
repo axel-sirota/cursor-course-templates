@@ -97,13 +97,13 @@ If you skip EDA, you will discover these problems during Experiment — after sp
 **Entry condition**: Validate phase complete; model is production-worthy.
 
 **Activities**:
-- Write the model card (`reports/model_card.md`)
+- Write the model card (`docs/model-card-<name>.md`)
 - Package reusable code into `src/` modules (feature engineering, predict function)
 - Write a brief engineering handoff document (input/output schema, expected latency, dependencies)
 - Confirm all artifacts are saved and paths are documented
 - Final clean run check
 
-**Deliverable**: `reports/model_card.md`, `src/` modules, handoff document, and all notebooks passing clean runs.
+**Deliverable**: `docs/model-card-<name>.md`, `src/` modules, handoff document, and all notebooks passing clean runs.
 
 **Exit condition**: An engineer with no prior context can read the model card and handoff doc, find the saved model artifact, and integrate it without needing to talk to the DS team.
 

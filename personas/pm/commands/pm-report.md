@@ -1,6 +1,6 @@
 # /pm-report
 
-**Purpose:** Pull current status from the issue tracker and generate a stakeholder-ready status update.
+**Purpose:** Read current ticket status from the markdown ticket file and generate a stakeholder-ready status update.
 
 Paths are relative to `workspaces/pm/`.
 
@@ -10,20 +10,17 @@ Paths are relative to `workspaces/pm/`.
    - Ask the user for the epic name or ID.
    - Default: the most recently created ticket document in `docs/tickets-*.md`.
 
-2. **Query the issue tracker**
+2. **Read ticket status**
 
-   **If Jira (Atlassian MCP) is configured:**
-   - Query the active sprint for tickets belonging to the named epic.
-   - Retrieve status (To Do / In Progress / In Review / Done / Blocked) and assignee for each ticket.
-   - For any ticket with status Blocked, retrieve the blocker description.
+   **Default (markdown, no MCP needed):**
+   - Read `docs/tickets-{epic}.md`.
+   - Take each ticket's status from its `Status` field. If a ticket has no status, treat it as Not Started and list it so the user can update the file.
+   - For any ticket marked Blocked, read the blocker note in the ticket.
 
-   **If GitHub Issues is configured:**
-   - Query open and closed issues with the epic label.
-   - Map GitHub labels to statuses: `open` → In Progress or Not Started; `closed` → Done; `blocked` label → Blocked.
-
-   **If neither is configured:**
-   - Warn the user: "No issue tracker MCP is configured. Add Atlassian or GitHub Issues credentials to `.env` and restart."
-   - Stop.
+   **Optional, if you configured an Atlassian MCP:**
+   - Ask the user whether to pull status from Jira instead of the markdown file.
+   - If yes, query the tickets belonging to the named epic and retrieve status and assignee for each.
+   - If the MCP call fails, fall back to the markdown file and say so.
 
 3. **Build the status summary**
    Categorize every ticket into one of four states:

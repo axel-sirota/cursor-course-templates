@@ -26,16 +26,16 @@ Expect: `docs/validation-my-feature.md` with a Three Amigos critique (dev feasib
 ```
 /pm-decompose prds/my-feature.md
 ```
-Expect: dependency-ordered tickets in `docs/tickets-{epic}.md`. Push to Jira / GitHub Issues via MCP only if you configured one.
+Expect: dependency-ordered tickets in `docs/tickets-{epic}.md`. That file is the deliverable. Pushing to Jira is optional, only if you configured an Atlassian MCP yourself.
 
-If you have an issue tracker MCP configured, `/pm-report` writes a status snapshot. End every session with `/next-session`.
+`/pm-report` reads the `Status` field of each ticket in that file and writes a status snapshot. End every session with `/next-session`.
 
 ## Platform gotchas
 
 - **PRDs live in `prds/*.md`, one story per file in `stories/*.md` (the PRD only holds an index table linking to them). Jira / Confluence are optional push targets, not your editor.** You will spend most of your time in markdown files in the workspace.
 - **Rules and hooks only see the workspace.** `.cursor/rules/pm/` and the INVEST / AC hooks fire for files under `workspaces/pm/`. A PRD saved at the repo root gets no checks.
 - **The AI doesn't know your product unless you tell it.** Put a 5-line product summary (target users, what the product does, key constraints) at the top of `plans/interface-contract.md`; `/start-session pm` loads it. Generic PRDs come from generic context. Use synthetic product details only.
-- **Atlassian MCP needs the right token.** If `JIRA_API_TOKEN` is missing or scoped wrong, ticket creation fails silently. Smoke-test it ("list my Jira projects") before relying on it.
+- **No issue tracker MCP ships with this pack.** Tickets and status live in markdown. If you add an Atlassian MCP on your own, smoke-test it ("list my Jira projects") before relying on it.
 
 ## What this pack does NOT do
 
@@ -75,7 +75,7 @@ You ship clarity. Your unit of delivery is a PRD that engineering can build with
 2. **Specify**: write the PRD: user stories (INVEST), AC (Given/When/Then), NFRs, edge cases, success metrics.
 3. **Validate**: run `/pm-validate` to get dev feasibility, QA edge cases, and structural gap analysis.
 4. **Decompose**: run `/pm-decompose` to produce dependency-ordered tickets from the validated PRD.
-5. **Track**: run `/pm-report` to pull status and generate stakeholder updates.
+5. **Track**: update ticket status in `docs/tickets-{epic}.md`, then run `/pm-report` to generate stakeholder updates.
 
 ## Key Rules
 

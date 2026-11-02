@@ -1,0 +1,43 @@
+---
+description: python-datascience code and notebook style
+alwaysApply: true
+---
+
+# Data Science Style
+
+## Python
+- PEP 8, snake_case for functions and variables, UPPER_CASE for constants (`SEED`, `DATA_DIR`).
+- Type hints on every function in `src/`.
+- `ruff check` for `.py` files, `nbqa ruff` for notebooks. Both must pass.
+- Imports grouped stdlib, third-party, local.
+
+## Naming
+- Notebooks: `NN_<topic>.ipynb` (`01_eda.ipynb`, `02_features.ipynb`).
+- Experiments: `exp-NNN` IDs in `experiments/log.md`, same ID as the `artifacts/exp-NNN/` folder.
+- Column names: snake_case. Rename on load if the source uses another style.
+
+## Output Discipline
+
+Large outputs kill notebook readability and slow down review:
+
+- DataFrames: `df.head()` or `display(df.head(10))`, never the full frame
+- Arrays: `.shape`, `.describe()` or slices, not raw `print(array)`
+- Plots: display inline, or save under `artifacts/`
+- Training logs: one summary line per epoch, detail goes to MLflow
+
+```python
+# GOOD
+print(df.shape, df.dtypes)
+df.head()
+
+# BAD
+print(df)
+df
+```
+
+## Plots
+- Every plot has a title, axis labels with units, and a legend when there is more than one series.
+- Use matplotlib (seaborn on top is fine). One figure per cell.
+
+## Markdown Cells
+- Each finding is a short markdown cell under the plot or table that shows it: what you saw, in numbers.

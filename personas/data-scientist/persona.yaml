@@ -1,4 +1,4 @@
-# persona.yaml — data-scientist
+# persona.yaml: data-scientist
 #
 # Single source of truth that the universal commands read
 # (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
@@ -35,6 +35,13 @@ in_session_commands:
     use: check seeds, leakage and baselines
   - name: /ds-handoff
     use: write the model card and serving spec
+
+# What /code-review checks for this persona, on top of the stack rules.
+review_focus:
+  - "Reproducibility: seed set before any random operation, requirements pinned, no absolute paths (reproducibility-checker agent)."
+  - "Experiment logging: every run has a row in experiments/log.md."
+  - "Every model is compared against a logged baseline; no leakage between train and test."
+  - "Model card is complete before handoff."
 
 quality_gate:
   - Log this session's results with the experiment-tracker agent.

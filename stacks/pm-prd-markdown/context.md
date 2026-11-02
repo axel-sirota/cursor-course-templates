@@ -11,7 +11,7 @@ Use for: product managers who write specs in the repo and push to Jira or GitHub
 - **Runtime for the linter**: Node.js 20 LTS or newer (only needed for `npx`)
 - **Structure checker**: `scripts/check_prd.py`, Python 3.11+, standard library only
 - **Diagrams (optional)**: Mermaid 11.x in fenced ```` ```mermaid ```` blocks, rendered by GitHub or Cursor preview
-- **Push targets**: Jira (Atlassian MCP) or GitHub Issues, after `/pm-validate`
+- **Tickets**: markdown in `docs/tickets-*.md`. Pushing to Jira is optional, only if you configured an Atlassian MCP yourself.
 
 ## Workspace layout
 All paths are relative to the persona workspace (`workspaces/pm/`).

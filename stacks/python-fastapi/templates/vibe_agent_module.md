@@ -2,7 +2,7 @@
 
 ## Purpose & Scope
 
-This guide provides rules, patterns, and instructions for AI coding assistants (Claude Code, Cursor, etc.) working on projects using the Agentic Module Pattern. Reference this document when implementing modules, agents, or related components.
+This guide provides rules, patterns, and instructions for AI coding assistants (Cursor) working on projects using the Agentic Module Pattern. Reference this document when implementing modules, agents, or related components.
 
 **When to use this guide:**
 - Creating new agentic modules

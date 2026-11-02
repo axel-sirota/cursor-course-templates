@@ -1,4 +1,4 @@
-# persona.yaml — accountant
+# persona.yaml: accountant
 #
 # Single source of truth that the universal commands read
 # (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
@@ -30,6 +30,14 @@ in_session_commands:
     use: test journal entries for duplicates, weekend postings, round amounts, self-approval
   - name: /acct-close-handoff
     use: write the close memo with tie-outs and open items
+
+# What /code-review checks for this persona, on top of the stack rules.
+review_focus:
+  - "Tie-outs: every reported number traces to a source file and row (tie-out-checker agent)."
+  - "No hardcoded amounts in src/ or tests; amounts come from source files."
+  - "data/raw/ is untouched (git diff on that folder is empty)."
+  - "Formulas and adjustments are visible in code or output, not buried."
+  - "No personal data in outputs; journal entry analysis passes the controls-checker agent."
 
 quality_gate:
   - Run the tie-out-checker agent. Every number in output/ traces to a source file and row.

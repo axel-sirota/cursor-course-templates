@@ -5,7 +5,7 @@ description: Close the current persona's session, run its quality gate, and writ
 # Next Session Command
 
 ```
-/next-session
+/next-session [<role>]
 ```
 
 Wraps up the session started by `/start-session` and writes a transition doc.
@@ -14,7 +14,9 @@ Wraps up the session started by `/start-session` and writes a transition doc.
 
 ### 1. Find the session persona
 
-Read `.cursor/.active-session`. Missing → ask "Which persona's session are you closing? {active list}". Read `personas/<role>/persona.yaml`.
+- Read `## Active Personas` from `.cursor/context.md`. Empty → **STOP**: "⚠️ No persona configured. Run **/set-persona** first."
+- Role from the argument (must be active), else the role in `.cursor/.active-session`, else ask "Which persona's session are you closing? {active list}".
+- Read `personas/<role>/persona.yaml`.
 
 ### 2. Run the quality gate
 
@@ -53,6 +55,6 @@ Write `workspaces/<role>/plans/transitions/<YYYY-MM-DD-HHMM>.md` and copy it to 
 
 ### 5. Clear the session marker
 
-Delete `.cursor/.active-session`. Print the path of the transition doc and the next step.
+Delete `.cursor/.active-session` if it names this role (leave it alone if it names another persona). Print the path of the transition doc and the next step.
 
 If other personas are active, list them with their Active Phase so the student can pick the next session.

@@ -1,7 +1,8 @@
 # Project Context: Python MLOps
 
 ## Architecture Shape
-MLOps Pipeline — end-to-end ML lifecycle: data ingestion → training → evaluation → model registry → serving. Use for: production ML systems, model versioning, experiment tracking, automated retraining pipelines.
+Data Pipeline (MLOps: end-to-end ML lifecycle: data ingestion → training → evaluation → model registry → serving)
+Use for: production ML systems, model versioning, experiment tracking, automated retraining pipelines.
 Use python-datascience for: exploratory analysis, prototyping, one-off notebooks.
 Use python-spark for: large-scale feature engineering on distributed data.
 Use python-dbt-snowflake for: SQL-first feature tables / analytics engineering.

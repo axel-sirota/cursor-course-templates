@@ -1,4 +1,4 @@
-# persona.yaml — engineer
+# persona.yaml: engineer
 #
 # Single source of truth that the universal commands read
 # (/set-persona, /setup-stack, /architect, /start-session, /next-session, /read, /undo).
@@ -37,6 +37,12 @@ in_session_commands:
     use: drive red, green, refactor for one task at a time
   - name: /code-review
     use: review the diff against the active stack rules
+
+# What /code-review checks for this persona, on top of the stack rules.
+review_focus:
+  - "Security: no secret leaks, no injection paths (security-auditor agent)."
+  - "Style: naming and type annotations match the stack rules (code-reviewer agent)."
+  - "Testing: critical paths are covered and tests assert real values."
 
 # What /next-session checks before writing the transition doc.
 quality_gate:

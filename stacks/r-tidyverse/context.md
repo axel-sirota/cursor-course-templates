@@ -1,7 +1,8 @@
 # Project Context: R + Tidyverse
 
 ## Architecture Shape
-Statistical Computing / Notebook — reproducible R analysis, statistical modeling, and optional API output via Plumber (advanced — not required for analysis deliverables). Use for: actuarial analysis, statistical hypothesis testing, regulatory reporting, exploratory data analysis with formal write-up.
+Statistical Computing (Notebook: reproducible R analysis, statistical modeling, and optional API output via Plumber, which is advanced and not required for analysis deliverables)
+Use for: actuarial analysis, statistical hypothesis testing, regulatory reporting, exploratory data analysis with formal write-up.
 Use python-datascience for: ML-first work, Python-native data teams, sklearn/deep learning models.
 Use python-spark for: distributed data at scale (>1TB), cluster-based processing.
 

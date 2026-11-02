@@ -51,6 +51,3 @@ plans/             ← /architect session plans and transitions
 ## Active Phase
 - Current: Phase 0 (Skeleton)
 - Phases: 0 Skeleton → 1 Sources & validation → 2 Reconciliations → 3 Flux analysis → 4 JE testing → 5 Close memo
-
-## Active Persona
-- (set by /set-persona)

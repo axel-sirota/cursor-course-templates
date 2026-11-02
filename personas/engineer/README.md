@@ -22,9 +22,6 @@ Install with `/set-persona add engineer`, then `/setup-stack engineer` → `/arc
 - `stop`: `test-runner.sh` runs the full test suite at the end of an engineer session
 
 **MCP servers:**
-- `github`: issue and PR operations (requires `GITHUB_PAT`)
-- `postgres`: read-only database introspection (requires `DATABASE_URL`, optional)
-- `sentry`: error retrieval and analysis (requires `SENTRY_AUTH_TOKEN`, optional)
 - `playwright`: browser automation for E2E tests (no credentials needed)
 - `context7`: up-to-date library documentation (no credentials needed)
 

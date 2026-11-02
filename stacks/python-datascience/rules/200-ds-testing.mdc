@@ -1,0 +1,42 @@
+---
+description: python-datascience testing and validation (seeds, baselines, leakage, notebook runs, pytest)
+alwaysApply: true
+---
+
+# Data Science Testing and Validation
+
+## Seeds Make Results Testable
+- Pass `random_state=SEED` to every scikit-learn estimator and splitter.
+- A test that checks a metric runs twice with the same seed and expects the same number.
+
+## Every Model Beats a Baseline
+- Fit a `DummyClassifier` (or `DummyRegressor`) on the same split before any real model.
+- Log the baseline score in `experiments/log.md` next to the candidate score.
+- A model that does not beat the baseline on the primary metric is not a result.
+
+## Leakage Checks
+- Split before any fit: scalers, encoders and imputers are fit on the training fold only (use a `Pipeline`).
+- No target-derived feature, and no feature computed with information from after the prediction time.
+- No row appears in both train and test (check IDs or a hash of each row).
+- Test-set scores are computed once, at the end. Tuning uses validation folds.
+
+## Notebooks Run Top to Bottom
+- Restart the kernel and run all cells before handoff.
+- Automate it: `pytest --nbval-lax notebooks/` runs each notebook and fails on any error.
+
+## pytest for src/
+- Every function in `src/` has at least one test in `tests/test_<module>.py`.
+- Tests use the tiny files in `data/fixtures/`, never `data/raw/`.
+- Assert on shapes, column names, dtypes and known values, not on printed output.
+
+```python
+def test_build_features_keeps_row_count(fixture_df):
+    out = build_features(fixture_df)
+    assert len(out) == len(fixture_df)
+    assert "target" not in out.columns
+```
+
+## Done Means
+- `pytest tests/` passes
+- `pytest --nbval-lax notebooks/` passes
+- Baseline and candidate scores are both in `experiments/log.md`
