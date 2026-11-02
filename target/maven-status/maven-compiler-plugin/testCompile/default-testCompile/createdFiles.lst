@@ -1,8 +1,0 @@
-com/example/broker/topics/TopicControllerTest.class
-com/example/broker/messages/PublishIntegrationTest.class
-com/example/broker/topics/TopicRepositoryTest.class
-com/example/broker/TestcontainersConfig.class
-com/example/broker/messages/MessageServiceTest.class
-com/example/broker/topics/TopicServiceTest.class
-com/example/broker/BrokerApplicationTests.class
-com/example/broker/messages/PublishControllerTest.class

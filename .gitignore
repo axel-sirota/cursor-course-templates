@@ -66,3 +66,7 @@ alembic/versions/*.pyc
 
 # Docker
 docker-compose.override.yml
+
+# Local plans and tool state
+plans/
+.kryla/
