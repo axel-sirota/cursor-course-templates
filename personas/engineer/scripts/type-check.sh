@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# type-check.sh — afterFileEdit hook
+# type-check.sh: afterFileEdit hook
 # Reads file_path from stdin JSON. Non-blocking (exit 0 always).
+# The edited file is usually under workspaces/engineer/; the project root is
+# found by walking up from the file, so both workspace and root layouts work.
 
 set -euo pipefail
 
@@ -35,32 +37,32 @@ case "$EXT" in
       if [ -f "$PROJECT_ROOT/mypy.ini" ] || [ -f "$PROJECT_ROOT/pyproject.toml" ]; then
         mypy "$FILE_PATH" >&2 || true
       else
-        echo "[type-check] No mypy config found — skipping type check for $FILE_PATH" >&2
+        echo "[type-check] No mypy config found, skipping type check for $FILE_PATH" >&2
       fi
     else
-      echo "[type-check] mypy not available — skipping Python type check for $FILE_PATH" >&2
+      echo "[type-check] mypy not available, skipping Python type check for $FILE_PATH" >&2
     fi
     ;;
   ts|tsx)
     if command -v npx >/dev/null 2>&1; then
       if [ -f "$PROJECT_ROOT/tsconfig.json" ]; then
-        npx tsc --noEmit >&2 || true
+        (cd "$PROJECT_ROOT" && npx tsc --noEmit) >&2 || true
       else
-        echo "[type-check] No tsconfig.json found — skipping TypeScript type check for $FILE_PATH" >&2
+        echo "[type-check] No tsconfig.json found, skipping TypeScript type check for $FILE_PATH" >&2
       fi
     else
-      echo "[type-check] npx not available — skipping TypeScript type check for $FILE_PATH" >&2
+      echo "[type-check] npx not available, skipping TypeScript type check for $FILE_PATH" >&2
     fi
     ;;
   go)
     if command -v go >/dev/null 2>&1; then
-      go vet ./... >&2 || true
+      (cd "$PROJECT_ROOT" && go vet ./...) >&2 || true
     else
-      echo "[type-check] go not available — skipping Go vet for $FILE_PATH" >&2
+      echo "[type-check] go not available, skipping Go vet for $FILE_PATH" >&2
     fi
     ;;
   *)
-    # Not a target file type — exit silently
+    # Not a target file type, exit silently
     exit 0
     ;;
 esac

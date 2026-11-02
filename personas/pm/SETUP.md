@@ -1,18 +1,20 @@
-# PM Persona — Pre-Class Setup
+# PM Persona: Pre-Class Setup
 
 Complete every item below before class. The instructor cannot wait for tool installation during the session.
 
-## 1. AI code assistant
+## 1. Cursor
 
-Install one of:
-- **Cursor IDE:** https://cursor.sh
-- **Claude Code:** https://docs.anthropic.com/en/docs/claude-code/overview
+Install **Cursor IDE**: https://cursor.sh
 
 Verify it launches and can open the course repo directory.
 
-## 2. Atlassian credentials (Jira + Confluence)
+## 2. Python 3
 
-The PM persona uses the Atlassian MCP to create and query Jira tickets and Confluence pages.
+The `pm-prd-markdown` stack ships a small PRD checker script. Verify: `python3 --version` (3.10+).
+
+## 3. Optional: Atlassian credentials (Jira + Confluence)
+
+The course works fully in markdown with synthetic data. Configure Atlassian only if you want to practise pushing tickets to a sandbox Jira.
 
 ### Generate an API token
 
@@ -21,42 +23,33 @@ The PM persona uses the Atlassian MCP to create and query Jira tickets and Confl
 
 ### Set environment variables
 
-Copy the env file to the project root and fill in your values:
-
-```bash
-cp personas/pm/.env.example .env
-```
-
-Then edit `.env`:
+Create a `.env` file in the repo root (if `personas/pm/.env.example` exists, copy it: `cp personas/pm/.env.example .env`) and fill in:
 
 | Variable | Value |
 |---|---|
-| `JIRA_URL` | Your Atlassian base URL — e.g. `https://yourcompany.atlassian.net` |
+| `JIRA_URL` | Your Atlassian base URL, e.g. `https://yourcompany.atlassian.net` |
 | `JIRA_USERNAME` | Your Atlassian account email |
 | `JIRA_API_TOKEN` | The token you generated above |
-| `CONFLUENCE_URL` | Usually `JIRA_URL` + `/wiki` — your instructor confirms |
+| `CONFLUENCE_URL` | Usually `JIRA_URL` + `/wiki`; your instructor confirms |
 | `CONFLUENCE_USERNAME` | Same email as `JIRA_USERNAME` |
 | `CONFLUENCE_API_TOKEN` | Same token as `JIRA_API_TOKEN` |
 
-Your instructor provides the correct `JIRA_URL` and `CONFLUENCE_URL` for the class environment.
+## 4. Optional: GitHub Personal Access Token
 
-## 3. GitHub Personal Access Token
-
-Required for the GitHub Issues MCP.
+Only needed for the GitHub Issues MCP.
 
 1. Go to: https://github.com/settings/tokens
 2. Generate a classic token with `repo` scope.
 3. Set `GITHUB_PAT` in your `.env` file.
 
-## 4. Optional: Slack and Notion
+## 5. Optional: Slack and Notion
 
-If your instructor's org uses Slack or Notion:
-- Set `SLACK_BOT_TOKEN` — your instructor provides this value.
-- Set `NOTION_API_KEY` — your instructor provides this value.
+- Set `SLACK_BOT_TOKEN` if you want status updates in Slack.
+- Set `NOTION_API_KEY` if you want documentation sync to Notion.
 
 Leave these blank if not needed. The MCP servers will simply not connect.
 
-## 5. Repository access
+## 6. Repository access
 
 Clone the course repo:
 
@@ -65,17 +58,17 @@ git clone https://github.com/axel-sirota/cursor-course-templates
 cd cursor-course-templates
 ```
 
-If your instructor provided a `client-config.zip`, unzip it into the repo root:
+## 7. Smoke test
 
-```bash
-unzip ~/client-config.zip
-# should create client-config/ in the repo root
+Open the repo in Cursor and run in the chat:
+
+```
+/set-persona add pm
+/setup-stack pm
 ```
 
-## 6. Smoke test
+After the first command you should see a confirmation listing the PM commands, subagents, hooks, MCP servers and the new `workspaces/pm/` folder. After the second, the `## Persona: pm` block in `.cursor/context.md` should show `Stack: pm-prd-markdown`.
 
-In the repo root, open your AI tool and run `/set-persona`, then pick `pm`. You should see a confirmation listing the PM commands, subagents, hooks, and MCP servers.
-
-Then test the Atlassian MCP by asking your AI tool to list your Jira projects. If this returns results, your credentials are working.
+If you configured Atlassian, ask Cursor to list your Jira projects. Results mean your credentials work.
 
 If any step fails, contact the instructor before class.

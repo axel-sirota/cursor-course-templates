@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# notebook-lint.sh — Advisory check: warn if a notebook has not been run to completion.
+# notebook-lint.sh: advisory check, warn if a notebook has not been run to completion.
 # Triggered by afterFileEdit hook. Reads file_path from stdin (JSON) or $FILE_PATH env var.
 # Requires: jq
 # Non-blocking: exits 0 always, warnings go to stderr.
@@ -8,7 +8,7 @@ set -euo pipefail
 
 # Parse file_path from JSON stdin if available, otherwise fall back to env var
 if [ -t 0 ]; then
-  # No stdin — use environment variable
+  # No stdin, use environment variable
   FILE="${FILE_PATH:-}"
 else
   # Read JSON from stdin
@@ -34,7 +34,7 @@ fi
 
 # Require jq
 if ! command -v jq &>/dev/null; then
-  echo "WARNING [notebook-lint]: jq not found — install with: brew install jq / apt install jq" >&2
+  echo "WARNING [notebook-lint]: jq not found, install with: brew install jq / apt install jq" >&2
   exit 0
 fi
 

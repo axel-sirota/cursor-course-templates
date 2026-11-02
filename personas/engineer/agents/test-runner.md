@@ -9,15 +9,17 @@ readonly: false
 
 Detect and execute the project's test suite, then report results with root-cause analysis for any failures.
 
+Paths are relative to `workspaces/engineer/`. The project root for tests is that folder, not the repo root.
+
 ## Steps
 
-1. **Detect test command** from project files (check in order):
+1. **Detect test command** from project files in `workspaces/engineer/` (check in order):
    - `pyproject.toml` or `setup.py` present → use `pytest -x --tb=short`
    - `package.json` with a `"test"` script → use `npm test --silent`
    - `go.mod` present → use `go test ./...`
    - If none detected, report "No test runner detected" and stop.
 
-2. **Execute the test command** from the project root.
+2. **Execute the test command** from `workspaces/engineer/`.
 
 3. **On success**:
    - Report total tests passed
@@ -26,9 +28,9 @@ Detect and execute the project's test suite, then report results with root-cause
 
 4. **On failure**, for each failing test report:
    - **Test name / ID**
-   - **Failed assertion** — the exact assertion that failed (expected vs actual)
-   - **Root cause** — parse the traceback or error output to identify the line and reason for failure
-   - **Suggested fix** — brief recommendation based on the error type (do not implement the fix)
+   - **Failed assertion**: the exact assertion that failed (expected vs actual)
+   - **Root cause**: parse the traceback or error output to identify the line and reason for failure
+   - **Suggested fix**: brief recommendation based on the error type (do not implement the fix)
 
 ## Output Format
 
@@ -46,7 +48,7 @@ Tests: 39 passed, 3 failed
 
 --- FAILURE: test_user_login_invalid_password ---
 Assertion: assert response.status_code == 401  (got 200)
-Root cause: `authenticate()` in auth.py:47 returns 200 on all paths — missing error branch.
+Root cause: `authenticate()` in auth.py:47 returns 200 on all paths, missing error branch.
 Suggested fix: Add `else: return 401` after credential check.
 
 --- FAILURE: ...
@@ -56,4 +58,4 @@ Suggested fix: Add `else: return 401` after credential check.
 
 - This agent reports test results only. It does NOT modify test files or implementation files.
 - Invoke this agent at the Red step (expect failure) and Green step (expect pass) of the TDD loop.
-- If the test command is destructive or requires elevated privileges, report that and stop — do not execute.
+- If the test command is destructive or requires elevated privileges, report that and stop. Do not execute.

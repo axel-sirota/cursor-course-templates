@@ -1,70 +1,49 @@
 ---
 name: persona-command-verifier
-description: Verifies that all persona-aware commands (architect, start-session, code-review, next-session, read) correctly branch on Active Persona, and that persona-specific commands exist for each persona pack in personas/.
+description: Verifies the multi-persona flow is consistent. Universal commands read persona.yaml and take a role argument; every persona pack has the files set-persona needs; every in-session command and quality-gate agent named in persona.yaml exists in its pack.
 ---
 
-You are verifying that the persona-aware command system is complete and correct.
+You are verifying the multi-persona pipeline: `/set-persona → /setup-stack <role> → /architect <role> → /start-session <role> → /next-session`.
 
-## Verification Steps
+## 1. Universal commands
 
-### 1. Universal Command Persona Branches
+For each of `.cursor/commands/{set-persona,setup-stack,architect,start-session,next-session,undo,read,code-review}.md`, check:
+- Reads `## Active Personas` (plural) from `.cursor/context.md` and stops with "Run /set-persona first" when it is empty.
+- Accepts a `<role>` argument, or asks when several personas are active.
+- Reads `personas/<role>/persona.yaml` or the `## Persona: <role>` block instead of hardcoding persona names.
+- Works inside `workspaces/<role>/` only.
+- Contains no reference to `CLAUDE.md`, `.claude/`, Claude Code, `## Active Persona` (singular), or the deleted devops persona.
 
-For each of these commands in `.claude/commands/`:
-- `architect.md`
-- `start-session.md`
-- `code-review.md`
-- `next-session.md`
-- `read.md`
+## 2. Persona packs
 
-Check: does the command read `## Active Persona` from the context and branch behavior based on it?
-Expected: each command contains text like "Active Persona" or "persona" and adjusts its behavior.
+For each directory in `personas/`, check these exist (set-persona aborts without them):
+- `persona.yaml`, `persona.md`, `README.md`, `hooks.json`, `mcp.json`
+- `commands/`, `agents/`, `rules/`, `scripts/` (non-empty)
 
-### 2. Persona Pack Completeness
+Then check `persona.yaml`:
+- `persona` equals the directory name; `workspace` is `workspaces/<role>`.
+- Every `in_session_commands[].name` has a matching `commands/<name>.md` in the pack, or is a universal command in `.cursor/commands/`.
+- Every agent named in `quality_gate` exists in the pack's `agents/`.
+- Every script referenced in `hooks.json` exists in `scripts/` and is executable.
+- No command or agent file name collides with another pack's.
 
-For each persona in `personas/` (engineer, designer, pm, data-scientist):
-- `persona.md` exists
-- `README.md` exists
-- `commands/` directory exists with at least one persona-specific command
-- `agents/` directory exists with at least one persona-specific agent
+## 3. MCP merge safety
 
-### 3. Set-Persona Command Check
-
-Read `.claude/commands/set-persona.md`. Verify:
-- It lists all 4 personas (engineer, designer, pm, data-scientist)
-- It writes `## Active Persona:` to the context file
-- It copies persona-specific files to .cursor/ and .claude/
-- It maintains a manifest file
-
-### 4. Context File Fields
-
-Read `.cursor/context.md` and `CLAUDE.md`. Verify both have:
-- `## Active Persona` section
-- `## Active Stack` section
-- `## Active Phase` section
+Across all `personas/*/mcp.json`: list server names used by more than one persona. For each, the configs must be identical, or set-persona will stop and ask. Flag differences.
 
 ## Output Format
 
 ```
 ## Persona Command Verification
 
-### Universal Commands (persona-aware branch check)
-| Command | Reads Active Persona | Branches on persona | Status |
-|---|---|---|---|
-| architect.md | ✅/❌ | ✅/❌ | PASS/FAIL |
+### Universal commands
+| Command | Active Personas | Role arg | Reads persona.yaml | Workspace-scoped | No stale refs | PASS? |
 
-### Persona Pack Completeness
-| Persona | persona.md | README.md | commands/ | agents/ | PASS? |
-|---|---|---|---|---|---|
+### Persona packs
+| Persona | Required files | Commands match | Agents match | Hook scripts OK | PASS? |
 
-### set-persona.md checks
-- Lists all 4 personas: ✅/❌
-- Writes Active Persona: ✅/❌
-- Copies persona files: ✅/❌
-- Maintains manifest: ✅/❌
+### MCP servers shared across personas
+| Server | Personas | Identical config? |
 
-### Context File Fields
-| File | Active Persona | Active Stack | Active Phase | PASS? |
-|---|---|---|---|---|
+Summary: {N} problems
 ```
-
-Read every file mentioned — do not assume based on what should be there.

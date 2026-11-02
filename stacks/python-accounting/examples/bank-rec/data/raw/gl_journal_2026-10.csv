@@ -1,0 +1,53 @@
+je_id,line,posting_date,account,account_name,description,debit,credit,reference
+JE-2026-10-0001,1,2026-10-02,1010,Cash - Operating,Vendor payment Harbor Freight Lines,0.00,10229.17,ACH-5002
+JE-2026-10-0001,2,2026-10-02,2000,Accounts Payable,Vendor payment Harbor Freight Lines,10229.17,0.00,ACH-5002
+JE-2026-10-0002,1,2026-10-02,1010,Cash - Operating,Vendor payment Harbor Freight Lines,0.00,8951.96,ACH-5008
+JE-2026-10-0002,2,2026-10-02,2000,Accounts Payable,Vendor payment Harbor Freight Lines,8951.96,0.00,ACH-5008
+JE-2026-10-0003,1,2026-10-07,1010,Cash - Operating,Customer receipt Bluefin Outfitters,11258.42,0.00,DEP-1015
+JE-2026-10-0003,2,2026-10-07,1200,Accounts Receivable,Customer receipt Bluefin Outfitters,0.00,11258.42,DEP-1015
+JE-2026-10-0004,1,2026-10-07,1010,Cash - Operating,Customer receipt Driftwood Supply,9722.09,0.00,DEP-1019
+JE-2026-10-0004,2,2026-10-07,1200,Accounts Receivable,Customer receipt Driftwood Supply,0.00,9722.09,DEP-1019
+JE-2026-10-0005,1,2026-10-08,1010,Cash - Operating,Vendor payment Granite Office Leasing,0.00,5465.67,ACH-5016
+JE-2026-10-0005,2,2026-10-08,2000,Accounts Payable,Vendor payment Granite Office Leasing,5465.67,0.00,ACH-5016
+JE-2026-10-0006,1,2026-10-08,1010,Cash - Operating,Vendor payment Ironwood IT Services,0.00,11569.30,ACH-5018
+JE-2026-10-0006,2,2026-10-08,2000,Accounts Payable,Vendor payment Ironwood IT Services,11569.30,0.00,ACH-5018
+JE-2026-10-0007,1,2026-10-08,1010,Cash - Operating,Customer receipt Driftwood Supply,2026.58,0.00,DEP-1001
+JE-2026-10-0007,2,2026-10-08,1200,Accounts Receivable,Customer receipt Driftwood Supply,0.00,2026.58,DEP-1001
+JE-2026-10-0008,1,2026-10-08,1010,Cash - Operating,Customer receipt Bluefin Outfitters,2762.80,0.00,DEP-1003
+JE-2026-10-0008,2,2026-10-08,1200,Accounts Receivable,Customer receipt Bluefin Outfitters,0.00,2762.80,DEP-1003
+JE-2026-10-0009,1,2026-10-08,1010,Cash - Operating,Customer receipt Bluefin Outfitters,12312.47,0.00,DEP-1005
+JE-2026-10-0009,2,2026-10-08,1200,Accounts Receivable,Customer receipt Bluefin Outfitters,0.00,12312.47,DEP-1005
+JE-2026-10-0010,1,2026-10-09,1010,Cash - Operating,Vendor payment Granite Office Leasing,0.00,9346.96,ACH-5012
+JE-2026-10-0010,2,2026-10-09,2000,Accounts Payable,Vendor payment Granite Office Leasing,9346.96,0.00,ACH-5012
+JE-2026-10-0011,1,2026-10-09,1010,Cash - Operating,Customer receipt Alder Street Cafe,15344.66,0.00,DEP-1023
+JE-2026-10-0011,2,2026-10-09,1200,Accounts Receivable,Customer receipt Alder Street Cafe,0.00,15344.66,DEP-1023
+JE-2026-10-0012,1,2026-10-12,1010,Cash - Operating,Vendor payment Ironwood IT Services,0.00,8527.72,ACH-5010
+JE-2026-10-0012,2,2026-10-12,2000,Accounts Payable,Vendor payment Ironwood IT Services,8527.72,0.00,ACH-5010
+JE-2026-10-0013,1,2026-10-12,1010,Cash - Operating,Customer receipt Elm Grove Schools,13953.92,0.00,DEP-1011
+JE-2026-10-0013,2,2026-10-12,1200,Accounts Receivable,Customer receipt Elm Grove Schools,0.00,13953.92,DEP-1011
+JE-2026-10-0014,1,2026-10-13,1010,Cash - Operating,Customer receipt Elm Grove Schools,5507.51,0.00,DEP-1013
+JE-2026-10-0014,2,2026-10-13,1200,Accounts Receivable,Customer receipt Elm Grove Schools,0.00,5507.51,DEP-1013
+JE-2026-10-0015,1,2026-10-14,1010,Cash - Operating,Vendor payment Harbor Freight Lines,0.00,1537.83,ACH-5022
+JE-2026-10-0015,2,2026-10-14,2000,Accounts Payable,Vendor payment Harbor Freight Lines,1537.83,0.00,ACH-5022
+JE-2026-10-0016,1,2026-10-16,1010,Cash - Operating,Vendor payment Juniper Utilities,0.00,7792.42,ACH-5006
+JE-2026-10-0016,2,2026-10-16,2000,Accounts Payable,Vendor payment Juniper Utilities,7792.42,0.00,ACH-5006
+JE-2026-10-0017,1,2026-10-16,1010,Cash - Operating,Vendor payment Juniper Utilities,0.00,7792.42,ACH-5006
+JE-2026-10-0017,2,2026-10-16,2000,Accounts Payable,Vendor payment Juniper Utilities,7792.42,0.00,ACH-5006
+JE-2026-10-0018,1,2026-10-16,1010,Cash - Operating,Customer receipt Cedar Hill Clinics,10041.86,0.00,DEP-1009
+JE-2026-10-0018,2,2026-10-16,1200,Accounts Receivable,Customer receipt Cedar Hill Clinics,0.00,10041.86,DEP-1009
+JE-2026-10-0019,1,2026-10-19,1010,Cash - Operating,Vendor payment Granite Office Leasing,0.00,5923.55,ACH-5004
+JE-2026-10-0019,2,2026-10-19,2000,Accounts Payable,Vendor payment Granite Office Leasing,5923.55,0.00,ACH-5004
+JE-2026-10-0020,1,2026-10-21,1010,Cash - Operating,Vendor payment Kestrel Insurance Group,0.00,3029.93,ACH-5020
+JE-2026-10-0020,2,2026-10-21,2000,Accounts Payable,Vendor payment Kestrel Insurance Group,3029.93,0.00,ACH-5020
+JE-2026-10-0021,1,2026-10-21,1010,Cash - Operating,Customer receipt Driftwood Supply,11586.14,0.00,DEP-1017
+JE-2026-10-0021,2,2026-10-21,1200,Accounts Receivable,Customer receipt Driftwood Supply,0.00,11586.14,DEP-1017
+JE-2026-10-0022,1,2026-10-22,1010,Cash - Operating,Vendor payment Harbor Freight Lines,0.00,2761.72,ACH-5014
+JE-2026-10-0022,2,2026-10-22,2000,Accounts Payable,Vendor payment Harbor Freight Lines,2761.72,0.00,ACH-5014
+JE-2026-10-0023,1,2026-10-26,1010,Cash - Operating,Vendor payment Granite Office Leasing,0.00,1630.42,ACH-5024
+JE-2026-10-0023,2,2026-10-26,2000,Accounts Payable,Vendor payment Granite Office Leasing,1630.42,0.00,ACH-5024
+JE-2026-10-0024,1,2026-10-26,1010,Cash - Operating,Customer receipt Bluefin Outfitters,2724.08,0.00,DEP-1007
+JE-2026-10-0024,2,2026-10-26,1200,Accounts Receivable,Customer receipt Bluefin Outfitters,0.00,2724.08,DEP-1007
+JE-2026-10-0025,1,2026-10-26,1010,Cash - Operating,Customer receipt Elm Grove Schools,1639.75,0.00,DEP-1021
+JE-2026-10-0025,2,2026-10-26,1200,Accounts Receivable,Customer receipt Elm Grove Schools,0.00,1639.75,DEP-1021
+JE-2026-10-0026,1,2026-10-31,1010,Cash - Operating,Customer receipt Cedar Hill Clinics,12750.00,0.00,DEP-1099
+JE-2026-10-0026,2,2026-10-31,1200,Accounts Receivable,Customer receipt Cedar Hill Clinics,0.00,12750.00,DEP-1099

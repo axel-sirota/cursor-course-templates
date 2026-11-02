@@ -1,0 +1,3 @@
+source,account,period,opening_balance,closing_balance
+bank_statement,1010,2026-10,250000.00,272078.63
+general_ledger,1010,2026-10,250000.00,277071.21

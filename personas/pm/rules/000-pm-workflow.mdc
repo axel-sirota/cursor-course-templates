@@ -5,15 +5,17 @@ alwaysApply: true
 
 # PM Workflow Rules
 
+Paths in this rule are relative to the persona workspace, `workspaces/pm/` (PRDs in `prds/`, stories in `stories/`, reports in `docs/`).
+
 ## INVEST is mandatory
 
 Every user story must satisfy all six INVEST criteria before it can be decomposed into tickets:
-- **Independent** — the story can be built and shipped without depending on another story in the same sprint.
-- **Negotiable** — the scope is not locked in stone; the PM and team can discuss alternatives.
-- **Valuable** — the story delivers visible value to a named user persona.
-- **Estimable** — the dev team can give a size estimate (S/M/L) without a spike.
-- **Small** — fits in a single sprint; if not, split it.
-- **Testable** — there are specific, observable conditions for "done."
+- **Independent**: the story can be built and shipped without depending on another story in the same sprint.
+- **Negotiable**: the scope is not locked in stone; the PM and team can discuss alternatives.
+- **Valuable**: the story delivers visible value to a named user persona.
+- **Estimable**: the dev team can give a size estimate (S/M/L) without a spike.
+- **Small**: fits in a single sprint; if not, split it.
+- **Testable**: there are specific, observable conditions for "done."
 
 Run `/pm-validate` to enforce INVEST compliance. Do not proceed to `/pm-decompose` until all stories pass.
 
@@ -44,9 +46,9 @@ Delegate to the right subagent at the right moment:
 
 | Trigger | Subagent |
 |---|---|
-| New user story written or revised | `dev-perspective` — check feasibility before writing AC |
-| AC written for a story | `qa-perspective` — hunt for missing edge cases |
-| PRD marked complete | `gap-detector` — structural completeness check before validation |
+| New user story written or revised | `dev-perspective`: check feasibility before writing AC |
+| AC written for a story | `qa-perspective`: hunt for missing edge cases |
+| PRD marked complete | `gap-detector`: structural completeness check before validation |
 
 These subagents are invoked automatically by `/pm-validate`. You may also invoke them directly for a targeted review.
 

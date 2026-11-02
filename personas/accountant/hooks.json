@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      { "command": ".cursor/scripts/protect-raw.sh" }
+    ],
+    "stop": [
+      { "command": ".cursor/scripts/tie-out-check.sh" }
+    ]
+  }
+}

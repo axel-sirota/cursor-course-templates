@@ -88,7 +88,7 @@ project/
 │   ├── train.py
 │   └── evaluate.py
 ├── experiments/      # experiment log (CSV or MLflow tracking)
-├── models/           # saved model artifacts (gitignored if large)
+├── artifacts/        # saved models + metrics per experiment (gitignored if large)
 ├── reports/
 │   └── model_card.md
 └── tests/            # pytest tests for src/ modules

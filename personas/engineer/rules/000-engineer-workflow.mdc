@@ -7,15 +7,17 @@ alwaysApply: true
 
 These rules govern all engineering work performed under the engineer persona. They are non-negotiable guardrails, not suggestions.
 
+Paths in this rule are relative to the persona workspace, `workspaces/engineer/`. Write code, tests and docs only inside it.
+
 ---
 
 ## 1. TDD is Mandatory
 
 Every piece of new logic must follow the Red-Green-Refactor cycle:
 
-1. **Red** — Write a failing test that asserts the acceptance criterion. Confirm it fails for the right reason before writing any implementation.
-2. **Green** — Write the minimum implementation to make the test pass. Do not over-engineer.
-3. **Refactor** — Remove duplication, improve clarity. Re-run tests after every change.
+1. **Red**: Write a failing test that asserts the acceptance criterion. Confirm it fails for the right reason before writing any implementation.
+2. **Green**: Write the minimum implementation to make the test pass. Do not over-engineer.
+3. **Refactor**: Remove duplication, improve clarity. Re-run tests after every change.
 
 Never write implementation before a failing test exists. If you discover a bug in existing code, write a failing test that reproduces it before fixing it.
 
@@ -38,7 +40,7 @@ Invoke agents at the correct step. Do not skip the security audit for "small" ch
 
 ## 3. Hooks are Guardrails
 
-The hooks installed by this persona (`lint.sh`, `type-check.sh`, `test-runner.sh`, `block-destructive.sh`) enforce quality and safety automatically.
+The hooks installed by this persona (`lint.sh`, `type-check.sh`, `test-runner.sh`, `block-destructive.sh`, in `.cursor/scripts/engineer/`) enforce quality and safety automatically.
 
 - If `block-destructive.sh` denies a command, **do not work around it**. Fix the underlying issue (use a safe alternative, confirm with the user, or restructure the approach).
 - If `lint.sh` or `type-check.sh` report errors after a file edit, address them before continuing to the next step.
@@ -54,7 +56,7 @@ Tasks and features progress through defined phases. Do not advance a phase until
 
 - A task is not complete until `verifier` returns `Verified` for all criteria.
 - A security `Critical` finding halts all work on dependent tasks until resolved.
-- A task that fails verification 3 times must be escalated to the user — do not silently retry indefinitely.
+- A task that fails verification 3 times must be escalated to the user. Do not silently retry indefinitely.
 - Do not merge or deliver work with open `Critical` or `High` security findings.
 
 ---

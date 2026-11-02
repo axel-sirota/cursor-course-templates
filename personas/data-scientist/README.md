@@ -1,47 +1,34 @@
 # Data Scientist Persona Pack
 
-This pack adds data-scientist-specific commands, subagents, hooks, MCP integrations, and rules to the Adaptive SDLC. It is installed by running `/set-persona data-scientist`.
+Runs reproducible experiments in `workspaces/data-scientist/` with seeds, baselines and tracked metrics, on synthetic data.
+
+Install with `/set-persona add data-scientist`, then `/setup-stack data-scientist` → `/architect data-scientist` → `/start-session data-scientist`. All paths below are relative to `workspaces/data-scientist/`.
 
 ## What this pack adds
 
 **Commands:**
-- `/ds-explore` — EDA loop: profile dataset, visualize distributions, document hypotheses
-- `/ds-experiment` — Run a model experiment with tracked params, metrics, and seed
-- `/ds-validate` — Validate model on held-out data, check for bias and distribution drift
-- `/ds-handoff` — Generate model card + handoff notes for engineering or stakeholders
+- `/ds-explore`: EDA loop (profile dataset, summarize distributions, document hypotheses) into `docs/eda/`
+- `/ds-experiment`: run a model experiment with tracked params, metrics, and seed
+- `/ds-validate`: validate a model on held-out data, check for bias and distribution drift
+- `/ds-handoff`: generate model card + handoff notes for engineering or stakeholders
 
 **Subagents:**
-- `data-profiler` — Statistical profile of a dataset (shape, dtypes, distributions, correlations, outliers)
-- `experiment-tracker` — Logs experiment params, metrics, and artifacts to `docs/experiments/log.md`
-- `reproducibility-checker` — Verifies experiment reproducibility (seed, pinned deps, relative paths, execution order)
+- `data-profiler`: statistical profile of a dataset (shape, dtypes, distributions, correlations, outliers)
+- `experiment-tracker`: logs experiment params, metrics, and artifacts to `experiments/log.md`
+- `reproducibility-checker`: verifies experiment reproducibility (seed, pinned deps, relative paths, execution order)
 
-**Hooks:**
-- `afterFileEdit` — Runs `seed-check.sh` and `notebook-lint.sh` on every `.ipynb` or `.py` file edited in `notebooks/`
-- `stop` — Runs `log-experiment.sh` to remind you to log results before ending the session
+**Hooks** (installed to `.cursor/scripts/data-scientist/`, scoped to `workspaces/data-scientist/`):
+- `afterFileEdit`: `seed-check.sh` (`.py` / `.ipynb` in `notebooks/`) and `notebook-lint.sh` (`.ipynb`)
+- `stop`: `log-experiment.sh` reminds you to log results before ending the session
 
-**MCP servers:**
-- `filesystem` — Local `data/` directory access. **No credentials required.**
-- `context7` — Up-to-date pandas, scikit-learn, and PyTorch documentation. **No credentials required.**
+**MCP servers** (no credentials required):
+- `data-scientist-data` (filesystem server): read access to `workspaces/data-scientist/data`
+- `context7`: up-to-date pandas, scikit-learn, and PyTorch documentation
 
-## How this pack pairs with `setup-stack`
+## How this pack pairs with `/setup-stack`
 
-After running `/set-persona data-scientist`, run `/setup-stack python-datascience` to activate the notebook-first context and DS-specific rules. Unlike the designer and PM personas, the data scientist persona requires this step because students choose different Python toolchains (sklearn vs pytorch vs statsmodels).
-
-## Default MCPs require NO external credentials
-
-The default configuration works out of the box. The `filesystem` MCP is scoped to the local `./data` directory and needs no authentication. `context7` also requires no credentials for its free tier.
-
-## Client overlay
-
-Your instructor may provide a `client-config/` directory that adds data platform MCPs for internal systems. Common additions include:
-
-- Snowflake (enterprise data warehouse)
-- BigQuery (GCP analytics)
-- Internal MLflow (experiment tracking server)
-- Internal data catalog
-
-These require credentials provided by your instructor. See `.env.example` for where to add them.
+After `/set-persona add data-scientist`, run `/setup-stack data-scientist` and pick one of: python-datascience (default), python-mlops, python-spark, python-dbt-snowflake, r-tidyverse. Stack rules install into `.cursor/rules/data-scientist/` next to this pack's rules. Both apply only to files in `workspaces/data-scientist/`.
 
 ## Prerequisites
 
-See `SETUP.md` for the full pre-class checklist.
+See `SETUP.md` for the pre-class checklist.

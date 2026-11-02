@@ -1,0 +1,52 @@
+---
+description: Accounting code style. Money as integer cents or Decimal, explicit dtypes, ISO dates, readable reports.
+alwaysApply: true
+---
+
+# Accounting Code Style
+
+## Money
+
+- Store amounts as integer cents (`int64`) or `decimal.Decimal`. Never `float`.
+- Parse from text: `Decimal(text) * 100`, then reject anything that is not a whole number of cents.
+- Never compare floats with `==`. If a float sneaks in, the code is wrong; fix the load, not the comparison.
+- Keep debit and credit as separate columns when the source has them. Derive a signed amount (`debit - credit`) in a new column and say so.
+- Round only at presentation, and only with an explicit rule (`ROUND_HALF_UP`). State the rule in the report.
+
+```python
+# GOOD
+def to_cents(text: str) -> int:
+    cents = Decimal(text.replace(",", "")) * 100
+    if cents != cents.to_integral_value():
+        raise ValueError(f"fraction of a cent: {text!r}")
+    return int(cents)
+
+# BAD
+df["amount"] = df["amount"].astype(float)
+assert df["amount"].sum() == 12750.0
+```
+
+## Dtypes
+
+- `pd.read_csv(path, dtype=str, keep_default_na=False)`. Convert each column on purpose.
+- Account numbers, cost centres, entity codes and JE IDs stay strings. `"0410"` is not `410`.
+- Excel: `pd.read_excel(path, dtype=str, engine="openpyxl")`. pandas reads cached values, not formulas. If the workbook was never recalculated and saved, the numbers can be stale.
+
+## Dates
+
+- ISO 8601 everywhere: `2026-10-31`.
+- Parse with an explicit format: `pd.to_datetime(col, format="%Y-%m-%d")`. Never let pandas guess between `10/11` and `11/10`.
+- Posting timestamps that matter for controls (after-hours tests) keep their time and time zone.
+
+## Naming
+
+- snake_case. Columns that hold cents end in `_cents`.
+- Step functions are verbs: `load_gl`, `validate`, `match_items`, `classify`, `write_outputs`.
+- Output files: `<workpaper>_<period>.<ext>` or `<workpaper>-<account>-<period>.<ext>`, all lowercase.
+
+## Reports
+
+- Negative amounts in parentheses: `(35.00)`. Thousands separator on.
+- Every amount in a table has a Source column: `file row N`, or the formula (`sum of lines above`, `category = 'bank fee not booked'`).
+- Synthetic data banner at the top of every report in this course.
+- No personal names, emails or full bank account numbers. Use IDs and last four digits.

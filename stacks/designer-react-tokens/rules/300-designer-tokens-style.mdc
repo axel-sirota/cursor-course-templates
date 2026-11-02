@@ -1,0 +1,40 @@
+---
+description: Style rules for tokens, CSS and React components. Semantic variables only, no hardcoded values, no inline styles.
+alwaysApply: true
+---
+
+# Design System Style
+
+## CSS
+- Every color, spacing, font size, font weight, line height, radius and shadow is `var(--token)`.
+- Use semantic variables only. `--primitive-*` is for `tokens.css` alone.
+- Allowed literals: `0`, `1px` borders, `100%`, `auto`, `none`, unitless `1` for flex.
+- Class names: `component-name__part` (BEM element style). Variants come from `[data-*]` selectors.
+- One CSS file per component, imported at the top of the component file.
+
+```css
+/* good */
+.budget-card { padding: var(--space-inset-md); color: var(--color-text-default); }
+.budget-card[data-status='over'] .budget-card__status { color: var(--color-status-danger); }
+
+/* bad */
+.budget-card { padding: 16px; color: #1e293b; }
+```
+
+## React / TSX
+- Function components with a named export. Props type named `XProps`.
+- No `style={{ }}`. Use `className` and `data-*`.
+- No `useEffect`, `fetch`, stores or context reads in presentational components.
+- No string building for money or dates inside the component. The parent passes `spentLabel="$420"`.
+- Semantic HTML first: `<article>`, `<h2>`, `<progress>`, `<button>`. ARIA only where HTML has no answer.
+- Every interactive element has an accessible name.
+
+## Tokens JSON
+- Primitive names describe the scale: `color.green.600`, `space.4`, `font.size.300`.
+- Semantic names describe the job: `color.surface.card`, `space.inset.md`, `font.size.body`.
+- Keep layers flat enough to read: three or four path segments.
+- Sort keys by scale order, not alphabetically, so the file reads like a ramp.
+
+## Stories
+- `title: 'Components/BudgetCard'`. One named export per state (`OnTrack`, `NearLimit`, `OverBudget`).
+- Story args use the same display-ready strings as tests.

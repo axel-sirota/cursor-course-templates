@@ -7,7 +7,7 @@ You are verifying that each stack's context.md gives the `/architect` command su
 
 ## What Architect Needs from context.md
 
-The `/architect` command reads `CLAUDE.md` (populated from `context.md` by `/setup-stack`) and must be able to determine:
+The `/architect` command reads the `## Persona: <role>` block in `.cursor/context.md` (populated from the stack's `context.md` by `/setup-stack`) and the stack rules in `.cursor/rules/<role>/`, and must be able to determine:
 
 1. **Architecture Shape** — REST API / gRPC / Notebook / Pipeline / IaC / etc. (determines what kind of skeleton to build)
 2. **Entry point pattern** — What file is the main entry point? (e.g., `cmd/api/main.go`, `src/server.ts`, `app/main.py`, `main.tf`)

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# seed-check.sh — Advisory check: warn if no random seed is set in .py or .ipynb files.
+# seed-check.sh: advisory check, warn if no random seed is set in .py or .ipynb files.
+# Path match is a suffix match, so workspaces/data-scientist/notebooks/x.ipynb and notebooks/x.ipynb both fire.
 # Triggered by afterFileEdit hook. Reads file_path from stdin (JSON) or $FILE_PATH env var.
 # Non-blocking: exits 0 always, warnings go to stderr.
 
@@ -7,7 +8,7 @@ set -euo pipefail
 
 # Parse file_path from JSON stdin if available, otherwise fall back to env var
 if [ -t 0 ]; then
-  # No stdin — use environment variable
+  # No stdin, use environment variable
   FILE="${FILE_PATH:-}"
 else
   # Read JSON from stdin
@@ -52,9 +53,9 @@ if [[ "$FILE" == *.py ]]; then
     echo "    tf.random.set_seed(42)" >&2
   fi
 elif [[ "$FILE" == *.ipynb ]]; then
-  # Check Jupyter notebook — extract cell source via jq and grep
+  # Check Jupyter notebook: extract cell source via jq and grep
   if ! command -v jq &>/dev/null; then
-    echo "WARNING [seed-check]: jq not found — cannot check seed in $FILE" >&2
+    echo "WARNING [seed-check]: jq not found, cannot check seed in $FILE" >&2
     exit 0
   fi
   CELL_SOURCES="$(jq -r '.cells[].source | if type == "array" then join("") else . end' "$FILE" 2>/dev/null || true)"

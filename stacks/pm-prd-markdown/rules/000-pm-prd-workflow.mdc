@@ -1,0 +1,52 @@
+---
+description: PRD workspace workflow. Discover, Specify, Validate, Decompose, Track. What to run at each step.
+alwaysApply: true
+---
+
+# PRD Workflow
+
+The unit of delivery is a PRD that engineering can build without guessing.
+Work moves through five phases. Do not skip one.
+
+| Phase | Output | Gate to leave the phase |
+|---|---|---|
+| 0. Skeleton | `prds/<slug>.md` with every heading and TODO bodies, `stories/`, `glossary.md` | lint + `check_prd.py` pass |
+| 1. Discover | Problem, Users, Goals, Non-goals filled. Notes in `research/` | Every goal has a metric |
+| 2. Specify | Epics, story files, AC, NFRs, edge cases, rollout | `check_prd.py --strict` passes |
+| 3. Validate | `docs/validation-<slug>.md` from `/pm-validate` | Verdict "Ready to decompose: Yes" |
+| 4. Decompose | `docs/tickets-<epic>.md` from `/pm-decompose` | Dependency graph is acyclic |
+| 5. Track | `docs/status-<date>-<epic>.md` from `/pm-report` | Shared with stakeholders |
+
+## Commands to run
+
+```bash
+npx markdownlint-cli2@0.18.1          # lint every PRD, story and the glossary
+python3 scripts/check_prd.py .        # headings + story structure + traceability
+python3 scripts/check_prd.py . --strict   # also fails on TODO and unmeasured NFRs
+```
+
+Run both checks after every editing session. A red check means the phase is not done.
+
+## Order of writing
+
+1. Problem first. One paragraph, one named user, one cost of doing nothing.
+2. Goals next, each with an ID (`G1`) and a number.
+3. Non-goals before epics. They stop scope creep early.
+4. Epics, each pointing at one goal.
+5. Stories, one file each, each pointing at one epic.
+6. AC, NFRs, edge cases, rollout, metrics, open questions.
+
+## Decisions
+
+When a trade-off is settled, write `decisions/<YYYY-MM-DD>-<slug>.md` with: context, options, decision, owner.
+Link it from the PRD line it affects. Do not bury decisions in chat or comments.
+
+## Research is input, not spec
+
+Raw notes go in `research/`. Never paste raw transcripts into a PRD.
+Pull out the facts, cite the research file, and move on.
+
+## Hand-off
+
+Jira and GitHub Issues are push targets. Edit in markdown, review, then push.
+Never edit a ticket in the tracker without updating the story file first.

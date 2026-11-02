@@ -51,7 +51,7 @@ Look up the persona's shape in this table and load ONLY that row's guidance. Do 
 | Data Pipeline | python-spark, python-mlops | Job stages + schemas + Bronze/Silver/Gold layers | Stage functions returning empty DataFrames | Import + run with empty input |
 | Analytics Model | python-dbt-snowflake | Sources + staging/mart model tree + grain | Models with `select 1 as placeholder` | `dbt parse` |
 | Statistical Computing | r-tidyverse | Notebook sequence + `src/` function signatures | Notebook files + stub functions | `Rscript --parse` |
-| Experiment Notebook | python-datascience | Dataset, EDA sequence, candidate models, metrics | `notebooks/` EDA template, `data/`, `models/` stubs | Notebook runs top to bottom |
+| Experiment Notebook | python-datascience | Dataset, EDA sequence, candidate models, metrics | `notebooks/` EDA template, `data/`, `artifacts/`, `experiments/log.md` stubs | Notebook runs top to bottom |
 | PRD Workspace | pm-prd-markdown | PRD outline: problem, goals, non-goals, users, epics, NFR categories, success metrics | `prds/<name>.md` with every section headed and TODO bodies, `stories/` folder, glossary | `markdownlint` + every required heading present |
 | Design System | designer-react-tokens | Token set (semantic over primitive) + component inventory (exists / to build) + screen layout | `tokens/tokens.json`, component files rendering placeholders, one story per component | Token JSON validates, Storybook / test build passes |
 | Close Workbook | python-accounting | Source files + schemas, reconciliation and analysis steps, output reports, tie-out points | `src/` step functions returning empty DataFrames, `output/` folder, pytest tie-out stubs | `pytest` collects and runs |

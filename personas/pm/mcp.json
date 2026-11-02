@@ -11,13 +11,13 @@
         "CONFLUENCE_USERNAME": "${CONFLUENCE_USERNAME}",
         "CONFLUENCE_API_TOKEN": "${CONFLUENCE_API_TOKEN}"
       },
-      "_note": "Override in client-config for internal Jira/Confluence URLs"
+      "_note": "Optional. Use a sandbox Jira/Confluence site; the course works fully in markdown."
     },
     "github-issues": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}" },
-      "_note": "Override in client-config for GitHub Enterprise"
+      "_note": "Optional. Requires GITHUB_PAT; use a personal or sandbox repo."
     },
     "slack": {
       "command": "npx",

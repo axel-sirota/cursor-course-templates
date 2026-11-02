@@ -1,0 +1,68 @@
+---
+description: Accountant persona guardrails. Raw data is read-only, every number cites a source, no personal data, materiality stated up front.
+alwaysApply: true
+---
+
+# Accountant Workflow Rules
+
+These rules apply to everything written in the accountant workspace. Paths are relative to it.
+
+## 1. `data/raw/` is read-only
+
+Source extracts (GL, bank statements, trial balances, JE detail, approval limits) are audit evidence. Never edit, rename, reformat or overwrite them. Not to fix a typo, not to add a column.
+
+- Work copies go to `data/interim/`.
+- Results go to `output/`.
+- The `protect-raw` hook warns on any edit under `data/raw/`. Treat that warning as an error and undo the edit with `git checkout -- <file>`.
+
+## 2. Outputs go to `output/`
+
+Reports, exception lists, proposed JEs and the close memo are written to `output/` by code or by a persona command. Never hand-edit a generated report. Change the code or the inputs and rerun.
+
+## 3. No hardcoded amounts
+
+Never type an amount into logic or a report. Amounts come from a source file or from a calculation on source files.
+
+- Thresholds (materiality, timing windows, round-amount rules, approval limits) are named settings, stated once, with where they came from.
+- If you need a number you do not have, ask for the source file. Do not estimate it.
+
+## 4. Every number cites its source
+
+Every amount in `output/` carries one of:
+
+- **File and row**: `bank_statement_2026-10.csv row 26`
+- **Formula over cited lines**: `sum of lines above`, `adjusted bank - adjusted book`, `category = 'bank fee not booked'`
+
+An amount with neither is a finding for the `tie-out-checker` agent.
+
+## 5. Show the formula
+
+Do arithmetic in code, not in prose. When a report states a derived number, show how it was built (the columns, the filter, the sum). A reviewer must be able to recompute it from the cited rows.
+
+## 6. No personal data in prompts or logs
+
+- Do not paste employee names, emails, phone numbers, tax IDs or full bank account numbers into chat.
+- Refer to people by user ID or role (`USR-014`, `Preparer`, `AP Clerk`). Bank accounts by last four digits.
+- Run the `pii-redactor` agent on any output that lists users before sharing it.
+- This course uses synthetic Northwind Co. data only. Never load real company data.
+
+## 7. Materiality is stated in the plan
+
+Before any reconciliation, flux or JE test, the plan (`plans/interface-contract.md` or `docs/close-plan.md`) states:
+
+- Overall materiality (an amount)
+- Flux threshold (an amount and a percent, and whether a line must cross both or either)
+
+If it is missing, stop and ask. Do not pick a threshold after seeing the results.
+
+## 8. Propose, never post
+
+Adjusting entries are proposals in `output/proposed_je_<period>.csv`, marked `PROPOSED - NOT POSTED`, with debits equal to credits. A person reviews and books them in the ERP. Sign-off blocks stay blank for a person to sign.
+
+## Agents to call
+
+| When | Agent |
+|---|---|
+| Any new or changed file in `output/` | `tie-out-checker` |
+| Any JE analysis | `controls-checker` |
+| Any output that names users, before sharing | `pii-redactor` |

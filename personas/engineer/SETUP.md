@@ -1,25 +1,23 @@
-# Engineer Persona — Pre-Class Setup
+# Engineer Persona: Pre-Class Setup
 
 Complete every item below before class. The instructor cannot wait for tool installation during the session.
 
-## 1. AI code assistant
+## 1. Cursor
 
-Install one of:
-- **Cursor IDE:** https://cursor.sh
-- **Claude Code:** https://docs.anthropic.com/en/docs/claude-code/overview
+Install **Cursor IDE**: https://cursor.sh
 
 Verify it launches and can open the course repo directory.
 
 ## 2. Programming language
 
-Install whichever you plan to use during class:
+Install the language for the stack you plan to use:
 
-| Language | Version | Verify with |
-|---|---|---|
-| Python | 3.11+ | `python3 --version` |
-| Node.js | 20+ | `node --version` |
-| Go | 1.22+ | `go version` |
-| Java | 21 | `java --version` |
+| Language | Version | Verify with | Stacks |
+|---|---|---|---|
+| Python | 3.11+ | `python3 --version` | python-fastapi |
+| Node.js | 20+ | `node --version` | node-express, node-nestjs |
+| Go | 1.22+ | `go version` | go-gin, go-grpc |
+| Java | 21 | `java --version` | java-spring |
 
 Also install the package manager for your language (`pip`/`venv`, `npm`, standard for Go/Java).
 
@@ -36,7 +34,7 @@ Verify: `git --version`
 
 ## 4. Docker (optional but recommended)
 
-Required if you plan to use the Python FastAPI or Node Express stacks, which run a containerized PostgreSQL database.
+Required if your stack runs a containerized PostgreSQL database (python-fastapi, node-express).
 
 Install Docker Desktop: https://www.docker.com/products/docker-desktop/
 
@@ -44,19 +42,14 @@ Verify: `docker --version` and `docker compose version`
 
 ## 5. MCP credentials
 
-Copy the persona env file to the project root and fill in your values:
+Create a `.env` file in the repo root (if `personas/engineer/.env.example` exists, copy it: `cp personas/engineer/.env.example .env`) and fill in:
 
-```bash
-cp personas/engineer/.env.example .env
-```
-
-Then edit `.env`:
-- **Required:** `GITHUB_PAT` — GitHub personal access token with `repo` scope
+- **Required:** `GITHUB_PAT`, a GitHub personal access token with `repo` scope
   - Generate at: https://github.com/settings/tokens
-- **Optional:** `SENTRY_AUTH_TOKEN` and `SENTRY_ORG_SLUG` — only if your project uses Sentry
-- **Optional:** `DATABASE_URL` — only if your project connects to an external Postgres instance
+- **Optional:** `SENTRY_AUTH_TOKEN` and `SENTRY_ORG_SLUG`, only if your project uses Sentry
+- **Optional:** `DATABASE_URL`, only if you connect to an external Postgres instance
 
-If your instructor provided a `client-config/` directory, also check `client-config/env.example` for org-specific variables.
+The course uses synthetic data only. Never point these at production systems.
 
 ## 6. Repository access
 
@@ -67,22 +60,15 @@ git clone https://github.com/axel-sirota/cursor-course-templates
 cd cursor-course-templates
 ```
 
-If your instructor provided a `client-config.zip`, unzip it into the repo root:
-
-```bash
-unzip ~/client-config.zip
-# should create client-config/ in the repo root
-```
-
 ## 7. Smoke test
 
-In the repo root, open your AI tool and run:
+Open the repo in Cursor and run in the chat:
 
-- **Cursor:** `@set-persona`
-- **Claude Code:** `/set-persona`
+```
+/set-persona add engineer
+/setup-stack engineer
+```
 
-Pick `engineer`. You should see a confirmation listing the engineer commands, subagents, hooks, and MCP servers.
-
-Then run `/setup-stack` and pick `blank`. You should see a confirmation that the blank stack is configured alongside the engineer persona.
+After the first command you should see a confirmation listing the engineer commands, subagents, hooks, MCP servers and the new `workspaces/engineer/` folder. Pick `python-fastapi` (or your stack) at the second; you should see the stack configured in the `## Persona: engineer` block of `.cursor/context.md`.
 
 If either step fails, contact the instructor before class.

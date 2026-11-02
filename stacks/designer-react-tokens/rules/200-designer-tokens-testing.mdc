@@ -1,0 +1,47 @@
+---
+description: Testing for design system work. Token schema check, render test and axe check per component.
+alwaysApply: true
+---
+
+# Design System Testing
+
+## Three checks, every time
+| Check | Command | Fails when |
+|---|---|---|
+| Token schema | `npm run check:tokens` | a leaf lacks `$value`/`$type`, a semantic leaf holds a raw value, a reference does not resolve |
+| Component render + a11y | `npm test` | a component throws, misses required text, or axe reports a violation |
+| Types | `npm run typecheck` | props or stories do not compile |
+
+## Per component (minimum)
+Each `X.test.tsx` has at least:
+1. **Render test**: renders with spec props, asserts visible text by role or label.
+2. **State test**: one assertion per variant (`data-status`, disabled, empty).
+3. **Accessibility test**: runs axe on the rendered container, expects zero violations.
+
+```tsx
+import axe from 'axe-core';
+
+it('has no axe violations', async () => {
+  const { container } = render(<BudgetCard {...props} />);
+  const results = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });
+  expect(results.violations).toEqual([]);
+});
+```
+
+jsdom has no layout or canvas, so the color-contrast rule is turned off in tests. Contrast is checked on the token pair in the component spec (4.5:1 for body text, 3:1 for large text and UI parts).
+
+## Style guard test
+Each component CSS file is read in a test and must not contain:
+- hex colors, `rgb(`, `hsl(`
+- `--primitive-` variables
+- px values other than `1px` borders
+
+## Token test
+`src/tokens.test.ts` runs `node scripts/build-tokens.mjs --check` and expects exit code 0.
+
+## Queries
+- Prefer `getByRole`, `getByLabelText`, `getByText`. Avoid `getByTestId` unless no role exists.
+- Never assert on class names or computed pixel sizes.
+
+## Stories are not tests
+Stories show states for review. Every state in a story must also be covered by a test assertion.

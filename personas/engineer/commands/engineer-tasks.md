@@ -2,11 +2,13 @@
 
 Decompose an architect plan into parallel-safe tasks ready for `/engineer-implement`.
 
+Paths are relative to `workspaces/engineer/`.
+
 ## Steps
 
-1. **Locate the plan** — Read `docs/plan-{feature}.md`. If multiple plan files exist, ask the user which one to use before proceeding.
+1. **Locate the plan.** Read the current session file in `plans/sessions/` (the lowest-numbered one with unchecked tasks) and `plans/interface-contract.md`. A feature plan at `docs/plan-{feature}.md` also works. If several candidates exist, ask the user which one to use before proceeding.
 
-2. **Identify task boundaries** — Split the plan into atomic tasks:
+2. **Identify task boundaries.** Split the plan into atomic tasks:
    - One task per API endpoint or function
    - One task per test file
    - One task per database migration
@@ -21,7 +23,7 @@ Decompose an architect plan into parallel-safe tasks ready for `/engineer-implem
    depends_on:   list of task ids (empty if none)
    ```
 
-4. **Detect file conflicts** — Any two tasks that touch the same file must be marked `parallel-safe: no` and placed in sequential order. Tasks with no shared files and no unmet dependencies are `parallel-safe: yes`.
+4. **Detect file conflicts.** Any two tasks that touch the same file must be marked `parallel-safe: no` and placed in sequential order. Tasks with no shared files and no unmet dependencies are `parallel-safe: yes`.
 
 5. **Output `docs/tasks-{feature}.md`** with:
    - A summary table (id | title | depends_on | parallel-safe)
@@ -36,10 +38,10 @@ Decompose an architect plan into parallel-safe tasks ready for `/engineer-implem
 
 | id       | title                  | depends_on | parallel-safe |
 |----------|------------------------|------------|---------------|
-| task-001 | ...                    | —          | yes           |
+| task-001 | ...                    | none       | yes           |
 | task-002 | ...                    | task-001   | no            |
 
-## task-001 — {title}
+## task-001: {title}
 
 **Acceptance Criteria**
 - Given: ...
@@ -56,6 +58,6 @@ Decompose an architect plan into parallel-safe tasks ready for `/engineer-implem
 
 ## Notes
 
-- Do not start implementation — this command produces the task file only.
-- If `docs/` does not exist, create it before writing the output file.
+- Do not start implementation. This command produces the task file only.
+- If `docs/` does not exist in the workspace, create it before writing the output file.
 - If a plan references architecture diagrams or ADRs, reference them in the relevant task's detail section.

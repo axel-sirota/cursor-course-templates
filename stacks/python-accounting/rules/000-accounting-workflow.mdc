@@ -1,0 +1,51 @@
+---
+description: Close Workbook workflow. Phase order, where files go, and what each session must leave behind.
+alwaysApply: true
+---
+
+# Close Workbook Workflow
+
+## Phase order
+
+Work moves through the close in this order. Do not start a phase until the one before it has passing tie-out tests.
+
+| Phase | Deliverable | Done when |
+|---|---|---|
+| 0 Skeleton | `src/` step stubs, `tests/` stubs, empty `output/` | `pytest -q tests/` collects and runs |
+| 1 Sources & validation | Loaders for every file in `data/raw/`, control totals recorded | Row counts and totals match the source; JEs balance |
+| 2 Reconciliations | `output/recon-<account>-<period>.md` + unmatched list | Difference is 0.00 or every reconciling item is listed |
+| 3 Flux analysis | `output/flux-<period>.md` | Every line over materiality has an explanation or an "owner to explain" flag |
+| 4 JE testing | `output/je-test-<period>.md` + exceptions CSV | Every test ran; every exception listed with JE ID and source row |
+| 5 Close memo | `output/close-memo-<period>.md` | Tie-out checker passes; open items have an owner and a date |
+
+## Before any analysis
+
+1. Read the close plan in `docs/` or `plans/interface-contract.md`. It must state the period, the entity (Northwind Co.), the accounts in scope, and the materiality threshold. If materiality is missing, stop and ask.
+2. List every source file in `data/raw/` with row count and control total. Write that list to the plan or `docs/sources.md`.
+3. Confirm the opening balances tie to last period's closing balances.
+
+## Where files go
+
+| Kind | Folder | Rule |
+|---|---|---|
+| Source extracts | `data/raw/` | Read-only. Never edited, renamed or overwritten |
+| Work copies | `data/interim/` | Rebuilt by code. Safe to delete |
+| Step code | `src/` | One module per workpaper |
+| Tie-out tests | `tests/` | One test file per workpaper |
+| Reports, exception lists, proposed JEs | `output/` | Rebuilt by code. Never edited by hand |
+| Plans, memos, notes | `docs/`, `plans/` | Written by people and commands |
+
+## Every session ends with
+
+- `pytest -q tests/` passing, or the failure written into the transition doc
+- The `tie-out-checker` agent run on anything new in `output/`
+- No change under `data/raw/` (`git status data/raw/` is clean)
+
+## In-session commands
+
+| Need | Command |
+|---|---|
+| Bank or sub-ledger to GL | `/acct-reconcile` |
+| Budget vs actual, month over month | `/acct-variance` |
+| Journal entry testing | `/acct-je-test` |
+| Close memo and handoff | `/acct-close-handoff` |

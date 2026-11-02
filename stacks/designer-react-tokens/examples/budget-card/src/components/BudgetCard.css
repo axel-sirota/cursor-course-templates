@@ -1,0 +1,82 @@
+/* BudgetCard: semantic tokens only. Values live in tokens/tokens.json. */
+
+.budget-card {
+  --budget-card-accent: var(--color-status-success);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  max-width: var(--size-card-max);
+  padding: var(--space-inset-md);
+  background: var(--color-surface-card);
+  border: var(--border-width-default) solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text-default);
+  font-family: var(--font-family-base);
+  line-height: var(--font-line-height-normal);
+}
+
+.budget-card[data-status='near-limit'] {
+  --budget-card-accent: var(--color-status-warning);
+}
+
+.budget-card[data-status='over'] {
+  --budget-card-accent: var(--color-status-danger);
+}
+
+.budget-card__title {
+  margin: 0;
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-line-height-tight);
+}
+
+.budget-card__amount {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-stack-xs);
+}
+
+.budget-card__spent {
+  font-size: var(--font-size-amount);
+  font-weight: var(--font-weight-bold);
+}
+
+.budget-card__limit {
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+}
+
+.budget-card__bar {
+  appearance: none;
+  width: 100%;
+  height: var(--size-bar-height);
+  border: none;
+  border-radius: var(--radius-bar);
+  background: var(--color-track-default);
+  overflow: hidden;
+}
+
+.budget-card__bar::-webkit-progress-bar {
+  background: var(--color-track-default);
+  border-radius: var(--radius-bar);
+}
+
+.budget-card__bar::-webkit-progress-value {
+  background: var(--budget-card-accent);
+  border-radius: var(--radius-bar);
+}
+
+.budget-card__bar::-moz-progress-bar {
+  background: var(--budget-card-accent);
+  border-radius: var(--radius-bar);
+}
+
+.budget-card__status {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--budget-card-accent);
+}

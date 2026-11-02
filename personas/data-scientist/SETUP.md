@@ -1,18 +1,16 @@
-# Data Scientist Persona — Pre-Class Setup
+# Data Scientist Persona: Pre-Class Setup
 
 Complete every item below before class. The instructor cannot wait for tool installation during the session.
 
-## 1. AI code assistant
+## 1. Cursor
 
-Install one of:
-- **Cursor IDE:** https://cursor.sh
-- **Claude Code:** https://docs.anthropic.com/en/docs/claude-code/overview
+Install **Cursor IDE**: https://cursor.sh
 
 Verify it launches and can open the course repo directory.
 
 ## 2. Python 3.11+
 
-This persona requires Python 3.11 or later.
+This persona requires Python 3.11 or later. If you pick the r-tidyverse stack, also install R (see that stack's README).
 
 ```bash
 python3 --version
@@ -64,11 +62,11 @@ pip install torch
 pip install tensorflow
 ```
 
-If you are unsure, install PyTorch — it is the most common in course exercises.
+If you are unsure, install PyTorch. It is the most common in course exercises.
 
 ## 6. jq CLI tool
 
-The `notebook-lint.sh` hook parses `.ipynb` files using `jq`. This tool must be installed on your system.
+The `seed-check.sh` and `notebook-lint.sh` hooks parse `.ipynb` files using `jq`.
 
 **macOS:**
 ```bash
@@ -104,22 +102,15 @@ git clone https://github.com/axel-sirota/cursor-course-templates
 cd cursor-course-templates
 ```
 
-If your instructor provided a `client-config.zip`, unzip it into the repo root:
-
-```bash
-unzip ~/client-config.zip
-# should create client-config/ in the repo root
-```
-
 ## 8. Smoke test
 
-In the repo root, open your AI tool and run:
+Open the repo in Cursor and run in the chat:
 
-- **Cursor:** `@set-persona`
-- **Claude Code:** `/set-persona`
+```
+/set-persona add data-scientist
+/setup-stack data-scientist
+```
 
-Pick `data-scientist`. You should see a confirmation listing the DS commands, subagents, hooks, and MCP servers.
-
-Then run `/setup-stack python-datascience`. You should see a confirmation that the DS stack is configured alongside the data scientist persona.
+After the first command you should see a confirmation listing the DS commands, subagents, hooks, MCP servers and the new `workspaces/data-scientist/` folder. Pick `python-datascience` at the second; the `## Persona: data-scientist` block in `.cursor/context.md` should then show that stack.
 
 If either step fails, contact the instructor before class.

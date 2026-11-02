@@ -2,6 +2,8 @@
 
 Execute the TDD loop on a tasks file produced by `/engineer-tasks`. Delegates to subagents.
 
+Paths are relative to `workspaces/engineer/`. Write code and tests only inside that folder.
+
 ## Prerequisites
 
 - A `docs/tasks-{feature}.md` file must exist. Ask for the feature name if not specified.
@@ -9,41 +11,41 @@ Execute the TDD loop on a tasks file produced by `/engineer-tasks`. Delegates to
 
 ## Per-Task Loop (execute in dependency order)
 
-### 1. Red — Write the Failing Test
+### 1. Red: Write the Failing Test
 
 Write a test that asserts the task's acceptance criteria. Run it and confirm it fails for the expected reason (not a syntax error or import failure).
 
-### 2. Run — Confirm Expected Failure
+### 2. Run: Confirm Expected Failure
 
-Invoke the `test-runner` subagent. The test must fail — if it passes without implementation, the test is wrong. Fix the test and repeat.
+Invoke the `test-runner` subagent. The test must fail. If it passes without implementation, the test is wrong. Fix the test and repeat.
 
-### 3. Green — Write Minimum Implementation
+### 3. Green: Write Minimum Implementation
 
 Write the simplest code that makes the test pass. Do not over-engineer at this stage.
 
-### 4. Run — Confirm Pass + No Regression
+### 4. Run: Confirm Pass + No Regression
 
 Invoke `test-runner` again. All previously passing tests must still pass. If regression detected, stop and fix before continuing.
 
-### 5. Audit — Security Check (conditional)
+### 5. Audit: Security Check (conditional)
 
-If the task touches any of: authentication, authorization, database queries, file I/O, network calls, external APIs — invoke `security-auditor`.
+If the task touches any of: authentication, authorization, database queries, file I/O, network calls, external APIs, invoke `security-auditor`.
 
 - **Critical findings**: must be resolved before continuing to the next task.
 - **High findings**: must be addressed before marking the task complete.
 - **Medium/Informational**: document and continue.
 
-### 6. Verify — Acceptance Criteria Check
+### 6. Verify: Acceptance Criteria Check
 
 Invoke `verifier` with the task's acceptance criteria. The verifier must return `Verified` for all criteria before proceeding.
 
-### 7. Refactor — Clean the Implementation
+### 7. Refactor: Clean the Implementation
 
 Remove duplication, improve naming, simplify logic. Re-run tests after each refactor step to confirm the safety net holds.
 
 ### 8. Mark Complete
 
-Update `docs/tasks-{feature}.md` — set the task status to `complete` with timestamp.
+Update `docs/tasks-{feature}.md`: set the task status to `complete` with timestamp.
 
 ---
 
@@ -64,8 +66,8 @@ Tasks with `parallel-safe: yes` and no unmet dependencies may be dispatched as b
 
 After each task completes, print a one-line summary:
 ```
-[task-001] DONE — 3 tests passing, 0 security findings
-[task-002] DONE — 5 tests passing, 1 High finding addressed
+[task-001] DONE: 3 tests passing, 0 security findings
+[task-002] DONE: 5 tests passing, 1 High finding addressed
 ```
 
 Report overall progress at the end:

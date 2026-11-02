@@ -1,52 +1,16 @@
-# Designer Persona — Pre-Class Setup
+# Designer Persona: Pre-Class Setup
 
-Complete every item below before class. The instructor cannot wait for tool installation during the session.
+Complete every item below before class. The instructor cannot wait for tool installation during the session. No Figma account is needed: the course works from `tokens/tokens.json` and markdown screen specs.
 
-## 1. AI code assistant
+## 1. Cursor
 
-Install one of:
-- **Cursor IDE:** https://cursor.sh
-- **Claude Code:** https://docs.anthropic.com/en/docs/claude-code/overview
+Install **Cursor IDE**: https://cursor.sh
 
 Verify it launches and can open the course repo directory.
 
-## 2. Figma desktop app
+## 2. Node.js 20+
 
-The designer persona uses Figma's Dev Mode MCP Server, which requires the desktop app — the browser version does not expose the MCP server.
-
-1. Download and install Figma Desktop: https://www.figma.com/downloads/
-2. Sign in to your Figma account.
-3. Open **Figma → Preferences** (macOS: `Cmd+,` / Windows: `Ctrl+,`)
-4. Navigate to the **Dev Mode** or **Integrations** section.
-5. Enable **Dev Mode MCP Server** and note the local port it listens on (default: `3845`).
-
-Verify: with the desktop app open, `curl http://localhost:3845/health` (or the port shown in Preferences) should return a JSON response.
-
-## 3. Figma access token
-
-The MCP server authenticates API calls using a personal access token.
-
-1. Go to https://www.figma.com/developers/api#access-tokens
-2. Click **Create new token** — scope: **File content** (read-only is sufficient).
-3. Copy the token (starts with `figd_`).
-
-You will add this token to `.env` in the next step.
-
-## 4. Environment variables
-
-Copy the persona env file to the project root and fill in your values:
-
-```bash
-cp personas/designer/.env.example .env
-```
-
-Then edit `.env` and set `FIGMA_ACCESS_TOKEN` to the token you just generated.
-
-If your instructor provided a `client-config/` directory, also check `client-config/env.example` for an org-level token.
-
-## 5. Node.js 20+
-
-Required to run the Figma MCP server and Playwright.
+Required for the `designer-react-tokens` stack (Vite, Storybook, the token build script) and Playwright.
 
 | Tool | Version | Verify with |
 |---|---|---|
@@ -55,7 +19,7 @@ Required to run the Figma MCP server and Playwright.
 
 Install Node.js from https://nodejs.org/en/download if needed.
 
-## 6. Browser (Chrome / Chromium for Playwright)
+## 3. Browser (Chromium for Playwright)
 
 The `responsive-checker` subagent uses Playwright to capture breakpoint screenshots.
 
@@ -65,7 +29,7 @@ npx playwright install chromium
 
 Verify: `npx playwright --version`
 
-## 7. Repository access
+## 4. Repository access
 
 Clone the course repo if you have not already:
 
@@ -74,22 +38,42 @@ git clone https://github.com/axel-sirota/cursor-course-templates
 cd cursor-course-templates
 ```
 
-If your instructor provided a `client-config.zip`, unzip it into the repo root:
+## 5. Smoke test
 
-```bash
-unzip ~/client-config.zip
-# should create client-config/ in the repo root
+Open the repo in Cursor and run in the chat:
+
+```
+/set-persona add designer
+/setup-stack designer
 ```
 
-## 8. Smoke test
+After the first command you should see a confirmation listing the designer commands, subagents, hooks, MCP servers (`playwright`, `context7`) and the new `workspaces/designer/` folder. After the second, the `## Persona: designer` block in `.cursor/context.md` should show `Stack: designer-react-tokens`.
 
-With the Figma desktop app open and your `.env` populated, open your AI tool and run:
+If either step fails, contact the instructor before class.
 
-- **Cursor:** `@set-persona`
-- **Claude Code:** `/set-persona`
+## Optional: Figma
 
-Pick `designer`. You should see a confirmation listing the designer commands, subagents, hooks, and MCP servers — including `figma` in the MCP list.
+Only do this if you want to try `/designer-extract <figma-frame-url>`. The default path does not use it.
 
-If the Figma MCP does not appear or shows an error, confirm the desktop app is running with Dev Mode MCP enabled and that `FIGMA_ACCESS_TOKEN` is set in `.env`.
+1. Create a personal access token at https://www.figma.com/developers/api#access-tokens with scope **File content** (read-only). It starts with `figd_`.
+2. Add it to `.env` in the repo root (if `personas/designer/.env.example` exists, copy it first: `cp personas/designer/.env.example .env`):
 
-If any step fails, contact the instructor before class.
+   ```
+   FIGMA_ACCESS_TOKEN=figd_...
+   ```
+
+3. Add this server to the `mcpServers` object in `.cursor/mcp.json`:
+
+   ```json
+   "figma": {
+     "command": "npx",
+     "args": ["-y", "figma-developer-mcp", "--figma-api-key=${FIGMA_ACCESS_TOKEN}", "--stdio"],
+     "env": {}
+   }
+   ```
+
+4. Restart Cursor and check the `figma` server shows as connected in Cursor's MCP settings.
+
+`figma-developer-mcp` calls the Figma REST API with your token, so the Figma desktop app is not required. (Figma's own Dev Mode MCP server is a different server that runs inside the desktop app; this pack does not use it.)
+
+`/undo persona designer` does not remove a server you added by hand. Delete the `figma` entry yourself if you no longer want it.

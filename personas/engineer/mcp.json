@@ -4,7 +4,7 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}" },
-      "_note": "Override in client-config/personas/engineer/mcp.json for GitHub Enterprise"
+      "_note": "Requires GITHUB_PAT. Use a personal or sandbox repo; the course uses synthetic data only."
     },
     "postgres": {
       "command": "npx",

@@ -9,13 +9,15 @@ readonly: true
 
 Review code changes in the current working tree against the active stack rules and engineering standards.
 
+Paths are relative to `workspaces/engineer/`. Review only changes inside that folder.
+
 ## Steps
 
-1. **Read active stack context** — Check `CLAUDE.md`, `.cursor/rules/`, or any active stack rule files to understand language, framework, and style conventions.
+1. **Read active stack context.** Read the `## Persona: engineer` block in `.cursor/context.md` (Stack, Architecture Shape) and the rule files in `.cursor/rules/engineer/` (persona rules plus `stack-*` rules) to understand language, framework, and style conventions.
 
-2. **Load rules** — Identify the relevant rule files for each changed file's language/framework.
+2. **Load rules.** Identify the relevant rule files for each changed file's language/framework.
 
-3. **Get the diff** — Run `git diff HEAD~1` to see all changed files and their modifications.
+3. **Get the diff.** Run `git diff HEAD~1 -- workspaces/engineer/` to see all changed files and their modifications.
 
 4. **For each changed file**, check:
    - **Style**: naming conventions, formatting, line length, file organization match stack rules
@@ -46,6 +48,6 @@ N Critical, N Important, N Suggestions across N files reviewed.
 ## Constraints
 
 - Do not modify files (readonly agent).
-- Do not run tests — that is `test-runner`'s responsibility.
-- Do not make security judgments beyond obvious patterns — that is `security-auditor`'s responsibility.
+- Do not run tests. That is `test-runner`'s responsibility.
+- Do not make security judgments beyond obvious patterns. That is `security-auditor`'s responsibility.
 - If no diff is available (new repository), review staged files instead.

@@ -1,0 +1,27 @@
+// markdownlint-cli2 config for a PRD workspace.
+// Run from the workspace root: npx markdownlint-cli2@0.18.1
+{
+  "config": {
+    "default": true,
+    // Prose wraps at sentence ends, not at 80 columns. Tables run long.
+    "MD013": false,
+    // Stories repeat "Given/When/Then" style H3s under different parents.
+    "MD024": { "siblings_only": true },
+    // No raw HTML in PRDs.
+    "MD033": true,
+    // Every fenced block names its language (markdown, mermaid, bash, text).
+    "MD040": true,
+    // Lists use "-".
+    "MD004": { "style": "dash" },
+    // Ordered lists use 1. 2. 3.
+    "MD029": { "style": "ordered" }
+  },
+  "globs": [
+    "prds/**/*.md",
+    "stories/**/*.md",
+    "research/**/*.md",
+    "decisions/**/*.md",
+    "glossary.md"
+  ],
+  "ignores": ["node_modules/**", "docs/**", "templates/**"]
+}

@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "filesystem": {
+    "data-scientist-data": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./data"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./workspaces/data-scientist/data"],
       "env": {},
-      "_note": "Scoped to local ./data directory. No credentials needed. Override in client-config to add internal data platform MCPs (Snowflake, BigQuery, MLflow, etc.)"
+      "_note": "Scoped to the persona workspace data folder, workspaces/data-scientist/data. No credentials needed. The course uses synthetic data only."
     },
     "context7": {
       "command": "npx",

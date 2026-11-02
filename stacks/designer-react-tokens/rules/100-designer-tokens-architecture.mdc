@@ -1,0 +1,42 @@
+---
+description: Design system layers (Tokens → Primitives → Components → Screens) and where each file lives.
+alwaysApply: true
+---
+
+# Design System Architecture
+
+## Layers
+| Layer | Lives in | May use | Must not use |
+|---|---|---|---|
+| Primitive tokens | `tokens/tokens.json` → `primitive` | raw values (hex, px) | references |
+| Semantic tokens | `tokens/tokens.json` → `semantic` | `{primitive.*}` references | raw values |
+| Primitives | `src/components/primitives/` | semantic CSS variables | `--primitive-*`, raw values |
+| Components | `src/components/` | primitives, semantic variables | fetch, stores, formatting |
+| Screens | `src/screens/` | components | new styling beyond layout |
+
+Dependencies point down only. A component never imports a screen. A primitive never imports a component.
+
+## Token file shape
+- Every leaf has `$value` and `$type` (`color`, `dimension`, `fontFamily`, `fontWeight`, `number`, `shadow`).
+- Semantic leaves hold a reference string: `"{primitive.color.green.600}"`.
+- Semantic names describe intent, not looks: `color.status.danger`, not `color.red`.
+
+## Generated CSS
+- `scripts/build-tokens.mjs` writes `src/styles/tokens.css`.
+- Primitive path `primitive.color.green.600` → `--primitive-color-green-600`.
+- Semantic path `semantic.color.text.muted` → `--color-text-muted: var(--primitive-color-slate-500)`.
+- `tokens.css` is generated. Never edit it. Import it once, in the app entry and in `.storybook/preview.ts`.
+- `tokens.css` is the one CSS file allowed raw values. A token-validator warning on it is expected.
+
+## Component files
+```
+src/components/BudgetCard.tsx         # markup, props typed
+src/components/BudgetCard.css         # var(--*) only
+src/components/BudgetCard.test.tsx    # render + axe
+src/components/BudgetCard.stories.tsx # one story per state
+```
+
+## Presentational contract
+- Props are display-ready: strings already formatted, numbers already clamped.
+- Variants are a typed union prop mapped to a `data-*` attribute.
+- Callbacks are optional props (`onSelect?: () => void`). The component never decides what they do.

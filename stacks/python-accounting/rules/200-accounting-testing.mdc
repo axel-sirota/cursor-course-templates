@@ -1,0 +1,49 @@
+---
+description: Tie-out testing. Every workpaper proves its totals, its balance and its completeness with pytest.
+alwaysApply: true
+---
+
+# Tie-out Testing
+
+A workpaper is not done until pytest proves it ties. Tests are the reviewer's tick marks, written as code.
+
+## Required tests per workpaper
+
+| Test | What it proves |
+|---|---|
+| Source totals | Row count and amount total after load equal the control totals of the source file |
+| Debits = credits | Every JE in the source, and every proposed JE, balances. So does the total |
+| Roll-forward | Opening balance + activity = closing balance for each balance file |
+| Completeness | Matched + unmatched = source, by count and by cents, on each side |
+| Every unmatched item listed | The set of unmatched `source_row` values equals the source rows not matched. None dropped, none netted |
+| Difference | Adjusted balance A = adjusted balance B, or the difference equals the listed reconciling items |
+| Citations | Every row in an output file has `source_file` and `source_row` |
+| Raw untouched | A hash of `data/raw/` before the run equals the hash after |
+
+## How to write them
+
+- Build fixtures from small synthetic files written into `tmp_path`, or from a seeded generator. Tests never depend on the real `data/raw/` contents changing.
+- Assert on integer cents. `assert total_cents == 1_275_000`, never `assert total == 12750.0`.
+- One behaviour per test. Name it after the tie-out point: `test_bank_lines_tie_to_statement_closing`.
+- Include at least one negative test: feed an unbalanced JE or a missing column and assert the step raises.
+- Seeded exceptions get their own test: if the data plants a duplicate, a test asserts it is found and classified.
+
+```python
+def test_matched_plus_unmatched_equals_source_totals(result):
+    gl_unmatched = result.unmatched[result.unmatched["side"] == "GL"]
+    assert len(result.matched) + len(gl_unmatched) == len(result.gl_cash)
+    assert (result.matched["amount_cents"].sum() + gl_unmatched["amount_cents"].sum()
+            == result.gl_cash["amount_cents"].sum())
+```
+
+## Phase 0 stubs
+
+In the skeleton, every required test exists and runs against the empty step functions. Mark the ones that cannot pass yet with `@pytest.mark.xfail(reason="Phase N", strict=True)` so they flip to failures the moment the logic lands and nobody forgets to remove the marker.
+
+## Running
+
+```bash
+pytest -q tests/
+```
+
+The `tie-out-check` stop hook runs this when `output/` has files. A red run goes into the transition doc as the first next step.

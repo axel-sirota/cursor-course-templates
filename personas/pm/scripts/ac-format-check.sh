@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ac-format-check.sh
 # Reads a file_path from stdin JSON.
-# Fires only on markdown files under prds/ or docs/prds/ or specs/ or docs/specs/.
+# Fires only on markdown files under prds/, stories/, docs/prds/, specs/ or docs/specs/.
+# Path match is a suffix match, so workspaces/pm/prds/x.md and prds/x.md both fire.
 # Checks that every user story section (containing "As a") is followed by
 # at least one Given/When/Then block within 10 lines.
 # All findings are advisory: warns to stderr, exits 0.
@@ -19,7 +20,7 @@ if [ -z "$file_path" ]; then
 fi
 
 # Only fire on matching path patterns
-if ! echo "$file_path" | grep -qE '(prds/[^/]+\.md|specs/[^/]+\.md|docs/prds/[^/]+\.md|docs/specs/[^/]+\.md)$'; then
+if ! echo "$file_path" | grep -qE '(prds/[^/]+\.md|stories/[^/]+\.md|specs/[^/]+\.md|docs/prds/[^/]+\.md|docs/specs/[^/]+\.md)$'; then
   exit 0
 fi
 
@@ -29,7 +30,9 @@ if [ ! -f "$file_path" ]; then
 fi
 
 # Read the file into an array
-mapfile -t lines < "$file_path"
+# (while-read instead of mapfile so it also runs on macOS bash 3.2)
+lines=()
+while IFS= read -r l || [ -n "$l" ]; do lines+=("$l"); done < "$file_path"
 total=${#lines[@]}
 
 for ((i=0; i<total; i++)); do
@@ -51,11 +54,11 @@ for ((i=0; i<total; i++)); do
       fi
     done
     if [ "$found_gwt" = false ]; then
-      echo "[ac-format-check] WARNING: Line $story_line in $file_path — user story has no Given/When/Then AC within 10 lines:" >&2
+      echo "[ac-format-check] WARNING: Line $story_line in $file_path: user story has no Given/When/Then AC within 10 lines:" >&2
       echo "  $line" >&2
     fi
   fi
 done
 
-# Always exit 0 — advisory only
+# Always exit 0, advisory only
 exit 0

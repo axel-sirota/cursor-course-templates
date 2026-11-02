@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# block-destructive.sh — beforeShellExecution hook
+# block-destructive.sh: beforeShellExecution hook
 # Reads command from stdin JSON.
 # Returns JSON with permission: deny for destructive commands, allow otherwise.
-# This is the ONLY blocking hook — all others are advisory.
+# This is the ONLY blocking hook. All others are advisory.
 
 set -euo pipefail
 

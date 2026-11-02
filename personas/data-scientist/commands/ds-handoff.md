@@ -2,18 +2,20 @@
 
 Generate model card + handoff notes for engineering or stakeholders.
 
+Paths are relative to `workspaces/data-scientist/`.
+
 ## Prerequisites
 
-- `docs/eda-{dataset}.md` exists
-- At least one `docs/experiments/{date}-{experiment-name}.md` exists
+- `docs/eda/{dataset}.md` exists
+- At least one `experiments/{date}-{experiment-name}.md` exists
 - `docs/validation-{model}.md` exists (produced by `/ds-validate`)
 
 ## Steps
 
-1. **Read all source documents** — Load and synthesize:
-   - `docs/eda-{dataset}.md` — data provenance, shape, known issues
-   - All relevant `docs/experiments/` files — experiment history, best model config
-   - `docs/validation-{model}.md` — test metrics, bias findings, drift findings, reproducibility status
+1. **Read all source documents.** Load and synthesize:
+   - `docs/eda/{dataset}.md`: data provenance, shape, known issues
+   - All relevant `experiments/` files: experiment history, best model config
+   - `docs/validation-{model}.md`: test metrics, bias findings, drift findings, reproducibility status
 
 2. **Generate `docs/model-card-{name}.md`** with the following sections:
 
@@ -55,16 +57,16 @@ Generate model card + handoff notes for engineering or stakeholders.
    - Model owner (name + contact)
    - Team or project this model belongs to
 
-3. **Output handoff checklist** — After the model card, produce a checklist:
+3. **Output handoff checklist.** After the model card, produce a checklist:
    - [ ] Model card complete (`docs/model-card-{name}.md` written)
    - [ ] Validation passed (`docs/validation-{model}.md` shows acceptable test metrics)
    - [ ] Reproducibility confirmed (reproducibility-checker: all checks pass)
    - [ ] Model artifact saved (`artifacts/` contains trained model file)
-   - [ ] Experiment log up to date (`docs/experiments/log.md` includes this run)
-   - [ ] No raw data committed (verify with `git status` — no CSVs or Parquets staged)
+   - [ ] Experiment log up to date (`experiments/log.md` includes this run)
+   - [ ] No raw data committed (verify with `git status`: no CSVs or Parquets staged from `data/`)
 
 ## Notes
 
-- Do not write the model card until validation is complete — a model card without a validation report is incomplete.
+- Do not write the model card until validation is complete. A model card without a validation report is incomplete.
 - If any checklist item fails, surface it clearly and block the handoff until resolved.
-- The model card is the deliverable for engineering and stakeholders — write it for them, not for yourself.
+- The model card is the deliverable for engineering and stakeholders. Write it for them, not for yourself.

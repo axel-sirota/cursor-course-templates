@@ -9,9 +9,11 @@ readonly: true
 
 Scan the current diff or specified files for security vulnerabilities and unsafe patterns.
 
+Paths are relative to `workspaces/engineer/`.
+
 ## Steps
 
-1. **Get scope** — Run `git diff HEAD~1` for changed files. If a specific file or directory is provided in context, scan that instead.
+1. **Get scope.** Run `git diff HEAD~1 -- workspaces/engineer/` for changed files. If a specific file or directory is provided in context, scan that instead.
 
 2. **Scan for each vulnerability class**:
 
@@ -35,12 +37,12 @@ Scan the current diff or specified files for security vulnerabilities and unsafe
 ## Security Audit Report
 
 ### Critical
-- [file:line] **Hardcoded secret** — `API_KEY = "sk-..."` found in source.
+- [file:line] **Hardcoded secret**: `API_KEY = "sk-..."` found in source.
   Remediation: Move to environment variable. Load with `os.environ["API_KEY"]`.
   OWASP: A02:2021 – Cryptographic Failures | CWE-798
 
 ### High
-- [file:line] **SQL Injection** — String interpolation in query.
+- [file:line] **SQL Injection**: String interpolation in query.
   Remediation: Use parameterized queries / ORM query builder.
   OWASP: A03:2021 – Injection | CWE-89
 
@@ -57,5 +59,5 @@ N Critical, N High, N Medium, N Informational across N files scanned.
 ## Constraints
 
 - Do not modify files (readonly agent).
-- Do not block on Medium or Informational findings — report and continue.
+- Do not block on Medium or Informational findings. Report and continue.
 - Critical findings in `engineer-implement` must halt further task progress until resolved.

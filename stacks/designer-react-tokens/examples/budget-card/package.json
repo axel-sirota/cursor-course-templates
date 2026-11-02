@@ -1,0 +1,42 @@
+{
+  "name": "budget-card-example",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Worked example for the designer-react-tokens stack: a fictional budgeting app card built from tokens only.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build:tokens": "node scripts/build-tokens.mjs",
+    "check:tokens": "node scripts/build-tokens.mjs --check",
+    "test": "npm run build:tokens && vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "storybook": "npm run build:tokens && storybook dev -p 6006",
+    "build-storybook": "npm run build:tokens && storybook build"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "8.6.14",
+    "@storybook/react": "8.6.14",
+    "@storybook/react-vite": "8.6.14",
+    "@storybook/test": "8.6.14",
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "22.20.5",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "4.7.0",
+    "axe-core": "4.10.3",
+    "jsdom": "25.0.1",
+    "storybook": "8.6.14",
+    "typescript": "5.9.3",
+    "vite": "5.4.21",
+    "vitest": "2.1.9"
+  }
+}

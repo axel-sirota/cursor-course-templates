@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # invest-validator.sh
 # Reads a file_path from stdin JSON.
-# Fires only on markdown files under prds/ or docs/prds/ or specs/ or docs/specs/.
+# Fires only on markdown files under prds/, stories/, docs/prds/, specs/ or docs/specs/.
+# Path match is a suffix match, so workspaces/pm/prds/x.md and prds/x.md both fire.
 # Checks that every line starting with "As a" or "As an" contains
 # both "I want" and "so that".
 # All findings are advisory: warns to stderr, exits 0.
@@ -19,7 +20,7 @@ if [ -z "$file_path" ]; then
 fi
 
 # Only fire on matching path patterns
-if ! echo "$file_path" | grep -qE '(prds/[^/]+\.md|specs/[^/]+\.md|docs/prds/[^/]+\.md|docs/specs/[^/]+\.md)$'; then
+if ! echo "$file_path" | grep -qE '(prds/[^/]+\.md|stories/[^/]+\.md|specs/[^/]+\.md|docs/prds/[^/]+\.md|docs/specs/[^/]+\.md)$'; then
   exit 0
 fi
 
@@ -46,12 +47,12 @@ while IFS= read -r line; do
       if [ "$has_so_that" = false ]; then
         [ -n "$missing" ] && missing="$missing and 'so that'" || missing="'so that'"
       fi
-      echo "[invest-validator] WARNING: Line $line_num in $file_path — user story missing $missing:" >&2
+      echo "[invest-validator] WARNING: Line $line_num in $file_path: user story missing $missing:" >&2
       echo "  $line" >&2
       found_issue=true
     fi
   fi
 done < "$file_path"
 
-# Always exit 0 — advisory only
+# Always exit 0, advisory only
 exit 0

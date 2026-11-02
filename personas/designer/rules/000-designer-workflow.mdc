@@ -1,9 +1,11 @@
 ---
-description: Designer persona workflow rules — always enforced when the designer persona is active.
+description: Designer persona workflow rules, always enforced for designer workspace files.
 alwaysApply: true
 ---
 
 # Designer Workflow Rules
+
+Paths in this rule are relative to the persona workspace, `workspaces/designer/` (tokens in `tokens/`, screen specs in `screens/`, components in `src/`, context and handoff docs in `docs/`).
 
 ## Three Guardrails (always enforced)
 
@@ -15,18 +17,18 @@ If a proposed change requires modifying logic, add a `// TODO: engineering` stub
 ### 2. Minimal diff
 Make the smallest change that achieves the design intent. Do not refactor, reorganize, rename, or restructure surrounding code while implementing a visual change.
 
-If you notice a code quality issue unrelated to the visual task, note it in the handoff output for the engineer persona to address — do not fix it now.
+If you notice a code quality issue unrelated to the visual task, note it in the handoff output for the engineer persona to address. Do not fix it now.
 
 ### 3. Reuse tokens and components
-Every color, spacing, font size, line height, border radius, and shadow value must reference a named design token from the codebase token file (`tokens.json`, `theme.ts`, CSS custom properties, or equivalent).
+Every color, spacing, font size, line height, border radius, and shadow value must reference a named design token from `tokens/tokens.json` (or the workspace's equivalent: `theme.ts`, CSS custom properties).
 
-Every UI element must use an existing codebase component if one exists. Do not create a new component when an existing one can be used directly or with a supported variant.
+Every UI element must use an existing component if one exists. Do not create a new component when an existing one can be used directly or with a supported variant.
 
-## Figma is the source of truth
+## The token file and screen specs are the source of truth
 
-When you are uncertain about a design value — color, spacing, font, radius, layout — do not guess. Fetch the value from Figma using the Figma MCP server.
+When you are uncertain about a design value (color, spacing, font, radius, layout), do not guess. Read it from `tokens/tokens.json` and the screen spec in `screens/`. If a Figma frame is in use (optional), fetch the value with the Figma MCP server.
 
-Memory and visual inspection are unreliable. MCP is the only authoritative source.
+Memory and visual inspection are unreliable. The token file, the spec, or MCP are the only authoritative sources.
 
 ## Subagent delegation
 
@@ -36,7 +38,7 @@ Invoke subagents automatically in these situations:
 |---|---|
 | A style file (`.css`, `.scss`, `.tsx`, `.jsx`, `.vue`, `.svelte`) is edited | `token-validator` |
 | A layout change is complete and ready for review | `responsive-checker` |
-| A Figma URL or node ID is provided | `figma-extractor` |
+| A Figma URL or node ID is provided (optional path) | `figma-extractor` |
 
 ## Forbidden patterns
 
@@ -48,3 +50,5 @@ The following patterns are always prohibited in designer persona output:
 - Hardcoded pixel spacing in `margin`, `padding`, `gap`, `width`, `height` (exception: `0` and `1px` borders)
 - Inline style attributes: `style={{ }}` in JSX/TSX
 - Modifications to files matching: `**/handlers/**`, `**/routes/**`, `**/store/**`, `**/reducers/**`, `**/api/**`, `**/*.service.ts`, `**/*.service.js`
+
+Values belong in `tokens/tokens.json` only. The generated `src/styles/tokens.css` is the one place raw values may appear in CSS.

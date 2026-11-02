@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "accountant-data": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./workspaces/accountant/data"],
+      "env": {},
+      "_note": "Scoped to the accountant workspace data folder. No credentials needed. Synthetic Northwind Co. data only. No ERP, bank or accounting-system MCPs in this course."
+    }
+  }
+}

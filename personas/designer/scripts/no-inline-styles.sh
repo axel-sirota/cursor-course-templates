@@ -31,9 +31,9 @@ fi
 # Check for inline style={{ }} attributes
 INLINE_HITS=$(grep -n 'style=\s*{{' "$FILE_PATH" || true)
 if [ -n "$INLINE_HITS" ]; then
-  echo "[no-inline-styles] WARNING: Inline style attribute(s) found in $FILE_PATH — use className with design tokens instead:" >&2
+  echo "[no-inline-styles] WARNING: Inline style attribute(s) found in $FILE_PATH, use className with design tokens instead:" >&2
   echo "$INLINE_HITS" >&2
 fi
 
-# Advisory only — always exit 0
+# Advisory only, always exit 0
 exit 0

@@ -9,6 +9,8 @@ readonly: true
 
 Verify that the current experiment can be reproduced exactly from its logged seed and documented environment.
 
+Paths are relative to `workspaces/data-scientist/` (notebooks in `notebooks/`, dependency files at the workspace root).
+
 ## Checks
 
 Run all of the following checks. Report pass/fail for each, with file and line number for every failure.
@@ -24,14 +26,14 @@ Run all of the following checks. Report pass/fail for each, with file and line n
 - **FAIL** if any random operation (e.g., `train_test_split`, `np.random.`, `torch.`) appears before the seed is set.
 
 ### 2. Pinned dependencies
-- Verify that `requirements.txt` or `pyproject.toml` exists.
+- Verify that `requirements.txt` or `pyproject.toml` exists in the workspace.
 - **FAIL** if neither file exists.
 - **FAIL** if any core DS library (`numpy`, `pandas`, `scikit-learn`, `torch`, `tensorflow`) uses an unbounded version specifier (e.g., `numpy>=1.24` without an upper bound `<2.0`).
 - Advisory warning (not fail) for non-core libraries with loose pins.
 
 ### 3. Relative paths only
 - Scan the notebook or script for absolute file paths (strings starting with `/` on Unix or `C:\` on Windows, or using `os.path.abspath` without a relative base).
-- **FAIL** if any absolute path is found. Recommend replacing with `pathlib.Path` relative to project root.
+- **FAIL** if any absolute path is found. Recommend replacing with `pathlib.Path` relative to the workspace root.
 
 ### 4. Notebook execution order
 - For `.ipynb` files: verify that cells were executed in sequential order.
@@ -41,26 +43,26 @@ Run all of the following checks. Report pass/fail for each, with file and line n
 
 ### 5. No mutable global state between cells
 - Scan for patterns where a variable is reassigned in a later cell to a different type than its initial assignment (e.g., `df = df.dropna()` followed by `df = "some string"` in a later cell).
-- Advisory warning (not fail) — flag suspicious reassignments for human review.
+- Advisory warning (not fail): flag suspicious reassignments for human review.
 
 ## Output Format
 
 ```
 ## Reproducibility Report
 
-### Check 1: Seed discipline — PASS / FAIL
+### Check 1: Seed discipline: PASS / FAIL
 [detail or "OK"]
 
-### Check 2: Pinned dependencies — PASS / FAIL
+### Check 2: Pinned dependencies: PASS / FAIL
 [detail or "OK"]
 
-### Check 3: Relative paths — PASS / FAIL
+### Check 3: Relative paths: PASS / FAIL
 [detail or "OK"]
 
-### Check 4: Notebook execution order — PASS / FAIL / N/A (not a notebook)
+### Check 4: Notebook execution order: PASS / FAIL / N/A (not a notebook)
 [detail or "OK"]
 
-### Check 5: Global state — ADVISORY
+### Check 5: Global state: ADVISORY
 [detail or "No issues found"]
 
 ### Summary

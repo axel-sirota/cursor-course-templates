@@ -1,0 +1,53 @@
+---
+description: PRD writing style. Plain declarative prose, concrete numbers, markdownlint-clean formatting.
+alwaysApply: true
+---
+
+# PRD Style
+
+## Voice
+
+- Short declarative sentences. One idea per sentence.
+- Concrete nouns and real numbers. "Alert within 2 minutes", not "timely alerts".
+- Present tense for behavior: "The app sends an alert." Not "will send" or "should send".
+- Name the user. "A household budgeter", never "the user" alone.
+- No hedging: drop "arguably", "it's worth noting", "ideally".
+- No marketing adjectives. If a word could sit in an ad, cut it.
+- No em dashes. Use a comma, a colon or a full stop.
+
+## Scope language
+
+- Goals say what changes for the user and by how much.
+- Non-goals say what this PRD will not do, with a reason. "No SMS alerts in v1: cost per message."
+- Requirements describe outcomes, not screens or tables. Leave the how to engineering.
+
+## Formatting (markdownlint-clean)
+
+- One H1 per file. H2 for required sections. H3 inside them. Never skip a level.
+- Blank line before and after headings, lists, tables and code fences.
+- Every code fence has a language: `markdown`, `mermaid`, `bash`, `text`.
+- Lists use `-`. Ordered lists count up: `1.`, `2.`, `3.`.
+- Tables for anything with two or more attributes per row: epics, metrics, NFRs, questions.
+- No trailing spaces. File ends with one newline.
+- No raw HTML.
+
+## TODO markers
+
+- Skeleton bodies use `TODO:` followed by what is missing. "TODO: name the primary user."
+- `check_prd.py --strict` fails on any `TODO:`. Clear them before `/pm-validate`.
+
+## Open questions
+
+Every open question has an owner and a due date in a table:
+
+| ID | Question | Owner | Due |
+|---|---|---|---|
+| Q1 | Do alerts count toward the notification cap? | PM | 2026-11-15 |
+
+A question with no owner is a note, not a question. Assign it or delete it.
+
+## Diagrams
+
+- Optional. At most one Mermaid diagram per PRD.
+- Use it for traceability or a user flow. Not for decoration.
+- The text must stand without the diagram.

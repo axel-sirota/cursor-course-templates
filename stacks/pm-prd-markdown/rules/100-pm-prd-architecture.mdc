@@ -1,0 +1,58 @@
+---
+description: PRD workspace file layout. One PRD per file, one story per file, naming and ID conventions.
+alwaysApply: true
+---
+
+# PRD Workspace Architecture
+
+## Layout (relative to the workspace root)
+
+```
+prds/<feature-slug>.md                         one PRD per feature
+stories/<feature-slug>-<NN>-<story-slug>.md    one story per file
+research/<YYYY-MM-DD>-<source>.md              raw input, never spec
+decisions/<YYYY-MM-DD>-<slug>.md               settled trade-offs
+docs/                                          command output (validation, tickets, status)
+glossary.md                                    domain terms, alphabetical
+scripts/check_prd.py                           structure checker
+.markdownlint-cli2.jsonc                       lint config
+```
+
+## One PRD per file
+
+- File name is the feature slug: `prds/budget-alerts.md`.
+- One H1 per PRD: `# PRD: <Feature name>`.
+- A PRD covers one feature. Two features means two PRDs.
+- Required H2 headings, in this order: Problem, Goals, Non-goals, Users, Epics, User Stories, Non-functional Requirements, Edge Cases, Dependencies, Rollout Plan, Success Metrics, Open Questions.
+- Required H3 under Non-functional Requirements: Performance, Security, Privacy, Accessibility, Internationalization, Observability.
+
+## One story per file
+
+- Name: `stories/<feature-slug>-<NN>-<story-slug>.md`. `NN` is two digits, never reused.
+- Story ID: a 2 to 4 letter feature prefix plus `NN`, for example `BA-03`.
+- H1: `# <ID>: <short title>`.
+- Header lines directly under the H1: `**Epic:** E<n> ...`, `**Goal:** G<n>`, `**Size:** S|M|L`.
+- Sections: Story, Acceptance Criteria, Edge Cases, INVEST Check.
+- The PRD's User Stories section is an index table that links to each file. Story text lives only in the story file.
+
+## IDs
+
+| Thing | Format | Defined in |
+|---|---|---|
+| Goal | `G1`, `G2` | PRD `## Goals` |
+| Epic | `E1`, `E2` | PRD `## Epics` table |
+| Story | `BA-01` | `stories/` file H1 |
+| NFR | `NFR-PERF-1` | PRD `## Non-functional Requirements` |
+| Decision | file date + slug | `decisions/` |
+
+IDs are permanent. A dropped story keeps its ID and moves to a "Dropped" row in the index.
+
+## Glossary
+
+- `glossary.md` holds one H2 per term, alphabetical, with a one-line definition.
+- The first use of a glossary term in a PRD is linked: `[safe-to-spend](../glossary.md#safe-to-spend)`.
+
+## Links
+
+- Use relative links only. `../stories/budget-alerts-01-set-category-limit.md`, never absolute paths.
+- No links to private tools inside story text. Put tracker links in the PRD index only.

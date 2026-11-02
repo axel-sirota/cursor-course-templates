@@ -1,0 +1,72 @@
+---
+description: Testing for PRDs. INVEST stories, Given/When/Then AC, measurable NFRs, story → epic → goal traceability.
+alwaysApply: true
+---
+
+# Testing a PRD
+
+A PRD has tests too. They are structural and they run on every edit.
+`check_prd.py` covers the mechanical checks. `/pm-validate` covers judgment.
+
+## 1. Every story is INVEST
+
+Fill the INVEST Check table in each story file. Each row is Yes plus one line of evidence.
+
+| Letter | Fails when |
+|---|---|
+| Independent | It needs another story in the same sprint to ship |
+| Negotiable | It prescribes a UI widget or an implementation |
+| Valuable | No named user gets a visible change |
+| Estimable | The team needs a spike before sizing it |
+| Small | Size is larger than L, or it has more than 5 AC |
+| Testable | Any AC has no observable Then |
+
+The story sentence is one line: `As a <user>, I want <capability> so that <outcome>.`
+Missing "I want" or "so that" is a defect. The `invest-validator` hook warns on it.
+
+## 2. Every AC is Given/When/Then
+
+```markdown
+- **Given** <starting state with concrete values>
+- **When** <one user action or one system event>
+- **Then** <one observable outcome>
+```
+
+- At least one AC per story. Number them `AC1`, `AC2`.
+- Use real values: "a $400 limit and $360 spent", not "a limit and some spending".
+- "Gracefully", "quickly", "user-friendly" are banned in a Then. Say what the user sees.
+
+## 3. Every NFR is measurable
+
+Each NFR has a number, a percentile, a time window or a named standard.
+
+| Category | Pass | Fail |
+|---|---|---|
+| Performance | p95 < 2 s from event to alert | "fast" |
+| Security | data class + auth model named | "secure" |
+| Privacy | retention days + consent model | absent |
+| Accessibility | WCAG 2.2 AA | "accessible" |
+| Internationalization | locales + currency format listed | absent |
+| Observability | metric names + alert threshold | "add monitoring later" |
+
+## 4. Traceability is complete
+
+- Every story names one epic (`**Epic:** E1`) and one goal (`**Goal:** G1`).
+- The epic exists in the PRD Epics table and points at the same goal.
+- Every goal has at least one epic. Every epic has at least one story.
+- Every story file appears in the PRD User Stories index.
+
+## 5. Edge cases are named
+
+List edge cases as named scenarios, each with the story that handles it.
+"Handle errors" is not an edge case.
+
+## Running the tests
+
+```bash
+npx markdownlint-cli2@0.18.1
+python3 scripts/check_prd.py .            # skeleton and draft phases
+python3 scripts/check_prd.py . --strict   # before /pm-validate and /pm-decompose
+```
+
+Exit code 0 means pass. Fix every reported line before moving phase.

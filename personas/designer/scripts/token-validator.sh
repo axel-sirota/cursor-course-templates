@@ -2,6 +2,7 @@
 # token-validator.sh
 # Fires on afterFileEdit for .css/.scss/.tsx/.jsx/.vue/.svelte files.
 # Warns to stderr about hardcoded color or spacing values. Advisory only (exits 0).
+# Works on the edited file path as given (workspaces/designer/... or repo-relative).
 
 set -euo pipefail
 
@@ -23,6 +24,13 @@ case "$FILE_PATH" in
     ;;
 esac
 
+# Skip the generated token stylesheet (built from tokens/tokens.json, raw values expected)
+case "$FILE_PATH" in
+  *src/styles/tokens.css)
+    exit 0
+    ;;
+esac
+
 # Exit silently if file does not exist
 if [ ! -f "$FILE_PATH" ]; then
   exit 0
@@ -33,7 +41,7 @@ WARNED=0
 # Check for hardcoded hex colors (outside comment lines)
 HEX_HITS=$(grep -n '#[0-9a-fA-F]\{3,6\}\b' "$FILE_PATH" | grep -v '^\s*//' | grep -v '^\s*\*' || true)
 if [ -n "$HEX_HITS" ]; then
-  echo "[token-validator] WARNING: Hardcoded hex color(s) found in $FILE_PATH — use design tokens instead:" >&2
+  echo "[token-validator] WARNING: Hardcoded hex color(s) found in $FILE_PATH, use design tokens instead:" >&2
   echo "$HEX_HITS" >&2
   WARNED=1
 fi
@@ -41,10 +49,10 @@ fi
 # Check for hardcoded px values in spacing properties (excluding 0px and 1px)
 SPACING_HITS=$(grep -nE '(margin|padding|gap):\s*[2-9][0-9]*px|[0-9]{2,}px' "$FILE_PATH" | grep -v '^\s*//' | grep -v '^\s*\*' || true)
 if [ -n "$SPACING_HITS" ]; then
-  echo "[token-validator] WARNING: Hardcoded spacing value(s) found in $FILE_PATH — use spacing tokens instead:" >&2
+  echo "[token-validator] WARNING: Hardcoded spacing value(s) found in $FILE_PATH, use spacing tokens instead:" >&2
   echo "$SPACING_HITS" >&2
   WARNED=1
 fi
 
-# Advisory only — always exit 0
+# Advisory only, always exit 0
 exit 0

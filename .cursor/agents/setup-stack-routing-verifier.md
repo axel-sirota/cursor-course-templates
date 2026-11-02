@@ -1,46 +1,35 @@
 ---
 name: setup-stack-routing-verifier
-description: Verifies that setup-stack.md correctly lists all available stacks for each persona, that every listed stack actually exists in stacks/, and that no existing stack is missing from the persona routing table.
+description: Verifies that every persona.yaml lists only stacks that exist, that every stack in stacks/ belongs to exactly one persona, and that every routed stack's Architecture Shape has a row in /architect's dispatch table.
 ---
 
-You are verifying that the `/setup-stack` command correctly routes each persona to the right stacks.
+You are verifying that `/setup-stack` and `/architect` can route every persona to a working stack.
+
+`/setup-stack` does not hardcode stacks. It reads `personas/<role>/persona.yaml` → `stacks`. So the routing table IS the set of persona.yaml files.
 
 ## Verification Steps
 
-1. **Read** `.claude/commands/setup-stack.md`
-2. **List** all directories in `stacks/` (excluding `blank/` and `shared/`)
-3. **Extract** the stack lists for each persona from setup-stack.md
-4. **Cross-check**:
-   - Every stack listed for a persona → exists in `stacks/`
-   - Every stack in `stacks/` → is listed under exactly one persona (or intentionally unlisted — if so, flag it)
-   - The allowed-list validation table matches the displayed lists
-
-## Persona-Stack Ownership
-
-Expected mapping:
-- **engineer**: python-fastapi, go-gin, go-grpc, java-spring, node-express, node-nestjs
-- **devops**: devops-terraform, devops-ansible, devops-k8s-helm
-- **data-scientist**: python-datascience, python-spark, python-dbt-snowflake, python-mlops, r-tidyverse
-- **pm**: (none)
-- **designer**: (none)
+1. List directories in `personas/`. For each, read `persona.yaml` → `stacks`.
+2. List directories in `stacks/`, excluding `blank/` and `shared/`.
+3. Cross-check:
+   - Every persona has at least one stack.
+   - Every stack listed in a persona.yaml exists in `stacks/` and has `context.md` with a non-empty `## Architecture Shape`.
+   - Every stack in `stacks/` is listed by exactly one persona. Unlisted stacks are flagged (they may be intentional, say so).
+4. Read `.cursor/commands/architect.md` → the Architecture Shape dispatch table. For each routed stack, the shape name in its `context.md` (text before the first parenthesis) must match a row, and the stack must appear in that row's Stacks column.
+5. Read `.cursor/commands/setup-stack.md` and confirm it contains no hardcoded persona → stack list.
 
 ## Output Format
 
 ```
 ## Setup-Stack Routing Verification
 
-### Stacks in filesystem but NOT in setup-stack.md:
-- {stack-name} — should be added to {persona} persona
+| Persona | Stacks in persona.yaml | All exist? | Shapes in architect table? |
+|---|---|---|---|
 
-### Stacks in setup-stack.md but NOT in filesystem:
-- {stack-name} under {persona} — BROKEN REFERENCE
+### Stacks not routed to any persona
+### Stacks routed but missing on disk
+### Shapes missing from /architect dispatch table
+### Hardcoded lists found in setup-stack.md
 
-### Persona list vs allowed-list validation table mismatches:
-- {persona}: displayed list has {stack} but validation table does not
-
-### Summary
-Total stacks in filesystem: {N}
-Total stacks routed in setup-stack.md: {N}
-Unrouted stacks: {N}
-Broken references: {N}
+Summary: {N} personas, {N} stacks, {N} problems
 ```

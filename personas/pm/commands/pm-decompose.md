@@ -2,6 +2,8 @@
 
 **Purpose:** Break a validated PRD into dependency-ordered tickets ready for the issue tracker.
 
+Paths are relative to `workspaces/pm/`.
+
 ## Steps
 
 1. **Read inputs**
@@ -11,8 +13,10 @@
    - If the user explicitly skips validation, note the override and continue.
 
 2. **Extract user stories**
-   - Identify every user story in the PRD (lines or sections starting with "As a…").
-   - For each story: extract the title, acceptance criteria (Given/When/Then blocks), and any NFRs or edge cases that belong to it.
+   - In the `pm-prd-markdown` stack the PRD's `## User Stories` section is an index table that links to one file per story in `stories/` (`stories/<feature-slug>-<NN>-<story-slug>.md`). Follow every link in that index and read each story file. Story text lives only there.
+   - If the PRD holds stories inline instead (sections starting with "As a…"), read them from the PRD.
+   - For each story: extract the ID, title, acceptance criteria (Given/When/Then blocks), and any NFRs or edge cases that belong to it.
+   - If decomposition needs a new story (for example, the PM agrees to split one), write it as a new `stories/` file using the story template that `/setup-stack pm` copied to `templates/story-template.md`, with the next unused `NN`, and add a row to the PRD index. Never reuse a story ID.
 
 3. **Create tickets**
    For each user story, produce a ticket with:
@@ -25,7 +29,7 @@
 
 4. **Build the dependency graph**
    - Identify which tickets block which.
-   - Verify the graph is acyclic — if a cycle is found, stop and ask the PM to resolve it.
+   - Verify the graph is acyclic. If a cycle is found, stop and ask the PM to resolve it.
    - Order the ticket list by dependency: tickets with no blockers first.
 
 5. **Write the ticket document**
@@ -45,6 +49,6 @@
 ## Constraints
 
 - Ticket titles must always be written from the user perspective ("As a…"). Never "Implement X" or "Add Y to the DB."
-- No implementation details in ticket descriptions — describe the user-visible outcome only.
+- No implementation details in ticket descriptions. Describe the user-visible outcome only.
 - The dependency graph must be acyclic before outputting.
-- Tickets must map 1-to-1 to stories in the PRD — do not merge or split stories without asking the PM first.
+- Tickets must map 1-to-1 to stories in the PRD. Do not merge or split stories without asking the PM first.

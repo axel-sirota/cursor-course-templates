@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Data Scientist Workflow Rules
 
+Paths in this rule are relative to the persona workspace, `workspaces/data-scientist/` (data in `data/`, notebooks in `notebooks/`, EDA in `docs/eda/`, experiment log in `experiments/log.md`).
+
 ## Seed discipline is mandatory
 
 Every experiment sets a random seed before any random operation. There are no exceptions.
@@ -30,7 +32,7 @@ Only data paths and content hashes enter the repository. Never commit:
 - Database dumps or exports
 - Any file from `data/` that contains actual records
 
-Add `data/` to `.gitignore`. If a dataset must be shared with the team, document its location and provide a reproducible download or query script instead.
+Add `workspaces/data-scientist/data/` to `.gitignore`. The course uses synthetic data only. If a dataset must be shared with the team, document its location and provide a reproducible generation, download or query script instead.
 
 ## Notebooks run top-to-bottom
 
@@ -45,7 +47,7 @@ The `notebook-lint` hook fires on every `.ipynb` edit and warns if cells appear 
 
 No experiment result exists only in your memory or a notebook output cell. After every experiment run:
 
-- Invoke `experiment-tracker` to append a row to `docs/experiments/log.md`
+- Invoke `experiment-tracker` to append a row to `experiments/log.md`
 - The row must include: timestamp, seed, model config, train metrics, validation metrics, artifact paths
 
 The `log-experiment` hook fires at session end to remind you if this step was skipped.
@@ -66,6 +68,6 @@ Delegate to subagents at these workflow transitions:
 
 | When | Delegate to |
 |---|---|
-| New dataset available | `data-profiler` → produces `docs/profile-{dataset}.md` |
-| Experiment run complete | `experiment-tracker` → appends to `docs/experiments/log.md` |
+| New dataset available | `data-profiler` → produces `docs/eda/{dataset}-profile.md` |
+| Experiment run complete | `experiment-tracker` → appends to `experiments/log.md` |
 | Before `/ds-validate` handoff step | `reproducibility-checker` → verifies seed, deps, paths, execution order |

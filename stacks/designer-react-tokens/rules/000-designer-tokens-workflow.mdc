@@ -1,0 +1,38 @@
+---
+description: Designer tokens workflow. Token file first, then components, then screens. Figma optional.
+alwaysApply: true
+---
+
+# Designer Tokens Workflow
+
+## Order of work
+1. **Tokens**: edit `tokens/tokens.json`. Run `npm run check:tokens`, then `npm run build:tokens`.
+2. **Component**: write `X.test.tsx` first (render + accessibility), then `X.tsx` and `X.css`.
+3. **Story**: add `X.stories.tsx` with one story per state listed in the component spec.
+4. **Screen**: arrange existing components as the screen spec in `screens/` says.
+
+Never jump to step 2 with a value that is not in the token file yet.
+
+## Inputs
+- Token JSON (`tokens/tokens.json`) is the source of truth for values.
+- Screen specs (`screens/*.md`) are the source of truth for layout and states.
+- Component specs (`templates/component-spec-template.md` filled in) describe props and variants.
+- Figma MCP is optional. Use `/designer-extract` with a Figma URL only if one exists. Without Figma, `/designer-extract` reads a token JSON or a screen spec file.
+
+## Session gate
+Before closing a session, all three must pass:
+1. `npm run check:tokens`: token JSON is valid, every reference resolves.
+2. `npm test`: every component renders and has zero axe violations.
+3. `npm run typecheck`: TypeScript compiles, stories included.
+
+## Missing token
+If a spec needs a value with no token:
+1. Stop. Do not hardcode it.
+2. Propose a semantic token name and the primitive it should point to.
+3. Add it to `tokens/tokens.json` only after the user agrees.
+4. Note it in the transition doc under "Token changes".
+
+## Hand-off boundary
+- Event handlers are empty stubs with `// TODO: engineering`.
+- No fetch, no store, no routing. Those belong to the engineer persona.
+- `/designer-handoff` lists components changed, tokens added and open questions.

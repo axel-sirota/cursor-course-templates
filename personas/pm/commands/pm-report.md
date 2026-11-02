@@ -2,6 +2,8 @@
 
 **Purpose:** Pull current status from the issue tracker and generate a stakeholder-ready status update.
 
+Paths are relative to `workspaces/pm/`.
+
 ## Steps
 
 1. **Identify the epic**
@@ -25,10 +27,10 @@
 
 3. **Build the status summary**
    Categorize every ticket into one of four states:
-   - **Completed** — Done, closed, or accepted.
-   - **In Progress** — Actively being worked on.
-   - **Blocked** — Cannot proceed; include the blocker reason.
-   - **Not Started** — Not yet picked up.
+   - **Completed**: Done, closed, or accepted.
+   - **In Progress**: Actively being worked on.
+   - **Blocked**: Cannot proceed; include the blocker reason.
+   - **Not Started**: Not yet picked up.
 
 4. **Generate the report**
    Save to:
