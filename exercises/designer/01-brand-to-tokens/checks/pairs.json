@@ -1,0 +1,23 @@
+{
+  "$description": "Foreground / background pairs that Northwind Expenses actually renders. Names are semantic tokens (the semantic. prefix is implied). min is the WCAG 2.2 AA ratio: 4.5 for text, 3 for focus rings and control borders.",
+  "pairs": [
+    { "fg": "color.text.default", "bg": "color.surface.page", "min": 4.5, "use": "body text on app background" },
+    { "fg": "color.text.default", "bg": "color.surface.card", "min": 4.5, "use": "body text on cards and tables" },
+    { "fg": "color.text.muted", "bg": "color.surface.page", "min": 4.5, "use": "dates and captions on app background" },
+    { "fg": "color.text.muted", "bg": "color.surface.card", "min": 4.5, "use": "dates and categories in table rows" },
+    { "fg": "color.text.inverse", "bg": "color.action.primary.bg", "min": 4.5, "use": "primary button label" },
+    { "fg": "color.text.inverse", "bg": "color.action.primary.bgHover", "min": 4.5, "use": "primary button label on hover" },
+    { "fg": "color.text.link", "bg": "color.surface.card", "min": 4.5, "use": "links and text buttons" },
+    { "fg": "color.text.danger", "bg": "color.surface.card", "min": 4.5, "use": "error message text" },
+    { "fg": "color.text.success", "bg": "color.surface.card", "min": 4.5, "use": "refund amounts" },
+    { "fg": "color.status.draft.text", "bg": "color.status.draft.bg", "min": 4.5, "use": "Draft badge" },
+    { "fg": "color.status.submitted.text", "bg": "color.status.submitted.bg", "min": 4.5, "use": "Submitted badge" },
+    { "fg": "color.status.approved.text", "bg": "color.status.approved.bg", "min": 4.5, "use": "Approved badge" },
+    { "fg": "color.status.rejected.text", "bg": "color.status.rejected.bg", "min": 4.5, "use": "Rejected badge" },
+    { "fg": "color.status.paid.text", "bg": "color.status.paid.bg", "min": 4.5, "use": "Paid badge" },
+    { "fg": "color.flag.text", "bg": "color.flag.bg", "min": 4.5, "use": "policy flag chip" },
+    { "fg": "color.border.control", "bg": "color.surface.card", "min": 3, "use": "checkbox and input border" },
+    { "fg": "color.focus.ring", "bg": "color.surface.card", "min": 3, "use": "focus ring on cards and rows" },
+    { "fg": "color.focus.ring", "bg": "color.surface.page", "min": 3, "use": "focus ring on app background" }
+  ]
+}

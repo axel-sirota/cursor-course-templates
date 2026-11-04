@@ -1,0 +1,60 @@
+{
+  "$description": "What check_stories.mjs requires for exercise 2. dir is relative to the workspace root (default workspaces/designer). Story names are exact export names. Test phrases are matched case-insensitively against it()/test() titles.",
+  "components": [
+    {
+      "name": "StatusBadge",
+      "dir": "src/components",
+      "stories": [
+        "Draft",
+        "Submitted",
+        "Approved",
+        "Rejected",
+        "Paid",
+        "FlagReceiptRequired",
+        "FlagOverMealLimit",
+        "FlagWeekendReview",
+        "FlagAlcohol"
+      ],
+      "tests": [
+        "renders the label for each status",
+        "maps status to data-status",
+        "renders policy flags with text",
+        "has no axe violations"
+      ]
+    },
+    {
+      "name": "AmountCell",
+      "dir": "src/components",
+      "stories": ["Usd", "Eur", "Gbp", "Cad", "Refund", "LargeAmount"],
+      "tests": [
+        "renders the amount and currency code",
+        "marks refunds with text",
+        "uses tabular numbers",
+        "has no axe violations"
+      ]
+    },
+    {
+      "name": "ExpenseRow",
+      "dir": "src/components",
+      "stories": [
+        "Default",
+        "Hover",
+        "Focused",
+        "Selected",
+        "Disabled",
+        "WithPolicyFlags",
+        "MissingReceipt",
+        "Refund"
+      ],
+      "tests": [
+        "renders merchant, date, category and amount",
+        "renders the status badge",
+        "renders each policy flag",
+        "announces receipt status",
+        "selected row checks the checkbox",
+        "disabled row disables the checkbox",
+        "has no axe violations"
+      ]
+    }
+  ]
+}

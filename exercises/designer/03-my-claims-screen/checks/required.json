@@ -1,0 +1,29 @@
+{
+  "$description": "What exercise 3 requires. Run with exercise 2's checker: node exercises/designer/02-claim-components/checks/check_stories.mjs --required exercises/designer/03-my-claims-screen/checks/required.json",
+  "components": [
+    {
+      "name": "ClaimSummaryCard",
+      "dir": "src/components",
+      "stories": ["Default", "Draft", "Rejected", "Paid", "WithReceipt", "LongTitle"],
+      "tests": [
+        "renders title, total and status text",
+        "view details is a button",
+        "more actions button has a label",
+        "has no axe violations"
+      ]
+    },
+    {
+      "name": "MyClaimsScreen",
+      "dir": "src/screens",
+      "stories": ["Default", "Loading", "Empty", "Error", "FilteredNoResults", "Mobile", "Tablet", "Desktop"],
+      "tests": [
+        "renders a row per expense",
+        "shows the loading state",
+        "shows the empty state",
+        "shows the error state with retry",
+        "shows the no results state",
+        "has no axe violations"
+      ]
+    }
+  ]
+}

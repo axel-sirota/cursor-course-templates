@@ -1,0 +1,15 @@
+{
+  "$description": "Extra contrast pairs for ExpenseRow hover and selected fills. Run with exercise 1's checker: node exercises/designer/01-brand-to-tokens/checks/check_contrast.mjs --pairs exercises/designer/02-claim-components/checks/pairs-rows.json",
+  "pairs": [
+    { "fg": "color.text.default", "bg": "color.surface.hover", "min": 4.5, "use": "row text on hover" },
+    { "fg": "color.text.muted", "bg": "color.surface.hover", "min": 4.5, "use": "date and category on hover" },
+    { "fg": "color.text.link", "bg": "color.surface.hover", "min": 4.5, "use": "merchant button on hover" },
+    { "fg": "color.text.default", "bg": "color.surface.selected", "min": 4.5, "use": "row text when selected" },
+    { "fg": "color.text.muted", "bg": "color.surface.selected", "min": 4.5, "use": "date and category when selected" },
+    { "fg": "color.text.link", "bg": "color.surface.selected", "min": 4.5, "use": "merchant button when selected" },
+    { "fg": "color.focus.ring", "bg": "color.surface.hover", "min": 3, "use": "focus ring on a hovered row" },
+    { "fg": "color.focus.ring", "bg": "color.surface.selected", "min": 3, "use": "focus ring on a selected row" },
+    { "fg": "color.border.selected", "bg": "color.surface.card", "min": 3, "use": "selected row accent bar" },
+    { "fg": "color.border.control", "bg": "color.surface.selected", "min": 3, "use": "checkbox border on a selected row" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "$description": "Extra contrast pairs for the My Claims screen states. Run with exercise 1's checker: node exercises/designer/01-brand-to-tokens/checks/check_contrast.mjs --pairs exercises/designer/03-my-claims-screen/checks/pairs-screen.json",
+  "pairs": [
+    { "fg": "color.text.danger", "bg": "color.feedback.danger.bg", "min": 4.5, "use": "error banner message" },
+    { "fg": "color.text.default", "bg": "color.feedback.danger.bg", "min": 4.5, "use": "error banner body text" },
+    { "fg": "color.text.inverse", "bg": "color.action.primary.bg", "min": 4.5, "use": "Try again, New claim, Submit selected" },
+    { "fg": "color.focus.ring", "bg": "color.feedback.danger.bg", "min": 3, "use": "focus ring on Try again inside the banner" },
+    { "fg": "color.feedback.danger.border", "bg": "color.surface.page", "min": 3, "use": "error banner edge on the page" },
+    { "fg": "color.text.default", "bg": "color.surface.card", "min": 4.5, "use": "toggle button, not pressed" },
+    { "fg": "color.border.control", "bg": "color.surface.page", "min": 3, "use": "toggle and search borders on the page" },
+    { "fg": "color.text.muted", "bg": "color.surface.page", "min": 4.5, "use": "subtitle, table caption, empty state text" },
+    { "fg": "color.text.link", "bg": "color.surface.page", "min": 4.5, "use": "Clear filters text button" }
+  ]
+}

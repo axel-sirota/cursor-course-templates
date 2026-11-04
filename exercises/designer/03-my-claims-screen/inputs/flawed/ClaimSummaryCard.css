@@ -1,0 +1,91 @@
+/* ClaimSummaryCard styles. */
+
+.claim-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack-sm);
+  width: 400px;
+  padding: var(--space-inset-md);
+  background: var(--color-surface-card);
+  border: var(--border-width-default) solid #d0d7de;
+  border-radius: var(--radius-card);
+  font-family: var(--font-family-base);
+  color: var(--color-text-default);
+}
+
+.claim-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-inline-sm);
+}
+
+.claim-card__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-line-height-tight);
+}
+
+.claim-card__menu {
+  padding: var(--space-inset-xs);
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.claim-card__menu:focus {
+  outline: none;
+}
+
+.claim-card__menu-icon {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+}
+
+.claim-card__id {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.claim-card__total {
+  margin: 0;
+  font-size: var(--font-size-amount);
+  font-weight: var(--font-weight-bold);
+  color: var(--primitive-color-navy-700);
+}
+
+.claim-card__dot {
+  display: inline-block;
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+  border-radius: var(--radius-badge);
+}
+
+.claim-card__dot--draft { background: var(--color-status-draft-text); }
+.claim-card__dot--submitted { background: var(--color-status-submitted-text); }
+.claim-card__dot--approved { background: var(--color-status-approved-text); }
+.claim-card__dot--rejected { background: var(--color-status-rejected-text); }
+.claim-card__dot--paid { background: var(--color-status-paid-text); }
+
+.claim-card__meta {
+  margin: 0;
+  font-size: var(--font-size-label);
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.claim-card__thumb {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  border-radius: var(--radius-control);
+}
+
+.claim-card__open {
+  align-self: flex-start;
+  color: var(--color-text-link);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
