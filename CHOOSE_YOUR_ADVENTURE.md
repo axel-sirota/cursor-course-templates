@@ -30,7 +30,7 @@ All engineer stacks are graded by the same Hurl acceptance tests over HTTP, so t
 ```
 /set-persona add <persona>
 /setup-stack <persona>              # pick the stack from your row
-/architect <persona> @exercises/<persona>/<01 folder>/README.md
+/architect <persona> @exercises/<persona>/<first exercise folder>/README.md   # engineer: 00-skeleton, others: 01-...
    ...review the plan, reply "approved"...
 /start-session <persona>
 ```

@@ -79,7 +79,7 @@ The engineer exercise is the Blog API (auth, posts, comments, tags), built in ph
 ```
 /set-persona add engineer
 /setup-stack engineer            # python-fastapi (default), go-gin, go-grpc, java-spring, node-express, node-nestjs
-/architect engineer @exercises/engineer/<01 folder>/README.md
+/architect engineer @exercises/engineer/00-skeleton/README.md
 /start-session engineer
 /engineer-tasks
 /engineer-implement
@@ -90,7 +90,7 @@ The engineer exercise is the Blog API (auth, posts, comments, tags), built in ph
 Start your server, then run the acceptance tests from a terminal:
 
 ```bash
-exercises/engineer/run-acceptance.sh <exercise>
+exercises/engineer/run-acceptance.sh 00        # then 01 ... 05, or "all"
 ```
 
 ### Product manager
@@ -100,7 +100,7 @@ Exercise 01: interview notes to PRD.
 ```
 /set-persona add pm
 /setup-stack pm                  # pm-prd-markdown
-/architect pm @exercises/pm/<01 folder>/README.md
+/architect pm @exercises/pm/01-notes-to-prd/README.md
 /start-session pm
 /pm-decompose
 /pm-validate
@@ -117,7 +117,7 @@ Exercise 01: brand brief to design tokens.
 ```
 /set-persona add designer
 /setup-stack designer            # designer-react-tokens
-/architect designer @exercises/designer/<01 folder>/README.md
+/architect designer @exercises/designer/01-brand-to-tokens/README.md
 /start-session designer
 /designer-extract
 /designer-compose
@@ -132,7 +132,7 @@ Exercise 01: exploratory analysis of Northwind expenses.
 ```
 /set-persona add data-scientist
 /setup-stack data-scientist      # python-datascience (default), python-mlops, python-spark, python-dbt-snowflake, r-tidyverse
-/architect data-scientist @exercises/data-scientist/<01 folder>/README.md
+/architect data-scientist @exercises/data-scientist/01-eda-data-quality/README.md
 /start-session data-scientist
 /ds-explore
 /ds-validate
@@ -146,7 +146,7 @@ Exercise 01: October bank reconciliation.
 ```
 /set-persona add accountant
 /setup-stack accountant          # sheets-accounting (default, no code), python-accounting (scripted)
-/architect accountant @exercises/accountant/<01 folder>/README.md
+/architect accountant @exercises/accountant/01-october-bank-rec/README.md
 /start-session accountant
 /acct-reconcile
 /next-session
