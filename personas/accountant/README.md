@@ -27,7 +27,12 @@ For corporate accountants who run month-end close: bank reconciliations, flux an
 
 ## How this pack pairs with `setup-stack`
 
-Run `/setup-stack accountant` next. It installs the `python-accounting` stack: Close Workbook rules (integer cents, explicit dtypes, tie-out tests), templates (recon, close memo, phase checklist) and the `examples/bank-rec/` reference reconciliation.
+Run `/setup-stack accountant` next. It offers two stacks with the same Close Workbook shape:
+
+- `sheets-accounting` (default, no code): the agent writes CSV / XLSX working papers in `working/` and you review them in Excel or Google Sheets. Rules: every number cites a file and row or a formula, no plugs, a `TIE-OUT` section at the bottom of each paper. Templates: starter, phase checklist, recon and flux working papers, close memo. Example: `examples/bank-rec-toy/`.
+- `python-accounting` (scripted): Close Workbook rules (integer cents, explicit dtypes, tie-out tests), templates (recon, close memo, phase checklist) and the `examples/bank-rec/` reference reconciliation.
+
+The exercises in `exercises/accountant/` work with either one.
 
 ## No external systems
 

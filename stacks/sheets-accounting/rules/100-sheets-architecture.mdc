@@ -1,0 +1,64 @@
+---
+description: Working paper architecture. Sources, sections, citations and the tie-out block every CSV or XLSX working paper must follow.
+alwaysApply: true
+---
+
+# Working Paper Architecture
+
+## The flow
+
+```
+data/raw/ ──► Sources list ──► Working paper ──► Tie-out rows ──► Memo in output/
+(read-only)   rows + control   sections with      every check      every number
+              totals           cited rows         = 0.00           traces back
+```
+
+One working paper per workpaper (bank rec, flux, JE testing). Start every paper from its template in `templates/`. Keep the template's columns and section names.
+
+## Sections in a working paper
+
+Every CSV working paper has one header row and a `section` column. Rows run top to bottom in this order:
+
+| Section | What goes there |
+|---|---|
+| `HEADER` | Entity, period, account, materiality, preparer role, prepared date. One fact per row |
+| `SOURCE` | The balances and totals taken straight from `data/raw/`, each with file and row |
+| body sections | The work itself: `BANK`, `BOOK` for a rec; one row per account for flux; one row per exception for JE testing |
+| `PROPOSED-JE` | Proposed adjusting entries, one row per line, status `PROPOSED - NOT POSTED` |
+| `TIE-OUT` | The checks. Always last. Each row shows a difference that must be 0.00 |
+
+## Citations
+
+Every row with an amount fills one of these:
+
+- `source_file` + `source_row`: the file in `data/raw/` and the line number in that file, header row = 1. Example: `bank_statement_2026-10.csv`, `838`
+- `formula`: plain words a reviewer can redo by hand. Example: `L1 + L2 + L3`, `sum of BANK rows`, `actual - budget`
+
+Rows that hold a total point to the lines they add up, by line id. Never leave both blank.
+
+## No plugs
+
+- Never type a balancing figure to make a difference go away.
+- A difference you cannot explain is its own row: description `UNRECONCILED`, amount, status `OPEN`. The `TIE-OUT` row then shows that amount, not 0.00, and the paper is not done.
+- Never net two items into one row. A deposit in transit and an outstanding check stay on separate rows.
+
+## Matching (reconciliations)
+
+- First pass: one-to-one on reference + amount. The first GL line with a reference pairs with the first bank line with the same reference and amount, so duplicates show up as unmatched.
+- Second pass: same reference, different amount. Flag as a possible keying error (a difference divisible by 9 often means a transposition). Do not clear it.
+- List every unmatched line on both sides. Classify each: deposit in transit, outstanding check, bank item not booked, GL error, duplicate.
+
+## Proposed entries
+
+| Column | Rule |
+|---|---|
+| `je` | `PJE-01`, `PJE-02` ... |
+| `account` | From the chart of accounts. Cite `gl_accounts.csv` row |
+| `debit` / `credit` | One side per line. Debits equal credits per entry |
+| `status` | Always `PROPOSED - NOT POSTED` |
+
+The agent never posts, never says an entry was booked, and never changes a source file to reflect a proposed entry.
+
+## XLSX (optional)
+
+When a reviewer wants Excel with live formulas, write an `.xlsx` copy with the same columns. Put real formulas in the amount cells (`=SUM(G5:G7)`) and keep the `formula` column in words. The CSV stays the record. Excel and Sheets recalculate on open; save after recalculating so the agent reads current values.

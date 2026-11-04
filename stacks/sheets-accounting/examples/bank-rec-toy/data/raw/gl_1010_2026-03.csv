@@ -1,0 +1,10 @@
+je_id,line_no,posting_date,account,debit_cents,credit_cents,description
+JE-T001,1,2026-03-02,1010,240000,0,Customer receipt RCPT-301
+JE-T002,1,2026-03-03,1010,0,85000,Check CHK 1001 Lantern Paper Co
+JE-T003,1,2026-03-09,1010,0,125740,AP payment Gull Rock Supply INV-4410
+JE-T004,1,2026-03-12,1010,315025,0,Customer receipt RCPT-302
+JE-T005,1,2026-03-16,1010,0,42000,Check CHK 1002 Pinewell Movers
+JE-T006,1,2026-03-20,1010,0,460000,Payroll run PR-0320
+JE-T007,1,2026-03-25,1010,198000,0,Customer receipt RCPT-303
+JE-T008,1,2026-03-30,1010,0,31500,Check CHK 1003 Lantern Paper Co
+JE-T009,1,2026-03-31,1010,205000,0,Customer receipt RCPT-304

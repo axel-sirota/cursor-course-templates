@@ -55,7 +55,9 @@ Excel or any spreadsheet app is useful for viewing CSV and XLSX files. It is not
 
 ## 6. Smoke test
 
-From the repo root:
+**Spreadsheet stack (`sheets-accounting`, the default).** No install needed. Open `stacks/sheets-accounting/examples/bank-rec-toy/working/recon-1010-2026-03.csv` in Excel or Google Sheets, filter the `section` column to `TIE-OUT`, and confirm eight rows that read 0.00 or 0 with status PASS. If the file opens with every value in one column, import it as comma separated (Excel: Data > From Text/CSV; Sheets: File > Import).
+
+**Scripted stack (`python-accounting`, optional).** Only if you plan to use Python. Steps 2 and 3 above are needed for this one only. From the repo root:
 
 ```bash
 cd stacks/python-accounting/examples/bank-rec
@@ -85,7 +87,7 @@ In Cursor chat, from the repo root:
 /setup-stack accountant
 ```
 
-The first prints the commands, agents, hooks and MCP server it installed. The second confirms the `python-accounting` stack and copies templates and `examples/bank-rec/` into `workspaces/accountant/`.
+The first prints the commands, agents, hooks and MCP server it installed. The second shows the stack menu: press Enter for `sheets-accounting` (copies its templates and `examples/bank-rec-toy/` into `workspaces/accountant/`), or pick `python-accounting` (copies its templates and `examples/bank-rec/`).
 
 If either step fails, contact the instructor before class.
 

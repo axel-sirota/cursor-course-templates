@@ -1,0 +1,60 @@
+---
+description: Spreadsheet close workflow. Phase order, where files go, and what each session must leave behind. The agent builds working papers; the accountant reviews them in Excel or Google Sheets.
+alwaysApply: true
+---
+
+# Spreadsheet Close Workflow
+
+You are working with an accountant, not a programmer. Do the matching, sorting and arithmetic yourself and write the result into a working paper. Do not ask the accountant to write code or formulas. Explain what you did in accounting terms.
+
+## Phase order
+
+Do not start a phase until the paper from the phase before it has every `TIE-OUT` row at 0.00.
+
+| Phase | Deliverable | Done when |
+|---|---|---|
+| 0 Skeleton | `docs/close-plan.md`, one working paper per workpaper in `working/` with headings and empty `TIE-OUT` rows | Every paper opens in Excel or Sheets; the plan states materiality |
+| 1 Sources | `working/sources-<period>.csv` | Every file in `data/raw/` listed with row count and control total |
+| 2 Reconciliations | `working/recon-<account>-<period>.csv` | Adjusted bank minus adjusted book is 0.00; every unmatched item listed |
+| 3 Flux analysis | `working/flux-<period>.csv` | Every account over the threshold has an explanation or `OWNER TO EXPLAIN` |
+| 4 JE testing | `working/je-test-<period>.csv` | Every test ran; every exception lists `je_id`, test and source row |
+| 5 Close memo | `output/close-memo-<period>.md` | `tie-out-checker` passes; open items have an owner role and a due date |
+
+## Before any analysis
+
+1. Read `docs/close-plan.md` or `plans/interface-contract.md`. It must state the period, the entity, the accounts in scope and materiality. If materiality is missing, stop and ask. Never pick a threshold after seeing results.
+2. Copy the source extracts into `data/raw/` once. Then treat them as read-only.
+3. Write `working/sources-<period>.csv`: file, rows, control total, what it ties to.
+
+## Where files go
+
+| Kind | Folder | Rule |
+|---|---|---|
+| Source extracts | `data/raw/` | Read-only. Never edited, sorted, renamed or re-saved |
+| Working papers | `working/` | Written by the agent from a template. CSV is the record, XLSX optional |
+| Final reports and memo | `output/` | Built from the working papers. Every number traces back |
+| Plans, materiality, notes | `docs/`, `plans/` | Written by people and commands |
+
+## Every session ends with
+
+- Every new or changed paper has its `TIE-OUT` rows at 0.00, or the open difference written into the transition doc
+- The `tie-out-checker` agent run on anything new in `working/` and `output/`
+- No change under `data/raw/`
+
+## In-session commands
+
+| Need | Command |
+|---|---|
+| Bank or sub-ledger to GL | `/acct-reconcile` |
+| Budget vs actual, month over month | `/acct-variance` |
+| Journal entry testing | `/acct-je-test` |
+| Close memo and handoff | `/acct-close-handoff` |
+
+The `/acct-*` commands were written for both stacks. In this stack:
+
+| Command says | Do this instead |
+|---|---|
+| write code in `src/` | write the working paper in `working/` from its template |
+| write or run `pytest` tie-out tests | fill the paper's `TIE-OUT` rows and confirm each is 0.00 |
+| report in `output/` | the working paper goes in `working/`; a short report or the memo goes in `output/` |
+| run `tie-out-checker` on `output/` | run it on `working/` and `output/` |

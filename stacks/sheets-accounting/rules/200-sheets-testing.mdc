@@ -1,0 +1,39 @@
+---
+description: Tie-out testing without code. Every working paper ends with TIE-OUT rows that prove totals, balance and completeness. A paper is done only when every difference is 0.00.
+alwaysApply: true
+---
+
+# Tie-out Testing (no code)
+
+In this stack the tie-out rows are the tests. They are the reviewer's tick marks, written into the paper.
+
+## Required tie-out rows
+
+Every working paper ends with a `TIE-OUT` section. Each row has `expected`, `actual` and `difference` (in the `amount` column, or in three columns where the template has them). Use the rows that fit the paper.
+
+| Check | Expected | Actual | Must be |
+|---|---|---|---|
+| Source balance | balance in the source file (file + row) | balance used on the paper | 0.00 |
+| Source rows | rows in the source file | matched + unmatched rows on the paper | 0 |
+| Source cents | sum of the source amounts | matched + unmatched amounts on the paper | 0.00 |
+| Roll-forward | opening + activity | closing per source | 0.00 |
+| Reconciliation | adjusted bank | adjusted book | 0.00 |
+| Debits = credits | total proposed debits | total proposed credits | 0.00 |
+| Flux population | sum of actuals on the paper | GL total for the same accounts and period | 0.00 |
+| JE population | entries and total debits on the paper | entries and total debits in the extract | 0 / 0.00 |
+
+## How to run the checks
+
+1. Ask the agent to fill the `TIE-OUT` rows from the paper and the sources. It cites the rows it used.
+2. Open the paper in Excel or Sheets. Filter `section = TIE-OUT`. Every difference must be 0.00.
+3. Spot-check: pick three amounts at random, follow `source_file` + `source_row` to the source, and confirm the amount.
+4. Run the `tie-out-checker` agent on the paper. It reports any amount with no citation, any total that does not add, and any unmatched item that was dropped.
+
+## When a tie-out row is not 0.00
+
+- Do not adjust anything to force it. Find the line that is missing or wrong.
+- If you cannot find it, add an `UNRECONCILED` row with the amount and status `OPEN`, and carry it to the memo's open items.
+
+## Seeded traps
+
+Practice data plants exceptions on purpose (duplicates, keying errors, unbooked bank items). Every planted item must appear on the paper as its own row. If a reviewer's answer key lists an item that is not on your paper, the paper failed completeness.

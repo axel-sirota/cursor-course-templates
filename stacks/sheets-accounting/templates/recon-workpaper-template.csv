@@ -1,0 +1,32 @@
+section,line,description,date,reference,count,amount,source_file,source_row,formula,status
+HEADER,H1,Entity,,,,,,,<entity>,
+HEADER,H2,Account,,,,,,,<account number and name>,
+HEADER,H3,Compared to,,,,,,,<bank statement file>,
+HEADER,H4,Period end,<YYYY-MM-DD>,,,,,,,
+HEADER,H5,Materiality,,,,<amount>,docs/close-plan.md,,,
+HEADER,H6,Match key,,,,,,,reference + amount; second pass same reference different amount,
+HEADER,H7,Prepared by (role),,,,,,,<Staff Accountant>,
+HEADER,H8,Synthetic data,,,,,,,training data only,
+SOURCE,S1,Bank statement rows for the period,,,<n>,<sum of amounts>,<bank file>,2 to <last>,count and sum of amount column,
+SOURCE,S2,GL lines for the account and period,,,<n>,<sum of signed amounts>,<gl file>,<rows>,count and sum of debit - credit,
+MATCHED,M1,<bank description>,<bank date>,<reference>,1,<amount>,<bank file> | <gl file>,<bank row> | <gl row>,bank amount = GL amount on same reference,MATCHED
+BANK,B1,Balance per bank,<YYYY-MM-DD>,,,<amount>,<balances file>,<row>,,
+BANK,B2,Add: deposit in transit,<date>,<reference>,,<amount>,<gl file>,<row>,GL line with no bank line,OPEN
+BANK,B3,Less: outstanding check,<date>,<reference>,,<-amount>,<gl file>,<row>,GL line with no bank line,OPEN
+BANK,B9,Adjusted bank balance,,,,<amount>,,,B1 + B2 + B3 (all BANK rows above),
+BOOK,K1,Balance per GL,<YYYY-MM-DD>,,,<amount>,<balances file>,<row>,,
+BOOK,K2,Less: bank fee not booked,<date>,<reference>,,<-amount>,<bank file>,<row>,bank line with no GL line,PROPOSE JE
+BOOK,K3,Add: interest not booked,<date>,<reference>,,<amount>,<bank file>,<row>,bank line with no GL line,PROPOSE JE
+BOOK,K4,Add back: duplicate GL entry,<date>,<je_id>,,<amount>,<gl file>,<row>,second of two identical GL lines; reverse it,PROPOSE JE
+BOOK,K5,Correct: keying error,<date>,<reference>,,<amount>,<bank file> | <gl file>,<bank row> | <gl row>,bank amount - GL amount,PROPOSE JE
+BOOK,K9,Adjusted book balance,,,,<amount>,,,K1 + K2 + K3 + K4 + K5 (all BOOK rows above),
+PROPOSED-JE,P1,<PJE-01 reason>,<period end>,<account>,,<debit as positive>,gl_accounts.csv,<row>,debit,PROPOSED - NOT POSTED
+PROPOSED-JE,P2,<PJE-01 reason>,<period end>,<account>,,<credit as negative>,gl_accounts.csv,<row>,credit,PROPOSED - NOT POSTED
+TIE-OUT,T1,Adjusted bank - adjusted book,,,,0.00,,,B9 - K9,must be 0.00
+TIE-OUT,T2,Balance per bank vs balances file,,,,0.00,,,B1 - bank closing in source,must be 0.00
+TIE-OUT,T3,Balance per GL vs balances file,,,,0.00,,,K1 - GL closing in source,must be 0.00
+TIE-OUT,T4,Bank roll-forward,,,,0.00,,,bank opening + S1 amount - B1,must be 0.00
+TIE-OUT,T5,GL roll-forward,,,,0.00,,,GL opening + S2 amount - K1,must be 0.00
+TIE-OUT,T6,Bank rows: source - (matched + unmatched),,,0,,,,S1 count - matched bank rows - unmatched bank rows,must be 0
+TIE-OUT,T7,GL lines: source - (matched + unmatched),,,0,,,,S2 count - matched GL lines - unmatched GL lines,must be 0
+TIE-OUT,T8,Proposed debits - proposed credits,,,,0.00,,,sum of PROPOSED-JE amounts,must be 0.00

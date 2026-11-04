@@ -54,7 +54,7 @@ Look up the persona's shape in this table and load ONLY that row's guidance. Do 
 | Experiment Notebook | python-datascience | Dataset, EDA sequence, candidate models, metrics | `notebooks/` EDA template, `data/`, `artifacts/`, `experiments/log.md` stubs | Notebook runs top to bottom |
 | PRD Workspace | pm-prd-markdown | PRD outline: problem, goals, non-goals, users, epics, NFR categories, success metrics | `prds/<name>.md` with every section headed and TODO bodies, `stories/` folder, glossary | `markdownlint` + every required heading present |
 | Design System | designer-react-tokens | Token set (semantic over primitive) + component inventory (exists / to build) + screen layout | `tokens/tokens.json`, component files rendering placeholders, one story per component | Token JSON validates, Storybook / test build passes |
-| Close Workbook | python-accounting | Source files + schemas, reconciliation and analysis steps, output reports, tie-out points | `src/` step functions returning empty DataFrames, `output/` folder, pytest tie-out stubs | `pytest` collects and runs |
+| Close Workbook | sheets-accounting, python-accounting | Source files + schemas, reconciliation and analysis steps, output reports, tie-out points | sheets: `docs/close-plan.md` + one `working/` paper per workpaper from its template (headings, empty body, `TIE-OUT` rows), `output/` folder. python: `src/` step functions returning empty DataFrames, `output/` folder, pytest tie-out stubs | sheets: every `TIE-OUT` row balances to 0.00 and the `tie-out-checker` agent passes. python: `pytest` collects and runs |
 | {custom stack} | from `stacks/<stack>/context.md` | Read the stack's Architecture Shape; ask the user if unclear | | |
 
 ---

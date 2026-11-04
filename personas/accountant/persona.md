@@ -22,7 +22,7 @@ Expect: `output/flux-2026-10.md` with every line over your threshold flagged, to
 ```
 Expect: `output/je-test-2026-10.md` and an exceptions CSV covering duplicates, weekend postings, round amounts and self-approval, reviewed by the `controls-checker` agent.
 
-No data yet? Run `/setup-stack accountant`, then open `examples/bank-rec/`. It has a seeded generator for Northwind Co. data and a working reconciliation with passing tie-out tests.
+No data yet? Run `/setup-stack accountant`, then open the stack's example: `examples/bank-rec-toy/` (sheets-accounting, a finished working paper and memo) or `examples/bank-rec/` (python-accounting, a working reconciliation with passing tie-out tests). The class exercises use the Northwind Co. files in `exercises/_data/northwind/`.
 
 ## Platform gotchas
 
@@ -47,7 +47,7 @@ No data yet? Run `/setup-stack accountant`, then open `examples/bank-rec/`. It h
 Run `/architect accountant` after `/set-persona accountant` and `/setup-stack accountant`. The output is a **close plan**, not an app:
 
 - `plans/interface-contract.md`: source files and their columns, reconciliation and analysis steps, output reports, tie-out points, materiality threshold
-- `plans/sessions/session-1-phase-0.md`: the skeleton. `src/` step functions returning empty DataFrames, an `output/` folder, pytest tie-out stubs
+- `plans/sessions/session-1-phase-0.md`: the skeleton. With `sheets-accounting`: one `working/` paper per workpaper with headings and `TIE-OUT` rows. With `python-accounting`: `src/` step functions returning empty DataFrames, an `output/` folder, pytest tie-out stubs
 - `plans/sessions/session-N-phase-X.md`: one per workpaper (reconciliation, flux, JE testing, close memo)
 
 Then `/start-session accountant` works one session at a time. Each session ends with `/next-session`, which runs the quality gate.
@@ -90,7 +90,14 @@ You ship workpapers that tie. Your unit of delivery is a report in `output/` whe
 
 ## Active Stack
 
-Set by `/setup-stack accountant` (stack: `python-accounting`). It adds the Close Workbook rules, templates (recon, close memo, phase checklist) and the `examples/bank-rec/` reference.
+Set by `/setup-stack accountant`. Two stacks share the Close Workbook shape:
+
+| Stack | You work in | Proof it ties | Example |
+|---|---|---|---|
+| `sheets-accounting` (default) | CSV / XLSX working papers in `working/`, reviewed in Excel or Google Sheets. No code | `TIE-OUT` rows at 0.00 + `tie-out-checker` agent | `examples/bank-rec-toy/` |
+| `python-accounting` (scripted) | Python step functions in `src/` | pytest tie-out tests | `examples/bank-rec/` |
+
+Exercises in `exercises/accountant/` work with either stack.
 
 ## Smallest valuable loop
 

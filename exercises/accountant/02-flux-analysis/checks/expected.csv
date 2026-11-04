@@ -1,0 +1,24 @@
+account,account_name,budget,prior,actual,var_vs_budget,var_vs_budget_pct,var_vs_prior,var_vs_prior_pct,class,explanation_status,explanation_source
+6000,Salaries and Wages,1150178.32,1150063.33,1188489.50,38311.18,3.3,38426.17,3.3,dollar_only,near miss: under 10%,context_notes_2026-10.md People and payroll
+6010,Payroll Taxes,87729.63,88073.76,86201.57,-1528.06,-1.7,-1872.19,-2.1,under,not flagged,
+6020,Employee Benefits,140082.33,140097.16,142147.85,2065.52,1.5,2050.69,1.5,under,not flagged,
+6100,Meals,45003.93,45250.16,44436.20,-567.73,-1.3,-813.96,-1.8,under,not flagged,
+6110,Lodging,144484.36,145019.32,148197.89,3713.53,2.6,3178.57,2.2,under,not flagged,
+6120,Airfare,228908.34,229041.56,227781.77,-1126.57,-0.5,-1259.79,-0.6,under,not flagged,
+6130,Ground Transport,44561.68,44446.20,44570.06,8.38,0.0,123.86,0.3,under,not flagged,
+6140,Software Subscriptions,128260.51,127441.72,124869.28,-3391.23,-2.6,-2572.44,-2.0,under,not flagged,
+6150,Office Supplies,56909.99,57056.36,65556.36,8646.37,15.2,8500.00,14.9,pct_only,near miss: under $10000,
+6160,Training,221123.99,220791.80,252932.30,31808.31,14.4,32140.50,14.6,both,explained,context_notes_2026-10.md Engineering
+6170,Client Entertainment,118195.07,118246.26,118539.47,344.40,0.3,293.21,0.2,under,not flagged,
+6180,Conferences and Events,25044.22,25052.50,73677.61,48633.39,194.2,48625.11,194.1,both,explained,context_notes_2026-10.md Sales
+6190,Other Travel and Expense (Uncategorized),2080.30,2086.27,2105.68,25.38,1.2,19.41,0.9,under,not flagged,
+6200,Rent,115752.19,114859.95,116561.43,809.24,0.7,1701.48,1.5,under,not flagged,
+6210,Utilities,7409.50,7410.02,9060.45,1650.95,22.3,1650.43,22.3,pct_only,near miss: under $10000,
+6300,Professional Fees,94023.51,94145.03,121595.36,27571.85,29.3,27450.33,29.2,both,OWNER TO EXPLAIN,none (Finance note says nothing unusual)
+6310,Legal Fees,28323.59,28046.02,27220.43,-1103.16,-3.9,-825.59,-2.9,under,not flagged,
+6400,Marketing Programs,120185.69,120041.67,156351.44,36165.75,30.1,36309.77,30.2,both,explained,context_notes_2026-10.md Marketing
+6500,Depreciation,20913.35,21081.47,20841.62,-71.73,-0.3,-239.85,-1.1,under,not flagged,
+6600,Bank and Merchant Fees,47681.86,48018.96,47322.48,-359.38,-0.8,-696.48,-1.5,under,not flagged,
+6700,Hosting and Cloud,309146.22,310012.02,329135.47,19989.25,6.5,19123.45,6.2,dollar_only,near miss: under 10%,
+6800,Insurance,9782.72,9790.63,11931.51,2148.79,22.0,2140.88,21.9,pct_only,near miss: under $10000,
+TOTAL,22 budgeted accounts,3145781.30,3146072.17,3359525.73,213744.43,,213453.56,,,,

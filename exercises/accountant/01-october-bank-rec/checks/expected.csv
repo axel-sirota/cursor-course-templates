@@ -1,0 +1,25 @@
+section,item,category,side,reference,je_id,account,date,amount,source_file,source_row
+BALANCE,GL closing,balance per GL,Book,,,1010,2026-10-31,5360650.74,gl_balance_1010_2026-10.csv,4
+BALANCE,Bank closing,balance per bank,Bank,,,1010,2026-10-31,5334876.08,gl_balance_1010_2026-10.csv,6
+ITEM,1,deposit in transit,Bank,RCPT-260145,JE-005212,1010,2026-10-30,7203.07,gl_journal.csv,12820
+ITEM,2,deposit in transit,Bank,RCPT-260146,JE-005213,1010,2026-10-30,20983.67,gl_journal.csv,12822
+ITEM,3,outstanding check,Bank,CHK 010246,JE-004646,1010,2026-10-22,-44.84,gl_journal.csv,11411
+ITEM,4,outstanding check,Bank,CHK 010269,JE-005001,1010,2026-10-29,-394.72,gl_journal.csv,12399
+ITEM,5,outstanding check,Bank,CHK 010281,JE-005208,1010,2026-10-29,-1158.70,gl_journal.csv,12813
+ITEM,6,bank fee not booked,Book,BKFEE-1021,,1010,2026-10-21,-35.00,bank_statement_2026-10.csv,838
+ITEM,7,interest not booked,Book,INT-1030,,1010,2026-10-30,12.87,bank_statement_2026-10.csv,1430
+ITEM,8,GL duplicate payment,Book,NWR2610150176,JE-003980,1010,2026-10-15,826.95,gl_journal.csv,9795
+ITEM,9,keying error (transposition),Book,NWR2610220046,JE-004388,1010,2026-10-22,9.00,gl_journal.csv | bank_statement_2026-10.csv,10895 | 884
+TOTAL,Adjusted bank,bank closing + items 1 to 5,Bank,,,1010,2026-10-31,5361464.56,,
+TOTAL,Adjusted book,GL closing + items 6 to 9,Book,,,1010,2026-10-31,5361464.56,,
+TOTAL,Difference,adjusted bank - adjusted book,,,,,2026-10-31,0.00,,
+NOT-AN-ITEM,distractor,cleared after issue,,CHK 010231,JE-003262,1010,2026-10-08,-1175.23,bank_statement_2026-10.csv,598
+NOT-AN-ITEM,distractor,cleared after issue,,CHK 010243,JE-003905,1010,2026-10-15,-119.44,bank_statement_2026-10.csv,833
+PROPOSED-JE,PJE-01,bank fee,Dr,BKFEE-1021,,6600,2026-10-31,35.00,bank_statement_2026-10.csv,838
+PROPOSED-JE,PJE-01,bank fee,Cr,BKFEE-1021,,1010,2026-10-31,-35.00,bank_statement_2026-10.csv,838
+PROPOSED-JE,PJE-02,interest,Dr,INT-1030,,1010,2026-10-31,12.87,bank_statement_2026-10.csv,1430
+PROPOSED-JE,PJE-02,interest,Cr,INT-1030,,4910,2026-10-31,-12.87,bank_statement_2026-10.csv,1430
+PROPOSED-JE,PJE-03,reverse duplicate,Dr,NWR2610150176,JE-003980,1010,2026-10-31,826.95,gl_journal.csv,9795
+PROPOSED-JE,PJE-03,reverse duplicate,Cr,NWR2610150176,JE-003980,2150,2026-10-31,-826.95,gl_journal.csv,9794
+PROPOSED-JE,PJE-04,correct transposition,Dr,NWR2610220046,JE-004388,1010,2026-10-31,9.00,payouts_2026-10.csv,840
+PROPOSED-JE,PJE-04,correct transposition,Cr,NWR2610220046,JE-004388,2150,2026-10-31,-9.00,payouts_2026-10.csv,840

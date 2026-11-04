@@ -11,6 +11,7 @@ summary: Runs reconciliations, flux analysis and journal entry testing where eve
 workspace: workspaces/accountant
 
 stacks:
+  - sheets-accounting
   - python-accounting
 
 exercises: exercises/accountant

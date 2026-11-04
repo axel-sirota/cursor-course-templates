@@ -1,0 +1,40 @@
+section,line,description,date,reference,count,amount,source_file,source_row,formula,status
+HEADER,H1,Entity,,,,,,,Tidewater Tools Co. (toy data),
+HEADER,H2,Account,,,,,gl_accounts.csv,2,1010 Operating Cash,
+HEADER,H3,Compared to,,,,,bank_statement_2026-03.csv,,operating bank account statement,
+HEADER,H4,Period end,2026-03-31,,,,,,,
+HEADER,H5,Materiality,,,,500.00,docs/close-plan.md,,stated before the rec,
+HEADER,H6,Match key,,,,,,,reference + amount; second pass same reference different amount,
+HEADER,H7,Prepared by (role),,,,,,,Staff Accountant,
+HEADER,H8,Synthetic data,,,,,,,toy data for training only,
+SOURCE,S1,Bank statement rows for March,,,9,374.47,bank_statement_2026-03.csv,2 to 10,count of rows and sum of amount_cents / 100,
+SOURCE,S2,GL 1010 lines for March,,,9,2137.85,gl_1010_2026-03.csv,2 to 10,count of lines and sum of (debit_cents - credit_cents) / 100,
+MATCHED,M1,DEPOSIT,2026-03-02,RCPT-301,1,2400.00,bank_statement_2026-03.csv | gl_1010_2026-03.csv,2 | 2,bank amount = GL amount on same reference,MATCHED
+MATCHED,M2,CHECK PAID,2026-03-04,CHK 1001,1,-850.00,bank_statement_2026-03.csv | gl_1010_2026-03.csv,3 | 3,bank amount = GL amount on same reference,MATCHED
+MATCHED,M3,DEPOSIT,2026-03-12,RCPT-302,1,3150.25,bank_statement_2026-03.csv | gl_1010_2026-03.csv,5 | 5,bank amount = GL amount on same reference,MATCHED
+MATCHED,M4,CHECK PAID,2026-03-16,CHK 1002,1,-420.00,bank_statement_2026-03.csv | gl_1010_2026-03.csv,6 | 6,bank amount = GL amount on same reference,MATCHED
+MATCHED,M5,ACH PAYROLL,2026-03-20,PR-0320,1,-4600.00,bank_statement_2026-03.csv | gl_1010_2026-03.csv,7 | 7,bank amount = GL amount on same reference,MATCHED
+MATCHED,M6,DEPOSIT,2026-03-25,RCPT-303,1,1980.00,bank_statement_2026-03.csv | gl_1010_2026-03.csv,8 | 8,bank amount = GL amount on same reference,MATCHED
+BANK,B1,Balance per bank,2026-03-31,,,12874.47,balances_2026-03.csv,5,bank_closing_2026-03-31 / 100,
+BANK,B2,Add: deposit in transit,2026-03-31,RCPT-304,,2050.00,gl_1010_2026-03.csv,10,GL line with no bank line; deposited after the cutoff,OPEN
+BANK,B3,Less: outstanding check,2026-03-30,CHK 1003,,-315.00,gl_1010_2026-03.csv,9,GL line with no bank line; check not yet cashed,OPEN
+BANK,B9,Adjusted bank balance,,,,14609.47,,,B1 + B2 + B3,
+BOOK,K1,Balance per GL,2026-03-31,,,14637.85,balances_2026-03.csv,3,gl_1010_closing_2026-03-31 / 100,
+BOOK,K2,Less: bank fee not booked,2026-03-27,BKFEE-0327,,-15.00,bank_statement_2026-03.csv,9,bank line with no GL line,PROPOSE JE
+BOOK,K3,Add: interest not booked,2026-03-31,INT-0331,,4.62,bank_statement_2026-03.csv,10,bank line with no GL line,PROPOSE JE
+BOOK,K4,Correct: keying error on vendor payment,2026-03-09,INV-4410,,-18.00,bank_statement_2026-03.csv | gl_1010_2026-03.csv,4 | 4,bank -1275.40 minus GL -1257.40; difference divisible by 9 (transposed digits),PROPOSE JE
+BOOK,K9,Adjusted book balance,,,,14609.47,,,K1 + K2 + K3 + K4,
+PROPOSED-JE,P1,PJE-01 record March bank service fee,2026-03-31,6600,,15.00,gl_accounts.csv,5,debit Bank Fees,PROPOSED - NOT POSTED
+PROPOSED-JE,P2,PJE-01 record March bank service fee,2026-03-31,1010,,-15.00,gl_accounts.csv,2,credit Operating Cash,PROPOSED - NOT POSTED
+PROPOSED-JE,P3,PJE-02 record March interest credit,2026-03-31,1010,,4.62,gl_accounts.csv,2,debit Operating Cash,PROPOSED - NOT POSTED
+PROPOSED-JE,P4,PJE-02 record March interest credit,2026-03-31,4910,,-4.62,gl_accounts.csv,4,credit Interest Income,PROPOSED - NOT POSTED
+PROPOSED-JE,P5,PJE-03 correct INV-4410 payment keyed as 1257.40 (cleared 1275.40),2026-03-31,2000,,18.00,gl_accounts.csv,3,debit Accounts Payable,PROPOSED - NOT POSTED
+PROPOSED-JE,P6,PJE-03 correct INV-4410 payment keyed as 1257.40 (cleared 1275.40),2026-03-31,1010,,-18.00,gl_accounts.csv,2,credit Operating Cash,PROPOSED - NOT POSTED
+TIE-OUT,T1,Adjusted bank - adjusted book,,,,0.00,,,B9 - K9 = 14609.47 - 14609.47,PASS
+TIE-OUT,T2,Balance per bank vs balances file,,,,0.00,balances_2026-03.csv,5,B1 - bank_closing = 12874.47 - 12874.47,PASS
+TIE-OUT,T3,Balance per GL vs balances file,,,,0.00,balances_2026-03.csv,3,K1 - gl_1010_closing = 14637.85 - 14637.85,PASS
+TIE-OUT,T4,Bank roll-forward,,,,0.00,balances_2026-03.csv,4,bank opening 12500.00 + S1 374.47 - B1 12874.47,PASS
+TIE-OUT,T5,GL roll-forward,,,,0.00,balances_2026-03.csv,2,GL opening 12500.00 + S2 2137.85 - K1 14637.85,PASS
+TIE-OUT,T6,Bank rows: source - (matched + unmatched),,,0,,,,S1 9 - M1..M6 6 - unmatched bank 3 (K2 K3 K4),PASS
+TIE-OUT,T7,GL lines: source - (matched + unmatched),,,0,,,,S2 9 - M1..M6 6 - unmatched GL 3 (B2 B3 K4),PASS
+TIE-OUT,T8,Proposed debits - proposed credits,,,,0.00,,,P1 + P2 + P3 + P4 + P5 + P6 = 37.62 - 37.62,PASS

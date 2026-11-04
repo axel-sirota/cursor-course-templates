@@ -1,0 +1,41 @@
+section,test,je_id,period,posting_date,entry_date,preparer_id,approver_id,total_debit,accounts,source_file,source_row
+POPULATION,entries,,2026-09 and 2026-10,,,,,5274,,gl_journal.csv,2 to 13014
+POPULATION,lines,,2026-09 and 2026-10,,,,,13014,,gl_journal.csv,2 to 13014
+POPULATION,total debits,,2026-09 and 2026-10,,,,,23888850.50,,gl_journal.csv,2 to 13014
+POPULATION,total credits,,2026-09 and 2026-10,,,,,23888850.50,,gl_journal.csv,2 to 13014
+POPULATION,manual entries,,2026-09 and 2026-10,,,,,42,,gl_journal.csv,source = MANUAL
+EXCEPTION,weekend or holiday,JE-000510,2026-09,2026-09-07,2026-09-07,E0067,E0065,2208.15,2100 6170,gl_journal.csv,1265
+EXCEPTION,weekend or holiday,JE-001774,2026-09,2026-09-19,2026-09-19,E0068,E0065,1374.22,2100 6130,gl_journal.csv,4324
+EXCEPTION,weekend or holiday,JE-003581,2026-10,2026-10-12,2026-10-12,E0068,E0065,4476.90,1400 2010,gl_journal.csv,8767
+EXCEPTION,weekend or holiday,JE-004085,2026-10,2026-10-18,2026-10-18,E0069,E0065,3812.40,2010 2100,gl_journal.csv,10056
+EXCEPTION,preparer outside Finance,JE-001903,2026-09,2026-09-22,2026-09-22,E0033,E0065,2684.11,2100 6140,gl_journal.csv,4706
+EXCEPTION,preparer outside Finance,JE-003131,2026-10,2026-10-06,2026-10-06,E0001,E0065,1950.37,6100 6170,gl_journal.csv,7735
+EXCEPTION,preparer outside Finance,JE-004780,2026-10,2026-10-26,2026-10-26,E0079,E0065,4120.66,2100 6400,gl_journal.csv,11773
+EXCEPTION,entered after close,JE-005272,2026-10,2026-10-30,2026-11-06,E0067,E0065,3185.44,1400 2010,gl_journal.csv,13010
+EXCEPTION,entered after close,JE-005273,2026-10,2026-10-30,2026-11-09,E0068,E0065,2749.03,2010 2100,gl_journal.csv,13012
+EXCEPTION,entered after close,JE-005274,2026-10,2026-10-30,2026-11-12,E0069,E0065,5862.10,1200 4000,gl_journal.csv,13014
+EXCEPTION,round amount,JE-002404,2026-09,2026-09-25,2026-09-25,E0069,E0064,25000.00,1400 2100,gl_journal.csv,5864
+EXCEPTION,round amount,JE-004720,2026-10,2026-10-23,2026-10-23,E0067,E0064,50000.00,2010 2100,gl_journal.csv,11595
+EXCEPTION,round amount,JE-004833,2026-10,2026-10-27,2026-10-27,E0068,E0064,100000.00,1400 2010,gl_journal.csv,11937
+EXCEPTION,just under limit,JE-002464,2026-09,2026-09-28,2026-09-28,E0068,E0065,9999.00,2100 6310,gl_journal.csv,6049
+EXCEPTION,just under limit,JE-003580,2026-10,2026-10-09,2026-10-09,E0067,E0065,9995.00,2100 6300,gl_journal.csv,8765
+EXCEPTION,just under limit,JE-004834,2026-10,2026-10-27,2026-10-27,E0069,E0065,9987.50,2100 6140,gl_journal.csv,11939
+EXCEPTION,seldom-used account,JE-001973,2026-09,2026-09-23,2026-09-23,E0067,E0065,612.50,2100 6950,gl_journal.csv,4896
+EXCEPTION,seldom-used account,JE-003730,2026-10,2026-10-14,2026-10-14,E0069,E0065,7421.18,1200 1900,gl_journal.csv,9218
+EXCEPTION,seldom-used account,JE-004227,2026-10,2026-10-20,2026-10-20,E0068,E0065,3833.17,3900 6990,gl_journal.csv,10459
+EXCEPTION,self-approved,JE-001232,2026-09,2026-09-15,2026-09-15,E0065,E0065,4315.08,2100 6300,gl_journal.csv,3082
+EXCEPTION,self-approved,JE-004287,2026-10,2026-10-21,2026-10-21,E0064,E0064,6702.94,2100 6310,gl_journal.csv,10648
+EXCEPTION,duplicate,JE-000663,2026-09,2026-09-10,2026-09-11,E0071,E0066,3429.60,1400 2010,gl_journal.csv,1688
+EXCEPTION,duplicate,JE-003980,2026-10,2026-10-15,2026-10-16,SVC-EXPENSE,,826.95,1010 2150,gl_journal.csv,9794
+EXCEPTION,intercompany without offset,JE-005211,2026-10,2026-10-29,2026-10-29,E0067,E0064,18124.94,1310 4100,gl_journal.csv,12818
+EXCEPTION-TOTAL,24 entries,,,,,,,282671.24,,,
+ZERO-FINDING,manual >= 10000.00 not approved by Controller,,,,,,,0,,je_policy.json,manual_je_approval
+ZERO-FINDING,unbalanced entries,,,,,,,0,,gl_journal.csv,
+ACCRUAL,approved unpaid claims (count),,2026-10,,,,,174,,expense_claims.csv,status = approved
+ACCRUAL,expected accrual,,2026-10,,,,,90735.87,2150,expense_lines.csv,lines of approved claims x fx_rate
+ACCRUAL,2150 opening credit 2026-09-01,,2026-09,,,,,108258.40,2150,gl_opening_balances_2026-09-01.csv,9
+ACCRUAL,GL 2150 credit balance 2026-10-31,,2026-10,,,,,89899.92,2150,gl_journal.csv,opening + Sep and Oct 2150 activity
+ACCRUAL,gap (expected - GL),,2026-10,,,,,835.95,2150,,
+ACCRUAL,explained by duplicate JE-003980,JE-003980,2026-10,,,,,826.95,2150,gl_journal.csv,9794
+ACCRUAL,explained by transposition JE-004388,JE-004388,2026-10,,,,,9.00,2150,gl_journal.csv,10894
+ACCRUAL,unexplained,,2026-10,,,,,0.00,2150,,

@@ -1,0 +1,46 @@
+---
+description: Working paper style. Amounts, dates, account numbers, file names and memo wording for CSV and XLSX papers that open cleanly in Excel and Google Sheets.
+alwaysApply: true
+---
+
+# Working Paper Style
+
+## Amounts
+
+- Dollars with two decimals: `1234.56`, `-35.00`. Always two decimals, even for round amounts (`25000.00`).
+- Sign: debits and deposits positive, credits and withdrawals negative, unless the template has separate `debit` and `credit` columns.
+- No thousands separators, no `$`, no parentheses inside a CSV. Excel and Sheets format them on screen; a comma inside a number breaks the CSV.
+- In memos (`.md`), show amounts as `$1,234.56` and negatives as `(35.00)`.
+- Source data in cents (`amount_cents`) is divided by 100 once, when it lands on the paper. Say so in the `formula` column: `bank amount_cents / 100`.
+- Never round in the middle of a calculation. If a rate is applied, round half up to the cent and say so.
+
+## Dates
+
+- ISO 8601: `2026-10-31`. Never `10/31/26`. Excel may display it differently; the file keeps ISO.
+
+## Text that must stay text
+
+- Account numbers, cost centers, JE ids, claim ids and references stay as written: `1010`, `CC-FIN`, `JE-003980`, `CHK 010246`.
+- When writing XLSX, set these columns to Text format so Excel does not drop leading zeros or turn ids into dates.
+
+## File names
+
+- Lowercase, hyphens: `recon-1010-2026-10.csv`, `flux-2026-10.csv`, `je-test-2026-10.csv`, `close-memo-2026-10.md`.
+- One paper per file. Do not add tabs to a CSV (it has none); use XLSX if you need tabs.
+
+## Column names
+
+- Keep the template's column names. Add columns at the right, never in the middle.
+- Snake case: `source_file`, `source_row`, `var_vs_budget_pct`.
+
+## Memos
+
+- A synthetic data banner on the first line.
+- Short sentences, facts and amounts. No adjectives.
+- Every amount names the working paper it came from.
+- Open items: item, amount, owner role, due date.
+- Sign-off block left blank for a person.
+
+## People
+
+- Employee IDs and roles only (`E0065`, `Accounting Manager`). No names, emails or full bank account numbers. Run the `pii-redactor` agent before sharing a paper that lists people.

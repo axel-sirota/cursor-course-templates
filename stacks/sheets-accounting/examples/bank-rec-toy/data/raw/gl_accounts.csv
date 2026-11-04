@@ -1,0 +1,5 @@
+account,name,type,normal_balance
+1010,Operating Cash,asset,debit
+2000,Accounts Payable,liability,credit
+4910,Interest Income,revenue,credit
+6600,Bank Fees,expense,debit

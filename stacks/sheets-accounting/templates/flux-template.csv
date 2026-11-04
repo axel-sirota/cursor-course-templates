@@ -1,0 +1,12 @@
+section,account,account_name,budget,prior,actual,var_vs_budget,var_vs_budget_pct,var_vs_prior,var_vs_prior_pct,over_dollar,over_pct,class,explanation,explanation_source,owner,source_formula
+HEADER,,Entity: <entity>,,,,,,,,,,,,,,
+HEADER,,Period: <YYYY-MM> actual vs <YYYY-MM> budget and vs <YYYY-MM> actual,,,,,,,,,,,,,,
+HEADER,,Threshold: more than <amount> AND more than <percent> (from docs/close-plan.md),,,,,,,,,,,,,,
+HEADER,,Level: account; all cost centers and entities summed,,,,,,,,,,,,,,
+HEADER,,Actual = sum of debit - credit in the GL for the period; amounts in dollars,,,,,,,,,,,,,,
+LINE,<account>,<name>,<budget>,<prior actual>,<actual>,<actual - budget>,<var / budget x 100>,<actual - prior>,<var / prior x 100>,<Y/N>,<Y/N>,<both / pct_only / dollar_only / under>,<from a note or OWNER TO EXPLAIN>,<file and section or blank>,<role>,budget: <budget file> month <YYYY-MM>; actual: <gl file> period <YYYY-MM>
+TOTAL,,Total of LINE rows,<sum>,<sum>,<sum>,<sum>,,<sum>,,,,,,,,sum of LINE rows
+TIE-OUT,,Budget total on paper - budget file total for the month,0.00,,,,,,,,,,,,,must be 0.00
+TIE-OUT,,Prior actual on paper - GL total for prior period (same accounts),,0.00,,,,,,,,,,,,must be 0.00
+TIE-OUT,,Actual on paper - GL total for period (same accounts),,,0.00,,,,,,,,,,,must be 0.00
+TIE-OUT,,Count of LINE rows - count of accounts in budget file (write the count difference in var_vs_budget),,,,0,,,,,,,,,,must be 0
