@@ -75,3 +75,5 @@ Each exercise has a `checks/expected_findings.md`. Open it only after you have w
 | 3 | Precision and recall per rule against the answer key, every rule at 1.00 / 1.00 after fixes or the gap explained, model card complete |
 
 Instructors: each folder has a `SOLUTION.md` with the exact expected values and the common wrong answers. Every number in them was recomputed from the CSVs.
+
+Note: `exercises/_data/README.md` stays visible to the agent because exercise 01 uses its column reference, and it also holds the answer key. Tell students to stop reading at "Answer key". `.cursorignore` hides only `answer_key.json`, `SOLUTION.md` and `checks/expected*` from the agent. Exercise 03 copies `answer_key.json` into the workspace with `cp` in the terminal, which `.cursorignore` does not block.

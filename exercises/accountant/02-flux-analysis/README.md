@@ -24,7 +24,7 @@ Level: account. Sum all cost centers and both entities. Use the 22 accounts in t
 
 ## Task
 
-1. **Build the paper** from `templates/flux-template.csv`: budget, September actual, October actual, both variances in $ and %.
+1. **Build the paper** from `templates/flux-template.csv` (python-accounting has no flux template: copy `stacks/sheets-accounting/templates/flux-template.csv` into `workspaces/accountant/templates/` first): budget, September actual, October actual, both variances in $ and %.
 2. **Class each account** for each comparison: `both` (over $10,000 and over 10%), `pct_only`, `dollar_only`, or `under`.
 3. **Explain** every `both` account from `context_notes_2026-10.md`. Cite the note section. Check the note's amount against the variance.
 4. **Owner to explain.** A `both` account with no matching note gets `OWNER TO EXPLAIN` and the owner role.

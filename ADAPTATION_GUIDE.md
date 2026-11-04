@@ -80,7 +80,7 @@ Copy `stacks/blank/` to `stacks/<stack>/`, or run `/setup-stack <role>` and type
 
 ### 2. Meet the completeness standard
 
-From `.cursor/agents/stack-completeness-auditor.md`. Run that agent when you are done.
+From `dev/agents/stack-completeness-auditor.md`. Copy it into `.cursor/agents/` and run that agent when you are done (see `dev/README.md`).
 
 | Item | Requirement |
 |---|---|
@@ -119,8 +119,8 @@ Exercises live in `exercises/<role>/<NN-name>/`. Number them in the order studen
 | Path | Contents |
 |---|---|
 | `README.md` | Scenario, inputs, task, "done when", commands to use, stretch goal. This is what students pass to `/architect` |
-| `inputs/` or `data/` | Files the exercise needs. Shared Northwind data stays in `exercises/_data/northwind/` and is referenced, not copied |
-| `checks/` | How the work is graded: Hurl tests for engineers, answer keys for PM, token and a11y checks for designers, expected findings for DS, tie-outs for accountants |
+| `inputs/` or `data/` | Files the exercise needs. Shared Northwind data lives once in `exercises/_data/northwind/`. The exercise README tells students which files to copy into their workspace |
+| `checks/` (engineers: `acceptance/`) | How the work is graded: Hurl tests for engineers (in `acceptance/`), answer keys for PM, token and a11y checks for designers, expected findings for DS, tie-outs for accountants |
 | `SOLUTION.md` | Instructor key. Expected results and the seeded traps |
 
 Rules for a good exercise:

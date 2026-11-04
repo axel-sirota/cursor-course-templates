@@ -1,0 +1,7 @@
+# Answer keys: hidden from Cursor's AI (Agent, Chat, Tab, @ mentions, indexing).
+# Instructors open these files directly. Terminal commands (cp, scripts) still read them.
+# exercises/_data/README.md stays visible: the data-scientist track uses its column reference.
+exercises/**/SOLUTION.md
+exercises/**/checks/expected*.csv
+exercises/**/checks/expected_findings.md
+exercises/_data/northwind/answer_key.json

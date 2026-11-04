@@ -283,7 +283,7 @@
           <li><strong>Lab 2: Architect + two sessions.</strong> Run <code>/architect &lt;role&gt;</code> on your track&rsquo;s first exercise in <code>exercises/&lt;role&gt;/</code>, then drive two <code>/start-session &lt;role&gt;</code> &rarr; <code>/next-session</code> cycles.</li>
           <li><strong>Lab 3 &mdash; Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
         </ul>
-        <p>This class teaches the <strong>workflow only</strong>. It does <em>not</em> cover hooks, MCP servers, sub-agents, or automation &mdash; those are advanced topics for a later session. If you came expecting MCP server configuration today, look in <code>materials/_old/</code> for the older deep-dive guides &mdash; they cover that material.</p>
+        <p>This class teaches the <strong>workflow only</strong>. It does <em>not</em> cover hooks, MCP servers, sub-agents, or automation. Those are advanced topics for a later session.</p>
         <div class="callout callout-info">
           <div class="callout-title">How to follow along</div>
           <p>Each section has a short concept, a small diagram, and either a demo block (instructor runs it) or a lab block (you run it). When you see <span class="timebox">&#9201; Lab</span>, stop reading and do it on your laptop.</p>
@@ -321,7 +321,7 @@
         </figure>
 
         <h3 id="pipeline-spine">The spine</h3>
-        <pre><code>/set-persona add &lt;role&gt;  →  /setup-stack &lt;role&gt;  →  /architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md
+        <pre><code>/set-persona add &lt;role&gt;  →  /setup-stack &lt;role&gt;  →  /architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md  (engineers start at 00-skeleton)
    →  (review gate)  →  /start-session &lt;role&gt;  →  in-session commands  →  /next-session</code></pre>
         <p><strong>Every persona runs the full spine</strong>, including <code>/setup-stack</code>. Each role has at least one stack. Some stacks install nothing on your machine (the PM&rsquo;s <code>pm-prd-markdown</code>, the accountant&rsquo;s <code>sheets-accounting</code>); they still add the rules and templates for that role. Several personas can be active in one repo; you run the spine once per role.</p>
 
@@ -466,8 +466,8 @@
           </tbody>
         </table>
         <div class="callout callout-info">
-          <div class="callout-title">Capstone: one feature, five personas</div>
-          <p><code>exercises/capstone/</code> takes one feature through all five roles: the PM writes it, the designer builds the screen, the engineer ships the endpoint, the data scientist checks the data, the accountant ties out the numbers. Each persona works in its own workspace and hands off through it.</p>
+          <div class="callout-title">Capstone: one feature, four personas</div>
+          <p><code>exercises/capstone/</code> takes one feature through four roles: the PM writes it, the designer builds the screen, the data scientist checks the data, the accountant ties out the numbers. Each persona works in its own workspace and hands off through it. Engineers stay on the Blog API track.</p>
         </div>
 
         <h3 id="multi-persona">Several personas, one repo</h3>
@@ -548,7 +548,7 @@
         <p><strong>Every persona runs it.</strong> PM and accountant (<code>sheets-accounting</code>) stacks install no software; they still bring the rules and templates for the role.</p>
 
         <h3 id="cmd-architect">/architect</h3>
-        <p><strong>What it does:</strong> <code>/architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md</code> turns an exercise brief (or a one-line idea) into a full plan inside <code>workspaces/&lt;role&gt;/plans/</code>: <code>sessions/session-overview.md</code>, one session file per phase, an <code>interface-contract.md</code> (OpenAPI, proto, PRD outline, token set, close workbook steps, depending on shape), and a walking skeleton in the right places.</p>
+        <p><strong>What it does:</strong> <code>/architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md</code> (engineers start at <code>00-skeleton</code>) turns an exercise brief (or a one-line idea) into a full plan inside <code>workspaces/&lt;role&gt;/plans/</code>: <code>sessions/session-overview.md</code>, one session file per phase, an <code>interface-contract.md</code> (OpenAPI, proto, PRD outline, token set, close workbook steps, depending on shape), and a walking skeleton in the right places.</p>
         <p><strong>Gated 3-phase flow:</strong>
           <ol>
             <li><strong>Design</strong> &mdash; produce all planning docs, no code.</li>
@@ -676,7 +676,7 @@
 
         <h3>Steps</h3>
         <ol>
-          <li><strong>Run /architect.</strong> Point it at your exercise brief: <code>/architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md</code>. It runs in plan-extraction mode and writes everything into <code>workspaces/&lt;role&gt;/</code>.</li>
+          <li><strong>Run /architect.</strong> Point it at your exercise brief: <code>/architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md</code> (engineers start at <code>00-skeleton</code>). It runs in plan-extraction mode and writes everything into <code>workspaces/&lt;role&gt;/</code>.</li>
           <li><strong>Wait for Phase 1 to finish.</strong> The AI produces <code>workspaces/&lt;role&gt;/plans/sessions/*.md</code>, <code>workspaces/&lt;role&gt;/plans/interface-contract.md</code>, and a self-audit. <strong>Nothing is built yet.</strong></li>
           <li><strong>READ THE PLAN.</strong> Open <code>session-overview.md</code> and the interface contract. Does it cover everything in the brief? Are the phases in the right order? Is anything obvious missing?</li>
           <li><strong>Approve or push back.</strong> Say &ldquo;approved&rdquo; (or specifically what to change). Only after approval will Phase 3 build the skeleton.</li>
@@ -717,7 +717,7 @@
         <h3>What changes</h3>
         <ul>
           <li><code>/setup-stack</code> &rarr; <code>/detect-stack</code>. The AI reads your code and infers the stack instead of you picking from a list.</li>
-          <li>The detected stack may match an existing library entry (great &mdash; you get the prebuilt rules) or it may be custom (you get a fresh stack scaffolded under <code>stacks/detected-{name}/</code>).</li>
+          <li>The detected stack may match an existing library entry (great: you get the prebuilt rules) or it may be custom (you get a fresh stack scaffolded under <code>stacks/{name}/</code>, a clean lowercase-hyphenated name with no <code>detected-</code> prefix).</li>
           <li>Everything downstream is the same. <code>/architect</code> still produces session files, the session loop still applies, persona spokes still work.</li>
         </ul>
 
@@ -838,7 +838,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>Cursor Class &mdash; 3-hour workflow class. Materials in <code>materials/</code>; advanced deep-dive reference (MCP, hooks, agents) in <code>materials/_old/</code>.</p>
+    <p>Cursor Class: 3-hour workflow class. Materials in <code>materials/</code>.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>

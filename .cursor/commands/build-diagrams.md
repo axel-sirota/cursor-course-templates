@@ -21,12 +21,12 @@ grep -n "DIAGRAM_PLACEHOLDER" materials/*.html
 Print the full list:
 ```
 Diagrams to render:
-1. materials/cursor-guide.html → cursor_guide_dN.svg — [description]
-2. materials/cursor-basics.html → cursor_basics_dN.svg — [description]
+1. materials/cursor-class.html → d01-<name>.svg: [description]
+2. materials/cursor-class.html → d02-<name>.svg: [description]
 ...
 ```
 
-If $ARGUMENTS is a specific filename (e.g. `cursor-guide`), only process that file.
+If $ARGUMENTS is a specific filename (e.g. `cursor-class`), only process that file.
 
 ---
 

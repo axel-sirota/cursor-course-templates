@@ -30,6 +30,8 @@ Tip for exercise 1: sort the key by `amount`. The nine reconciling items range f
 
 ## Option B: with the agent (2 minutes per paper)
 
+`checks/expected*.csv` is in `.cursorignore`, so the agent cannot read it in a student repo. Use this option on your own grading copy after removing the `exercises/**/checks/expected*.csv` line from `.cursorignore` there.
+
 Open Cursor in the student's workspace and paste:
 
 ```

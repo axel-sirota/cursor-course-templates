@@ -4,12 +4,27 @@ description: Automatically detect stack, style, and structure of an existing pro
 
 # Detect Stack Command
 
-This command analyzes an existing codebase (Brownfield) to generate a custom configuration. It is the "Universal Adapter" for unknown or legacy projects.
+This command analyzes an existing codebase (Brownfield) to generate a custom configuration for ONE persona. It is the "Universal Adapter" for unknown or legacy projects, and the brownfield alternative to `/setup-stack`.
+
+```
+/detect-stack                 # if one persona is active, use it; if several, ask which
+/detect-stack <role>          # detect the stack for that persona
+/detect-stack <role> <path>   # scan <path> instead of workspaces/<role>/
+```
 
 ## Execution Flow
 
+**0. Pick the persona**
+- Read `## Active Personas` from `.cursor/context.md`.
+  - Empty or `(none)` → "⚠️ No persona configured. Run `/set-persona` first." Stop.
+- If `<role>` was given, it must be in the active list. Otherwise: "`<role>` is not active. Run `/set-persona add <role>` first." Stop.
+- If no role was given: one active persona → use it. Several → ask "Which persona is this stack for? {list}".
+- If `## Persona: <role>` already has a Stack set → "`<role>` already uses `{stack}`. Run `/undo stack <role>` first to switch." Stop.
+- **Scan root**: the `<path>` the user gave, otherwise `workspaces/<role>/` (ignore `plans/` and `README.md`). If the scan root has no code, ask the user for the path to their existing code.
+- Track every path written in `files` (for the manifest in step 10).
+
 **1. Reconnaissance**
-- **Action**: Scan the root directory and key subdirectories.
+- **Action**: Scan the scan root and its key subdirectories.
 - **Look for**:
   - `package.json`, `tsconfig.json` (Node/JS)
   - `requirements.txt`, `pyproject.toml`, `Pipfile` (Python)
@@ -24,7 +39,7 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
 - Read 2-3 representative source files (e.g., `src/main...`, `app/routes...`, `controllers/...`).
 - **Extract**:
   - **Coding Style**: Indentation (Tabs/Spaces), Naming (Camel/Snake), Semicolons?
-  - **Architecture**: MVC? Hexagonal? Flat? Service-based?
+  - **Architecture**: MVC? Hexagonal? Flat? Service-based? Write it as one Architecture Shape line.
   - **Testing**: Is there a `tests/` or `spec/` folder? Which framework is used?
   - **Patterns**: Repository pattern? Dependency injection? Service objects?
 
@@ -38,13 +53,11 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
 **4A. If Match Found (Stack Already Exists)**
 - **Action**: Use the existing stack
 - **Steps**:
-  1. Copy `stacks/{matched-name}/context.md` → `.cursor/context.md`
-  2. Copy `stacks/{matched-name}/rules/*` → `.cursor/rules/`
-  3. **Adjust context for brownfield**:
-     - Set `Strictness: Low` (if not already set)
-     - Add note: "Detected from existing codebase - rules apply to new code only"
+  1. Take the Architecture Shape from `stacks/{matched-name}/context.md` → `## Architecture Shape` (first non-empty line).
+  2. Copy `stacks/{matched-name}/rules/*.mdc` → `.cursor/rules/<role>/stack-<file>.mdc` (scoping per step 9).
+  3. **Brownfield note**: add to the top of each copied rule body: "Detected from existing codebase. Rules apply to new code only (Strictness: Low)."
   4. Inform user: "Detected {stack-name}! Using existing stack configuration from `stacks/{matched-name}/`"
-  5. **Done** ✅
+  5. Go to step 10.
 
 **4B. If No Match Found (New Stack Detected)**
 - **Action**: Generate a clean stack name
@@ -56,7 +69,7 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
 **5. Present Detection Results**
 - Show the user what was detected:
   ```
-  Detected Stack:
+  Detected Stack (for <role>, scanned <scan root>):
   - Language: {Language + Version}
   - Framework: {Framework}
   - Architecture: {Pattern}
@@ -68,7 +81,7 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
 - **Question**: "Would you like to save this as a reusable stack in `stacks/{clean-name}/` for future projects?"
 - **Options**:
   - **Yes** → Create complete reusable stack (go to step 7)
-  - **No** → Create context for this project only (go to step 10)
+  - **No** → Create rules for this persona only (go to step 9, generating the rules in step 8b content directly into `.cursor/rules/<role>/`; do NOT create `stacks/{clean-name}/`)
 
 **7. Create Reusable Stack Structure (If User Says Yes)**
 - **Action**: Create the following directory structure:
@@ -86,6 +99,9 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
 - **Format**:
   ```markdown
   # Project Context: {Detected Name}
+
+  ## Architecture Shape
+  {One line describing the detected shape}
 
   ## Tech Stack
   - Language: {Detected Language + Version}
@@ -108,9 +124,6 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
   - Refactoring: Only touch what is necessary
   - New Code: Apply full standards to new features only
   - Legacy Code: Document issues but don't force refactoring
-
-  ## Active Phase
-  - Current: Phase 0 (Skeleton)
   ```
 
 **8b. Create `stacks/{clean-name}/rules/`**
@@ -138,12 +151,13 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
   - {Rule 2 based on observed code}
   - {Rule 3 based on observed code}
   ```
+  The library copy stays generic (`alwaysApply: true`); step 9 scopes it to the persona when installing.
 
 **8c. Extract `stacks/{clean-name}/templates/`**
-- **Copy actual configuration files from the detected codebase**:
-  - `.env.example` (if exists in repo)
-  - `docker-compose.yml` (if exists in repo)
-  - `Makefile` (if exists in repo)
+- **Copy actual configuration files from the scanned codebase**:
+  - `.env.example` (if exists)
+  - `docker-compose.yml` (if exists)
+  - `Makefile` (if exists)
   - Package/dependency files:
     - `requirements.txt` or `pyproject.toml` (Python)
     - `package.json` (Node.js)
@@ -158,10 +172,10 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
 - **Example**:
   ```
   stacks/{clean-name}/templates/
-  ├── .env.example           # Copied from repo root
-  ├── docker-compose.yml     # Copied from repo root
-  ├── requirements.txt       # Copied from repo root
-  └── pytest.ini             # Copied from repo root
+  ├── .env.example           # Copied from scan root
+  ├── docker-compose.yml     # Copied from scan root
+  ├── requirements.txt       # Copied from scan root
+  └── pytest.ini             # Copied from scan root
   ```
 
 **8d. Extract `stacks/{clean-name}/examples/`**
@@ -188,46 +202,67 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
   3. Copy the file preserving the exact code: `users_controller.rb`
   4. This ensures future users get the SAME patterns found in the original codebase
 
-**9. Copy to Current Project**
-- **Action**: Copy generated stack to `.cursor/` for immediate use
-  1. Copy `stacks/{clean-name}/context.md` → `.cursor/context.md`
-  2. Copy `stacks/{clean-name}/rules/*` → `.cursor/rules/`
-  3. (Templates and examples stay in `stacks/` for future projects)
-
-- **Inform User**:
+**9. Install for the persona**
+- Copy each rule (from `stacks/{name}/rules/*.mdc`, or the generated rules in context-only mode) → `.cursor/rules/<role>/stack-<file>.mdc`, rewriting the frontmatter to:
   ```
-  ✅ Stack saved to `stacks/{clean-name}/`
-  ✅ Templates extracted from your config files
-  ✅ Examples extracted from your codebase
-  ✅ Context activated for this project
-
-  Future projects can select '{clean-name}' from @setup-stack
+  ---
+  description: <keep original description>
+  globs: workspaces/<role>/**
+  alwaysApply: false
+  ---
   ```
-
-**10. Context-Only Mode (If User Says No)**
-- **Action**: Create context and rules for this project only (not reusable)
-  1. Generate `.cursor/context.md` with detected configuration
-  2. Generate `.cursor/rules/` with basic rules
-  3. Set `Strictness: Low`
-  4. **Do NOT** create `stacks/{clean-name}/`
-
-- **Inform User**:
+  The `stack-` prefix keeps stack rules apart from the persona's own rules in the same folder (same as `/setup-stack`).
+- Templates and examples stay in `stacks/` (the student's code is already in the workspace). Do not copy anything into `workspaces/<role>/`.
+- **Never overwrite `.cursor/context.md`.** In the `## Persona: <role>` block set only:
   ```
-  ✅ Context configured for this project only
-
-  To use standard stacks in future projects, run @setup-stack and select from the library
+  Stack: <stack name>
+  Architecture Shape: <shape line>
+  Active Phase: Phase 0 (Skeleton)
   ```
+  Do not touch `## Active Personas` or other persona blocks.
 
-**11. Final Confirmation**
-- Present the context to the user.
-- Ask: "Does this configuration look correct? Ready to start working?"
+**10. Write the stack manifest**
+
+`.cursor/stacks/<role>.manifest.json` (same format as `/setup-stack`, so `/undo stack <role>` works):
+
+```json
+{
+  "persona": "<role>",
+  "stack": "<stack name>",
+  "architecture_shape": "<shape>",
+  "installed_at": "<ISO 8601>",
+  "reconcile_mode": "detected",
+  "scanned_path": "<scan root>",
+  "files": [".cursor/rules/<role>/stack-100-style.mdc", "..."]
+}
+```
+
+List only files written under `.cursor/`. Files created under `stacks/{clean-name}/` are library content and are not removed by `/undo`.
+
+**11. Confirm**
+```
+✅ Stack for <role>: <stack> (<shape>), detected from <scan root>
+   Rules: .cursor/rules/<role>/stack-*.mdc  (apply to workspaces/<role>/** only)
+   Saved to library: stacks/<clean-name>/   (only if you chose Yes in step 6)
+
+Next: /architect <role>
+```
+- Ask: "Does this configuration look correct?"
 
 ## Usage
-`@detect-stack`
--> *Scans repo → Checks existing stacks → Creates reusable stack if needed → Adapts Agent to your Reality.*
+`/detect-stack <role>`
+-> *Picks the persona → Scans its workspace (or your path) → Checks existing stacks → Creates reusable stack if needed → Updates only that persona's block.*
+
+## Error Messages
+
+| Situation | Message |
+|---|---|
+| No active persona | "⚠️ No persona configured. Run `/set-persona` first." |
+| Role not active | "`<role>` is not active. Run `/set-persona add <role>` first." |
+| Stack already set | "`<role>` already uses `<stack>`. Run `/undo stack <role>` first." |
 
 ## Notes
 - Detected stacks use clean names without "detected-" prefix
 - Templates and examples are extracted from the ACTUAL codebase, preserving real patterns
 - `Strictness: Low` is always set for brownfield projects
-- Future projects can reuse detected stacks via `@setup-stack`
+- Future projects can reuse detected stacks via `/setup-stack`

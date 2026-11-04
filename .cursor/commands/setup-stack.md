@@ -64,7 +64,7 @@ Track every path written in `files`.
 | `stacks/<stack>/rules/*.mdc` | `.cursor/rules/<role>/stack-<file>.mdc` | Scope frontmatter to `globs: workspaces/<role>/**`, `alwaysApply: false` (same as /set-persona) |
 | `stacks/<stack>/templates/` | `workspaces/<role>/templates/` | per Step 4 mode |
 | `stacks/<stack>/examples/` | `workspaces/<role>/examples/` | per Step 4 mode |
-| `stacks/<stack>/vibe/` + `stacks/shared/vibe_*.md` | `workspaces/<role>/docs/vibe/` | none |
+| `stacks/<stack>/vibe/` (only if present) + `stacks/shared/vibe_*.md` | `workspaces/<role>/docs/vibe/` | none; skip `vibe/` silently when the stack has none |
 
 The `stack-` prefix keeps stack rules apart from the persona's own rules in the same folder.
 

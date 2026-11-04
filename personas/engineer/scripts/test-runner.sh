@@ -51,6 +51,28 @@ if [ -f "$PROJECT_ROOT/go.mod" ]; then
   RAN=1
 fi
 
+if [ -f "$PROJECT_ROOT/pom.xml" ]; then
+  echo "[test-runner] Detected Maven project, running tests" >&2
+  if [ -x "$PROJECT_ROOT/mvnw" ]; then
+    ./mvnw -q test || echo "[test-runner] WARNING: mvnw test reported failures, review output above" >&2
+  elif command -v mvn >/dev/null 2>&1; then
+    mvn -q test || echo "[test-runner] WARNING: mvn test reported failures, review output above" >&2
+  else
+    echo "[test-runner] mvn not available, skipping Maven tests" >&2
+  fi
+  RAN=1
+fi
+
+if ls "$PROJECT_ROOT"/build.gradle* >/dev/null 2>&1; then
+  echo "[test-runner] Detected Gradle project, running tests" >&2
+  if [ -x "$PROJECT_ROOT/gradlew" ]; then
+    ./gradlew test || echo "[test-runner] WARNING: gradlew test reported failures, review output above" >&2
+  else
+    echo "[test-runner] gradlew not found, skipping Gradle tests" >&2
+  fi
+  RAN=1
+fi
+
 if [ "$RAN" -eq 0 ]; then
   echo "[test-runner] No supported test runner detected in $PROJECT_ROOT, skipping" >&2
 fi

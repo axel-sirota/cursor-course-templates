@@ -26,7 +26,7 @@ Your code goes in `workspaces/engineer/`. The exercise folders are read-only bri
 
 ## Phases
 
-The phases are the ones the course has always used. Each phase is one `/architect` session.
+The phases are the ones the course has always used. `/architect` runs once (on 00-skeleton); each phase is one `/start-session` to `/next-session` cycle.
 
 | Folder | Phase | Time | You build | Rules |
 |---|---|---|---|---|

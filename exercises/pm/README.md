@@ -18,10 +18,10 @@ Total: about 3 to 4 hours. Exercise 1 sets up `workspaces/pm/research/`, which e
 
 | File | Used in | What it holds |
 |---|---|---|
-| `_data/northwind/interview_notes.md` | 1, 2, 3 | six interviews, P1 to P6: receipts, approvals, mobile, currency, policy |
-| `_data/northwind/support_tickets.csv` | 1, 2 | 60 October tickets (1 in 11 sample) with a category |
-| `_data/northwind/usage_metrics.csv` | 1, 3 | 8 candidate features with monthly users, tickets and minutes to submit |
-| `_data/northwind/expense_policy.json` | 1, 2 | receipt over $75.00, 60-day limit, approval limits. Amounts in cents |
+| `exercises/_data/northwind/interview_notes.md` | 1, 2, 3 | six interviews, P1 to P6: receipts, approvals, mobile, currency, policy |
+| `exercises/_data/northwind/support_tickets.csv` | 1, 2 | 60 October tickets (1 in 11 sample) with a category |
+| `exercises/_data/northwind/usage_metrics.csv` | 1, 3 | 8 candidate features with monthly users, tickets and minutes to submit |
+| `exercises/_data/northwind/expense_policy.json` | 1, 2 | receipt over $75.00, 60-day limit, approval limits. Amounts in cents |
 
 ## Flow
 

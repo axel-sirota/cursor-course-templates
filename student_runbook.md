@@ -31,6 +31,8 @@ The instructor fills in the times.
 /next-session
 ```
 
+Exception: pm exercise 02 (fix a flawed PRD) skips `/architect`. Its README says the PRD already exists, so start at `/start-session pm`.
+
 | Rule | Why |
 |---|---|
 | Read the plan before you approve it | `/architect` stops at a review gate. Nothing is built until you say "approved" |
@@ -53,7 +55,7 @@ The engineer exercise is the Blog API: auth, posts, comments and tags, built one
 
 | Step | Commands | Done when |
 |---|---|---|
-| Plan | `/architect engineer @exercises/engineer/README.md`, review, "approved" | Skeleton check passes |
+| Plan | `/architect engineer @exercises/engineer/00-skeleton/README.md`, review, "approved" | Skeleton check passes |
 | Each phase | `/start-session engineer` → `/engineer-tasks` → `/engineer-implement` → `/code-review` → `/next-session` | `exercises/engineer/run-acceptance.sh <exercise>` passes for that phase |
 
 The acceptance tests are Hurl files that call your API over HTTP, so they work for every stack. Start your server before you run them. On go-grpc, the exercise README gives the grpcurl variant.
@@ -104,14 +106,14 @@ On sheets-accounting, review the workbooks Cursor writes in Excel or Google Shee
 
 ## Capstone: one feature, every persona
 
-The capstone brief is `exercises/capstone/README.md`. One Northwind expense feature moves through pm, designer, data-scientist and accountant. Each persona works in its own workspace and reads the previous persona's output. Engineers: see `exercises/engineer/README.md` for your capstone step.
+The capstone brief is `exercises/capstone/README.md`. One Northwind expense feature moves through pm, designer, data-scientist and accountant. Each persona works in its own workspace and reads the previous persona's output. Engineers: see the Engineers section of `exercises/capstone/README.md`.
 
 ```mermaid
 flowchart LR
   PM["pm<br/>workspaces/pm/"] --> DES["designer<br/>workspaces/designer/"]
   DES --> DS["data-scientist<br/>workspaces/data-scientist/"]
   DS --> ACC["accountant<br/>workspaces/accountant/"]
-  ENG["engineer<br/>workspaces/engineer/<br/>see exercises/engineer/README.md"]
+  ENG["engineer<br/>workspaces/engineer/<br/>see exercises/capstone/README.md"]
   CTX[".cursor/context.md<br/>one block per persona"] -.-> PM & DES & DS & ACC & ENG
 ```
 

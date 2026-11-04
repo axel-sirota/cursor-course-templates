@@ -52,7 +52,7 @@ Look up the persona's shape in this table and load ONLY that row's guidance. Do 
 | Analytics Model | python-dbt-snowflake | Sources + staging/mart model tree + grain | Models with `select 1 as placeholder` | `dbt parse` |
 | Statistical Computing | r-tidyverse | Notebook sequence + `src/` function signatures | Notebook files + stub functions | `Rscript --parse` |
 | Experiment Notebook | python-datascience | Dataset, EDA sequence, candidate models, metrics | `notebooks/` EDA template, `data/`, `artifacts/`, `experiments/log.md` stubs | Notebook runs top to bottom |
-| PRD Workspace | pm-prd-markdown | PRD outline: problem, goals, non-goals, users, epics, NFR categories, success metrics | `prds/<name>.md` with every section headed and TODO bodies, `stories/` folder, glossary | `markdownlint` + every required heading present |
+| PRD Workspace | pm-prd-markdown | PRD outline: problem, goals, non-goals, users, epics, NFR categories, success metrics | `prds/<name>.md` with every section headed and TODO bodies, `stories/` folder, glossary | `markdownlint` if installed, otherwise every required heading present |
 | Design System | designer-react-tokens | Token set (semantic over primitive) + component inventory (exists / to build) + screen layout | `tokens/tokens.json`, component files rendering placeholders, one story per component | Token JSON validates, Storybook / test build passes |
 | Close Workbook | sheets-accounting, python-accounting | Source files + schemas, reconciliation and analysis steps, output reports, tie-out points | sheets: `docs/close-plan.md` + one `working/` paper per workpaper from its template (headings, empty body, `TIE-OUT` rows), `output/` folder. python: `src/` step functions returning empty DataFrames, `output/` folder, pytest tie-out stubs | sheets: every `TIE-OUT` row balances to 0.00 and the `tie-out-checker` agent passes. python: `pytest` collects and runs |
 | {custom stack} | from `stacks/<stack>/context.md` | Read the stack's Architecture Shape; ask the user if unclear | | |
@@ -68,6 +68,16 @@ Check if the user provided a plan:
 - The persona's exercise brief, if the student says they are doing an exercise: `exercises/<role>/<exercise>/README.md`
 
 **Plan found → Plan Extraction Mode (3A–5A). No plan → Design Mode (3B–4B).**
+
+**Earlier plan in the workspace.** Before Phase 1, if `{ws}/plans/sessions/` already has files (from an earlier exercise), ask:
+
+```
+Archive the current plan to {ws}/plans/archive/<name>/ and start a new one? (archive / cancel)
+```
+
+- `<name>`: the previous plan's name (from `{ws}/plans/.architect-manifest.json` or the exercise folder), else the date (`YYYY-MM-DD`).
+- **archive** → move `{ws}/plans/sessions/`, `{ws}/plans/interface-contract.md` and `{ws}/plans/.architect-manifest.json` into `{ws}/plans/archive/<name>/`, then continue.
+- **cancel** → STOP. Change nothing.
 
 ---
 
@@ -214,6 +224,8 @@ Wait for explicit approval ("approved", "looks good", "proceed", "yes", "lgtm", 
 
 Read `{ws}/plans/sessions/session-1-phase-0.md`. Build the skeleton described in the persona's dispatch row, inside `{ws}/` only. Stubs and placeholders, no business logic or final content. Then run that row's skeleton check.
 
+Never overwrite an existing file in `{ws}/` without asking. If a skeleton file already exists, ask per file: overwrite / skip / write as `<file>.from-architect`.
+
 📋 **Phase 3 checkpoint:**
 ```
 📋 PHASE 3 COMPLETE — Skeleton built (<role>)
@@ -248,7 +260,7 @@ In the `## Persona: <role>` block of `.cursor/context.md`, set `Active Phase: Ph
 ## Usage Examples
 
 ```
-/architect engineer "Expense tracker API"
+/architect engineer "Blog API (exercises/engineer/00-skeleton/README.md)"
 /architect pm exercises/pm/01-notes-to-prd/README.md
 /architect designer "Budget overview screen"
 /architect data-scientist "Categorise transactions"

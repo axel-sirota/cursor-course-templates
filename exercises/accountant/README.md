@@ -62,10 +62,12 @@ Put this in `workspaces/accountant/docs/close-plan.md` before you start (the com
 
 ## How it is checked
 
-Each exercise has a `checks/expected.csv` with the key figures: reconciling items, flagged accounts, exceptions and their amounts. Compare your working paper to it, by eye or with the agent. See [checks/compare.md](checks/compare.md). No script is needed.
+Each exercise has a `checks/expected.csv` with the key figures: reconciling items, flagged accounts, exceptions and their amounts. Compare your working paper to it by eye. The key is hidden from the agent by `.cursorignore`, so open it yourself. See [checks/compare.md](checks/compare.md). No script is needed.
 
 A result passes when every row in `expected.csv` is on your paper with the same id and amount, and your paper has no extra exceptions the key does not list (or you can explain each one).
 
 ## For instructors
 
 Each exercise has a `SOLUTION.md` with the exact expected numbers, the traps, and grading notes. Every figure was recomputed from the CSVs in `exercises/_data/northwind/`. The full answer key for the dataset is `exercises/_data/README.md` (sections C to F). Do not hand `SOLUTION.md` to students before they finish.
+
+Note: `exercises/_data/README.md` stays visible to the agent because the data-scientist track reads its column reference. Only `answer_key.json`, `SOLUTION.md` and the `checks/expected*` files are hidden by `.cursorignore`.
