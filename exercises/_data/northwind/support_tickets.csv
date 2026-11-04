@@ -1,0 +1,61 @@
+ticket_id,created_at,category,text
+T-1001,2026-10-01T19:06:00,currency,My CAD hotel showed up as USD and I got reimbursed the wrong amount.
+T-1002,2026-10-03T07:48:00,policy,The policy says receipts over $75 but the app asked for one on a $67.89 lunch.
+T-1003,2026-10-03T08:55:00,policy,I did not know weekend expenses need extra review.
+T-1004,2026-10-03T18:10:00,mobile,Cannot add attendees from the mobile app.
+T-1005,2026-10-03T19:57:00,mobile,Lost my draft on mobile when I switched apps.
+T-1006,2026-10-04T13:21:00,receipts,Receipt photo came out blurry and the app rejected it twice before I gave up.
+T-1007,2026-10-04T13:36:00,receipts,Card transaction shows up but the receipt I emailed in is not matched to it.
+T-1008,2026-10-05T10:46:00,approvals,Manager is on leave and nobody else can approve my claims.
+T-1009,2026-10-05T12:13:00,currency,My CAD hotel showed up as USD and I got reimbursed the wrong amount.
+T-1010,2026-10-05T15:38:00,approvals,My claim from 27 days ago is still waiting on my manager.
+T-1011,2026-10-05T17:47:00,mobile,Cannot add attendees from the mobile app.
+T-1012,2026-10-06T15:33:00,policy,"Claim rejected for being too old, but I was traveling for two months."
+T-1013,2026-10-06T20:30:00,approvals,I have 19 claims to approve and opening each one takes forever.
+T-1014,2026-10-07T17:20:00,receipts,Receipt upload spun for a minute and then said it failed. Tried on wifi too.
+T-1015,2026-10-07T18:53:00,mobile,Lost my draft on mobile when I switched apps.
+T-1016,2026-10-08T08:02:00,approvals,Manager is on leave and nobody else can approve my claims.
+T-1017,2026-10-10T15:11:00,receipts,Receipt photo came out blurry and the app rejected it twice before I gave up.
+T-1018,2026-10-11T09:23:00,approvals,Approval reminder emails go to my old manager.
+T-1019,2026-10-11T15:19:00,approvals,"Got rejected with no comment, not sure what to fix."
+T-1020,2026-10-12T10:58:00,receipts,"The app did not read the total from my hotel folio, I had to type every line."
+T-1021,2026-10-12T16:56:00,receipts,Receipt photo came out blurry and the app rejected it twice before I gave up.
+T-1022,2026-10-13T18:41:00,approvals,I have 14 claims to approve and opening each one takes forever.
+T-1023,2026-10-14T17:38:00,policy,"Claim rejected for being too old, but I was traveling for two months."
+T-1024,2026-10-15T08:45:00,approvals,I have 21 claims to approve and opening each one takes forever.
+T-1025,2026-10-15T15:10:00,approvals,Manager is on leave and nobody else can approve my claims.
+T-1026,2026-10-15T17:19:00,receipts,Receipt photo came out blurry and the app rejected it twice before I gave up.
+T-1027,2026-10-16T13:09:00,approvals,My claim from 21 days ago is still waiting on my manager.
+T-1028,2026-10-16T20:06:00,receipts,Receipt upload spun for a minute and then said it failed. Tried on wifi too.
+T-1029,2026-10-17T07:21:00,receipts,"The app did not read the total from my hotel folio, I had to type every line."
+T-1030,2026-10-17T14:48:00,approvals,I approved a claim but the employee still sees it as pending.
+T-1031,2026-10-17T16:16:00,receipts,Card transaction shows up but the receipt I emailed in is not matched to it.
+T-1032,2026-10-18T12:33:00,mobile,App crashes when I open the camera on my phone.
+T-1033,2026-10-18T19:35:00,currency,Paid in EUR and the app converted at a rate that does not match my card statement.
+T-1034,2026-10-19T19:25:00,currency,"I cannot pick GBP on a claim line, only on the whole claim."
+T-1035,2026-10-19T20:27:00,approvals,I approved a claim but the employee still sees it as pending.
+T-1036,2026-10-20T11:17:00,approvals,I approved a claim but the employee still sees it as pending.
+T-1037,2026-10-20T14:00:00,receipts,Card transaction shows up but the receipt I emailed in is not matched to it.
+T-1038,2026-10-20T14:46:00,policy,Why was my team dinner flagged? It was under the limit per person.
+T-1039,2026-10-21T12:48:00,currency,Where do I enter the exchange rate my card used?
+T-1040,2026-10-21T13:02:00,receipts,Uploaded a PDF receipt and the app says file type not supported.
+T-1041,2026-10-21T18:39:00,other,How do I change the bank account my reimbursement goes to?
+T-1042,2026-10-22T14:02:00,receipts,Receipt photo came out blurry and the app rejected it twice before I gave up.
+T-1043,2026-10-22T19:43:00,mobile,App crashes when I open the camera on my phone.
+T-1044,2026-10-23T08:55:00,currency,"I cannot pick GBP on a claim line, only on the whole claim."
+T-1045,2026-10-23T11:19:00,mobile,Lost my draft on mobile when I switched apps.
+T-1046,2026-10-23T20:35:00,approvals,I have 19 claims to approve and opening each one takes forever.
+T-1047,2026-10-24T17:11:00,currency,Paid in EUR and the app converted at a rate that does not match my card statement.
+T-1048,2026-10-24T20:07:00,mobile,Cannot add attendees from the mobile app.
+T-1049,2026-10-25T08:56:00,mobile,Submit button is hidden behind the keyboard on small phones.
+T-1050,2026-10-26T19:24:00,receipts,"The app did not read the total from my hotel folio, I had to type every line."
+T-1051,2026-10-27T09:53:00,receipts,"Auto-fill picked the tip line as the total, so my claim was $56.83 short."
+T-1052,2026-10-27T11:11:00,receipts,Uploaded a PDF receipt and the app says file type not supported.
+T-1053,2026-10-27T11:29:00,receipts,Card transaction shows up but the receipt I emailed in is not matched to it.
+T-1054,2026-10-27T16:04:00,receipts,Uploaded a PDF receipt and the app says file type not supported.
+T-1055,2026-10-29T10:41:00,receipts,Receipt photo came out blurry and the app rejected it twice before I gave up.
+T-1056,2026-10-30T08:28:00,policy,The policy says receipts over $75 but the app asked for one on a $136.53 lunch.
+T-1057,2026-10-30T09:09:00,receipts,Receipt upload spun for a minute and then said it failed. Tried on wifi too.
+T-1058,2026-10-31T10:18:00,policy,Why was my team dinner flagged? It was under the limit per person.
+T-1059,2026-10-31T12:06:00,approvals,Manager is on leave and nobody else can approve my claims.
+T-1060,2026-10-31T15:30:00,receipts,Uploaded a PDF receipt and the app says file type not supported.

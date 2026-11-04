@@ -1,0 +1,679 @@
+openapi: 3.1.0
+info:
+  title: Blog API (engineer exercises)
+  version: 1.0.0
+  summary: The one contract every engineer implements, in any of the six course stacks.
+  description: |
+    Language-neutral contract for the engineer track. The Hurl graders in
+    exercises/engineer/<phase>/acceptance/ check exactly what is written here.
+
+    Conventions that apply to every operation:
+    - JSON field names are camelCase. Ids are strings in JSON, even when the
+      database key is a number.
+    - Timestamps are RFC 3339 strings in UTC, for example 2026-11-04T09:30:00Z.
+    - Every error uses the Error envelope below. Error codes are stable strings.
+    - Status precedence on protected writes: 401 (no or bad token) > 404 (no such
+      resource) > 403 (not the owner) > 422 (bad body).
+    - Malformed JSON bodies get 400 MALFORMED_JSON. Well-formed JSON that breaks a
+      rule gets 422 VALIDATION_FAILED with one fields[] entry per bad field.
+    - Unknown ids return 404 NOT_FOUND whatever their format (never 400 or 500).
+    - Every response carries an X-Request-Id header (phase 05).
+    - Wrong JSON types are rejected, never coerced (a number is not a title).
+
+    Phases: 00 skeleton (shapes), 01 auth, 02 posts, 03 comments, 04 tags, 05 polish.
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8000
+    description: Default BASE_URL used by the graders
+tags:
+  - name: health
+  - name: auth
+  - name: posts
+  - name: comments
+  - name: tags
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      operationId: getHealth
+      summary: Liveness check
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    const: ok
+
+  /api/auth/register:
+    post:
+      tags: [auth]
+      operationId: register
+      summary: Create a user account (phase 01)
+      description: Usernames and emails are unique, compared case-insensitively. The password is stored as a bcrypt or argon2 hash and never returned.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/MalformedJson"
+        "409":
+          description: USERNAME_TAKEN or EMAIL_TAKEN
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+
+  /api/auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      summary: Exchange username and password for a JWT (phase 01)
+      description: Unknown username and wrong password return the same 401 INVALID_CREDENTIALS. The token is an HS256 JWT signed with JWT_SECRET_KEY, with sub = user id and exp = now + JWT_EXPIRATION_DAYS (default 7).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          $ref: "#/components/responses/MalformedJson"
+        "401":
+          description: INVALID_CREDENTIALS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+
+  /api/auth/me:
+    get:
+      tags: [auth]
+      operationId: getMe
+      summary: The user that owns the bearer token (phase 01)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/posts:
+    get:
+      tags: [posts]
+      operationId: listPosts
+      summary: List posts, newest first (phase 02; q, tag and sort in phase 05)
+      description: Public. Filters combine with AND, and pagination applies after filtering.
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+        - name: authorId
+          in: query
+          description: Only posts by this user (phase 02)
+          schema:
+            type: string
+        - name: q
+          in: query
+          description: Case-insensitive substring match on title or content (phase 05)
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: tag
+          in: query
+          description: Only posts carrying this tag, normalized like stored tags (phase 05)
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Sort key (phase 05). Unknown values return 422 on field sort.
+          schema:
+            type: string
+            enum: [-createdAt, createdAt, title, -title]
+            default: -createdAt
+      responses:
+        "200":
+          description: One page of posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostPage"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+    post:
+      tags: [posts]
+      operationId: createPost
+      summary: Create a post (phase 02; tags in phase 04)
+      description: authorId is taken from the token. Any authorId in the body is ignored.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/MalformedJson"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+
+  /api/posts/{postId}:
+    parameters:
+      - $ref: "#/components/parameters/PostId"
+    get:
+      tags: [posts]
+      operationId: getPost
+      summary: Get one post (phase 02)
+      responses:
+        "200":
+          description: The post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [posts]
+      operationId: updatePost
+      summary: Replace a post, author only (phase 02)
+      description: Full replacement of title and content. If tags is omitted the current tags stay; tags [] clears them.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "200":
+          description: Updated post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/MalformedJson"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+    delete:
+      tags: [posts]
+      operationId: deletePost
+      summary: Delete a post and its comments, author only (phase 02)
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Deleted. Empty body.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/posts/{postId}/comments:
+    parameters:
+      - $ref: "#/components/parameters/PostId"
+    get:
+      tags: [comments]
+      operationId: listComments
+      summary: List comments on a post, oldest first (phase 03)
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: One page of comments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentPage"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+    post:
+      tags: [comments]
+      operationId: createComment
+      summary: Add a comment (phase 03)
+      description: Any authenticated user may comment. authorId comes from the token.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "400":
+          $ref: "#/components/responses/MalformedJson"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+
+  /api/comments/{commentId}:
+    parameters:
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      tags: [comments]
+      operationId: deleteComment
+      summary: Delete a comment, comment author only (phase 03)
+      description: The post author is NOT allowed to delete other people's comments.
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Deleted. Empty body.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/tags:
+    get:
+      tags: [tags]
+      operationId: listTags
+      summary: Every tag in use with its post count, sorted by name (phase 04)
+      description: Tags with zero posts are not listed. Not paginated.
+      responses:
+        "200":
+          description: Tag list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TagSummary"
+
+  /api/tags/{tagName}/posts:
+    parameters:
+      - name: tagName
+        in: path
+        required: true
+        description: Normalized before lookup (trimmed, lowercased)
+        schema:
+          type: string
+    get:
+      tags: [tags]
+      operationId: listPostsByTag
+      summary: Posts carrying a tag, newest first (phase 04)
+      description: An unknown tag returns 200 with an empty page, not 404.
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: One page of posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostPage"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: HS256 only. Tokens with alg none or another algorithm are rejected with 401.
+
+  parameters:
+    PostId:
+      name: postId
+      in: path
+      required: true
+      schema:
+        type: string
+    Page:
+      name: page
+      in: query
+      description: 1-based page number. Non-integers and values below 1 return 422 on field page.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      description: Items per page. Outside 1..100 returns 422 on field pageSize.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+
+  headers:
+    XRequestId:
+      description: Echoes the client X-Request-Id, or a server-generated id (phase 05)
+      schema:
+        type: string
+
+  responses:
+    MalformedJson:
+      description: Body is not valid JSON (code MALFORMED_JSON)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ValidationFailed:
+      description: Well-formed JSON or query parameters that break a rule (code VALIDATION_FAILED)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Missing, malformed, expired or wrongly signed token (code UNAUTHORIZED)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Authenticated but not the owner (code FORBIDDEN)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: No such resource or route (code NOT_FOUND)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                - MALFORMED_JSON
+                - VALIDATION_FAILED
+                - UNAUTHORIZED
+                - INVALID_CREDENTIALS
+                - FORBIDDEN
+                - NOT_FOUND
+                - METHOD_NOT_ALLOWED
+                - USERNAME_TAKEN
+                - EMAIL_TAKEN
+            message:
+              type: string
+              description: Human readable. Never a stack trace.
+            fields:
+              type: array
+              description: Present on VALIDATION_FAILED. One entry per invalid field.
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                    description: The camelCase field or query parameter name, for example pageSize
+                  message:
+                    type: string
+      example:
+        error:
+          code: VALIDATION_FAILED
+          message: Request failed validation
+          fields:
+            - field: title
+              message: 1 to 200 characters, not blank
+
+    RegisterRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          pattern: "^[A-Za-z0-9_]{3,30}$"
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          description: 8 to 72 bytes (72 is the bcrypt input limit)
+          minLength: 8
+          maxLength: 72
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    User:
+      type: object
+      required: [id, username, email, createdAt]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+
+    TokenResponse:
+      type: object
+      required: [accessToken, tokenType, expiresIn, user]
+      properties:
+        accessToken:
+          type: string
+          description: Compact JWT, three base64url parts
+        tokenType:
+          type: string
+          const: Bearer
+        expiresIn:
+          type: integer
+          minimum: 1
+          description: Seconds until the token expires
+        user:
+          $ref: "#/components/schemas/User"
+
+    PostInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Not blank (whitespace only is invalid)
+        content:
+          type: string
+          minLength: 1
+          maxLength: 20000
+          description: Not blank
+        tags:
+          type: array
+          maxItems: 5
+          description: Phase 04. Each tag is trimmed and lowercased, then must match ^[a-z0-9][a-z0-9-]{0,29}$. Duplicates collapse. At most 5 after normalization.
+          items:
+            type: string
+
+    Post:
+      type: object
+      required: [id, title, content, authorId, authorUsername, tags, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        authorId:
+          type: string
+        authorUsername:
+          type: string
+        tags:
+          type: array
+          description: Normalized, sorted A to Z. Always present; empty before phase 04.
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CommentInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Not blank
+
+    Comment:
+      type: object
+      required: [id, postId, authorId, authorUsername, content, createdAt]
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+        authorId:
+          type: string
+        authorUsername:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    TagSummary:
+      type: object
+      required: [name, postCount]
+      properties:
+        name:
+          type: string
+        postCount:
+          type: integer
+          minimum: 1
+
+    PageMeta:
+      type: object
+      required: [page, pageSize, total, totalPages]
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+          description: ceil(total / pageSize); 0 when total is 0
+
+    PostPage:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Post"
+
+    CommentPage:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Comment"

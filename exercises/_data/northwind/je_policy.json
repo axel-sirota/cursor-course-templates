@@ -1,0 +1,38 @@
+{
+  "company": "Northwind Co.",
+  "entities": {
+    "NW-US": "Northwind Co. (United States)",
+    "NW-CA": "Northwind Co. Canada (reports in USD)"
+  },
+  "reporting_currency": "USD",
+  "close_calendar": {
+    "2026-09": {
+      "period_end": "2026-09-30",
+      "close_date": "2026-10-06"
+    },
+    "2026-10": {
+      "period_end": "2026-10-31",
+      "close_date": "2026-11-05"
+    }
+  },
+  "close_rule": "Entries for a period must be entered (entry_date) on or before that period's close_date.",
+  "company_holidays": {
+    "2026-09-07": "Labor Day",
+    "2026-10-12": "Indigenous Peoples' Day"
+  },
+  "posting_days": "Entries post on business days (Monday to Friday, excluding company holidays).",
+  "manual_je_approval": {
+    "limit_cents": 1000000,
+    "rule": "MANUAL entries with total debits of 1000000 cents ($10,000.00) or more need the Controller. Smaller entries can be approved by the Accounting Manager or the Controller. Preparer and approver must be different people."
+  },
+  "preparers": "Journal entries are prepared by Finance staff. System sources post as service accounts SVC-EXPENSE (expense claims and payouts) and SVC-GL (billing, receipts, fees, depreciation).",
+  "sources": {
+    "AP": "Vendor invoices and vendor payments",
+    "EXP": "Expense claim approvals and payouts",
+    "PAYROLL": "Payroll runs",
+    "MANUAL": "Manual journal entries",
+    "SYSTEM": "Automated postings"
+  },
+  "intercompany": "Every NW-US entry to 1310 Intercompany Receivable must have an NW-CA entry to 2310 Intercompany Payable with the same IC reference and amount.",
+  "gl_extract_date": "2026-11-12"
+}

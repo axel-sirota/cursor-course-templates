@@ -1,0 +1,228 @@
+// Blog API contract for the go-grpc stack. Same operations and rules as ../openapi.yaml.
+//
+// Error mapping (HTTP contract -> gRPC status):
+//   400 MALFORMED_JSON / 422 VALIDATION_FAILED -> INVALID_ARGUMENT (put the field name in the message,
+//                                                 or attach google.rpc.BadRequest field violations)
+//   401 UNAUTHORIZED / INVALID_CREDENTIALS      -> UNAUTHENTICATED
+//   403 FORBIDDEN                               -> PERMISSION_DENIED
+//   404 NOT_FOUND                               -> NOT_FOUND
+//   409 USERNAME_TAKEN / EMAIL_TAKEN            -> ALREADY_EXISTS
+//
+// Auth: send the JWT as metadata "authorization: Bearer <token>". Check it in a unary
+// interceptor, not inside each method. Register, Login and every read are public.
+//
+// The server must also register grpc.health.v1.Health and server reflection, so that
+// grpcurl works without local proto files.
+syntax = "proto3";
+
+package blog.v1;
+
+option go_package = "example.com/blog/gen/blog/v1;blogv1";
+
+import "google/protobuf/timestamp.proto";
+
+service BlogService {
+  // Phase 01: auth
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc GetMe(GetMeRequest) returns (GetMeResponse);
+
+  // Phase 02: posts
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc ListPosts(ListPostsRequest) returns (ListPostsResponse);
+  rpc GetPost(GetPostRequest) returns (GetPostResponse);
+  rpc UpdatePost(UpdatePostRequest) returns (UpdatePostResponse);
+  rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
+
+  // Phase 03: comments
+  rpc CreateComment(CreateCommentRequest) returns (CreateCommentResponse);
+  rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse);
+  rpc DeleteComment(DeleteCommentRequest) returns (DeleteCommentResponse);
+
+  // Phase 04: tags
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse);
+  rpc ListPostsByTag(ListPostsByTagRequest) returns (ListPostsByTagResponse);
+}
+
+// Response wrappers follow the buf STANDARD lint rules (one Response message per RPC).
+message RegisterResponse {
+  User user = 1;
+}
+
+message GetMeResponse {
+  User user = 1;
+}
+
+message CreatePostResponse {
+  Post post = 1;
+}
+
+message GetPostResponse {
+  Post post = 1;
+}
+
+message UpdatePostResponse {
+  Post post = 1;
+}
+
+message CreateCommentResponse {
+  Comment comment = 1;
+}
+
+message ListPostsByTagResponse {
+  repeated Post items = 1;
+  PageMeta meta = 2;
+}
+
+// ---------------------------------------------------------------- shared
+
+message PageRequest {
+  int32 page = 1;       // 1-based. 0 means "use the default" (1). Negative -> INVALID_ARGUMENT.
+  int32 page_size = 2;  // 1..100. 0 means "use the default" (10). Over 100 -> INVALID_ARGUMENT.
+}
+
+message PageMeta {
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 total = 3;
+  int32 total_pages = 4;
+}
+
+// ---------------------------------------------------------------- auth
+
+message User {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message RegisterRequest {
+  string username = 1;  // ^[A-Za-z0-9_]{3,30}$, unique case-insensitively
+  string email = 2;     // unique case-insensitively
+  string password = 3;  // 8 to 72 bytes, stored as a bcrypt or argon2 hash
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string access_token = 1;  // HS256 JWT
+  string token_type = 2;    // always "Bearer"
+  int64 expires_in = 3;     // seconds
+  User user = 4;
+}
+
+message GetMeRequest {}
+
+// ---------------------------------------------------------------- posts
+
+message Post {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string author_id = 4;
+  string author_username = 5;
+  repeated string tags = 6;  // normalized, sorted A to Z
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message CreatePostRequest {
+  string title = 1;           // 1..200, not blank
+  string content = 2;         // 1..20000, not blank
+  repeated string tags = 3;   // phase 04; at most 5 after normalization
+}
+
+enum PostSort {
+  POST_SORT_UNSPECIFIED = 0;      // same as CREATED_AT_DESC
+  POST_SORT_CREATED_AT_DESC = 1;
+  POST_SORT_CREATED_AT_ASC = 2;
+  POST_SORT_TITLE_ASC = 3;
+  POST_SORT_TITLE_DESC = 4;
+}
+
+message ListPostsRequest {
+  PageRequest page = 1;
+  string author_id = 2;  // optional filter
+  string q = 3;          // phase 05: case-insensitive substring on title or content
+  string tag = 4;        // phase 05
+  PostSort sort = 5;     // phase 05
+}
+
+message ListPostsResponse {
+  repeated Post items = 1;
+  PageMeta meta = 2;
+}
+
+message GetPostRequest {
+  string id = 1;
+}
+
+message UpdatePostRequest {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  // proto3 cannot tell "absent" from "empty" for repeated fields, so the gRPC variant
+  // makes the intent explicit: replace_tags=false keeps the current tags.
+  bool replace_tags = 4;
+  repeated string tags = 5;
+}
+
+message DeletePostRequest {
+  string id = 1;
+}
+
+message DeletePostResponse {}
+
+// ---------------------------------------------------------------- comments
+
+message Comment {
+  string id = 1;
+  string post_id = 2;
+  string author_id = 3;
+  string author_username = 4;
+  string content = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message CreateCommentRequest {
+  string post_id = 1;
+  string content = 2;  // 1..2000, not blank
+}
+
+message ListCommentsRequest {
+  string post_id = 1;
+  PageRequest page = 2;
+}
+
+message ListCommentsResponse {
+  repeated Comment items = 1;
+  PageMeta meta = 2;
+}
+
+message DeleteCommentRequest {
+  string id = 1;
+}
+
+message DeleteCommentResponse {}
+
+// ---------------------------------------------------------------- tags
+
+message TagSummary {
+  string name = 1;
+  int32 post_count = 2;
+}
+
+message ListTagsRequest {}
+
+message ListTagsResponse {
+  repeated TagSummary items = 1;
+}
+
+message ListPostsByTagRequest {
+  string tag_name = 1;
+  PageRequest page = 2;
+}

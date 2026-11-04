@@ -1,0 +1,121 @@
+employee_id,name,department,role,title,manager_id,approval_limit_cents,cost_center,hire_date
+E0001,Ira Westerly,Sales,VP,VP of Sales,,5000000,CC-SAL,2016-08-26
+E0002,Kai Lowmarsh,Sales,Director,Director of Sales,E0001,1000000,CC-SAL,2020-01-23
+E0003,Elliot Zephyrine,Sales,Manager,Sales Manager,E0002,250000,CC-SAL,2025-06-01
+E0004,Avery Underhill,Sales,Manager,Sales Manager,E0002,250000,CC-SAL,2022-10-23
+E0005,Zion Millbrook,Sales,Manager,Sales Manager,E0002,250000,CC-SAL,2018-02-05
+E0006,Umi Hearthstone,Sales,IC,Account Executive,E0003,0,CC-SAL,2018-11-04
+E0007,Nova Mossgrove,Sales,IC,Account Executive,E0004,0,CC-SAL,2018-05-15
+E0008,Nova Yarrowby,Sales,IC,Account Executive,E0005,0,CC-SAL,2019-05-14
+E0009,Noel Lowmarsh,Sales,IC,Account Executive,E0003,0,CC-SAL,2020-08-30
+E0010,Glen Glimmerton,Sales,IC,Account Executive,E0004,0,CC-SAL,2017-09-11
+E0011,Cove Nettlefield,Sales,IC,Account Executive,E0005,0,CC-SAL,2023-10-07
+E0012,Ira Pennywhistle,Sales,IC,Account Executive,E0003,0,CC-SAL,2020-08-25
+E0013,Nova Ironwood,Sales,IC,Account Executive,E0004,0,CC-SAL,2025-07-28
+E0014,Briar Hearthstone,Sales,IC,Account Executive,E0005,0,CC-SAL,2023-02-26
+E0015,Dell Vantwood,Sales,IC,Account Executive,E0003,0,CC-SAL,2019-04-19
+E0016,Fern Mossgrove,Sales,IC,Account Executive,E0004,0,CC-SAL,2019-03-22
+E0017,Xen Jasperly,Sales,IC,Account Executive,E0005,0,CC-SAL,2019-01-02
+E0018,Wren Orchardly,Sales,IC,Account Executive,E0003,0,CC-SAL,2023-01-29
+E0019,Finley Hearthstone,Sales,IC,Account Executive,E0004,0,CC-SAL,2025-08-20
+E0020,Harper Juniper,Sales,IC,Account Executive,E0005,0,CC-SAL,2016-06-17
+E0021,Cove Northcote,Sales,IC,Account Executive,E0003,0,CC-SAL,2018-01-17
+E0022,Wren Kestrel,Sales,IC,Account Executive,E0004,0,CC-SAL,2021-06-12
+E0023,Kit Birchmont,Sales,IC,Account Executive,E0005,0,CC-SAL,2016-02-12
+E0024,Avery Orchardly,Sales,IC,Account Executive,E0003,0,CC-SAL,2022-10-02
+E0025,Dana Zephyrine,Sales,IC,Account Executive,E0004,0,CC-SAL,2020-02-02
+E0026,Hollis Greystone,Sales,IC,Account Executive,E0005,0,CC-SAL,2021-03-15
+E0027,Quinn Elmstead,Sales,IC,Account Executive,E0003,0,CC-SAL,2025-08-20
+E0028,Avery Zephyrine,Sales,IC,Account Executive,E0004,0,CC-SAL,2015-10-10
+E0029,Noel Dunmore,Sales,IC,Account Executive,E0005,0,CC-SAL,2021-11-10
+E0030,Kai Millbrook,Sales,IC,Account Executive,E0003,0,CC-SAL,2018-06-01
+E0031,Ira Greystone,Engineering,VP,VP of Engineering,,5000000,CC-ENG,2021-01-10
+E0032,Indy Lowmarsh,Engineering,Director,Director of Engineering,E0031,1000000,CC-ENG,2025-03-14
+E0033,Oakley Silverton,Engineering,Manager,Engineering Manager,E0032,250000,CC-ENG,2023-10-26
+E0034,Yael Greystone,Engineering,Manager,Engineering Manager,E0032,250000,CC-ENG,2017-04-30
+E0035,Glen Larkspur,Engineering,Manager,Engineering Manager,E0032,250000,CC-ENG,2019-09-03
+E0036,Casey Thistledown,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2021-11-23
+E0037,Vale Driftwood,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2017-10-13
+E0038,Ember Westerly,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2020-10-22
+E0039,Harper Mossgrove,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2024-04-21
+E0040,Oakley Thistledown,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2016-08-15
+E0041,Lark Elmstead,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2025-10-01
+E0042,Quinn Ravensworth,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2022-02-07
+E0043,Oakley Kestrel,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2021-05-19
+E0044,Ember Millbrook,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2021-09-16
+E0045,Umi Thistledown,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2017-12-12
+E0046,Reese Eastlake,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2016-01-27
+E0047,Ira Ravensworth,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2016-07-14
+E0048,Reese Coldharbor,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2021-07-16
+E0049,Blake Foxglove,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2024-10-07
+E0050,Briar Brightwater,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2017-01-11
+E0051,Oakley Westerly,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2019-07-13
+E0052,Marlo Dunmore,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2019-07-22
+E0053,Finley Millbrook,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2015-04-07
+E0054,Jordan Orchardly,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2015-09-08
+E0055,Glen Ashdown,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2022-01-29
+E0056,Blake Ashdown,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2019-07-18
+E0057,Vale Oakhurst,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2015-08-20
+E0058,Parker Oakhurst,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2022-02-25
+E0059,Elliot Coldharbor,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2017-02-11
+E0060,Nova Kestrel,Engineering,IC,Software Engineer,E0033,0,CC-ENG,2020-09-07
+E0061,Fern Northcote,Engineering,IC,Software Engineer,E0034,0,CC-ENG,2026-03-15
+E0062,Jules Fairholm,Engineering,IC,Software Engineer,E0035,0,CC-ENG,2024-04-01
+E0063,Gray Birchmont,Finance,VP,Chief Financial Officer,,5000000,CC-FIN,2022-07-05
+E0064,Briar Jasperly,Finance,Director,Controller,E0063,1000000,CC-FIN,2019-12-03
+E0065,Oakley Glimmerton,Finance,Manager,Accounting Manager,E0064,250000,CC-FIN,2015-12-21
+E0066,Cove Hollowell,Finance,Manager,AP Manager,E0064,250000,CC-FIN,2023-01-14
+E0067,Indy Hearthstone,Finance,IC,Senior Accountant,E0065,0,CC-FIN,2026-01-19
+E0068,Arden Nettlefield,Finance,IC,Staff Accountant,E0065,0,CC-FIN,2025-12-20
+E0069,Blake Quarrystone,Finance,IC,Staff Accountant,E0065,0,CC-FIN,2024-08-18
+E0070,Reese Underhill,Finance,IC,AP Specialist,E0066,0,CC-FIN,2016-05-29
+E0071,Glen Foxglove,Finance,IC,AP Specialist,E0066,0,CC-FIN,2022-09-08
+E0072,Reese Larkspur,Finance,IC,Payroll Specialist,E0066,0,CC-FIN,2023-02-26
+E0073,Quinn Foxglove,Finance,IC,Financial Analyst,E0065,0,CC-FIN,2019-07-16
+E0074,Marlo Brightwater,Finance,IC,Financial Analyst,E0065,0,CC-FIN,2020-09-15
+E0075,Elliot Ironwood,Marketing,VP,VP of Marketing,,5000000,CC-MKT,2022-09-26
+E0076,Dell Oakhurst,Marketing,Director,Director of Marketing,E0075,1000000,CC-MKT,2024-01-15
+E0077,Xen Orchardly,Marketing,Manager,Marketing Manager,E0076,250000,CC-MKT,2016-10-28
+E0078,Hollis Yarrowby,Marketing,Manager,Marketing Manager,E0076,250000,CC-MKT,2015-06-24
+E0079,Zion Ravensworth,Marketing,IC,Marketing Specialist,E0077,0,CC-MKT,2024-09-24
+E0080,Logan Northcote,Marketing,IC,Marketing Specialist,E0078,0,CC-MKT,2025-06-16
+E0081,Logan Greystone,Marketing,IC,Marketing Specialist,E0077,0,CC-MKT,2016-03-08
+E0082,Wren Hearthstone,Marketing,IC,Marketing Specialist,E0078,0,CC-MKT,2015-11-24
+E0083,Arden Mossgrove,Marketing,IC,Marketing Specialist,E0077,0,CC-MKT,2025-08-10
+E0084,Dana Amberlyn,Marketing,IC,Marketing Specialist,E0078,0,CC-MKT,2018-04-12
+E0085,Jordan Kestrel,Marketing,IC,Marketing Specialist,E0077,0,CC-MKT,2025-08-15
+E0086,Kit Vantwood,Marketing,IC,Marketing Specialist,E0078,0,CC-MKT,2024-01-22
+E0087,Lark Mossgrove,Marketing,IC,Marketing Specialist,E0077,0,CC-MKT,2017-09-16
+E0088,Oakley Underhill,Marketing,IC,Marketing Specialist,E0078,0,CC-MKT,2022-12-29
+E0089,Avery Northcote,Support,VP,VP of Support,,5000000,CC-SUP,2017-09-27
+E0090,Briar Copperfield,Support,Director,Director of Support,E0089,1000000,CC-SUP,2020-12-08
+E0091,Umi Zephyrine,Support,Manager,Support Manager,E0090,250000,CC-SUP,2017-08-27
+E0092,Morgan Mossgrove,Support,Manager,Support Manager,E0090,250000,CC-SUP,2020-06-17
+E0093,Cove Zephyrine,Support,IC,Support Specialist,E0091,0,CC-SUP,2024-06-28
+E0094,Sage Greystone,Support,IC,Support Specialist,E0092,0,CC-SUP,2020-01-26
+E0095,Finley Elmstead,Support,IC,Support Specialist,E0091,0,CC-SUP,2019-09-01
+E0096,Xen Greystone,Support,IC,Support Specialist,E0092,0,CC-SUP,2021-04-02
+E0097,Arden Lowmarsh,Support,IC,Support Specialist,E0091,0,CC-SUP,2019-10-19
+E0098,Morgan Greystone,Support,IC,Support Specialist,E0092,0,CC-SUP,2025-05-01
+E0099,Hollis Driftwood,Support,IC,Support Specialist,E0091,0,CC-SUP,2015-03-19
+E0100,Dana Silverton,Support,IC,Support Specialist,E0092,0,CC-SUP,2017-09-24
+E0101,Kit Ashdown,Support,IC,Support Specialist,E0091,0,CC-SUP,2015-11-15
+E0102,Taylor Brightwater,Support,IC,Support Specialist,E0092,0,CC-SUP,2025-08-28
+E0103,Morgan Glimmerton,Support,IC,Support Specialist,E0091,0,CC-SUP,2022-11-20
+E0104,Vale Hollowell,Support,IC,Support Specialist,E0092,0,CC-SUP,2018-11-19
+E0105,Finley Mossgrove,Support,IC,Support Specialist,E0091,0,CC-SUP,2023-11-04
+E0106,Cove Inglewick,Support,IC,Support Specialist,E0092,0,CC-SUP,2017-12-23
+E0107,Dell Coldharbor,Operations,VP,VP of Operations,,5000000,CC-OPS,2019-06-22
+E0108,Ember Ravensworth,Operations,Director,Director of Operations,E0107,1000000,CC-OPS,2021-10-10
+E0109,Logan Ironwood,Operations,Manager,Operations Manager,E0108,250000,CC-OPS,2019-01-13
+E0110,Hollis Inglewick,Operations,Manager,Operations Manager,E0108,250000,CC-OPS,2021-11-30
+E0111,Cove Greystone,Operations,IC,Operations Analyst,E0109,0,CC-OPS,2024-09-03
+E0112,Jordan Elmstead,Operations,IC,Operations Analyst,E0110,0,CC-OPS,2021-06-06
+E0113,Casey Vantwood,Operations,IC,Operations Analyst,E0109,0,CC-OPS,2024-06-28
+E0114,Ember Larkspur,Operations,IC,Operations Analyst,E0110,0,CC-OPS,2024-10-16
+E0115,Hollis Jasperly,Operations,IC,Operations Analyst,E0109,0,CC-OPS,2024-09-17
+E0116,Taylor Inglewick,Operations,IC,Operations Analyst,E0110,0,CC-OPS,2019-07-09
+E0117,Casey Kestrel,Operations,IC,Operations Analyst,E0109,0,CC-OPS,2017-01-06
+E0118,Xen Elmstead,Operations,IC,Operations Analyst,E0110,0,CC-OPS,2023-11-27
+E0119,Briar Eastlake,Operations,IC,Operations Analyst,E0109,0,CC-OPS,2023-06-11
+E0120,Morgan Quarrystone,Operations,IC,Operations Analyst,E0110,0,CC-OPS,2023-04-07

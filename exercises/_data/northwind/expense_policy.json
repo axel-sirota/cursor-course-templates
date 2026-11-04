@@ -1,0 +1,65 @@
+{
+  "company": "Northwind Co.",
+  "policy_version": "2026.1",
+  "effective_date": "2026-01-01",
+  "base_currency": "USD",
+  "amounts_in": "cents",
+  "category_limits": {
+    "Meals": {
+      "limit_cents": 7500,
+      "per": "person_per_day",
+      "note": "Sum of Meals lines for one employee on one date, divided by attendees_count"
+    },
+    "Lodging": {
+      "limit_cents": 30000,
+      "per": "night",
+      "note": "One line per night"
+    },
+    "Airfare": {
+      "limit_cents": 150000,
+      "per": "ticket",
+      "note": "Economy class"
+    },
+    "Ground transport": {
+      "limit_cents": 15000,
+      "per": "line"
+    },
+    "Software": {
+      "limit_cents": 50000,
+      "per": "line"
+    },
+    "Office supplies": {
+      "limit_cents": 50000,
+      "per": "line"
+    },
+    "Training": {
+      "limit_cents": 250000,
+      "per": "line"
+    },
+    "Client entertainment": {
+      "limit_cents": 15000,
+      "per": "attendee"
+    }
+  },
+  "receipt_required_over_cents": 7500,
+  "max_age_days": 60,
+  "max_age_rule": "submitted_at date minus expense_date must be 60 days or less",
+  "weekend_expenses": "flag_for_review",
+  "non_reimbursable": [
+    "alcohol",
+    "personal entertainment",
+    "traffic and parking fines"
+  ],
+  "approval": {
+    "rule": "Approver must be in the submitter's management chain with approval_limit_cents at least the claim total in USD. Nobody approves their own claim.",
+    "limits_cents": {
+      "IC": 0,
+      "Manager": 250000,
+      "Director": 1000000,
+      "VP": 5000000
+    },
+    "top_of_chain": "VP claims are approved by the Chief Financial Officer; the CFO's claims by the VP of Operations."
+  },
+  "foreign_currency": "Claims in EUR, GBP or CAD carry fx_rate = USD per 1 unit of claim currency. USD value = amount_cents x fx_rate, rounded half up to the cent, per line. All lines on a claim must be in the claim currency.",
+  "payment": "Approved claims are paid in the weekly Thursday payout run at least 2 days after approval."
+}

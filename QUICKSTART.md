@@ -1,334 +1,174 @@
-# Quickstart Guide 🚀
+# Quickstart
 
-Welcome to the **AI-Assisted Development Template**. This guide will help you start a new project or adapt an existing one in minutes.
+Fifteen minutes from clone to your first plan. You pick one persona, run its flow on exercise 01, and stop at the review gate.
 
-**Works with both Cursor IDE and Claude Code.**
+Everything runs in Cursor. All data is synthetic. Engineers build a Blog API; the other personas work on the fictional company Northwind Co. You need no company accounts or tools.
 
----
+## 1. Prerequisites
 
-## Step 0: Choose Your Role
+Everyone needs Cursor, git and python3. The hooks use python3; macOS ships with it. Beyond that, each exercise uses your role's own tools and language. Install only what your persona and stack need.
 
-Before anything else, run:
+| Persona | Stack | Install | Check |
+|---|---|---|---|
+| everyone | any | Cursor, git, python3 (for the hooks) | `git --version`, `python3 --version` |
+| engineer | python-fastapi | Python 3.11+, Hurl | `python3 --version`, `hurl --version` |
+| engineer | java-spring | JDK 21, Maven 3.9+, Hurl | `java -version`, `mvn -v` |
+| engineer | go-gin | Go 1.22+, Hurl | `go version` |
+| engineer | go-grpc | Go 1.22+, Hurl, grpcurl | `grpcurl --version` |
+| engineer | node-express, node-nestjs | Node.js 20+, Hurl | `node --version` |
+| pm | pm-prd-markdown | nothing beyond Cursor | |
+| designer | designer-react-tokens | Node.js 20+ | `node --version` |
+| data-scientist | python-datascience, python-mlops | Python 3.11+ | `python3 --version` |
+| data-scientist | python-spark | Python 3.11+, JDK 17 or 21 | `java -version` |
+| data-scientist | python-dbt-snowflake | Python 3.11+, dbt Core 1.8+ | `dbt --version` |
+| data-scientist | r-tidyverse | R 4.4+ | `R --version` |
+| accountant | sheets-accounting (default) | Excel or any spreadsheet app | |
+| accountant | python-accounting (scripted) | Python 3.11+ | `python3 --version` |
 
-- Cursor: `@set-persona`
-- Claude Code: `/set-persona`
+Hurl runs the engineer acceptance tests: `brew install hurl` (other platforms: https://hurl.dev). The optional MCP servers start with `npx`, so they need Node.js 20+. Exercise 01 works without them.
 
-Pick your role: **engineer**, **designer**, **pm**, or **data-scientist**.
+The shared Northwind data is already in `exercises/_data/northwind/`. You never run a generator.
 
-- Engineers, DevOps, and data scientists: then run `@setup-stack` / `/setup-stack`
-- Designers and PMs: skip `setup-stack` — your persona is ready immediately
+Each persona has a longer checklist in `personas/<role>/SETUP.md`. Do it before class if you can.
 
-Everything below assumes you've done this first.
+## 2. Clone and open
 
----
-
-## Step 2: Choose Your Stack (Engineers, DevOps, and Data Scientists only)
-
-Run `/setup-stack` (Claude Code) or `@setup-stack` (Cursor). You'll see options filtered for your persona:
-
-**Engineer** example:
-```
-Available stacks for Engineer persona:
-  1. python-fastapi  — Python REST API
-  2. go-gin          — Go REST API
-  3. go-grpc         — Go gRPC Service
-  4. java-spring     — Java REST API
-  5. node-express    — Node.js REST API
-  6. node-nestjs     — Node.js Enterprise API
-```
-
-**Data Scientist** example:
-```
-Available stacks for Data Scientist persona:
-  1. python-datascience    — Notebooks + ML
-  2. python-spark          — Distributed Pipelines
-  3. python-dbt-snowflake  — Analytics Modeling
+```bash
+git clone https://github.com/axel-sirota/cursor-course-templates
+cd cursor-course-templates
+git checkout intuit-cursor
+cursor .
 ```
 
-**DevOps** example:
+Open the Cursor chat (Agent mode). Every command below is typed there.
+
+## 3. The flow
+
+```mermaid
+flowchart LR
+  A["/set-persona add role"] --> B["/setup-stack role"]
+  B --> C["/architect role + exercise README"]
+  C --> G{"Review gate:<br/>you read the plan"}
+  G -- "edit and re-check" --> C
+  G -- "approved" --> S["Skeleton built"]
+  S --> D["/start-session role"]
+  D --> E["in-session commands"]
+  E --> F["/next-session"]
+  F -- "next session" --> D
 ```
-Available stacks for DevOps persona:
-  1. devops-terraform    — Cloud Infrastructure
-  2. devops-ansible      — Configuration Management
-  3. devops-k8s-helm     — Kubernetes GitOps
+
+| Step | What happens | Where it writes |
+|---|---|---|
+| `/set-persona add <role>` | Installs the persona's commands, agents, rules, hooks and MCP servers | `.cursor/`, `workspaces/<role>/` |
+| `/setup-stack <role>` | Installs the stack rules, templates and examples | `.cursor/rules/<role>/`, `workspaces/<role>/` |
+| `/architect <role> <exercise README>` | Writes the interface contract and session files, then stops for your review. Builds the skeleton only after you say "approved" | `workspaces/<role>/plans/` |
+| `/start-session <role>` | Loads rules and plan, agrees the session goal | `.cursor/.active-session` |
+| in-session commands | The persona's own commands (table below) | `workspaces/<role>/` |
+| `/next-session` | Runs the quality gate, writes the handoff | `workspaces/<role>/plans/transitions/latest.md` |
+
+`/read` shows every active persona and its next step at any time.
+
+## 4. Pick a persona and run exercise 01
+
+Each exercise lives in its own folder under `exercises/<role>/`. The list is in `exercises/<role>/README.md`. When you pass the exercise README to `/architect`, type `@` and pick the file so Cursor attaches the right path.
+
+### Engineer
+
+The engineer exercise is the Blog API (auth, posts, comments, tags), built in phases in your own stack. Hurl tests grade it over HTTP, so any of the six stacks works. Phases and folders are in `exercises/engineer/README.md`.
+
+```
+/set-persona add engineer
+/setup-stack engineer            # python-fastapi (default), go-gin, go-grpc, java-spring, node-express, node-nestjs
+/architect engineer @exercises/engineer/<01 folder>/README.md
+/start-session engineer
+/engineer-tasks
+/engineer-implement
+/code-review
+/next-session
 ```
 
-**PM**: Skip this step. PMs do not configure a stack.
-
----
-
-## Step 3: Design Your Project with `/architect`
-
-Before you can `/start-session`, you need a plan. Run:
-
-- Cursor: `@architect "Build X"`
-- Claude Code: `/architect "Build X"`
-
-The architect command produces:
-- `plans/interface-contract.md` (your API / pipeline / chart / module surface)
-- `plans/sessions/session-overview.md` (phase + session breakdown)
-- `plans/sessions/session-1-phase-0.md` (skeleton session)
-- `plans/sessions/session-N-phase-X.md` (one per feature)
-
-It runs a self-audit (Phase 1.5) to verify the plan is internally consistent, then waits for your approval before scaffolding code.
-
-## Step 4: Start Your First Session
-
-Run `/start-session` (Claude Code) or `@start-session` (Cursor). The AI loads your persona + stack context, reads the session plan, and asks for your session goal. Then use the persona's in-session commands (e.g. `/engineer-tasks` and `/engineer-implement` for engineer) to make progress. End with `/next-session`.
-
-The full pipeline is: `/set-persona → /setup-stack → /architect → /start-session → /next-session`.
-
----
-
-## Prerequisites
-
-Before you begin, ensure you have:
-
--   **AI Tool** (choose one):
-    -   **Cursor IDE**: [Download here](https://cursor.sh) *OR*
-    -   **Claude Code**: [Installation guide](https://docs.claude.com/en/docs/claude-code/overview)
-
-**Optional Dependencies:**
--   **Docker**: Only required if your stack uses containerized databases (Python FastAPI, Node Express examples include PostgreSQL in docker-compose)
--   **Git**: Only required if cloning the template from a repository
-
----
-
-## Three Core Workflows
-
-This template supports three distinct workflows depending on your needs. Choose the one that matches your situation.
-
----
-
-### Workflow 1: Fresh Project with Known Stack
-
-**Best for:** Starting a new project using a pre-built stack (Python FastAPI, Node Express, Java Spring, Go Gin, DevOps Terraform).
-
-**Steps:**
-
-1.  **Get the Template**
-    ```bash
-    git clone https://github.com/your-org/cursor-course-templates my-new-project
-    cd my-new-project
-    ```
-
-2.  **Open in Your AI Tool**
-
-    **Cursor IDE:**
-    ```bash
-    cursor .
-    ```
-    Open Chat (`Cmd+L`)
-
-    **Claude Code:**
-    ```bash
-    claude
-    ```
-
-3.  **Configure Stack**
-
-    Run the setup command:
-    - **Cursor**: `@setup-stack`
-    - **Claude Code**: `/setup-stack`
-
-    Select from available stacks:
-    - `python-fastapi` (REST API with PostgreSQL)
-    - `node-express` (TypeScript API)
-    - `java-spring` (Enterprise Java)
-    - `go-gin` (High-performance Go)
-    - `devops-terraform` (Infrastructure as Code)
-    - `blank` (Minimal template for custom stacks)
-
-4.  **Design Your Feature**
-
-    - **Cursor**: `@architect "Build a task management API"`
-    - **Claude Code**: `/architect "Build a task management API"`
-
-    The AI will design the API surface and create a walking skeleton.
-
-5.  **Start Coding**
-
-    - **Cursor**: `@start-session`
-    - **Claude Code**: `/start-session`
-
-    The AI loads your stack context, reads the architect's session plan, and begins implementation. Use the persona's in-session commands (e.g. `/engineer-tasks` then `/engineer-implement`) to drive progress. End with `/next-session`.
-
----
-
-### Workflow 2: Fresh Project with Custom Stack
-
-**Best for:** Building a project with a technology stack not included in the template (e.g., Ruby on Rails, Elixir Phoenix, Kotlin Spring).
-
-**Steps:**
-
-1.  **Get the Template**
-    ```bash
-    git clone https://github.com/your-org/cursor-course-templates my-new-project
-    cd my-new-project
-    ```
-
-2.  **Create Your Stack Structure**
-
-    Easiest: run `/setup-stack`, pick a non-listed stack, and accept the `new` prompt — it scaffolds everything from `stacks/blank/` for you.
-
-    Manual alternative:
-    ```bash
-    mkdir -p stacks/my-stack/{rules,templates,examples}
-    cp stacks/blank/context.md stacks/my-stack/context.md
-    ```
-
-3.  **Define Stack Context**
-
-    Create `stacks/my-stack/context.md`:
-    ```markdown
-    # Project Context: My Stack
-
-    ## Tech Stack
-    - Language: [Your Language]
-    - Framework: [Your Framework]
-    - Database: [Your Database]
-    - Testing: [Your Test Framework]
-
-    ## Vibe & Style
-    - Coding Style: [camelCase/snake_case/PascalCase]
-    - Architecture: [MVC/Layered/Hexagonal/etc.]
-
-    ## Key Rules
-    - [Your Rule 1]
-    - [Your Rule 2]
-
-    ## Active Phase
-    - Current: Phase 0 (Skeleton)
-    ```
-
-4.  **Create Rules**
-
-    Create `.mdc` files in `stacks/my-stack/rules/`:
-    - `style.mdc`: Coding standards
-    - `testing.mdc`: Test-driven development rules
-    - `architecture.mdc`: Structural patterns
-
-    See `stacks/python-fastapi/rules/` for examples.
-
-5.  **Optional: Add Templates and Examples**
-
-    - `templates/`: Scaffolding files AND walkthrough guides (everything that should be copied to the project root on install — boilerplate code, `vibe_*.md` walkthroughs, phase checklists)
-    - `examples/`: Reference code samples (stay in the stack library — not copied to projects)
-
-6.  **Configure Your Project**
-
-    Open in your AI tool and run:
-    - **Cursor**: `@setup-stack`
-    - **Claude Code**: `/setup-stack`
-
-    Select your new stack from the list.
-
-7.  **Start Building**
-
-    - **Cursor**: `@architect "Build X"` → `@start-session`
-    - **Claude Code**: `/architect "Build X"` → `/start-session`
-
----
-
-### Workflow 3: Adapt Existing Codebase
-
-**Best for:** Adding AI-assisted development to a legacy or brownfield project.
-
-**Steps:**
-
-1.  **Copy Configuration to Your Repo**
-
-    **For Cursor IDE:**
-    ```bash
-    cd /path/to/your-existing-project
-    cp -r /path/to/cursor-course-templates/.cursor .
-    ```
-
-    **For Claude Code:**
-    ```bash
-    cd /path/to/your-existing-project
-    cp -r /path/to/cursor-course-templates/.claude .
-    cp /path/to/cursor-course-templates/CLAUDE.md .
-    ```
-
-2.  **Open in Your AI Tool**
-
-    **Cursor IDE:**
-    ```bash
-    cursor .
-    ```
-
-    **Claude Code:**
-    ```bash
-    claude
-    ```
-
-3.  **Detect Your Stack**
-
-    Run the detection command:
-    - **Cursor**: `@detect-stack`
-    - **Claude Code**: `/detect-stack`
-
-    The AI will:
-    - Scan your codebase (`package.json`, `requirements.txt`, `go.mod`, etc.)
-    - Analyze coding style, architecture, and testing patterns
-    - Generate a custom context file (`.cursor/context.md` or `CLAUDE.md`)
-    - Optionally create a reusable stack in `stacks/detected-{name}/`
-
-4.  **Review and Adjust Context**
-
-    Open the generated context file:
-    - **Cursor**: `.cursor/context.md`
-    - **Claude Code**: `CLAUDE.md`
-
-    **Critical**: Set `Strictness: Low` for legacy codebases
-    ```markdown
-    ## Strictness: Low
-    - Refactoring: Only touch what is necessary
-    - New Code: Apply full standards to new features only
-    - Legacy Code: Document issues but don't force refactoring
-    ```
-
-5.  **Start Working on New Features**
-
-    - **Cursor**: `@start-session`
-    - **Claude Code**: `/start-session`
-
-    The AI will respect your existing patterns while writing clean new code.
-
----
-
-## Command Reference
-
-Once your stack is configured, use these commands during development:
-
-| Command | Cursor | Claude Code | Purpose |
-|---------|--------|-------------|---------|
-| **Setup Stack** | `@setup-stack` | `/setup-stack` | Configure project with a technology stack |
-| **Detect Stack** | `@detect-stack` | `/detect-stack` | Analyze existing code to generate configuration |
-| **Architect** | `@architect "Build X"` | `/architect "Build X"` | Design Phase 0 (API surface, skeleton, mocks) |
-| **Start Session** | `@start-session` | `/start-session` | Load context and begin coding |
-| **Research** | `@research "Question"` | `/research "Question"` | Deep investigation with 3-cycle validation |
-| **Code Review** | `@code-review` | `/code-review` | Audit code against stack rules |
-| **Next Session** | `@next-session` | `/next-session` | Wrap up and generate transition summary |
-| **Read Context** | `@read` | `/read` | Quick context load (stack + phase + next step) |
-
----
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| **"No Stack Configured"** | Run `@setup-stack` (Cursor) or `/setup-stack` (Claude Code) first |
-| **AI suggests wrong stack** | Check context file (`.cursor/context.md` or `CLAUDE.md`) and verify stack selection |
-| **Command not found** | Ensure `.cursor/commands/` or `.claude/commands/` directory exists |
-| **Too many linter errors** | Set `Strictness: Low` in context file for legacy codebases |
-| **Docker connection fails** | Only needed if using containerized databases - run `docker-compose down -v` to reset |
-
----
-
-## Next Steps
-
--   **Understand the Methodology**: Read [METHODOLOGY.md](METHODOLOGY.md) to learn about Phase-Based Development, TDD, and command workflows
--   **Create Custom Stacks**: Read [ADAPTATION_GUIDE.md](ADAPTATION_GUIDE.md) to build stacks for any language or framework
--   **View Examples**: Check `stacks/python-fastapi/examples/` for reference implementations
+Start your server, then run the acceptance tests from a terminal:
+
+```bash
+exercises/engineer/run-acceptance.sh <exercise>
+```
+
+### Product manager
+
+Exercise 01: interview notes to PRD.
+
+```
+/set-persona add pm
+/setup-stack pm                  # pm-prd-markdown
+/architect pm @exercises/pm/<01 folder>/README.md
+/start-session pm
+/pm-decompose
+/pm-validate
+/pm-report
+/next-session
+```
+
+The check is `/pm-validate` plus the exercise answer key. The stack's `check_prd.py` is optional.
+
+### Designer
+
+Exercise 01: brand brief to design tokens.
+
+```
+/set-persona add designer
+/setup-stack designer            # designer-react-tokens
+/architect designer @exercises/designer/<01 folder>/README.md
+/start-session designer
+/designer-extract
+/designer-compose
+/designer-iterate
+/next-session
+```
+
+### Data scientist
+
+Exercise 01: exploratory analysis of Northwind expenses.
+
+```
+/set-persona add data-scientist
+/setup-stack data-scientist      # python-datascience (default), python-mlops, python-spark, python-dbt-snowflake, r-tidyverse
+/architect data-scientist @exercises/data-scientist/<01 folder>/README.md
+/start-session data-scientist
+/ds-explore
+/ds-validate
+/next-session
+```
+
+### Accountant
+
+Exercise 01: October bank reconciliation.
+
+```
+/set-persona add accountant
+/setup-stack accountant          # sheets-accounting (default, no code), python-accounting (scripted)
+/architect accountant @exercises/accountant/<01 folder>/README.md
+/start-session accountant
+/acct-reconcile
+/next-session
+```
+
+On sheets-accounting, Cursor writes the CSV/XLSX workbook and a markdown memo. You review them in Excel or Google Sheets.
+
+You are done with the quickstart when `workspaces/<role>/plans/sessions/session-overview.md` exists and the skeleton check printed by `/architect` passed. The exercise README says when the exercise itself is done.
+
+## 5. Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| "No persona configured. Run /set-persona first." | No persona is active | `/set-persona add <role>` |
+| "`<role>` is not active." | You ran a command for a role you have not added | `/set-persona add <role>`, or `/set-persona list` to see what is active |
+| "Run `/setup-stack <role>` first." | Stack not set for that role | `/setup-stack <role>` |
+| "Run `/architect <role>` first. A session needs a plan." | No `session-overview.md` yet | `/architect <role> @<exercise README>` |
+| `/architect` stopped and built nothing | That is the review gate | Read `workspaces/<role>/plans/`, then reply "approved" |
+| "`<role>` already uses `<stack>`." | You want a different stack | `/undo stack <role>`, then `/setup-stack <role>` |
+| Persona commands missing from the `/` menu | Cursor has not reloaded `.cursor/commands/` | Reload the window (Cmd/Ctrl+Shift+P, "Reload Window") |
+| MCP server shows an error | Node.js missing or `npx` blocked | Install Node 20+, then restart Cursor. MCP servers are optional for exercise 01 |
+| A rule fires on the wrong files | Rules are scoped to `workspaces/<role>/**` | Keep your work inside your persona's workspace |
+| Something is installed wrong | | `/undo persona <role>` and start again. Your workspace is kept |
+
+Next: `student_runbook.md` for the full day, or `CHOOSE_YOUR_ADVENTURE.md` if you are not sure which persona to pick.

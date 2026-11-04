@@ -1,0 +1,13 @@
+entity,account,name,balance_cents
+NW-US,1010,Operating Cash,425187342
+NW-US,1200,Accounts Receivable,348621077
+NW-US,1400,Prepaid Expenses,41288015
+NW-US,1500,Fixed Assets,210455000
+NW-US,1510,Accumulated Depreciation,-64122931
+NW-US,2010,Accounts Payable,-85887766
+NW-US,2100,Accrued Liabilities,-18344720
+NW-US,2150,Accrued Reimbursements,-10825840
+NW-US,3000,Common Stock,-100000000
+NW-US,3100,Retained Earnings,-746370177
+NW-CA,1020,Operating Cash (NW-CA),50000000
+NW-CA,3100,Retained Earnings,-50000000

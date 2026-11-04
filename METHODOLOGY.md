@@ -1,567 +1,103 @@
-# Core Methodology: Agentic SDLC
+# Methodology
 
-This document defines the **language-agnostic principles** behind the AI-Assisted Development Template. These principles apply whether you are using Cursor IDE or Claude Code, and whether you are writing Python, Go, TypeScript, Rust, or any other language.
+The principles behind the course. They apply to every persona and every stack. `/read` loads this file, so the AI works by it too.
 
----
+## The five principles
 
-## Core Principles
+| # | Principle | In one line |
+|---|---|---|
+| 1 | Phases | Build the shape first, then fill it in one piece at a time |
+| 2 | Test first | Write the check before the work. The check decides when you are done |
+| 3 | Sessions | Bounded units of work with a goal, a gate and a handoff |
+| 4 | Context first | The AI knows only what the repo tells it. Write it down |
+| 5 | Explicit over clever | Consistency beats cleverness. Files are cheap; confusion is expensive |
 
-### 1. Phase-Based Development
-Software is built in distinct layers, not vertical slices.
+## 1. Phases
 
-- **Phase 0 (Skeleton)**: Build the structure first. Mock every endpoint. Verify the "shape" of the API before writing logic.
-- **Phase 1+ (Implementation)**: Implement one endpoint at a time.
-- **Why?**: Prevents getting stuck in implementation details before the architecture is proven.
+| Phase | What you build | Who decides it is right |
+|---|---|---|
+| Phase 0: skeleton | The whole surface as stubs: every route, PRD section, token, notebook step or workpaper, with no real content | You, at the `/architect` review gate, then the skeleton check |
+| Phase 1+: features | One contract item at a time, until its check passes | The check for that item |
 
-### 2. Test-Driven Development (TDD)
-Tests are not "quality assurance"; they are **design tools**.
+The skeleton proves the shape before anyone sinks hours into details. `/architect` writes the plan, stops at the review gate, and builds the skeleton only after you approve.
 
-- **The Rule**: You cannot write implementation code until a test fails.
-- **The Flow**: Red (Write Test) → Green (Make it Pass) → Refactor (Clean up).
-- **AI Role**: The AI is excellent at writing tests if you give it the skeleton (Phase 0).
+What "the surface" means depends on the Architecture Shape:
 
-### 3. Session-Based Workflow
-Development happens in bounded units called "Sessions".
+| Persona | Shape | Phase 0 stubs |
+|---|---|---|
+| engineer | REST API / gRPC Service | Routes or RPCs returning hardcoded responses |
+| pm | PRD Workspace | Every PRD section headed, bodies marked TODO |
+| designer | Design System | Token file and components rendering placeholders |
+| data-scientist | Experiment Notebook / Data Pipeline / Analytics Model / Statistical Computing | Notebooks, stages or models that run on empty input |
+| accountant | Close Workbook | Workpaper steps with empty outputs and tie-out stubs |
 
-- **Start**: Load Context → Define Goal.
-- **Execute**: Work on *one* thing.
-- **End**: Document what changed → Update Context.
-- **Why?**: Prevents "context drift" where the AI forgets the plan.
+## 2. Test first, for every role
 
-### 4. Context-First Architecture
-The AI is only as smart as its context.
+The rule is the same everywhere: you may not do the work until a check exists that fails without it. Red, then green, then clean up.
 
-- **Explicit Context**: We don't rely on the AI guessing the stack. We define it in `.cursor/context.md` (Cursor) or `CLAUDE.md` (Claude Code).
-- **Rule Enforcement**: Rules are injected based on the context.
-- **Strictness**: We acknowledge that legacy code requires different rules than new code.
+"Test" means the check that fits the role:
 
-### 5. The "Vibe"
-- **Explicit is better than implicit.**
-- **Consistency is better than cleverness.**
-- **Files are cheap; confusion is expensive.** (Split code into modules).
+| Persona | The test | Red means | Green means |
+|---|---|---|---|
+| engineer | Acceptance tests (Hurl over HTTP) plus unit tests in the stack | The endpoint returns the wrong thing | The test passes for real values |
+| pm | INVEST checks on every story, Given/When/Then on every acceptance criterion | `/pm-validate` lists a failing story | Every story passes and the gap-detector finds no missing NFR |
+| designer | Token and accessibility checks | A hardcoded color, spacing or font size, or a contrast failure | Components use tokens only and pass at every breakpoint |
+| data-scientist | Fixed seeds and a logged baseline | No seed, no baseline, or leakage between train and test | The model beats the baseline in `experiments/log.md` and reruns to the same numbers |
+| accountant | Tie-outs | A reported number with no source row | Every number in `output/` traces to a source file and row |
 
----
+The AI is good at writing these checks once the skeleton exists. Ask for the check first, read it, then ask for the work.
 
-## Personas
+Never let the AI change a check to make it pass. If the check is wrong, fix it yourself and say why.
 
-The Adaptive SDLC runs underneath all four roles. What changes per persona is the *vocabulary*, *deliverable*, and *tooling* — not the phase-based discipline.
+## 3. Sessions
 
-### Shared foundation
+```
+/start-session <role>  →  in-session commands  →  /next-session
+```
 
-All personas follow the same session structure:
-1. `/start-session` — load context, state goal
-2. Work using the persona's in-session commands (see table below)
-3. `/next-session` — document state, log handoffs
-
-| Persona | In-session commands (run during a `/start-session`) |
+| Part | What happens |
 |---|---|
-| **engineer** | `/engineer-tasks` → `/engineer-implement` (TDD red/green/refactor); plus `/code-review`, `/research` |
-| **designer** | `/designer-extract` → `/designer-compose` → `/designer-iterate` → `/designer-handoff` |
-| **pm** | `/pm-decompose` → `/pm-validate` → `/pm-report` |
-| **data-scientist** | `/ds-explore` → `/ds-experiment` → `/ds-validate` → `/ds-handoff` |
-| **devops** | Direct shell tools (terraform plan/apply, ansible-playbook, helm); universal `/code-review` for IaC |
+| Start | Load the role's rules, plan and last handoff. Agree one goal from the current session file |
+| Work | Use the role's in-session commands. Stay inside `workspaces/<role>/` |
+| End | Run the role's quality gate. Write `workspaces/<role>/plans/transitions/latest.md`. Advance the phase only if every acceptance criterion is met |
 
-These commands are spokes of the session loop — they only make sense inside an active session. Don't call them standalone.
+Sessions stop context drift. The plan lives in files, not in the chat history, so a new chat picks up exactly where the last one stopped.
 
-All personas use the same quality loop:
-- Universal commands (`/architect`, `/code-review`, etc.) adapt their output per role
-- Subagents handle isolated tasks without polluting the main context
-- Hooks enforce quality guardrails automatically
+Each role's in-session commands and quality gate are in `personas/<role>/persona.yaml`.
 
-### What's different per persona
+## 4. Context first
 
-| | Engineer | Designer | PM | Data Scientist |
-|---|---|---|---|---|
-| **Deliverable** | Tested code | Visual prototype | PRD + tickets | Experiment + model card |
-| **Quality gate** | Tests pass + security clean | Tokens used + logic intact | INVEST + AC format | Seed set + reproducible |
-| **Primary MCPs** | GitHub, Postgres | Figma, Playwright | Jira, Confluence | filesystem, context7 |
-| **Handoff artifact** | PR | PR_DESCRIPTION.md | Jira tickets | model card |
+| What the AI needs | Where it lives |
+|---|---|
+| Which roles are active, their stacks and phases | `.cursor/context.md` |
+| What the role is and how it works | `personas/<role>/persona.yaml` |
+| How work must look | Rules in `.cursor/rules/<role>/`, scoped to `workspaces/<role>/**` |
+| What to build and in what order | `workspaces/<role>/plans/interface-contract.md` and `plans/sessions/` |
+| Where the last session stopped | `workspaces/<role>/plans/transitions/latest.md` |
 
-### Cross-persona handoff
+Rules are scoped per role, so several personas share one repo without their rules colliding. A PM's rules never fire on engineering code.
 
-The capstone exercise passes one feature through all four personas:
-1. PM writes the PRD with acceptance criteria
-2. Designer produces the prototype consuming the PRD
-3. Engineer builds the code satisfying the PRD's acceptance criteria
-4. Data Scientist validates any model or data component
+## 5. Explicit over clever
 
-The shared workflow vocabulary (specs, plans, sessions, acceptance criteria) is what makes this handoff clean.
+| Do | Instead of |
+|---|---|
+| Write the decision in the plan | Hoping the AI remembers it |
+| One small file per concern | One large file that does everything |
+| Name the source of every number | "Approximately" |
+| Follow the stack's conventions | A clever pattern only you understand |
 
----
+## Working across roles
 
-## Command Reference
+Each persona writes only to its own workspace and may read the others. Handoffs between roles go through files: a PRD in `workspaces/pm/`, a component spec in `workspaces/designer/`, flags in `workspaces/data-scientist/`. The capstone (`exercises/capstone/README.md`) runs one feature through several roles this way.
 
-These commands are available in both Cursor IDE (using `@` prefix) and Claude Code (using `/` prefix). The functionality is identical across both tools.
+To switch roles, close the current session with `/next-session`, then `/start-session <other-role>`.
 
-### Setup Commands
+## Anti-patterns
 
-#### `setup-stack` (or `@setup-stack` / `/setup-stack`)
-**Purpose**: Configure the project's technology stack from the built-in library. Runs AFTER `/set-persona`.
-
-**What it does:**
-1. Reads `## Active Persona` from CLAUDE.md (mandatory — fails if unset).
-2. Shows the persona-filtered stack menu (engineer / data-scientist / devops only — designer + pm have no stack and are routed straight to `/architect`).
-3. If you pick a stack that's not in the list, offers `new` to scaffold a custom one from `stacks/blank/`.
-4. **Reconciles with existing code** (Step 5.5): scans the project for existing files matching the stack's language and prompts before overwriting (overwrite / skip / merge).
-5. Writes `## Active Stack`, `## Architecture Shape`, `## Active Phase` to CLAUDE.md.
-6. Copies `stacks/{selection}/rules/*` to `.claude/rules/`, copies `stacks/{selection}/templates/*` to `templates/` in the project root, copies `stacks/{selection}/examples/*` to `examples/`.
-7. Writes `.claude/.stack-manifest.json` listing every file installed (used by `/undo stack`).
-8. Recommends `/architect` as the next command.
-
-**For brownfield projects**, use `/detect-stack` instead — it scans your existing repo and generates a stack config from observed patterns.
-
-**When to use:** First step when starting any project or adopting the template.
-
-#### `detect-stack` (or `@detect-stack` / `/detect-stack`)
-**Purpose**: Automatically analyze an existing codebase to generate custom configuration.
-
-**What it does:**
-1. Scans for stack indicators (`package.json`, `requirements.txt`, `go.mod`, etc.)
-2. Analyzes coding style, architecture patterns, and testing frameworks
-3. Generates custom context file with detected configuration
-4. Sets `Strictness: Low` by default for brownfield projects
-5. Optionally creates a reusable stack in `stacks/detected-{name}/`
-
-**When to use:** When adding AI assistance to legacy or existing codebases (Workflow 3).
-
----
-
-### Development Commands
-
-#### `architect` (or `@architect` / `/architect`)
-**Purpose**: Execute Phase 0 - Design the API surface and create a walking skeleton.
-
-**What it does:**
-1. Reads active stack from context file
-2. Designs the API contract (OpenAPI spec for REST, CLI args for CLI tools, Terraform inputs/outputs for IaC)
-3. Creates skeleton implementation with mock responses
-4. Generates implementation plan broken into sessions
-
-**When to use:** At the start of a new feature or project, after stack is configured.
-
-**Example:** `@architect "Build a user authentication system"` or `/architect "Build a user authentication system"`
-
-#### `start-session` (or `@start-session` / `/start-session`)
-**Purpose**: Load context and begin a development session.
-
-**What it does:**
-1. Reads context file (`.cursor/context.md` or `CLAUDE.md`)
-2. Loads active rules from `.cursor/rules/` or `.claude/rules/`
-3. Displays current stack, phase, and strictness level
-4. Asks for session goal
-5. Enforces rules during coding
-
-**When to use:** At the beginning of every coding session, after running `setup-stack` or `architect`.
-
-#### `start-project` (or `@start-project` / `/start-project`)
-**Purpose**: Domain modeling - propose entities and API for a business domain.
-
-**What it does:**
-1. Reads context to understand the active language/framework
-2. Proposes data model (entities, tables, relationships)
-3. Proposes REST API endpoints or CLI commands
-4. Generates implementation plan using Phase-Based Workflow
-
-**When to use:** When starting a new business domain or feature that needs data modeling.
-
-**Example:** `@start-project "Library Management System"` or `/start-project "Library Management System"`
-
----
-
-### Quality & Research Commands
-
-#### `research` (or `@research` / `/research`)
-**Purpose**: Deep investigation using rigorous 3-cycle validation.
-
-**What it does:**
-1. **Cycle 1 - Broad Exploration:** Form hypothesis → 5 web searches → refute → refine
-2. **Cycle 2 - Deep Dive:** Refined hypothesis → 5 targeted searches → validate → polish
-3. **Cycle 3 - Edge Cases:** Final hypothesis → integration checks → sanity check → conclude
-4. Outputs research artifact with executive summary, findings, trade-offs, proposed plan
-
-**When to use:** When stuck, investigating new technologies, or solving complex architectural problems.
-
-**Critical:** Does NOT modify code - only researches and documents findings.
-
-**Example:** `@research "Best way to handle distributed locking in Redis"` or `/research "Best way to handle distributed locking in Redis"`
-
-#### `research-export` (or `@research-export` / `/research-export`)
-**Purpose**: Generate a structured document to share with external experts or team members.
-
-**What it does:**
-1. Gathers current context and problem description
-2. Creates `research-exports/research-{topic}-{date}.md` with:
-   - Problem statement
-   - Attempted solutions
-   - Relevant code snippets
-   - Specific questions
-
-**When to use:** When you need to escalate a problem or get external review.
-
-#### `code-review` (or `@code-review` / `/code-review`)
-**Purpose**: Comprehensive audit of codebase against active stack rules.
-
-**What it does:**
-1. Loads context and strictness level
-2. Security audit (secrets, injection vulnerabilities, dependency versions)
-3. Style check (naming conventions, type safety, complexity)
-4. Testing gaps (coverage, assertion quality)
-5. Outputs violation report and suggestions
-
-**When to use:** Before committing, before phase transitions, or periodic quality checks.
-
-#### `next-session` (or `@next-session` / `/next-session`)
-**Purpose**: Wrap up current work and generate transition summary.
-
-**What it does:**
-1. Analyzes what files were changed
-2. Checks test status
-3. Updates Active Phase in context if phase is complete
-4. Generates transition document with:
-   - Session status (success/fail)
-   - Where you stopped
-   - Next immediate step
-   - Context files to load
-
-**When to use:** At the end of a coding session, before switching tasks.
-
-#### `read` (or `@read` / `/read`)
-**Purpose**: Quick context load to understand current project state.
-
-**What it does:**
-1. Reads context file (`.cursor/context.md` or `CLAUDE.md`)
-2. Reads active rules
-3. Checks for active session tracking files
-4. Outputs summary: Stack, Current Phase, Next Step
-
-**When to use:** When rejoining a project or starting a new session quickly.
-
----
-
-### Infrastructure Commands
-
-#### `dockerize` (or `@dockerize` / `/dockerize`)
-**Purpose**: Containerize the application with Docker and Docker Compose.
-
-**What it does:**
-1. Detects the active stack from context
-2. Analyzes application (entry point, dependencies, database)
-3. Generates multi-stage `Dockerfile` optimized for the stack
-4. Generates `docker-compose.yml` with app + database + health checks
-5. Generates `.dockerignore` with appropriate exclusions
-6. Creates or updates `.env.example` with environment variables
-7. Adds `/health` endpoint if missing
-
-**When to use:** After Phase 0 skeleton is complete, or when preparing for deployment.
-
-**Example:**
-```
-@dockerize
-```
-or
-```
-/dockerize
-```
-
-**Key features generated:**
-- Multi-stage builds (smaller images)
-- Non-root user (security)
-- Health checks (reliability)
-- Environment variables via .env (no secrets in image)
-
----
-
-## Workflow Chains
-
-Here's how to chain commands together for each of the three core workflows.
-
-### Chain 1: Fresh Project with Known Stack
-
-**Goal:** Start a new project using a pre-built stack.
-
-**Sequence:**
-```
-1. setup-stack       → Select stack (e.g., python-fastapi)
-2. architect         → Design API surface and skeleton
-3. start-session     → Begin implementation
-4. (code)            → Implement features using TDD
-5. code-review       → Audit quality
-6. next-session      → Wrap up and plan next work
-```
-
-**Example flow:**
-```
-@setup-stack
-→ Select "python-fastapi"
-→ Rules copied, context loaded
-
-@architect "Build a blog API with posts and comments"
-→ OpenAPI spec created
-→ Skeleton with mocked endpoints created
-→ Implementation plan generated
-
-@start-session
-→ Context loaded: Python FastAPI, Phase 0
-→ Begin implementing POST /posts endpoint with TDD
-
-@code-review
-→ Security: ✓ No secrets
-→ Style: ✓ Type hints present
-→ Tests: ⚠️ Missing test for error case
-
-@next-session
-→ Status: Phase 0 complete
-→ Next: Start Phase 1 (implement POST /posts)
-```
-
-### Chain 2: Fresh Project with Custom Stack
-
-**Goal:** Start a new project with a technology stack not in the template library.
-
-**Sequence:**
-```
-1. (Manual) Create stacks/{name}/ structure
-2. (Manual) Write context.md and rules/*.mdc
-3. setup-stack       → Select your new stack
-4. architect         → Design API surface
-5. start-session     → Begin implementation
-6. (code)            → Implement features
-```
-
-**Example flow:**
-```
-# Manual steps
-mkdir -p stacks/ruby-rails/rules
-# Create stacks/ruby-rails/context.md
-# Create stacks/ruby-rails/rules/*.mdc
-
-@setup-stack
-→ Select "ruby-rails"
-→ Custom rules loaded
-
-@architect "Build a Rails API for e-commerce"
-→ Design follows Rails conventions
-→ Skeleton with ActiveRecord models
-
-@start-session
-→ Context loaded: Ruby on Rails, Phase 0
-→ Begin implementation
-```
-
-### Chain 3: Existing Codebase (Brownfield)
-
-**Goal:** Add AI assistance to a legacy project.
-
-**Sequence:**
-```
-1. (Manual) Copy .cursor/ or .claude/ into existing repo
-2. detect-stack      → AI analyzes codebase
-3. (Manual) Review context, set Strictness: Low
-4. start-session     → Begin working on new features only
-5. (code)            → Add new features with full standards
-6. code-review       → Audit new code only
-```
-
-**Example flow:**
-```
-# Manual: cp -r cursor-course-templates/.claude .
-
-@detect-stack
-→ Detected: Python 3.9, Flask, SQLAlchemy
-→ Architecture: Flat structure
-→ Testing: Pytest present
-→ Generated context with Strictness: Low
-
-# Manual: Review CLAUDE.md, confirm Strictness: Low
-
-@start-session
-→ Context loaded: Python Flask (Legacy), Strictness: Low
-→ Rules apply to NEW code only
-
-# Implement new /api/v2/users endpoint with full standards
-# Existing /api/v1/ endpoints remain unchanged
-
-@code-review
-→ New code: ✓ Full type hints, ✓ Tests, ✓ Standards
-→ Legacy code: (ignored per Strictness: Low)
-```
-
----
-
-## Creating Custom Stacks
-
-### When to Create a Stack in `stacks/{name}/`
-
-You should create a custom stack in two scenarios:
-
-1. **Workflow 2**: You need a technology stack not in the built-in library (Ruby, Elixir, Scala, etc.)
-2. **Workflow 3**: After running `detect-stack`, you want to save the detected configuration as a reusable stack
-
-### Required Directory Structure
-
-```
-stacks/{name}/
-├── context.md          # REQUIRED: Tech stack definition
-├── rules/              # REQUIRED: Coding standards and workflow rules
-│   ├── style.mdc       # Naming conventions, formatting
-│   ├── testing.mdc     # TDD rules, test patterns
-│   └── ...             # Additional rules as needed
-├── templates/          # OPTIONAL: Scaffolding files
-├── examples/           # OPTIONAL: Reference implementations
-└── vibe/               # OPTIONAL: Documentation and guides
-```
-
-### Required: context.md
-
-Minimum structure (see `stacks/blank/context.md`):
-
-```markdown
-# Project Context: {Stack Name}
-
-## Tech Stack
-- Language: {Language + Version}
-- Framework: {Framework}
-- Database: {Database}
-- Testing: {Test Framework}
-- Linting: {Linter}
-
-## Vibe & Style
-- Coding Style: {Naming conventions}
-- Architecture: {Pattern - MVC/Layered/Hexagonal/etc.}
-
-## Key Rules
-- {Core rule 1}
-- {Core rule 2}
-- {Core rule 3}
-
-## Active Phase
-- Current: Phase 0 (Skeleton)
-```
-
-### Required: rules/ Directory
-
-Create `.mdc` files for different aspects of your stack. Common patterns:
-
-- `000-core-workflow.mdc`: Phase-based development rules
-- `100-style.mdc`: Naming, formatting, code organization
-- `200-testing.mdc`: TDD rules, test structure
-- `300-architecture.mdc`: Layering, dependency rules
-- `400-security.mdc`: Security best practices
-
-See `stacks/python-fastapi/rules/` for comprehensive examples.
-
-### Optional: templates/ Directory
-
-Scaffolding files that will be copied to the project root when the stack is selected:
-
-```
-templates/
-├── .env.example           # Environment variables template
-├── docker-compose.yml     # Development infrastructure
-├── Makefile              # Common commands
-└── src/
-    └── main.{ext}        # Entry point boilerplate
-```
-
-### Optional: examples/ Directory
-
-Reference implementations showing how to use the stack:
-
-```
-examples/
-├── auth-example/         # Complete authentication example
-├── crud-example/         # CRUD operations example
-└── testing-example/      # Testing patterns example
-```
-
-### Optional: vibe/ Directory
-
-Documentation and guides specific to your stack:
-
-```
-vibe/
-├── phase_workflow.md         # Phase-based development guide
-├── architecture.md           # Architecture decisions
-├── database.md              # Database patterns
-└── deployment.md            # Deployment guide
-```
-
-### Example: Minimal Custom Stack
-
-For a minimal custom stack, you only need:
-
-```bash
-# Create structure
-mkdir -p stacks/my-stack/rules
-
-# Create context.md
-cat > stacks/my-stack/context.md <<EOF
-# Project Context: My Stack
-
-## Tech Stack
-- Language: TypeScript 5.0
-- Framework: Express.js
-- Database: PostgreSQL
-- Testing: Jest
-
-## Vibe & Style
-- Coding Style: camelCase
-- Architecture: Layered (Controllers/Services/Repositories)
-
-## Key Rules
-- Use async/await, never callbacks
-- All functions must have TypeScript types
-- TDD: Write tests before implementation
-
-## Active Phase
-- Current: Phase 0 (Skeleton)
-EOF
-
-# Create basic rule
-cat > stacks/my-stack/rules/style.mdc <<EOF
----
-description: TypeScript coding standards
-alwaysApply: true
----
-
-# Style Guide
-
-- Use camelCase for variables and functions
-- Use PascalCase for classes and interfaces
-- Use async/await instead of promises or callbacks
-- Add explicit return types to all functions
-EOF
-
-# Done! Now run @setup-stack and select "my-stack"
-```
-
----
-
-## Best Practices
-
-1. **Start Simple**: Begin with Workflow 1 (known stack) to learn the methodology
-2. **One Thing at a Time**: Use `start-session` to focus on a single goal per session
-3. **Trust the Process**: Follow Phase 0 → Phase 1 → Phase 2 even when it feels slow
-4. **Research Before Coding**: Use `@research` when uncertain - it's faster than trial and error
-5. **Review Regularly**: Run `@code-review` before committing or phase transitions
-6. **Document Transitions**: Use `@next-session` to maintain context across work sessions
-7. **Strictness Levels Matter**: Set `Strictness: Low` for brownfield, `High` for greenfield
-8. **Reuse Stacks**: Once you create a custom stack, commit it to `stacks/` for future projects
-
----
-
-## The Philosophy
-
-This template embodies a fundamental truth: **AI is context-hungry**.
-
-Generic prompts produce generic code. But when you give the AI:
-- A clear technology stack (context.md or CLAUDE.md)
-- Explicit rules (rules/*.mdc)
-- A structured workflow (Phase-Based Development)
-- Bounded sessions (start-session → code → next-session)
-
-...you get consistent, professional, maintainable code that follows your standards.
-
-The methodology works because it treats AI like a junior developer who needs clear guidance, not a magic solution that reads your mind.
-
-**Explicit is better than implicit. Consistency is better than cleverness.**
+| Anti-pattern | Why it hurts | Do this |
+|---|---|---|
+| Skipping the review gate | You build the wrong thing fast | Read the plan, then approve |
+| Work before the check | You cannot tell when you are done | Write the check first |
+| One giant session | The AI loses the plan | Keep sessions to 1 to 4 hours |
+| Editing another role's workspace | Their rules and gates never see the change | Hand off through a file in your own workspace |
+| Skipping `/next-session` | The next session starts blind | Always close with the handoff |

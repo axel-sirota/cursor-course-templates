@@ -203,7 +203,7 @@
   <!-- ===== HERO ===== -->
   <header class="hero">
     <h1>Cursor Class</h1>
-    <p class="subtitle">The 3-hour workflow class &mdash; persona, stack, architect, sessions, adapt (Cursor IDE edition)</p>
+    <p class="subtitle">The 3-hour workflow class for five roles: persona, stack, architect, sessions, adapt (Cursor IDE edition)</p>
     <div class="badge-row">
       <span class="badge badge-indigo">Workflow class</span>
       <span class="badge badge-teal">~3 hours</span>
@@ -219,6 +219,7 @@
       <li><a href="#what-is">1. What is Cursor?</a></li>
       <li><a href="#sdd-pipeline">2. The SDD pipeline</a></li>
       <li><a href="#personas-stacks">3. Personas, stacks, and architecture shapes</a></li>
+      <li><a href="#pick-track">Pick your track</a></li>
       <li><a href="#lab-1">Lab 1 &mdash; Onboarding</a></li>
       <li><a href="#commands">4. The 6 commands you need</a></li>
       <li><a href="#architect-deep">5. /architect &mdash; the gated 3-phase flow</a></li>
@@ -249,6 +250,8 @@
           <li class="sub"><a href="#personas">The 5 personas</a></li>
           <li class="sub"><a href="#stacks">The stack library</a></li>
           <li class="sub"><a href="#shapes">Architecture shapes</a></li>
+          <li class="sub"><a href="#pick-track">Pick your track</a></li>
+          <li class="sub"><a href="#multi-persona">Several personas, one repo</a></li>
           <li><a href="#lab-1">Lab 1 &mdash; Onboarding</a></li>
           <li><a href="#commands">4. The 6 commands</a></li>
           <li class="sub"><a href="#cmd-set-persona">/set-persona</a></li>
@@ -274,10 +277,10 @@
       <!-- ===== 0. How to use this guide ===== -->
       <section id="how-to-use">
         <h2>0. How to use this guide</h2>
-        <p>This is a <strong>3-hour, hands-on class</strong> on the AI-assisted development workflow. You bring your own laptop, your own project (or one you want to start), and the persona that matches your job. We do three labs:</p>
+        <p>This is a <strong>3-hour, hands-on class</strong> on the AI-assisted development workflow. You bring your own laptop and pick the persona that matches your job: <strong>engineer, pm, designer, data-scientist or accountant</strong>. Each persona works on exercises built for that role, in its own language and tools (see <a href="#pick-track">Pick your track</a>). We do three labs:</p>
         <ul>
-          <li><strong>Lab 1 &mdash; Onboarding.</strong> Run <code>/set-persona</code> and <code>/setup-stack</code> on the project you brought.</li>
-          <li><strong>Lab 2 &mdash; Architect + two sessions.</strong> Run <code>/architect</code> on something you actually want to build, then drive two <code>/start-session</code> &rarr; <code>/next-session</code> cycles.</li>
+          <li><strong>Lab 1: Onboarding.</strong> Run <code>/set-persona add &lt;role&gt;</code> and <code>/setup-stack &lt;role&gt;</code> in the course repo.</li>
+          <li><strong>Lab 2: Architect + two sessions.</strong> Run <code>/architect &lt;role&gt;</code> on your track&rsquo;s first exercise in <code>exercises/&lt;role&gt;/</code>, then drive two <code>/start-session &lt;role&gt;</code> &rarr; <code>/next-session</code> cycles.</li>
           <li><strong>Lab 3 &mdash; Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
         </ul>
         <p>This class teaches the <strong>workflow only</strong>. It does <em>not</em> cover hooks, MCP servers, sub-agents, or automation &mdash; those are advanced topics for a later session. If you came expecting MCP server configuration today, look in <code>materials/_old/</code> for the older deep-dive guides &mdash; they cover that material.</p>
@@ -314,12 +317,13 @@
         <p>Everything in this class hangs on one diagram: the Spec-Driven Development (SDD) pipeline. Memorize it now &mdash; every command you learn is a station on this line.</p>
 
         <figure>
-          <img src="diagrams/d02-sdd-pipeline-spine.svg" alt="SDD pipeline spine &mdash; /set-persona &rarr; /setup-stack &rarr; /architect &rarr; /start-session &harr; /next-session, with /undo as the safety valve">
+          <img src="diagrams/d02-sdd-pipeline-spine-v2.svg" alt="SDD pipeline spine per persona: /set-persona add role, /setup-stack role, /architect role, then /start-session and /next-session in a loop, with /undo as the safety valve">
         </figure>
 
         <h3 id="pipeline-spine">The spine</h3>
-        <pre><code>/set-persona  →  /setup-stack  →  /architect  →  /start-session ⇄ /next-session</code></pre>
-        <p>Designers and PMs skip <code>/setup-stack</code> (they don&rsquo;t have a tech stack &mdash; designers have Figma, PMs have PRDs). Everyone else runs the full spine.</p>
+        <pre><code>/set-persona add &lt;role&gt;  →  /setup-stack &lt;role&gt;  →  /architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md
+   →  (review gate)  →  /start-session &lt;role&gt;  →  in-session commands  →  /next-session</code></pre>
+        <p><strong>Every persona runs the full spine</strong>, including <code>/setup-stack</code>. Each role has at least one stack. Some stacks install nothing on your machine (the PM&rsquo;s <code>pm-prd-markdown</code>, the accountant&rsquo;s <code>sheets-accounting</code>); they still add the rules and templates for that role. Several personas can be active in one repo; you run the spine once per role.</p>
 
         <h3 id="pipeline-rules">Two enforcement rules</h3>
         <p>The pipeline is enforced by two rules baked into every command. This is not advice &mdash; the commands literally stop if these rules are violated.</p>
@@ -336,32 +340,32 @@
           <tbody>
             <tr>
               <td>/set-persona</td>
-              <td>(writes the persona)</td>
-              <td>&rarr; <code>/setup-stack</code> (or <code>/architect</code> for designer/pm)</td>
-              <td><code>.cursor/context.md</code> + persona pack installed</td>
+              <td>(adds the persona)</td>
+              <td>&rarr; <code>/setup-stack &lt;role&gt;</code></td>
+              <td><code>## Persona: &lt;role&gt;</code> block in <code>.cursor/context.md</code>, pack in <code>.cursor/</code>, <code>workspaces/&lt;role&gt;/</code></td>
             </tr>
             <tr>
               <td>/setup-stack</td>
               <td>Stops if no persona</td>
-              <td>&rarr; <code>/architect</code></td>
-              <td>Stack rules + <code>.stack-manifest.json</code></td>
+              <td>&rarr; <code>/architect &lt;role&gt;</code></td>
+              <td><code>.cursor/rules/&lt;role&gt;/stack-*.mdc</code> + <code>.cursor/stacks/&lt;role&gt;.manifest.json</code></td>
             </tr>
             <tr>
               <td>/architect</td>
-              <td>Stops if no persona</td>
-              <td>&rarr; <code>/start-session</code></td>
-              <td><code>plans/sessions/*.md</code> + <code>interface-contract.md</code> + skeleton code</td>
+              <td>Stops if no persona or no stack</td>
+              <td>&rarr; <code>/start-session &lt;role&gt;</code></td>
+              <td><code>workspaces/&lt;role&gt;/plans/sessions/*.md</code> + <code>interface-contract.md</code> + skeleton</td>
             </tr>
             <tr>
               <td>/start-session</td>
-              <td>Stops if no persona</td>
+              <td>Stops if no persona, stack or plan</td>
               <td>&rarr; (use persona spokes, then <code>/next-session</code>)</td>
-              <td>Code, tests, commits</td>
+              <td>Work in <code>workspaces/&lt;role&gt;/</code>: code, PRDs, components, notebooks, workpapers</td>
             </tr>
             <tr>
               <td>/next-session</td>
               <td>Stops if no persona</td>
-              <td>&rarr; <code>/start-session</code> (or <code>/architect</code> at phase boundary)</td>
+              <td>&rarr; <code>/start-session &lt;role&gt;</code> (or <code>/architect &lt;role&gt;</code> at phase boundary)</td>
               <td>Transition doc for next time</td>
             </tr>
           </tbody>
@@ -379,29 +383,31 @@
         <p>The pipeline is parametric. The same five commands work for very different jobs because three knobs configure them: <strong>persona</strong> (who you are), <strong>stack</strong> (what tech you use), and <strong>architecture shape</strong> (what the output looks like).</p>
 
         <figure>
-          <img src="diagrams/d03-persona-stack-shape.svg" alt="Three lanes: Persona &rarr; Stack &rarr; Architecture Shape, showing how the same pipeline produces different outputs per role">
+          <img src="diagrams/d03-persona-stack-shape-v2.svg" alt="Three lanes: Persona, Stack, Architecture Shape, showing how the same pipeline produces a different output for each of the five roles">
         </figure>
 
         <h3 id="personas">The 5 personas</h3>
         <table>
           <thead>
-            <tr><th>Persona</th><th>For</th><th>Has a stack?</th><th>In-session spokes</th></tr>
+            <tr><th>Persona</th><th>For</th><th>Stacks</th><th>In-session spokes</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>engineer</code></td><td>Backend / API / service developers</td><td>Yes</td><td><code>/engineer-tasks</code>, <code>/engineer-implement</code></td></tr>
-            <tr><td><code>designer</code></td><td>UI / Figma designers</td><td>No</td><td><code>/designer-extract</code>, <code>/designer-compose</code>, <code>/designer-iterate</code>, <code>/designer-handoff</code></td></tr>
-            <tr><td><code>pm</code></td><td>Product managers writing PRDs</td><td>No</td><td><code>/pm-decompose</code>, <code>/pm-validate</code>, <code>/pm-report</code></td></tr>
-            <tr><td><code>data-scientist</code></td><td>Notebook + experiment + MLOps</td><td>Yes</td><td><code>/ds-explore</code>, <code>/ds-experiment</code>, <code>/ds-validate</code>, <code>/ds-handoff</code></td></tr>
-            <tr><td><code>devops</code></td><td>Infra-as-code, K8s, config mgmt</td><td>Yes</td><td>(shell tools &mdash; <code>terraform plan</code>, <code>ansible-lint</code>, &hellip;)</td></tr>
+            <tr><td><code>engineer</code></td><td>Backend / API / service developers</td><td>6, one per language</td><td><code>/engineer-tasks</code>, <code>/engineer-implement</code>, <code>/code-review</code></td></tr>
+            <tr><td><code>pm</code></td><td>Product managers writing PRDs</td><td>1 (markdown, nothing to install)</td><td><code>/pm-decompose</code>, <code>/pm-validate</code>, <code>/pm-report</code></td></tr>
+            <tr><td><code>designer</code></td><td>UI designers: tokens, components, screens (no Figma needed)</td><td>1 (React + tokens)</td><td><code>/designer-extract</code>, <code>/designer-compose</code>, <code>/designer-iterate</code>, <code>/designer-handoff</code></td></tr>
+            <tr><td><code>data-scientist</code></td><td>Notebook + experiment + MLOps</td><td>5</td><td><code>/ds-explore</code>, <code>/ds-experiment</code>, <code>/ds-validate</code>, <code>/ds-handoff</code></td></tr>
+            <tr><td><code>accountant</code></td><td>Reconciliations, flux analysis, journal entry testing, close</td><td>2 (spreadsheet or Python)</td><td><code>/acct-reconcile</code>, <code>/acct-variance</code>, <code>/acct-je-test</code>, <code>/acct-close-handoff</code></td></tr>
           </tbody>
         </table>
 
         <h3 id="stacks">The stack library</h3>
-        <p>Each persona that has a stack picks from a curated library. You don&rsquo;t have to use the library &mdash; if your language isn&rsquo;t there, <code>/setup-stack</code> offers a <code>new</code> option that scaffolds a custom stack from <code>stacks/blank/</code>.</p>
+        <p>Every persona picks from a curated library. The first stack in each list is the default. If your language isn&rsquo;t there, <code>/setup-stack</code> offers a <code>new</code> option that scaffolds a custom stack from <code>stacks/blank/</code>.</p>
         <ul>
-          <li><strong>Engineer:</strong> <code>python-fastapi</code>, <code>go-gin</code>, <code>go-grpc</code>, <code>java-spring</code>, <code>node-express</code>, <code>node-nestjs</code></li>
-          <li><strong>Data scientist:</strong> <code>python-datascience</code>, <code>python-spark</code>, <code>python-dbt-snowflake</code>, <code>r-tidyverse</code>, <code>python-mlops</code></li>
-          <li><strong>DevOps:</strong> <code>devops-terraform</code>, <code>devops-ansible</code>, <code>devops-k8s-helm</code></li>
+          <li><strong>Engineer:</strong> <code>python-fastapi</code>, <code>go-gin</code>, <code>go-grpc</code>, <code>java-spring</code>, <code>node-express</code>, <code>node-nestjs</code>. Pick the language you use at work. The engineer labs are graded by language-neutral Hurl HTTP tests, so a Java developer builds the same Blog API in Spring.</li>
+          <li><strong>PM:</strong> <code>pm-prd-markdown</code></li>
+          <li><strong>Designer:</strong> <code>designer-react-tokens</code></li>
+          <li><strong>Data scientist:</strong> <code>python-datascience</code>, <code>python-mlops</code>, <code>python-spark</code>, <code>python-dbt-snowflake</code>, <code>r-tidyverse</code></li>
+          <li><strong>Accountant:</strong> <code>sheets-accounting</code> (default, spreadsheet-first, no code) or <code>python-accounting</code></li>
         </ul>
 
         <h3 id="shapes">Architecture shapes</h3>
@@ -414,9 +420,74 @@
             <tr><td>python-spark, python-mlops</td><td>Data Pipeline</td><td>Job stages + schema + medallion layers</td></tr>
             <tr><td>python-dbt-snowflake</td><td>Analytics Model</td><td>Staging/mart tree + source defs</td></tr>
             <tr><td>r-tidyverse, python-datascience</td><td>Notebook / Experiment</td><td>EDA sequence + models + metrics</td></tr>
-            <tr><td>devops-terraform</td><td>Cloud Infrastructure</td><td>Module inputs/outputs + resource map</td></tr>
-            <tr><td>devops-ansible</td><td>IaC Playbook</td><td>Roles + playbooks + variable contract</td></tr>
-            <tr><td>devops-k8s-helm</td><td>GitOps Platform</td><td>Chart structure + <code>values.yaml</code> contract</td></tr>
+            <tr><td>pm-prd-markdown</td><td>PRD Workspace</td><td>PRD outline: problem, goals, users, epics, NFRs, success metrics</td></tr>
+            <tr><td>designer-react-tokens</td><td>Design System</td><td>Token set + component inventory + screen layout</td></tr>
+            <tr><td>sheets-accounting, python-accounting</td><td>Close Workbook</td><td>Source files, reconciliation and analysis steps, output reports, tie-out points</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="pick-track">Pick your track</h3>
+        <p>Each persona does exercises that fit its role, in its own language and tools. Nobody builds someone else&rsquo;s project. The non-engineer tracks share one fictional company, <strong>Northwind Co.</strong>, and one theme (employee expenses) on shared synthetic data, so no company systems or documents are needed. The engineer track keeps the Blog API labs, built in your own stack.</p>
+        <table>
+          <thead>
+            <tr><th>Persona</th><th>Stacks (default first)</th><th>Exercises in <code>exercises/&lt;role&gt;/</code></th><th>What you need installed</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>engineer</code></td>
+              <td><code>python-fastapi</code>, <code>go-gin</code>, <code>go-grpc</code>, <code>java-spring</code>, <code>node-express</code>, <code>node-nestjs</code></td>
+              <td>The Blog API labs, built in your stack. Graded by language-neutral Hurl HTTP tests.</td>
+              <td>Your language toolchain (JDK + Maven, Go, Node, or Python) and <a href="https://hurl.dev">Hurl</a></td>
+            </tr>
+            <tr>
+              <td><code>pm</code></td>
+              <td><code>pm-prd-markdown</code></td>
+              <td>1. Raw notes to PRD. 2. Fix a flawed PRD. 3. RICE prioritisation.</td>
+              <td>Nothing beyond Cursor</td>
+            </tr>
+            <tr>
+              <td><code>designer</code></td>
+              <td><code>designer-react-tokens</code></td>
+              <td>1. Brand guide to tokens. 2. Expense claim components. 3. &ldquo;My claims&rdquo; screen + fix a flawed component.</td>
+              <td>Node 20+ (no Figma needed)</td>
+            </tr>
+            <tr>
+              <td><code>data-scientist</code></td>
+              <td><code>python-datascience</code>, <code>python-mlops</code>, <code>python-spark</code>, <code>python-dbt-snowflake</code>, <code>r-tidyverse</code></td>
+              <td>1. EDA on claims data with seeded issues. 2. Expense category model with a leakage trap. 3. Duplicate and policy-violation detection.</td>
+              <td>Python 3 (or R for <code>r-tidyverse</code>)</td>
+            </tr>
+            <tr>
+              <td><code>accountant</code></td>
+              <td><code>sheets-accounting</code> (spreadsheet-first, no code), <code>python-accounting</code></td>
+              <td>1. October bank reconciliation. 2. Flux analysis (flag moves over $10k AND 10%). 3. Journal entry testing + close memo.</td>
+              <td>Excel or Google Sheets (Python 3 only for <code>python-accounting</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout callout-info">
+          <div class="callout-title">Capstone: one feature, five personas</div>
+          <p><code>exercises/capstone/</code> takes one feature through all five roles: the PM writes it, the designer builds the screen, the engineer ships the endpoint, the data scientist checks the data, the accountant ties out the numbers. Each persona works in its own workspace and hands off through it.</p>
+        </div>
+
+        <h3 id="multi-persona">Several personas, one repo</h3>
+        <figure>
+          <img src="diagrams/d09-multi-persona-workspaces.svg" alt="One repo with five active personas. Each persona has its own stack, its own rules folder scoped by glob to its own workspace, and its own workspaces folder. One scope script decides which hooks fire.">
+        </figure>
+        <p>You can wear more than one hat in the same repo. Each persona gets its own workspace, rules and hooks, so a PM&rsquo;s rules never fire on engineering code.</p>
+        <pre><code>/set-persona add engineer      # first role
+/set-persona add pm            # a second role; nothing already installed is removed
+/set-persona list              # active personas, their stacks and phases
+/set-persona remove pm         # remove one role; workspaces/pm/ is kept</code></pre>
+        <table>
+          <thead><tr><th>Piece</th><th>Where</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>Persona contract</td><td><code>personas/&lt;role&gt;/persona.yaml</code></td><td>Workspace, stacks, in-session commands, quality gate. Every command reads it</td></tr>
+            <tr><td>Work</td><td><code>workspaces/&lt;role&gt;/</code></td><td>Plans, code, data and docs for that role only</td></tr>
+            <tr><td>Rules</td><td><code>.cursor/rules/&lt;role&gt;/</code></td><td>Scoped by glob to <code>workspaces/&lt;role&gt;/**</code></td></tr>
+            <tr><td>Hooks</td><td><code>.cursor/hooks.json</code> through <code>.cursor/scripts/_scope.sh</code></td><td>Edit hooks run only for that role&rsquo;s files; stop hooks only for the role whose session is open</td></tr>
+            <tr><td>Install record</td><td><code>.cursor/personas/&lt;role&gt;.manifest.json</code>, <code>.cursor/stacks/&lt;role&gt;.manifest.json</code></td><td>Lets <code>/undo</code> remove one role cleanly</td></tr>
+            <tr><td>Project state</td><td><code>.cursor/context.md</code></td><td><code>## Active Personas</code>, then one block per persona: stack, shape, phase</td></tr>
           </tbody>
         </table>
       </section>
@@ -427,28 +498,28 @@
 
         <div class="callout callout-lab">
           <div class="callout-title">Goal</div>
-          <p>Pick the persona and stack that match your real job. Run them against the project you brought (or a fresh empty folder). End with a configured <code>.cursor/context.md</code> and a stack pack installed.</p>
+          <p>Pick the persona and stack that match your real job (see <a href="#pick-track">Pick your track</a>). Run them in the course repo. End with your role listed in <code>.cursor/context.md</code>, a stack installed for it, and an empty <code>workspaces/&lt;role&gt;/</code> ready for Lab 2.</p>
         </div>
 
         <h3>Steps</h3>
         <ol>
-          <li>Open a terminal in your project folder. If you don&rsquo;t have one, <code>mkdir my-class && cd my-class && git init</code>.</li>
-          <li>Copy this repo&rsquo;s <code>.cursor/</code> directory into your project: <code>cp -r /path/to/cursor-course-templates/.cursor .</code> &mdash; it brings the commands, rules, and a starter context file with it.</li>
+          <li>Open a terminal in your copy of the course repo (the folder with <code>personas/</code>, <code>stacks/</code> and <code>exercises/</code>). The commands read those folders, so work inside this repo.</li>
           <li>Open the folder in Cursor: <code>cursor .</code> (or use <kbd>File &rarr; Open Folder</kbd>).</li>
           <li>Open the chat panel with <kbd>Cmd</kbd>+<kbd>L</kbd> so you can type slash commands.</li>
-          <li>Run <code>/set-persona</code>. Pick the persona for your job (engineer, designer, pm, data-scientist, devops).</li>
-          <li>If your persona has a stack, run <code>/setup-stack</code>. Pick the matching stack &mdash; or pick <code>new</code> if your language isn&rsquo;t listed.</li>
-          <li>If you already had code in your folder, <code>/setup-stack</code> will detect it and ask: <strong>overwrite</strong>, <strong>skip templates</strong>, or <strong>merge per-file</strong>. Pick &ldquo;skip templates&rdquo; if you just want rules; pick &ldquo;merge&rdquo; if you want to see each conflict.</li>
-          <li>Open <code>.cursor/context.md</code>. Confirm the <code>## Active Persona</code> and <code>## Active Stack</code> fields are filled in.</li>
+          <li>Run <code>/set-persona add &lt;role&gt;</code> with the persona for your job: <code>engineer</code>, <code>pm</code>, <code>designer</code>, <code>data-scientist</code> or <code>accountant</code>. Plain <code>/set-persona</code> shows the menu.</li>
+          <li>Run <code>/setup-stack &lt;role&gt;</code>. Everyone runs it. Pick the stack from your track (Enter takes the default), or <code>new</code> if your language isn&rsquo;t listed. Engineers: pick the language you use at work.</li>
+          <li>If <code>workspaces/&lt;role&gt;/</code> already has files, <code>/setup-stack</code> will detect them and ask: <strong>overwrite</strong>, <strong>skip templates</strong>, or <strong>merge per-file</strong>. Pick &ldquo;skip templates&rdquo; if you just want rules; pick &ldquo;merge&rdquo; if you want to see each conflict.</li>
+          <li>Optional: add a second role with <code>/set-persona add &lt;other-role&gt;</code> and check both with <code>/set-persona list</code>.</li>
+          <li>Open <code>.cursor/context.md</code>. Confirm <code>## Active Personas</code> lists your role and the <code>## Persona: &lt;role&gt;</code> block has <code>Stack</code> and <code>Architecture Shape</code> filled in.</li>
         </ol>
 
         <h3>Checkpoint</h3>
         <ul>
-          <li>✅ <code>grep "Active Persona" .cursor/context.md</code> shows your persona</li>
-          <li>✅ <code>grep "Active Stack" .cursor/context.md</code> shows your stack (or is absent for designer/pm)</li>
-          <li>✅ <code>ls .cursor/.persona-manifest.json</code> exists</li>
-          <li>✅ (if stack chosen) <code>ls .cursor/.stack-manifest.json</code> exists</li>
-          <li>✅ Cursor&rsquo;s <kbd>Cmd</kbd>+<kbd>L</kbd> chat shows the active rules in its system context (look for <code>.cursor/rules/*.mdc</code> being loaded)</li>
+          <li><code>grep "Active Personas" -A1 .cursor/context.md</code> shows your role</li>
+          <li><code>grep -A3 "Persona: &lt;role&gt;" .cursor/context.md</code> shows your stack and shape</li>
+          <li><code>ls .cursor/personas/&lt;role&gt;.manifest.json .cursor/stacks/&lt;role&gt;.manifest.json</code> both exist</li>
+          <li><code>ls .cursor/rules/&lt;role&gt;/</code> shows persona rules plus <code>stack-*.mdc</code> rules</li>
+          <li>Open any file under <code>workspaces/&lt;role&gt;/</code> and Cursor attaches that role&rsquo;s rules (they are scoped by glob to that folder)</li>
         </ul>
 
         <div class="callout callout-tip">
@@ -463,21 +534,21 @@
         <p>Six commands. Five on the spine + <code>/detect-stack</code> for brownfield. That&rsquo;s the whole class. Everything else is optional or persona-specific.</p>
 
         <figure>
-          <img src="diagrams/d04-six-commands-overview.svg" alt="The 6 commands radiating from the project context file: the 5 spine commands plus /detect-stack as brownfield entry">
+          <img src="diagrams/d04-six-commands-overview-v2.svg" alt="The 6 commands radiating from .cursor/context.md: the 5 spine commands, each taking a role, plus /detect-stack as brownfield entry">
         </figure>
 
         <h3 id="cmd-set-persona">/set-persona</h3>
-        <p><strong>What it does:</strong> installs a persona pack (commands, agents, rules, MCP config) for the role you pick, into <code>.cursor/</code>. Writes <code>## Active Persona</code> into <code>.cursor/context.md</code>.</p>
+        <p><strong>What it does:</strong> <code>/set-persona add &lt;role&gt;</code> installs a persona pack (commands, agents, rules, hooks, MCP config) into <code>.cursor/</code>. Rules go to <code>.cursor/rules/&lt;role&gt;/</code>, scoped by glob to <code>workspaces/&lt;role&gt;/**</code>. Hooks are wired through <code>.cursor/scripts/_scope.sh</code> so they fire only for that role. It creates <code>workspaces/&lt;role&gt;/</code> and adds the role to <code>## Active Personas</code> in <code>.cursor/context.md</code>. Run it again to add another role; <code>list</code> and <code>remove &lt;role&gt;</code> do what they say.</p>
         <p><strong>When:</strong> first thing. Always. There is no escape hatch.</p>
-        <p><strong>Output:</strong> persona files installed; <code>.persona-manifest.json</code> written so <code>/undo</code> can reverse it.</p>
+        <p><strong>Output:</strong> persona files installed; <code>.cursor/personas/&lt;role&gt;.manifest.json</code> written so <code>/undo</code> can reverse it.</p>
 
         <h3 id="cmd-setup-stack">/setup-stack</h3>
-        <p><strong>What it does:</strong> shows you the stacks available for your persona, lets you pick one (or create a new one from <code>stacks/blank/</code>), copies the stack&rsquo;s rules and templates into your project, and writes <code>## Active Stack</code> + <code>## Architecture Shape</code> to <code>.cursor/context.md</code>.</p>
-        <p><strong>Smart bit:</strong> if your folder already has code in the stack&rsquo;s language, it detects that and asks how to reconcile &mdash; overwrite, skip templates, or merge per-file. Your existing code is never blindly overwritten.</p>
-        <p><strong>Designer / PM:</strong> this command is skipped &mdash; those personas have no tech stack.</p>
+        <p><strong>What it does:</strong> <code>/setup-stack &lt;role&gt;</code> shows the stacks listed in that persona&rsquo;s <code>persona.yaml</code>, lets you pick one (or create a new one from <code>stacks/blank/</code>), copies the stack&rsquo;s rules into <code>.cursor/rules/&lt;role&gt;/</code> and its templates into <code>workspaces/&lt;role&gt;/</code>, and writes <code>Stack</code> + <code>Architecture Shape</code> into the <code>## Persona: &lt;role&gt;</code> block.</p>
+        <p><strong>Smart bit:</strong> if <code>workspaces/&lt;role&gt;/</code> already has files, it detects that and asks how to reconcile: overwrite, skip templates, or merge per-file. Your existing work is never blindly overwritten.</p>
+        <p><strong>Every persona runs it.</strong> PM and accountant (<code>sheets-accounting</code>) stacks install no software; they still bring the rules and templates for the role.</p>
 
         <h3 id="cmd-architect">/architect</h3>
-        <p><strong>What it does:</strong> turns a one-line idea into a full plan &mdash; <code>plans/sessions/session-overview.md</code>, one session file per phase, an <code>interface-contract.md</code> (OpenAPI / proto / DAG / PRD depending on shape), and a walking skeleton of code in the right places.</p>
+        <p><strong>What it does:</strong> <code>/architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md</code> turns an exercise brief (or a one-line idea) into a full plan inside <code>workspaces/&lt;role&gt;/plans/</code>: <code>sessions/session-overview.md</code>, one session file per phase, an <code>interface-contract.md</code> (OpenAPI, proto, PRD outline, token set, close workbook steps, depending on shape), and a walking skeleton in the right places.</p>
         <p><strong>Gated 3-phase flow:</strong>
           <ol>
             <li><strong>Design</strong> &mdash; produce all planning docs, no code.</li>
@@ -488,11 +559,11 @@
         <p>This means <code>/architect</code> never ships code you haven&rsquo;t signed off on. We&rsquo;ll go deeper in Section 5.</p>
 
         <h3 id="cmd-start-session">/start-session</h3>
-        <p><strong>What it does:</strong> loads the active stack, rules, and last session&rsquo;s state. Asks for today&rsquo;s session goal. Tells you which <em>in-session spokes</em> you have for your persona.</p>
-        <p><strong>Spokes are persona-specific.</strong> An engineer gets <code>/engineer-tasks</code> and <code>/engineer-implement</code>. A PM gets <code>/pm-decompose</code>, <code>/pm-validate</code>, <code>/pm-report</code>. See Section 6 for the full map.</p>
+        <p><strong>What it does:</strong> <code>/start-session &lt;role&gt;</code> loads that persona&rsquo;s stack, rules, plan and last session&rsquo;s state, and marks the session as open for that role. Asks for today&rsquo;s session goal. Tells you which <em>in-session spokes</em> you have (they come from <code>persona.yaml</code>).</p>
+        <p><strong>Spokes are persona-specific.</strong> An engineer gets <code>/engineer-tasks</code>, <code>/engineer-implement</code> and <code>/code-review</code>. A PM gets <code>/pm-decompose</code>, <code>/pm-validate</code>, <code>/pm-report</code>. See Section 6 for the full map.</p>
 
         <h3 id="cmd-next-session">/next-session</h3>
-        <p><strong>What it does:</strong> wraps up today. Runs the persona&rsquo;s quality gate (tests for engineer, screenshot comparison for designer, gap-detector for PM, experiment validator for data-scientist). Writes a transition doc you can paste into tomorrow&rsquo;s session, including the exact spokes to call next time.</p>
+        <p><strong>What it does:</strong> wraps up today. Runs the persona&rsquo;s quality gate from <code>persona.yaml</code> (test suite for engineer, token-validator for designer, gap-detector for PM, experiment tracker and <code>/ds-validate</code> for data-scientist, tie-out-checker and controls-checker for accountant). Writes a transition doc to <code>workspaces/&lt;role&gt;/plans/transitions/</code>, including the exact spokes to call next time.</p>
         <p><strong>It points you back to <code>/start-session</code>.</strong> The loop is closed.</p>
 
         <h3 id="cmd-detect-stack">/detect-stack</h3>
@@ -514,12 +585,12 @@
         <p>Gating the design phase forces a moment where you, the human, read what the AI plans to build <em>before</em> it builds it. Catching a bad design in a markdown file is free; catching it in code is not.</p>
 
         <h3>Phase 1 &mdash; Design</h3>
-        <p>The AI produces:</p>
+        <p>The AI produces, inside <code>workspaces/&lt;role&gt;/</code>:</p>
         <ul>
-          <li><code>plans/sessions/session-overview.md</code> &mdash; the phase breakdown and session list</li>
-          <li><code>plans/sessions/session-1-phase-0.md</code> &mdash; the skeleton session plan</li>
-          <li><code>plans/sessions/session-N-phase-X.md</code> &mdash; one file per feature phase</li>
-          <li><code>plans/interface-contract.md</code> &mdash; the contract appropriate to your stack&rsquo;s shape (OpenAPI, proto, DAG, PRD, model card&hellip;)</li>
+          <li><code>plans/sessions/session-overview.md</code>: the phase breakdown and session list</li>
+          <li><code>plans/sessions/session-1-phase-0.md</code>: the skeleton session plan</li>
+          <li><code>plans/sessions/session-N-phase-X.md</code>: one file per feature phase</li>
+          <li><code>plans/interface-contract.md</code>: the contract for your stack&rsquo;s shape (OpenAPI, proto, DAG, PRD outline, token set, close workbook steps&hellip;)</li>
         </ul>
         <p>It also runs a <strong>self-audit</strong> step: re-reads its own output, diffs the manifest, checks that every promised file actually exists, and lists the architectural risks it sees. You see this audit before the gate.</p>
 
@@ -527,11 +598,11 @@
         <p>Nothing else happens until you say yes. Read the plan, push back if anything is wrong, ask for revisions. <strong>The AI cannot proceed to scaffold without your approval.</strong></p>
 
         <h3>Phase 3 &mdash; Scaffold</h3>
-        <p>After approval, the AI writes the walking skeleton &mdash; the minimum runnable code that matches the interface contract. Tests are stubbed but failing on purpose; the first <code>/start-session</code> turns red tests green.</p>
+        <p>After approval, the AI writes the walking skeleton: the minimum that matches the interface contract, with stubs and no final content. Then it runs the shape&rsquo;s skeleton check: every stub route answers (engineer), every PRD heading is present (pm), the token JSON validates (designer), the notebook runs top to bottom (data-scientist), the tie-out stubs run (accountant). The first <code>/start-session</code> fills the stubs in.</p>
 
         <div class="callout callout-info">
           <div class="callout-title">Plan-extraction mode</div>
-          <p>If you already have a written plan (<code>plan.md</code>, <code>PRD.md</code>, <code>requirements.md</code>), point <code>/architect</code> at it: <code>/architect plan.md</code>. It will extract requirements instead of inventing them. Use this when you already know what you want &mdash; you skip the &ldquo;ask 10 clarifying questions&rdquo; back-and-forth.</p>
+          <p>If you already have a written plan, point <code>/architect</code> at it. In this class the plan is your exercise brief: <code>/architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md</code> (for example <code>/architect pm exercises/pm/01-notes-to-prd/README.md</code>). It will extract requirements instead of inventing them, so you skip the &ldquo;ask 10 clarifying questions&rdquo; back-and-forth.</p>
         </div>
       </section>
 
@@ -552,13 +623,13 @@
           <tbody>
             <tr>
               <td>engineer</td>
-              <td><code>/engineer-tasks</code><br><code>/engineer-implement</code></td>
-              <td>Decompose session goal into TDD-ordered tasks; then drive red &rarr; green &rarr; refactor on one task at a time</td>
+              <td><code>/engineer-tasks</code><br><code>/engineer-implement</code><br><code>/code-review</code></td>
+              <td>Decompose session goal into TDD-ordered tasks; drive red &rarr; green &rarr; refactor on one task at a time; review the diff against the stack rules</td>
             </tr>
             <tr>
               <td>designer</td>
               <td><code>/designer-extract</code><br><code>/designer-compose</code><br><code>/designer-iterate</code><br><code>/designer-handoff</code></td>
-              <td>Pull tokens from Figma; assemble components; apply review feedback; produce dev-ready spec</td>
+              <td>Pull tokens from a token JSON or screen spec (or a Figma frame, optional); build components from tokens only; apply review feedback; produce dev-ready spec</td>
             </tr>
             <tr>
               <td>pm</td>
@@ -571,9 +642,9 @@
               <td>EDA on a dataset; tracked-metrics experiment run; check seeds/leakage/baselines; model card + serving spec</td>
             </tr>
             <tr>
-              <td>devops</td>
-              <td>(no slash-spokes yet &mdash; uses shell)</td>
-              <td><code>terraform plan</code>, <code>ansible-lint</code>, <code>helm lint</code> directly</td>
+              <td>accountant</td>
+              <td><code>/acct-reconcile</code><br><code>/acct-variance</code><br><code>/acct-je-test</code><br><code>/acct-close-handoff</code></td>
+              <td>Match bank lines to GL lines and list unmatched items; budget vs actual and month-over-month flux with explanations; test journal entries for duplicates, weekend postings, round amounts, self-approval; write the close memo with tie-outs and open items</td>
             </tr>
           </tbody>
         </table>
@@ -590,38 +661,43 @@
 
         <div class="callout callout-lab">
           <div class="callout-title">Goal</div>
-          <p>Take an idea you actually want to build, run it through <code>/architect</code>, approve the plan, then drive two <code>/start-session</code> &rarr; <code>/next-session</code> cycles. End with a walking skeleton + at least one passing feature.</p>
+          <p>Take your track&rsquo;s first exercise from <code>exercises/&lt;role&gt;/</code>, run it through <code>/architect &lt;role&gt;</code>, approve the plan, then drive two <code>/start-session &lt;role&gt;</code> &rarr; <code>/next-session</code> cycles. End with a walking skeleton + at least one finished piece of work.</p>
         </div>
 
-        <h3>Pick an idea</h3>
-        <p>Use something real but small. Examples by persona:</p>
+        <h3>Your exercise</h3>
+        <p>Start with exercise 01 of your track. Each folder has a <code>README.md</code> brief, the inputs, and the checks you are graded against.</p>
         <ul>
-          <li><strong>Engineer:</strong> a small REST API (e.g. a tasks tracker, a URL shortener, a webhook receiver), a CLI tool, a gRPC service.</li>
-          <li><strong>Designer:</strong> a component set for an existing Figma file you have access to.</li>
-          <li><strong>PM:</strong> a one-page PRD for a feature your team is actually considering.</li>
-          <li><strong>Data scientist:</strong> a small EDA + one model on a public dataset (Titanic, Iris, anything you&rsquo;ve seen before).</li>
-          <li><strong>DevOps:</strong> a small Terraform module (e.g. one S3 bucket + IAM) or one Ansible role (e.g. nginx).</li>
+          <li><strong>Engineer:</strong> the Blog API labs in <code>exercises/engineer/</code>, built in the stack you picked (Spring, Gin, gRPC, Express, NestJS or FastAPI). The Hurl tests are the same for every language.</li>
+          <li><strong>PM:</strong> <code>exercises/pm/</code>, starting with raw meeting notes to a PRD for Northwind&rsquo;s expense claims.</li>
+          <li><strong>Designer:</strong> <code>exercises/designer/01-brand-to-tokens/</code>: Northwind&rsquo;s brand guide to a token set, then claim components.</li>
+          <li><strong>Data scientist:</strong> <code>exercises/data-scientist/</code>, starting with EDA on the claims data (it has seeded issues to find).</li>
+          <li><strong>Accountant:</strong> <code>exercises/accountant/</code>, starting with the October bank reconciliation.</li>
         </ul>
 
         <h3>Steps</h3>
         <ol>
-          <li><strong>Run /architect.</strong> Either with a one-liner (<code>/architect &quot;Tasks REST API with auth&quot;</code>) or pointing at a written plan file (<code>/architect my-plan.md</code>).</li>
-          <li><strong>Wait for Phase 1 to finish.</strong> The AI produces <code>plans/sessions/*.md</code>, <code>plans/interface-contract.md</code>, and a self-audit. <strong>No code yet.</strong></li>
-          <li><strong>READ THE PLAN.</strong> Open <code>plans/sessions/session-overview.md</code> and the interface contract. Does the data model make sense? Are the phases in the right order? Is anything obvious missing?</li>
-          <li><strong>Approve or push back.</strong> Say &ldquo;approved&rdquo; (or specifically what to change). Only after approval will Phase 3 write code.</li>
-          <li><strong>Session 1.</strong> Run <code>/start-session</code>. State your goal (usually: &ldquo;make Phase 0 tests green&rdquo;). Use your persona&rsquo;s spokes (<code>/engineer-tasks</code> + <code>/engineer-implement</code>, or the equivalent). Stop when you have one working feature or you&rsquo;re out of time.</li>
-          <li><strong>Wrap.</strong> Run <code>/next-session</code>. Save the transition doc it outputs.</li>
-          <li><strong>Session 2.</strong> Run <code>/start-session</code> again. Paste the transition doc&rsquo;s &ldquo;Next step&rdquo; line as today&rsquo;s goal. Drive another feature.</li>
+          <li><strong>Run /architect.</strong> Point it at your exercise brief: <code>/architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md</code>. It runs in plan-extraction mode and writes everything into <code>workspaces/&lt;role&gt;/</code>.</li>
+          <li><strong>Wait for Phase 1 to finish.</strong> The AI produces <code>workspaces/&lt;role&gt;/plans/sessions/*.md</code>, <code>workspaces/&lt;role&gt;/plans/interface-contract.md</code>, and a self-audit. <strong>Nothing is built yet.</strong></li>
+          <li><strong>READ THE PLAN.</strong> Open <code>session-overview.md</code> and the interface contract. Does it cover everything in the brief? Are the phases in the right order? Is anything obvious missing?</li>
+          <li><strong>Approve or push back.</strong> Say &ldquo;approved&rdquo; (or specifically what to change). Only after approval will Phase 3 build the skeleton.</li>
+          <li><strong>Session 1.</strong> Run <code>/start-session &lt;role&gt;</code>. State your goal (usually the first unchecked task in the session file). Use your persona&rsquo;s spokes from Section 6 (engineer: <code>/engineer-tasks</code> + <code>/engineer-implement</code>; pm: <code>/pm-decompose</code> + <code>/pm-validate</code>; designer: <code>/designer-extract</code> + <code>/designer-compose</code>; data-scientist: <code>/ds-explore</code>; accountant: <code>/acct-reconcile</code>). Stop when one piece of work is done or you&rsquo;re out of time.</li>
+          <li><strong>Wrap.</strong> Run <code>/next-session</code>. It runs your persona&rsquo;s quality gate and writes the transition doc to <code>workspaces/&lt;role&gt;/plans/transitions/</code>.</li>
+          <li><strong>Session 2.</strong> Run <code>/start-session &lt;role&gt;</code> again. Use the transition doc&rsquo;s &ldquo;Next step&rdquo; line as today&rsquo;s goal. Finish the next piece.</li>
           <li><strong>Wrap again</strong> with <code>/next-session</code>.</li>
         </ol>
 
         <h3>Checkpoint</h3>
         <ul>
-          <li>✅ <code>ls plans/sessions/</code> shows session-overview.md + at least one session file</li>
-          <li>✅ <code>ls plans/interface-contract.md</code> exists</li>
-          <li>✅ At least one feature works end-to-end (test passes, endpoint returns 200, notebook runs, terraform plan succeeds &mdash; whatever &ldquo;works&rdquo; means in your shape)</li>
-          <li>✅ You have two transition docs from two <code>/next-session</code> calls</li>
+          <li><code>ls workspaces/&lt;role&gt;/plans/sessions/</code> shows session-overview.md + at least one session file</li>
+          <li><code>ls workspaces/&lt;role&gt;/plans/interface-contract.md</code> exists</li>
+          <li>One piece of work passes its check. Engineer: the exercise&rsquo;s Hurl tests pass against your server. PM: the PRD passes <code>/pm-validate</code> and the gap-detector. Designer: tokens validate and the component renders in Storybook. Data scientist: the notebook runs top to bottom on a fresh kernel. Accountant: the reconciliation ties out to the source files.</li>
+          <li>You have two transition docs in <code>workspaces/&lt;role&gt;/plans/transitions/</code></li>
         </ul>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Finished early?</div>
+          <p>Go to exercise 02 of your track, or add a second persona with <code>/set-persona add &lt;role&gt;</code> and try its exercise 01. Teams of mixed roles can start the capstone in <code>exercises/capstone/</code>.</p>
+        </div>
 
         <div class="callout callout-warning">
           <div class="callout-title">Common Lab 2 mistake</div>
@@ -667,10 +743,10 @@
 
         <h3>Steps</h3>
         <ol>
-          <li>Pick a repo from your real work. Anything with at least a few files of source code in one primary language.</li>
-          <li><code>cp -r /path/to/cursor-course-templates/.cursor .</code> into that repo. (Don&rsquo;t commit it yet &mdash; you may want to <code>.gitignore</code> the local config or move it to a branch.)</li>
+          <li>Pick a repo from your real work. Anything with at least a few files of source code in one primary language. PM, designer and accountant tracks without a code repo: use a folder of your own non-confidential documents (a PRD template, a token file, a workpaper layout), or spend this lab on exercise 02 of your track.</li>
+          <li>Copy the course&rsquo;s <code>.cursor/</code>, <code>personas/</code> and <code>stacks/</code> folders into that repo (the commands read all three). Don&rsquo;t commit them yet: you may want to <code>.gitignore</code> them or move them to a branch.</li>
           <li>Open the repo in Cursor: <code>cursor .</code>, then <kbd>Cmd</kbd>+<kbd>L</kbd> for chat.</li>
-          <li>Run <code>/set-persona</code>. Pick the persona that matches what you do in that repo.</li>
+          <li>Run <code>/set-persona add &lt;role&gt;</code> with the persona that matches what you do in that repo.</li>
           <li>Run <code>/detect-stack</code>. Let it scan. Read what it reports.</li>
           <li>Open the generated context file. Does it correctly identify your framework, your testing tool, your conventions? If not, edit it &mdash; the file is yours.</li>
           <li>Ask Cursor a question about your real code: &ldquo;What does <code>UserService.create</code> do?&rdquo; or &ldquo;Where are tests for the auth flow?&rdquo; Confirm the answers reference your actual files, not generic guesses.</li>
@@ -693,25 +769,25 @@
       <section id="undo">
         <h2>8. /undo &mdash; the safety valve</h2>
         <p>The pipeline writes files. Lots of files &mdash; rules, templates, manifests, context. If you want to switch personas, switch stacks, or just start over, you need a clean way to remove everything you installed.</p>
-        <p><code>/undo</code> reads the manifests that <code>/set-persona</code> and <code>/setup-stack</code> wrote and deletes exactly those files. Nothing more, nothing less.</p>
+        <p><code>/undo</code> reads the manifests that <code>/set-persona</code> and <code>/setup-stack</code> wrote for one role and deletes exactly those files. Nothing more, nothing less. Other roles stay installed, and your work in <code>workspaces/&lt;role&gt;/</code> is never deleted.</p>
 
         <figure>
-          <img src="diagrams/d08-undo-manifest-flow.svg" alt="Undo flow: /set-persona and /setup-stack each write a manifest; /undo reads the manifests and removes exactly those files">
+          <img src="diagrams/d08-undo-manifest-flow-v2.svg" alt="Undo flow: /set-persona and /setup-stack each write a per-role manifest; /undo reads the manifests and removes exactly those files, leaving other roles and workspaces in place">
         </figure>
 
         <h3>Three modes</h3>
         <table>
           <thead><tr><th>Command</th><th>Reverses&hellip;</th><th>Use when&hellip;</th></tr></thead>
           <tbody>
-            <tr><td><code>/undo persona</code></td><td>Persona pack install</td><td>You want to switch from engineer to data-scientist</td></tr>
-            <tr><td><code>/undo stack</code></td><td>Stack rules + templates install</td><td>You want to swap python-fastapi for go-gin</td></tr>
-            <tr><td><code>/undo all</code></td><td>Both</td><td>Start completely over</td></tr>
+            <tr><td><code>/undo persona &lt;role&gt;</code></td><td>That role&rsquo;s persona pack (and its stack first)</td><td>You no longer need that role in this repo</td></tr>
+            <tr><td><code>/undo stack &lt;role&gt;</code></td><td>That role&rsquo;s stack rules + templates</td><td>You want to swap stacks, e.g. <code>/undo stack engineer</code> to go from java-spring to go-gin</td></tr>
+            <tr><td><code>/undo all</code></td><td>Every stack, then every persona</td><td>Start completely over</td></tr>
           </tbody>
         </table>
 
         <div class="callout callout-info">
           <div class="callout-title">Why this matters</div>
-          <p>Without <code>/undo</code>, switching personas or stacks leaves stale files behind &mdash; old rules that contradict new ones, old commands that don&rsquo;t fit. Manifest-based undo means experimentation is safe. Try engineer + python-fastapi, then <code>/undo all</code> and try data-scientist + python-spark. No residue.</p>
+          <p>Without <code>/undo</code>, switching stacks leaves stale files behind: old rules that contradict new ones, old templates that don&rsquo;t fit. Manifest-based undo means experimentation is safe. You don&rsquo;t need it to try another role: <code>/set-persona add data-scientist</code> sits next to your engineer setup. Use <code>/undo stack engineer</code> to try another language, with no residue.</p>
         </div>
       </section>
 
@@ -727,7 +803,7 @@
           <tbody>
             <tr>
               <td>Pick a persona</td>
-              <td>Be explicit about <em>which job</em> you&rsquo;re doing right now. The same person can wear engineer hat in the morning, designer hat in the afternoon &mdash; but never both in one session. Switch with <code>/undo persona</code> + <code>/set-persona</code>.</td>
+              <td>Be explicit about <em>which job</em> you&rsquo;re doing right now. The same person can wear the engineer hat in the morning and the designer hat in the afternoon: add both with <code>/set-persona add</code>, but run one persona per session. Switch with <code>/next-session</code>, then <code>/start-session &lt;other-role&gt;</code>.</td>
             </tr>
             <tr>
               <td>Pick a stack (or detect one)</td>
@@ -747,14 +823,14 @@
             </tr>
             <tr>
               <td>Use <code>/undo</code> when things drift</td>
-              <td>If your config feels stale, don&rsquo;t debug it &mdash; reset it. <code>/undo all</code>, <code>/set-persona</code>, <code>/setup-stack</code>. Two minutes, clean slate.</td>
+              <td>If your config feels stale, don&rsquo;t debug it: reset it. <code>/undo all</code>, <code>/set-persona add &lt;role&gt;</code>, <code>/setup-stack &lt;role&gt;</code>. Two minutes, clean slate, and your workspaces are kept.</td>
             </tr>
           </tbody>
         </table>
 
         <div class="callout callout-tip">
           <div class="callout-title">First thing to do Monday</div>
-          <p>Pick one real repo at work. Copy <code>.cursor/</code> into it. Run <code>/set-persona</code> + <code>/detect-stack</code>. Ask Cursor one question about your actual code. If the answer is grounded in real files, you&rsquo;ve adopted the workflow. The rest follows from there.</p>
+          <p>Pick one real repo at work. Copy <code>.cursor/</code>, <code>personas/</code> and <code>stacks/</code> into it. Run <code>/set-persona add &lt;role&gt;</code> + <code>/detect-stack</code>. Ask Cursor one question about your actual code. If the answer is grounded in real files, you&rsquo;ve adopted the workflow. The rest follows from there.</p>
         </div>
       </section>
 

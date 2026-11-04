@@ -1,0 +1,49 @@
+account,name,type,normal_balance
+1010,Operating Cash,asset,debit
+1020,Operating Cash (NW-CA),asset,debit
+1050,Petty Cash,asset,debit
+1200,Accounts Receivable,asset,debit
+1310,Intercompany Receivable,asset,debit
+1400,Prepaid Expenses,asset,debit
+1500,Fixed Assets,asset,debit
+1510,Accumulated Depreciation,asset,credit
+1900,Suspense,asset,debit
+2010,Accounts Payable,liability,credit
+2100,Accrued Liabilities,liability,credit
+2150,Accrued Reimbursements,liability,credit
+2200,Payroll Liabilities,liability,credit
+2310,Intercompany Payable,liability,credit
+2400,Corporate Card Payable,liability,credit
+2500,Deferred Revenue,liability,credit
+3000,Common Stock,equity,credit
+3100,Retained Earnings,equity,credit
+3900,Opening Balance Equity,equity,credit
+4000,Subscription Revenue,revenue,credit
+4100,Services Revenue,revenue,credit
+4910,Interest Income,revenue,credit
+4990,FX Gain or Loss,revenue,credit
+6000,Salaries and Wages,expense,debit
+6010,Payroll Taxes,expense,debit
+6020,Employee Benefits,expense,debit
+6100,Meals,expense,debit
+6110,Lodging,expense,debit
+6120,Airfare,expense,debit
+6130,Ground Transport,expense,debit
+6140,Software Subscriptions,expense,debit
+6150,Office Supplies,expense,debit
+6160,Training,expense,debit
+6170,Client Entertainment,expense,debit
+6180,Conferences and Events,expense,debit
+6190,Other Travel and Expense (Uncategorized),expense,debit
+6200,Rent,expense,debit
+6210,Utilities,expense,debit
+6300,Professional Fees,expense,debit
+6310,Legal Fees,expense,debit
+6400,Marketing Programs,expense,debit
+6500,Depreciation,expense,debit
+6600,Bank and Merchant Fees,expense,debit
+6700,Hosting and Cloud,expense,debit
+6800,Insurance,expense,debit
+6900,Charitable Contributions,expense,debit
+6950,Penalties and Fines,expense,debit
+6990,Miscellaneous Expense,expense,debit

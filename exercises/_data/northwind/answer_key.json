@@ -1,0 +1,3638 @@
+{
+  "seed": 2026,
+  "expense_lines": {
+    "exact_duplicates": [
+      {
+        "original_line_id": "L-000112",
+        "duplicate_line_id": "L-000327",
+        "claim_id": "C-00137",
+        "employee_id": "E0015",
+        "merchant": "Stayline Hotels",
+        "expense_date": "2026-07-29",
+        "amount_cents": 15093,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-000121",
+        "duplicate_line_id": "L-002976",
+        "claim_id": "C-01271",
+        "employee_id": "E0086",
+        "merchant": "Deskworks",
+        "expense_date": "2026-07-21",
+        "amount_cents": 16062,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-000174",
+        "duplicate_line_id": "L-004340",
+        "claim_id": "C-01892",
+        "employee_id": "E0014",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-07-23",
+        "amount_cents": 23070,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-000354",
+        "duplicate_line_id": "L-001489",
+        "claim_id": "C-00656",
+        "employee_id": "E0097",
+        "merchant": "Swift Cab Co",
+        "expense_date": "2026-07-30",
+        "amount_cents": 1632,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-000360",
+        "duplicate_line_id": "L-002605",
+        "claim_id": "C-01108",
+        "employee_id": "E0083",
+        "merchant": "Diagramly",
+        "expense_date": "2026-07-31",
+        "amount_cents": 19484,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-000373",
+        "duplicate_line_id": "L-001018",
+        "claim_id": "C-00431",
+        "employee_id": "E0027",
+        "merchant": "ParkRight Garage",
+        "expense_date": "2026-07-28",
+        "amount_cents": 3345,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-000413",
+        "duplicate_line_id": "L-001313",
+        "claim_id": "C-00564",
+        "employee_id": "E0023",
+        "merchant": "ParkRight Garage",
+        "expense_date": "2026-07-28",
+        "amount_cents": 1735,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-000742",
+        "duplicate_line_id": "L-004234",
+        "claim_id": "C-01848",
+        "employee_id": "E0099",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-07-29",
+        "amount_cents": 20307,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-000818",
+        "duplicate_line_id": "L-002251",
+        "claim_id": "C-00961",
+        "employee_id": "E0003",
+        "merchant": "Bluejet Airways",
+        "expense_date": "2026-08-03",
+        "amount_cents": 47079,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-000943",
+        "duplicate_line_id": "L-000965",
+        "claim_id": "C-00406",
+        "employee_id": "E0005",
+        "merchant": "Skylark Air",
+        "expense_date": "2026-08-04",
+        "amount_cents": 30277,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-001035",
+        "duplicate_line_id": "L-003877",
+        "claim_id": "C-01679",
+        "employee_id": "E0009",
+        "merchant": "Skylark Air",
+        "expense_date": "2026-07-28",
+        "amount_cents": 73162,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-001049",
+        "duplicate_line_id": "L-003100",
+        "claim_id": "C-01323",
+        "employee_id": "E0066",
+        "merchant": "Deskworks",
+        "expense_date": "2026-08-05",
+        "amount_cents": 18084,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-001086",
+        "duplicate_line_id": "L-005323",
+        "claim_id": "C-02322",
+        "employee_id": "E0063",
+        "merchant": "CodeCamp Academy",
+        "expense_date": "2026-08-03",
+        "amount_cents": 218153,
+        "currency": "USD",
+        "category": "Training"
+      },
+      {
+        "original_line_id": "L-001101",
+        "duplicate_line_id": "L-001804",
+        "claim_id": "C-00787",
+        "employee_id": "E0052",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-08-07",
+        "amount_cents": 19317,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-001102",
+        "duplicate_line_id": "L-002243",
+        "claim_id": "C-00955",
+        "employee_id": "E0052",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-08-10",
+        "amount_cents": 23244,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-001318",
+        "duplicate_line_id": "L-005181",
+        "claim_id": "C-02252",
+        "employee_id": "E0027",
+        "merchant": "Paper & Pine Supply",
+        "expense_date": "2026-08-13",
+        "amount_cents": 14519,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-001400",
+        "duplicate_line_id": "L-001604",
+        "claim_id": "C-00698",
+        "employee_id": "E0120",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-08-10",
+        "amount_cents": 34521,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-001428",
+        "duplicate_line_id": "L-004223",
+        "claim_id": "C-01846",
+        "employee_id": "E0002",
+        "merchant": "Deskworks",
+        "expense_date": "2026-08-10",
+        "amount_cents": 20888,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-001750",
+        "duplicate_line_id": "L-004443",
+        "claim_id": "C-01937",
+        "employee_id": "E0105",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-08-07",
+        "amount_cents": 46544,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-001897",
+        "duplicate_line_id": "L-002961",
+        "claim_id": "C-01267",
+        "employee_id": "E0104",
+        "merchant": "Skyline Steakhouse",
+        "expense_date": "2026-08-07",
+        "amount_cents": 15813,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-002036",
+        "duplicate_line_id": "L-006310",
+        "claim_id": "C-02752",
+        "employee_id": "E0103",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-08-19",
+        "amount_cents": 36140,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-002047",
+        "duplicate_line_id": "L-002953",
+        "claim_id": "C-01263",
+        "employee_id": "E0078",
+        "merchant": "Diagramly",
+        "expense_date": "2026-08-07",
+        "amount_cents": 18620,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-002086",
+        "duplicate_line_id": "L-003190",
+        "claim_id": "C-01358",
+        "employee_id": "E0058",
+        "merchant": "Meridian Suites",
+        "expense_date": "2026-08-12",
+        "amount_cents": 28498,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-002200",
+        "duplicate_line_id": "L-002674",
+        "claim_id": "C-01138",
+        "employee_id": "E0086",
+        "merchant": "Bluejet Airways",
+        "expense_date": "2026-08-19",
+        "amount_cents": 64158,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-002226",
+        "duplicate_line_id": "L-002897",
+        "claim_id": "C-01240",
+        "employee_id": "E0091",
+        "merchant": "Northstar Airlines",
+        "expense_date": "2026-08-17",
+        "amount_cents": 80122,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-002382",
+        "duplicate_line_id": "L-007251",
+        "claim_id": "C-03148",
+        "employee_id": "E0090",
+        "merchant": "Stayline Hotels",
+        "expense_date": "2026-08-19",
+        "amount_cents": 17102,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-002436",
+        "duplicate_line_id": "L-005367",
+        "claim_id": "C-02347",
+        "employee_id": "E0097",
+        "merchant": "Swift Cab Co",
+        "expense_date": "2026-08-13",
+        "amount_cents": 4622,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-002650",
+        "duplicate_line_id": "L-004325",
+        "claim_id": "C-01886",
+        "employee_id": "E0021",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-08-17",
+        "amount_cents": 9008,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-002671",
+        "duplicate_line_id": "L-005255",
+        "claim_id": "C-02286",
+        "employee_id": "E0086",
+        "merchant": "Metro Transit",
+        "expense_date": "2026-08-17",
+        "amount_cents": 881,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-002701",
+        "duplicate_line_id": "L-004028",
+        "claim_id": "C-01753",
+        "employee_id": "E0082",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-08-10",
+        "amount_cents": 27856,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-002751",
+        "duplicate_line_id": "L-006614",
+        "claim_id": "C-02872",
+        "employee_id": "E0082",
+        "merchant": "Parkway Inn",
+        "expense_date": "2026-08-26",
+        "amount_cents": 16339,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-002844",
+        "duplicate_line_id": "L-006551",
+        "claim_id": "C-02851",
+        "employee_id": "E0001",
+        "merchant": "Stayline Hotels",
+        "expense_date": "2026-08-18",
+        "amount_cents": 18093,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-002986",
+        "duplicate_line_id": "L-003272",
+        "claim_id": "C-01394",
+        "employee_id": "E0078",
+        "merchant": "Parkway Inn",
+        "expense_date": "2026-08-27",
+        "amount_cents": 20259,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-003035",
+        "duplicate_line_id": "L-004284",
+        "claim_id": "C-01866",
+        "employee_id": "E0001",
+        "merchant": "ParkRight Garage",
+        "expense_date": "2026-08-27",
+        "amount_cents": 3412,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-003158",
+        "duplicate_line_id": "L-004421",
+        "claim_id": "C-01927",
+        "employee_id": "E0093",
+        "merchant": "Roadrunner Car Rental",
+        "expense_date": "2026-08-25",
+        "amount_cents": 9624,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-003262",
+        "duplicate_line_id": "L-006084",
+        "claim_id": "C-02654",
+        "employee_id": "E0055",
+        "merchant": "Diagramly",
+        "expense_date": "2026-08-24",
+        "amount_cents": 26595,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-003263",
+        "duplicate_line_id": "L-006838",
+        "claim_id": "C-02984",
+        "employee_id": "E0039",
+        "merchant": "Skylark Air",
+        "expense_date": "2026-08-27",
+        "amount_cents": 70004,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-003414",
+        "duplicate_line_id": "L-007324",
+        "claim_id": "C-03183",
+        "employee_id": "E0087",
+        "merchant": "Bluejet Airways",
+        "expense_date": "2026-08-27",
+        "amount_cents": 33570,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-003518",
+        "duplicate_line_id": "L-007100",
+        "claim_id": "C-03092",
+        "employee_id": "E0012",
+        "merchant": "Parkway Inn",
+        "expense_date": "2026-08-27",
+        "amount_cents": 18450,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-003595",
+        "duplicate_line_id": "L-004088",
+        "claim_id": "C-01779",
+        "employee_id": "E0030",
+        "merchant": "Roadrunner Car Rental",
+        "expense_date": "2026-08-28",
+        "amount_cents": 13757,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-003632",
+        "duplicate_line_id": "L-004723",
+        "claim_id": "C-02055",
+        "employee_id": "E0014",
+        "merchant": "Metro Transit",
+        "expense_date": "2026-09-01",
+        "amount_cents": 883,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-003677",
+        "duplicate_line_id": "L-007210",
+        "claim_id": "C-03129",
+        "employee_id": "E0035",
+        "merchant": "Parkway Inn",
+        "expense_date": "2026-08-27",
+        "amount_cents": 15927,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-003706",
+        "duplicate_line_id": "L-006694",
+        "claim_id": "C-02906",
+        "employee_id": "E0008",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-08-31",
+        "amount_cents": 26755,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-003746",
+        "duplicate_line_id": "L-006630",
+        "claim_id": "C-02881",
+        "employee_id": "E0009",
+        "merchant": "Swift Cab Co",
+        "expense_date": "2026-09-01",
+        "amount_cents": 5112,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-003751",
+        "duplicate_line_id": "L-008911",
+        "claim_id": "C-03882",
+        "employee_id": "E0085",
+        "merchant": "Pixelforge",
+        "expense_date": "2026-09-04",
+        "amount_cents": 29459,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-003769",
+        "duplicate_line_id": "L-005523",
+        "claim_id": "C-02422",
+        "employee_id": "E0018",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-08-28",
+        "amount_cents": 29074,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-004180",
+        "duplicate_line_id": "L-004863",
+        "claim_id": "C-02121",
+        "employee_id": "E0043",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-08-31",
+        "amount_cents": 10809,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-004193",
+        "duplicate_line_id": "L-004344",
+        "claim_id": "C-01894",
+        "employee_id": "E0027",
+        "merchant": "Summit Learning",
+        "expense_date": "2026-09-07",
+        "amount_cents": 202808,
+        "currency": "USD",
+        "category": "Training"
+      },
+      {
+        "original_line_id": "L-004196",
+        "duplicate_line_id": "L-006170",
+        "claim_id": "C-02690",
+        "employee_id": "E0098",
+        "merchant": "Northstar Airlines",
+        "expense_date": "2026-09-01",
+        "amount_cents": 32357,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-004631",
+        "duplicate_line_id": "L-009083",
+        "claim_id": "C-03958",
+        "employee_id": "E0078",
+        "merchant": "Pixelforge",
+        "expense_date": "2026-09-08",
+        "amount_cents": 11677,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-004646",
+        "duplicate_line_id": "L-007151",
+        "claim_id": "C-03113",
+        "employee_id": "E0013",
+        "merchant": "Northstar Airlines",
+        "expense_date": "2026-09-07",
+        "amount_cents": 80782,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-004739",
+        "duplicate_line_id": "L-006733",
+        "claim_id": "C-02926",
+        "employee_id": "E0098",
+        "merchant": "Rideo",
+        "expense_date": "2026-09-16",
+        "amount_cents": 2470,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-004740",
+        "duplicate_line_id": "L-005946",
+        "claim_id": "C-02593",
+        "employee_id": "E0099",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-08-28",
+        "amount_cents": 4386,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-004743",
+        "duplicate_line_id": "L-006439",
+        "claim_id": "C-02807",
+        "employee_id": "E0005",
+        "merchant": "Meridian Suites",
+        "expense_date": "2026-09-08",
+        "amount_cents": 24115,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-004793",
+        "duplicate_line_id": "L-008958",
+        "claim_id": "C-03905",
+        "employee_id": "E0030",
+        "merchant": "Parkway Inn",
+        "expense_date": "2026-09-15",
+        "amount_cents": 26811,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-004817",
+        "duplicate_line_id": "L-007810",
+        "claim_id": "C-03401",
+        "employee_id": "E0028",
+        "merchant": "Rideo",
+        "expense_date": "2026-09-11",
+        "amount_cents": 3266,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-005034",
+        "duplicate_line_id": "L-007083",
+        "claim_id": "C-03087",
+        "employee_id": "E0077",
+        "merchant": "Meridian Suites",
+        "expense_date": "2026-09-15",
+        "amount_cents": 15450,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-005193",
+        "duplicate_line_id": "L-007045",
+        "claim_id": "C-03068",
+        "employee_id": "E0102",
+        "merchant": "Roadrunner Car Rental",
+        "expense_date": "2026-09-16",
+        "amount_cents": 12678,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-005232",
+        "duplicate_line_id": "L-006749",
+        "claim_id": "C-02932",
+        "employee_id": "E0003",
+        "merchant": "Roadrunner Car Rental",
+        "expense_date": "2026-09-14",
+        "amount_cents": 11066,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-005234",
+        "duplicate_line_id": "L-006899",
+        "claim_id": "C-03009",
+        "employee_id": "E0011",
+        "merchant": "Summit Learning",
+        "expense_date": "2026-09-02",
+        "amount_cents": 98538,
+        "currency": "USD",
+        "category": "Training"
+      },
+      {
+        "original_line_id": "L-005384",
+        "duplicate_line_id": "L-007914",
+        "claim_id": "C-03442",
+        "employee_id": "E0040",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-09-17",
+        "amount_cents": 38286,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-005459",
+        "duplicate_line_id": "L-007379",
+        "claim_id": "C-03206",
+        "employee_id": "E0081",
+        "merchant": "Paper & Pine Supply",
+        "expense_date": "2026-09-22",
+        "amount_cents": 21381,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-005493",
+        "duplicate_line_id": "L-008872",
+        "claim_id": "C-03865",
+        "employee_id": "E0086",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-09-18",
+        "amount_cents": 22605,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-005694",
+        "duplicate_line_id": "L-005763",
+        "claim_id": "C-02517",
+        "employee_id": "E0094",
+        "merchant": "Skylark Air",
+        "expense_date": "2026-09-22",
+        "amount_cents": 59864,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-005716",
+        "duplicate_line_id": "L-007830",
+        "claim_id": "C-03409",
+        "employee_id": "E0089",
+        "merchant": "Deskworks",
+        "expense_date": "2026-09-17",
+        "amount_cents": 2917,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-005799",
+        "duplicate_line_id": "L-006193",
+        "claim_id": "C-02704",
+        "employee_id": "E0085",
+        "merchant": "Bluejet Airways",
+        "expense_date": "2026-09-21",
+        "amount_cents": 86134,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-005865",
+        "duplicate_line_id": "L-007939",
+        "claim_id": "C-03452",
+        "employee_id": "E0004",
+        "merchant": "Swift Cab Co",
+        "expense_date": "2026-09-21",
+        "amount_cents": 2820,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-005896",
+        "duplicate_line_id": "L-007647",
+        "claim_id": "C-03333",
+        "employee_id": "E0118",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-09-29",
+        "amount_cents": 8207,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-005935",
+        "duplicate_line_id": "L-008988",
+        "claim_id": "C-03922",
+        "employee_id": "E0025",
+        "merchant": "Summit Learning",
+        "expense_date": "2026-09-10",
+        "amount_cents": 146803,
+        "currency": "USD",
+        "category": "Training"
+      },
+      {
+        "original_line_id": "L-006000",
+        "duplicate_line_id": "L-007539",
+        "claim_id": "C-03284",
+        "employee_id": "E0008",
+        "merchant": "Rideo",
+        "expense_date": "2026-09-25",
+        "amount_cents": 4196,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-006104",
+        "duplicate_line_id": "L-006618",
+        "claim_id": "C-02873",
+        "employee_id": "E0043",
+        "merchant": "Swift Cab Co",
+        "expense_date": "2026-09-29",
+        "amount_cents": 1549,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-006128",
+        "duplicate_line_id": "L-008827",
+        "claim_id": "C-03847",
+        "employee_id": "E0075",
+        "merchant": "Meridian Suites",
+        "expense_date": "2026-09-24",
+        "amount_cents": 27548,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-006145",
+        "duplicate_line_id": "L-006701",
+        "claim_id": "C-02910",
+        "employee_id": "E0022",
+        "merchant": "Stayline Hotels",
+        "expense_date": "2026-09-22",
+        "amount_cents": 24417,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-006187",
+        "duplicate_line_id": "L-007705",
+        "claim_id": "C-03358",
+        "employee_id": "E0033",
+        "merchant": "Deskworks",
+        "expense_date": "2026-09-25",
+        "amount_cents": 19152,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-006540",
+        "duplicate_line_id": "L-007338",
+        "claim_id": "C-03190",
+        "employee_id": "E0020",
+        "merchant": "Notably",
+        "expense_date": "2026-09-29",
+        "amount_cents": 13357,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-006545",
+        "duplicate_line_id": "L-007752",
+        "claim_id": "C-03381",
+        "employee_id": "E0089",
+        "merchant": "Swift Cab Co",
+        "expense_date": "2026-09-28",
+        "amount_cents": 2159,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-006611",
+        "duplicate_line_id": "L-009003",
+        "claim_id": "C-03928",
+        "employee_id": "E0090",
+        "merchant": "Diagramly",
+        "expense_date": "2026-10-05",
+        "amount_cents": 5247,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "original_line_id": "L-006670",
+        "duplicate_line_id": "L-008121",
+        "claim_id": "C-03534",
+        "employee_id": "E0001",
+        "merchant": "ParkRight Garage",
+        "expense_date": "2026-09-29",
+        "amount_cents": 3903,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-006715",
+        "duplicate_line_id": "L-007886",
+        "claim_id": "C-03432",
+        "employee_id": "E0008",
+        "merchant": "Deskworks",
+        "expense_date": "2026-09-25",
+        "amount_cents": 17442,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-006782",
+        "duplicate_line_id": "L-006916",
+        "claim_id": "C-03015",
+        "employee_id": "E0081",
+        "merchant": "Parkway Inn",
+        "expense_date": "2026-10-05",
+        "amount_cents": 15654,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-007013",
+        "duplicate_line_id": "L-008377",
+        "claim_id": "C-03646",
+        "employee_id": "E0057",
+        "merchant": "Skylark Air",
+        "expense_date": "2026-10-05",
+        "amount_cents": 27081,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-007036",
+        "duplicate_line_id": "L-007040",
+        "claim_id": "C-03064",
+        "employee_id": "E0008",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-10-02",
+        "amount_cents": 12134,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "original_line_id": "L-007054",
+        "duplicate_line_id": "L-008927",
+        "claim_id": "C-03890",
+        "employee_id": "E0003",
+        "merchant": "Rideo",
+        "expense_date": "2026-10-05",
+        "amount_cents": 2535,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-008058",
+        "duplicate_line_id": "L-008464",
+        "claim_id": "C-03688",
+        "employee_id": "E0026",
+        "merchant": "Deskworks",
+        "expense_date": "2026-10-20",
+        "amount_cents": 21639,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-008140",
+        "duplicate_line_id": "L-008870",
+        "claim_id": "C-03864",
+        "employee_id": "E0023",
+        "merchant": "Roadrunner Car Rental",
+        "expense_date": "2026-10-06",
+        "amount_cents": 11777,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-008267",
+        "duplicate_line_id": "L-008931",
+        "claim_id": "C-03892",
+        "employee_id": "E0018",
+        "merchant": "Bluejet Airways",
+        "expense_date": "2026-10-13",
+        "amount_cents": 68830,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "original_line_id": "L-008417",
+        "duplicate_line_id": "L-008834",
+        "claim_id": "C-03850",
+        "employee_id": "E0016",
+        "merchant": "Paper & Pine Supply",
+        "expense_date": "2026-10-13",
+        "amount_cents": 3544,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "original_line_id": "L-008493",
+        "duplicate_line_id": "L-008567",
+        "claim_id": "C-03734",
+        "employee_id": "E0033",
+        "merchant": "Roadrunner Car Rental",
+        "expense_date": "2026-10-19",
+        "amount_cents": 8135,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "original_line_id": "L-008531",
+        "duplicate_line_id": "L-008618",
+        "claim_id": "C-03755",
+        "employee_id": "E0015",
+        "merchant": "Parkway Inn",
+        "expense_date": "2026-10-21",
+        "amount_cents": 28700,
+        "currency": "USD",
+        "category": "Lodging"
+      },
+      {
+        "original_line_id": "L-008854",
+        "duplicate_line_id": "L-009016",
+        "claim_id": "C-03932",
+        "employee_id": "E0006",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-10-16",
+        "amount_cents": 16532,
+        "currency": "USD",
+        "category": "Client entertainment"
+      }
+    ],
+    "near_duplicates": [
+      {
+        "line_id_a": "L-000107",
+        "line_id_b": "L-002374",
+        "kind": "date_1_day",
+        "employee_id": "E0074",
+        "merchant": "ParkRight Garage",
+        "date_a": "2026-07-17",
+        "date_b": "2026-07-16",
+        "amount_a": 2747,
+        "amount_b": 2747
+      },
+      {
+        "line_id_a": "L-000138",
+        "line_id_b": "L-001535",
+        "kind": "amount_1_cent",
+        "employee_id": "E0056",
+        "merchant": "Rideo",
+        "date_a": "2026-07-27",
+        "date_b": "2026-07-27",
+        "amount_a": 2088,
+        "amount_b": 2089
+      },
+      {
+        "line_id_a": "L-000297",
+        "line_id_b": "L-000954",
+        "kind": "date_1_day",
+        "employee_id": "E0086",
+        "merchant": "Swift Cab Co",
+        "date_a": "2026-07-27",
+        "date_b": "2026-07-28",
+        "amount_a": 4520,
+        "amount_b": 4520
+      },
+      {
+        "line_id_a": "L-000465",
+        "line_id_b": "L-004067",
+        "kind": "amount_1_cent",
+        "employee_id": "E0047",
+        "merchant": "Riverside Grill",
+        "date_a": "2026-07-24",
+        "date_b": "2026-07-24",
+        "amount_a": 16966,
+        "amount_b": 16965
+      },
+      {
+        "line_id_a": "L-000722",
+        "line_id_b": "L-001596",
+        "kind": "amount_1_cent",
+        "employee_id": "E0046",
+        "merchant": "Skyline Steakhouse",
+        "date_a": "2026-07-24",
+        "date_b": "2026-07-24",
+        "amount_a": 51692,
+        "amount_b": 51691
+      },
+      {
+        "line_id_a": "L-000783",
+        "line_id_b": "L-004572",
+        "kind": "amount_1_cent",
+        "employee_id": "E0006",
+        "merchant": "Skyline Steakhouse",
+        "date_a": "2026-07-22",
+        "date_b": "2026-07-22",
+        "amount_a": 39305,
+        "amount_b": 39304
+      },
+      {
+        "line_id_a": "L-000809",
+        "line_id_b": "L-003536",
+        "kind": "date_1_day",
+        "employee_id": "E0083",
+        "merchant": "Pixelforge",
+        "date_a": "2026-07-27",
+        "date_b": "2026-07-28",
+        "amount_a": 19337,
+        "amount_b": 19337
+      },
+      {
+        "line_id_a": "L-000888",
+        "line_id_b": "L-001869",
+        "kind": "amount_1_cent",
+        "employee_id": "E0007",
+        "merchant": "Summit Learning",
+        "date_a": "2026-07-24",
+        "date_b": "2026-07-24",
+        "amount_a": 66246,
+        "amount_b": 66247
+      },
+      {
+        "line_id_a": "L-000937",
+        "line_id_b": "L-001181",
+        "kind": "amount_1_cent",
+        "employee_id": "E0107",
+        "merchant": "Meridian Suites",
+        "date_a": "2026-08-04",
+        "date_b": "2026-08-04",
+        "amount_a": 24489,
+        "amount_b": 24488
+      },
+      {
+        "line_id_a": "L-001115",
+        "line_id_b": "L-005156",
+        "kind": "amount_1_cent",
+        "employee_id": "E0029",
+        "merchant": "ProCert Institute",
+        "date_a": "2026-07-31",
+        "date_b": "2026-07-31",
+        "amount_a": 85420,
+        "amount_b": 85421
+      },
+      {
+        "line_id_a": "L-001603",
+        "line_id_b": "L-005879",
+        "kind": "amount_1_cent",
+        "employee_id": "E0120",
+        "merchant": "Paper & Pine Supply",
+        "date_a": "2026-08-07",
+        "date_b": "2026-08-07",
+        "amount_a": 16146,
+        "amount_b": 16147
+      },
+      {
+        "line_id_a": "L-001829",
+        "line_id_b": "L-002768",
+        "kind": "date_1_day",
+        "employee_id": "E0116",
+        "merchant": "Northstar Airlines",
+        "date_a": "2026-08-13",
+        "date_b": "2026-08-14",
+        "amount_a": 24881,
+        "amount_b": 24881
+      },
+      {
+        "line_id_a": "L-001837",
+        "line_id_b": "L-003742",
+        "kind": "date_1_day",
+        "employee_id": "E0008",
+        "merchant": "Northstar Airlines",
+        "date_a": "2026-08-17",
+        "date_b": "2026-08-18",
+        "amount_a": 68036,
+        "amount_b": 68036
+      },
+      {
+        "line_id_a": "L-001854",
+        "line_id_b": "L-003863",
+        "kind": "amount_1_cent",
+        "employee_id": "E0030",
+        "merchant": "Riverside Grill",
+        "date_a": "2026-07-31",
+        "date_b": "2026-07-31",
+        "amount_a": 32961,
+        "amount_b": 32962
+      },
+      {
+        "line_id_a": "L-001886",
+        "line_id_b": "L-003348",
+        "kind": "date_1_day",
+        "employee_id": "E0055",
+        "merchant": "Northstar Airlines",
+        "date_a": "2026-08-10",
+        "date_b": "2026-08-11",
+        "amount_a": 74403,
+        "amount_b": 74403
+      },
+      {
+        "line_id_a": "L-002630",
+        "line_id_b": "L-003826",
+        "kind": "date_1_day",
+        "employee_id": "E0051",
+        "merchant": "Deskworks",
+        "date_a": "2026-08-20",
+        "date_b": "2026-08-21",
+        "amount_a": 4138,
+        "amount_b": 4138
+      },
+      {
+        "line_id_a": "L-002665",
+        "line_id_b": "L-006251",
+        "kind": "date_1_day",
+        "employee_id": "E0080",
+        "merchant": "Bluejet Airways",
+        "date_a": "2026-08-24",
+        "date_b": "2026-08-25",
+        "amount_a": 87531,
+        "amount_b": 87531
+      },
+      {
+        "line_id_a": "L-002699",
+        "line_id_b": "L-004319",
+        "kind": "date_1_day",
+        "employee_id": "E0001",
+        "merchant": "Deskworks",
+        "date_a": "2026-08-11",
+        "date_b": "2026-08-12",
+        "amount_a": 23656,
+        "amount_b": 23656
+      },
+      {
+        "line_id_a": "L-002801",
+        "line_id_b": "L-005775",
+        "kind": "date_1_day",
+        "employee_id": "E0017",
+        "merchant": "Deskworks",
+        "date_a": "2026-08-20",
+        "date_b": "2026-08-21",
+        "amount_a": 5855,
+        "amount_b": 5855
+      },
+      {
+        "line_id_a": "L-003261",
+        "line_id_b": "L-003352",
+        "kind": "date_1_day",
+        "employee_id": "E0022",
+        "merchant": "Boxmart Marketplace",
+        "date_a": "2026-08-17",
+        "date_b": "2026-08-18",
+        "amount_a": 24732,
+        "amount_b": 24732
+      },
+      {
+        "line_id_a": "L-003578",
+        "line_id_b": "L-004292",
+        "kind": "date_1_day",
+        "employee_id": "E0097",
+        "merchant": "CodeCamp Academy",
+        "date_a": "2026-08-20",
+        "date_b": "2026-08-21",
+        "amount_a": 118837,
+        "amount_b": 118837
+      },
+      {
+        "line_id_a": "L-003679",
+        "line_id_b": "L-005983",
+        "kind": "amount_1_cent",
+        "employee_id": "E0020",
+        "merchant": "Stayline Hotels",
+        "date_a": "2026-08-26",
+        "date_b": "2026-08-26",
+        "amount_a": 21523,
+        "amount_b": 21522
+      },
+      {
+        "line_id_a": "L-004150",
+        "line_id_b": "L-007270",
+        "kind": "amount_1_cent",
+        "employee_id": "E0117",
+        "merchant": "Meridian Suites",
+        "date_a": "2026-08-31",
+        "date_b": "2026-08-31",
+        "amount_a": 17265,
+        "amount_b": 17266
+      },
+      {
+        "line_id_a": "L-004179",
+        "line_id_b": "L-007842",
+        "kind": "date_1_day",
+        "employee_id": "E0086",
+        "merchant": "Skyline Steakhouse",
+        "date_a": "2026-09-04",
+        "date_b": "2026-09-03",
+        "amount_a": 10950,
+        "amount_b": 10950
+      },
+      {
+        "line_id_a": "L-004200",
+        "line_id_b": "L-006732",
+        "kind": "amount_1_cent",
+        "employee_id": "E0098",
+        "merchant": "Metro Transit",
+        "date_a": "2026-09-02",
+        "date_b": "2026-09-02",
+        "amount_a": 275,
+        "amount_b": 276
+      },
+      {
+        "line_id_a": "L-004320",
+        "line_id_b": "L-008844",
+        "kind": "amount_1_cent",
+        "employee_id": "E0001",
+        "merchant": "Pixelforge",
+        "date_a": "2026-09-09",
+        "date_b": "2026-09-09",
+        "amount_a": 18059,
+        "amount_b": 18060
+      },
+      {
+        "line_id_a": "L-004328",
+        "line_id_b": "L-005754",
+        "kind": "date_1_day",
+        "employee_id": "E0055",
+        "merchant": "Boxmart Marketplace",
+        "date_a": "2026-09-02",
+        "date_b": "2026-09-03",
+        "amount_a": 24479,
+        "amount_b": 24479
+      },
+      {
+        "line_id_a": "L-004562",
+        "line_id_b": "L-007033",
+        "kind": "amount_1_cent",
+        "employee_id": "E0012",
+        "merchant": "Northstar Airlines",
+        "date_a": "2026-09-14",
+        "date_b": "2026-09-14",
+        "amount_a": 41280,
+        "amount_b": 41281
+      },
+      {
+        "line_id_a": "L-004776",
+        "line_id_b": "L-005248",
+        "kind": "date_1_day",
+        "employee_id": "E0081",
+        "merchant": "Roadrunner Car Rental",
+        "date_a": "2026-09-07",
+        "date_b": "2026-09-08",
+        "amount_a": 8543,
+        "amount_b": 8543
+      },
+      {
+        "line_id_a": "L-004927",
+        "line_id_b": "L-008935",
+        "kind": "amount_1_cent",
+        "employee_id": "E0053",
+        "merchant": "Paper & Pine Supply",
+        "date_a": "2026-09-11",
+        "date_b": "2026-09-11",
+        "amount_a": 3244,
+        "amount_b": 3245
+      },
+      {
+        "line_id_a": "L-005436",
+        "line_id_b": "L-007912",
+        "kind": "amount_1_cent",
+        "employee_id": "E0006",
+        "merchant": "Riverside Grill",
+        "date_a": "2026-09-14",
+        "date_b": "2026-09-14",
+        "amount_a": 61550,
+        "amount_b": 61549
+      },
+      {
+        "line_id_a": "L-005610",
+        "line_id_b": "L-005890",
+        "kind": "date_1_day",
+        "employee_id": "E0087",
+        "merchant": "Riverside Grill",
+        "date_a": "2026-09-21",
+        "date_b": "2026-09-22",
+        "amount_a": 25425,
+        "amount_b": 25425
+      },
+      {
+        "line_id_a": "L-005758",
+        "line_id_b": "L-006490",
+        "kind": "date_1_day",
+        "employee_id": "E0094",
+        "merchant": "Bluejet Airways",
+        "date_a": "2026-09-21",
+        "date_b": "2026-09-22",
+        "amount_a": 39651,
+        "amount_b": 39651
+      },
+      {
+        "line_id_a": "L-005981",
+        "line_id_b": "L-008932",
+        "kind": "date_1_day",
+        "employee_id": "E0053",
+        "merchant": "Diagramly",
+        "date_a": "2026-09-24",
+        "date_b": "2026-09-25",
+        "amount_a": 5560,
+        "amount_b": 5560
+      },
+      {
+        "line_id_a": "L-006259",
+        "line_id_b": "L-007057",
+        "kind": "date_1_day",
+        "employee_id": "E0034",
+        "merchant": "Stayline Hotels",
+        "date_a": "2026-09-30",
+        "date_b": "2026-10-01",
+        "amount_a": 15154,
+        "amount_b": 15154
+      },
+      {
+        "line_id_a": "L-006447",
+        "line_id_b": "L-008540",
+        "kind": "amount_1_cent",
+        "employee_id": "E0090",
+        "merchant": "Deskworks",
+        "date_a": "2026-09-21",
+        "date_b": "2026-09-21",
+        "amount_a": 1469,
+        "amount_b": 1470
+      },
+      {
+        "line_id_a": "L-006707",
+        "line_id_b": "L-009135",
+        "kind": "date_1_day",
+        "employee_id": "E0102",
+        "merchant": "Northstar Airlines",
+        "date_a": "2026-10-01",
+        "date_b": "2026-10-02",
+        "amount_a": 41373,
+        "amount_b": 41373
+      },
+      {
+        "line_id_a": "L-006950",
+        "line_id_b": "L-008969",
+        "kind": "amount_1_cent",
+        "employee_id": "E0096",
+        "merchant": "Pixelforge",
+        "date_a": "2026-10-08",
+        "date_b": "2026-10-08",
+        "amount_a": 3743,
+        "amount_b": 3744
+      },
+      {
+        "line_id_a": "L-007023",
+        "line_id_b": "L-007050",
+        "kind": "amount_1_cent",
+        "employee_id": "E0030",
+        "merchant": "Bluejet Airways",
+        "date_a": "2026-10-07",
+        "date_b": "2026-10-07",
+        "amount_a": 31233,
+        "amount_b": 31234
+      },
+      {
+        "line_id_a": "L-007174",
+        "line_id_b": "L-008079",
+        "kind": "amount_1_cent",
+        "employee_id": "E0067",
+        "merchant": "Skylark Air",
+        "date_a": "2026-10-06",
+        "date_b": "2026-10-06",
+        "amount_a": 23756,
+        "amount_b": 23757
+      },
+      {
+        "line_id_a": "L-007256",
+        "line_id_b": "L-008833",
+        "kind": "amount_1_cent",
+        "employee_id": "E0016",
+        "merchant": "Stayline Hotels",
+        "date_a": "2026-09-28",
+        "date_b": "2026-09-28",
+        "amount_a": 20277,
+        "amount_b": 20278
+      },
+      {
+        "line_id_a": "L-007691",
+        "line_id_b": "L-007915",
+        "kind": "amount_1_cent",
+        "employee_id": "E0040",
+        "merchant": "Skylark Air",
+        "date_a": "2026-10-05",
+        "date_b": "2026-10-05",
+        "amount_a": 57136,
+        "amount_b": 57135
+      },
+      {
+        "line_id_a": "L-008208",
+        "line_id_b": "L-008246",
+        "kind": "date_1_day",
+        "employee_id": "E0007",
+        "merchant": "Metro Transit",
+        "date_a": "2026-10-13",
+        "date_b": "2026-10-14",
+        "amount_a": 983,
+        "amount_b": 983
+      },
+      {
+        "line_id_a": "L-008382",
+        "line_id_b": "L-008727",
+        "kind": "amount_1_cent",
+        "employee_id": "E0026",
+        "merchant": "Stayline Hotels",
+        "date_a": "2026-10-19",
+        "date_b": "2026-10-19",
+        "amount_a": 22958,
+        "amount_b": 22957
+      },
+      {
+        "line_id_a": "L-008978",
+        "line_id_b": "L-009160",
+        "kind": "date_1_day",
+        "employee_id": "E0091",
+        "merchant": "Riverside Grill",
+        "date_a": "2026-10-21",
+        "date_b": "2026-10-22",
+        "amount_a": 25896,
+        "amount_b": 25896
+      }
+    ],
+    "split_under_receipt_threshold": [
+      {
+        "line_ids": [
+          "L-000213",
+          "L-000553",
+          "L-000554"
+        ],
+        "employee_id": "E0013",
+        "merchant": "Paper & Pine Supply",
+        "expense_date": "2026-07-31",
+        "claim_ids": [
+          "C-00091",
+          "C-00241"
+        ],
+        "amounts_cents": [
+          7033,
+          7314,
+          7215
+        ],
+        "total_cents": 21562
+      },
+      {
+        "line_ids": [
+          "L-000222",
+          "L-000512"
+        ],
+        "employee_id": "E0003",
+        "merchant": "Pixelforge",
+        "expense_date": "2026-07-31",
+        "claim_ids": [
+          "C-00096",
+          "C-00224"
+        ],
+        "amounts_cents": [
+          7479,
+          7240
+        ],
+        "total_cents": 14719
+      },
+      {
+        "line_ids": [
+          "L-000580",
+          "L-002258"
+        ],
+        "employee_id": "E0088",
+        "merchant": "Paper & Pine Supply",
+        "expense_date": "2026-08-04",
+        "claim_ids": [
+          "C-00251",
+          "C-00964"
+        ],
+        "amounts_cents": [
+          7318,
+          7083
+        ],
+        "total_cents": 14401
+      },
+      {
+        "line_ids": [
+          "L-000694",
+          "L-001099",
+          "L-001100"
+        ],
+        "employee_id": "E0052",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-08-06",
+        "claim_ids": [
+          "C-00298",
+          "C-00466"
+        ],
+        "amounts_cents": [
+          7467,
+          7142,
+          7070
+        ],
+        "total_cents": 21679
+      },
+      {
+        "line_ids": [
+          "L-000914",
+          "L-001272"
+        ],
+        "employee_id": "E0062",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-08-07",
+        "claim_ids": [
+          "C-00385",
+          "C-00546"
+        ],
+        "amounts_cents": [
+          7403,
+          7025
+        ],
+        "total_cents": 14428
+      },
+      {
+        "line_ids": [
+          "L-001748",
+          "L-003696",
+          "L-003697"
+        ],
+        "employee_id": "E0095",
+        "merchant": "Pixelforge",
+        "expense_date": "2026-08-17",
+        "claim_ids": [
+          "C-00764",
+          "C-01599"
+        ],
+        "amounts_cents": [
+          7186,
+          7314,
+          7078
+        ],
+        "total_cents": 21578
+      }
+    ],
+    "weekend_expenses": [
+      {
+        "line_id": "L-000022",
+        "claim_id": "C-00009",
+        "employee_id": "E0097",
+        "merchant": "Pixelforge",
+        "expense_date": "2026-07-04",
+        "amount_cents": 7920,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-000408",
+        "claim_id": "C-00178",
+        "employee_id": "E0101",
+        "merchant": "Deskworks",
+        "expense_date": "2026-07-19",
+        "amount_cents": 6028,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "line_id": "L-000696",
+        "claim_id": "C-00300",
+        "employee_id": "E0100",
+        "merchant": "Deskworks",
+        "expense_date": "2026-07-26",
+        "amount_cents": 3347,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "line_id": "L-001008",
+        "claim_id": "C-00425",
+        "employee_id": "E0077",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-08-01",
+        "amount_cents": 19645,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-001203",
+        "claim_id": "C-00514",
+        "employee_id": "E0020",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-08-01",
+        "amount_cents": 12216,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "line_id": "L-001360",
+        "claim_id": "C-00588",
+        "employee_id": "E0015",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-07-26",
+        "amount_cents": 5767,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-001542",
+        "claim_id": "C-00674",
+        "employee_id": "E0119",
+        "merchant": "Notably",
+        "expense_date": "2026-08-09",
+        "amount_cents": 25148,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-002064",
+        "claim_id": "C-00893",
+        "employee_id": "E0058",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-08-09",
+        "amount_cents": 4166,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-002238",
+        "claim_id": "C-00953",
+        "employee_id": "E0114",
+        "merchant": "Riverside Grill",
+        "expense_date": "2026-08-02",
+        "amount_cents": 24126,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "line_id": "L-002252",
+        "claim_id": "C-00961",
+        "employee_id": "E0003",
+        "merchant": "Lumen Cafe",
+        "expense_date": "2026-08-16",
+        "amount_cents": 2327,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-003214",
+        "claim_id": "C-01364",
+        "employee_id": "E0085",
+        "merchant": "Corner Deli Co",
+        "expense_date": "2026-08-29",
+        "amount_cents": 4196,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-003346",
+        "claim_id": "C-01424",
+        "employee_id": "E0010",
+        "merchant": "Lumen Cafe",
+        "expense_date": "2026-08-23",
+        "amount_cents": 4423,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-003438",
+        "claim_id": "C-01465",
+        "employee_id": "E0013",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-08-29",
+        "amount_cents": 2405,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-003666",
+        "claim_id": "C-01586",
+        "employee_id": "E0082",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-08-23",
+        "amount_cents": 20805,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-003759",
+        "claim_id": "C-01625",
+        "employee_id": "E0005",
+        "merchant": "Deskworks",
+        "expense_date": "2026-08-23",
+        "amount_cents": 23977,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "line_id": "L-003944",
+        "claim_id": "C-01715",
+        "employee_id": "E0023",
+        "merchant": "Skyline Steakhouse",
+        "expense_date": "2026-08-22",
+        "amount_cents": 28825,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "line_id": "L-004620",
+        "claim_id": "C-02007",
+        "employee_id": "E0080",
+        "merchant": "Roadrunner Car Rental",
+        "expense_date": "2026-08-30",
+        "amount_cents": 10035,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "line_id": "L-004737",
+        "claim_id": "C-02063",
+        "employee_id": "E0098",
+        "merchant": "Greenfield Kitchen",
+        "expense_date": "2026-08-29",
+        "amount_cents": 4591,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-005254",
+        "claim_id": "C-02285",
+        "employee_id": "E0003",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-09-19",
+        "amount_cents": 12363,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-005858",
+        "claim_id": "C-02559",
+        "employee_id": "E0100",
+        "merchant": "Deskworks",
+        "expense_date": "2026-09-05",
+        "amount_cents": 1548,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "line_id": "L-006468",
+        "claim_id": "C-02820",
+        "employee_id": "E0058",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-09-19",
+        "amount_cents": 7452,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-006829",
+        "claim_id": "C-02976",
+        "employee_id": "E0093",
+        "merchant": "Diagramly",
+        "expense_date": "2026-09-20",
+        "amount_cents": 28164,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-007038",
+        "claim_id": "C-03063",
+        "employee_id": "E0022",
+        "merchant": "Corner Deli Co",
+        "expense_date": "2026-10-04",
+        "amount_cents": 4082,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-007184",
+        "claim_id": "C-03122",
+        "employee_id": "E0017",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-10-03",
+        "amount_cents": 18930,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "line_id": "L-007419",
+        "claim_id": "C-03231",
+        "employee_id": "E0020",
+        "merchant": "Metro Transit",
+        "expense_date": "2026-10-03",
+        "amount_cents": 1036,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "line_id": "L-007592",
+        "claim_id": "C-03303",
+        "employee_id": "E0020",
+        "merchant": "Pixelforge",
+        "expense_date": "2026-10-11",
+        "amount_cents": 16400,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-007782",
+        "claim_id": "C-03396",
+        "employee_id": "E0029",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-10-03",
+        "amount_cents": 64905,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "line_id": "L-008157",
+        "claim_id": "C-03558",
+        "employee_id": "E0044",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-10-04",
+        "amount_cents": 21654,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-008533",
+        "claim_id": "C-03720",
+        "employee_id": "E0015",
+        "merchant": "Diagramly",
+        "expense_date": "2026-10-04",
+        "amount_cents": 7656,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-008909",
+        "claim_id": "C-03880",
+        "employee_id": "E0015",
+        "merchant": "Harbor Noodle House",
+        "expense_date": "2026-10-24",
+        "amount_cents": 5066,
+        "currency": "USD",
+        "category": "Meals"
+      }
+    ],
+    "missing_category": [
+      {
+        "line_id": "L-000092",
+        "claim_id": "C-00037",
+        "employee_id": "E0110",
+        "merchant": "Boxmart Marketplace",
+        "expense_date": "2026-07-24",
+        "amount_cents": 2184,
+        "currency": "USD",
+        "category": ""
+      },
+      {
+        "line_id": "L-000542",
+        "claim_id": "C-00238",
+        "employee_id": "E0028",
+        "merchant": "Swift Cab Co",
+        "expense_date": "2026-07-31",
+        "amount_cents": 5156,
+        "currency": "USD",
+        "category": ""
+      },
+      {
+        "line_id": "L-002881",
+        "claim_id": "C-01233",
+        "employee_id": "E0001",
+        "merchant": "Deskworks",
+        "expense_date": "2026-08-28",
+        "amount_cents": 18348,
+        "currency": "USD",
+        "category": ""
+      },
+      {
+        "line_id": "L-004343",
+        "claim_id": "C-01894",
+        "employee_id": "E0027",
+        "merchant": "Deskworks",
+        "expense_date": "2026-09-04",
+        "amount_cents": 15097,
+        "currency": "USD",
+        "category": ""
+      },
+      {
+        "line_id": "L-005471",
+        "claim_id": "C-02397",
+        "employee_id": "E0011",
+        "merchant": "Skyline Steakhouse",
+        "expense_date": "2026-09-18",
+        "amount_cents": 48300,
+        "currency": "USD",
+        "category": ""
+      },
+      {
+        "line_id": "L-005932",
+        "claim_id": "C-02586",
+        "employee_id": "E0095",
+        "merchant": "Rideo",
+        "expense_date": "2026-09-18",
+        "amount_cents": 4410,
+        "currency": "USD",
+        "category": ""
+      },
+      {
+        "line_id": "L-006886",
+        "claim_id": "C-03002",
+        "employee_id": "E0090",
+        "merchant": "Roadrunner Car Rental",
+        "expense_date": "2026-10-05",
+        "amount_cents": 11506,
+        "currency": "USD",
+        "category": ""
+      },
+      {
+        "line_id": "L-007780",
+        "claim_id": "C-03394",
+        "employee_id": "E0007",
+        "merchant": "Rideo",
+        "expense_date": "2026-10-14",
+        "amount_cents": 3536,
+        "currency": "USD",
+        "category": ""
+      }
+    ],
+    "mixed_currency_without_fx": [
+      {
+        "line_id": "L-008749",
+        "claim_id": "C-03817",
+        "employee_id": "E0080",
+        "merchant": "Metro Transit",
+        "expense_date": "2026-10-19",
+        "amount_cents": 921,
+        "currency": "GBP",
+        "category": "Ground transport"
+      },
+      {
+        "line_id": "L-009143",
+        "claim_id": "C-03986",
+        "employee_id": "E0039",
+        "merchant": "ParkRight Garage",
+        "expense_date": "2026-10-29",
+        "amount_cents": 1840,
+        "currency": "CAD",
+        "category": "Ground transport"
+      },
+      {
+        "line_id": "L-009164",
+        "claim_id": "C-03996",
+        "employee_id": "E0023",
+        "merchant": "Metro Transit",
+        "expense_date": "2026-10-28",
+        "amount_cents": 402,
+        "currency": "EUR",
+        "category": "Ground transport"
+      }
+    ],
+    "claims_missing_fx_rate": [
+      "C-03817",
+      "C-03986",
+      "C-03996"
+    ],
+    "outliers": [
+      {
+        "line_id": "L-007001",
+        "claim_id": "C-03048",
+        "employee_id": "E0088",
+        "merchant": "Deskworks",
+        "expense_date": "2026-09-24",
+        "amount_cents": 980000,
+        "currency": "USD",
+        "category": "Office supplies"
+      }
+    ],
+    "alcohol_in_meals": [
+      {
+        "line_id": "L-000334",
+        "claim_id": "C-00142",
+        "employee_id": "E0057",
+        "merchant": "Harbor Noodle House",
+        "expense_date": "2026-07-24",
+        "amount_cents": 9005,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-000400",
+        "claim_id": "C-00172",
+        "employee_id": "E0109",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-07-24",
+        "amount_cents": 10236,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-000750",
+        "claim_id": "C-00323",
+        "employee_id": "E0015",
+        "merchant": "Copper Kettle Taproom",
+        "expense_date": "2026-07-30",
+        "amount_cents": 3529,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-000964",
+        "claim_id": "C-00405",
+        "employee_id": "E0012",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-08-06",
+        "amount_cents": 5789,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-001506",
+        "claim_id": "C-00660",
+        "employee_id": "E0103",
+        "merchant": "Corner Deli Co",
+        "expense_date": "2026-08-06",
+        "amount_cents": 25010,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-001896",
+        "claim_id": "C-00827",
+        "employee_id": "E0016",
+        "merchant": "Harbor Noodle House",
+        "expense_date": "2026-08-19",
+        "amount_cents": 6444,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-001937",
+        "claim_id": "C-00842",
+        "employee_id": "E0021",
+        "merchant": "Copper Kettle Taproom",
+        "expense_date": "2026-08-19",
+        "amount_cents": 7251,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-002831",
+        "claim_id": "C-01208",
+        "employee_id": "E0010",
+        "merchant": "Lumen Cafe",
+        "expense_date": "2026-08-18",
+        "amount_cents": 5487,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-003043",
+        "claim_id": "C-01296",
+        "employee_id": "E0102",
+        "merchant": "Corner Deli Co",
+        "expense_date": "2026-08-27",
+        "amount_cents": 25536,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-004195",
+        "claim_id": "C-01835",
+        "employee_id": "E0011",
+        "merchant": "Corner Deli Co",
+        "expense_date": "2026-08-28",
+        "amount_cents": 5281,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-004294",
+        "claim_id": "C-01871",
+        "employee_id": "E0097",
+        "merchant": "Lumen Cafe",
+        "expense_date": "2026-09-07",
+        "amount_cents": 6626,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-004557",
+        "claim_id": "C-01980",
+        "employee_id": "E0086",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-09-04",
+        "amount_cents": 3970,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-004752",
+        "claim_id": "C-02068",
+        "employee_id": "E0011",
+        "merchant": "Lumen Cafe",
+        "expense_date": "2026-09-09",
+        "amount_cents": 10290,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-005189",
+        "claim_id": "C-02257",
+        "employee_id": "E0075",
+        "merchant": "Copper Kettle Taproom",
+        "expense_date": "2026-09-11",
+        "amount_cents": 5567,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-005539",
+        "claim_id": "C-02426",
+        "employee_id": "E0109",
+        "merchant": "Copper Kettle Taproom",
+        "expense_date": "2026-09-18",
+        "amount_cents": 5149,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-006401",
+        "claim_id": "C-02795",
+        "employee_id": "E0004",
+        "merchant": "Basil & Rye",
+        "expense_date": "2026-10-01",
+        "amount_cents": 11640,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-006640",
+        "claim_id": "C-02882",
+        "employee_id": "E0009",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-09-29",
+        "amount_cents": 5224,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-006863",
+        "claim_id": "C-02993",
+        "employee_id": "E0094",
+        "merchant": "Harbor Noodle House",
+        "expense_date": "2026-10-06",
+        "amount_cents": 6777,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-006993",
+        "claim_id": "C-03042",
+        "employee_id": "E0068",
+        "merchant": "Corner Deli Co",
+        "expense_date": "2026-09-23",
+        "amount_cents": 2474,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-007180",
+        "claim_id": "C-03119",
+        "employee_id": "E0067",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-10-08",
+        "amount_cents": 1639,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-007650",
+        "claim_id": "C-03333",
+        "employee_id": "E0118",
+        "merchant": "Copper Kettle Taproom",
+        "expense_date": "2026-10-12",
+        "amount_cents": 4313,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-007741",
+        "claim_id": "C-03374",
+        "employee_id": "E0038",
+        "merchant": "Corner Deli Co",
+        "expense_date": "2026-10-05",
+        "amount_cents": 4368,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-007791",
+        "claim_id": "C-03398",
+        "employee_id": "E0063",
+        "merchant": "Northside Bistro",
+        "expense_date": "2026-10-13",
+        "amount_cents": 6324,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-007885",
+        "claim_id": "C-03431",
+        "employee_id": "E0077",
+        "merchant": "Greenfield Kitchen",
+        "expense_date": "2026-10-13",
+        "amount_cents": 1686,
+        "currency": "USD",
+        "category": "Meals"
+      },
+      {
+        "line_id": "L-008253",
+        "claim_id": "C-03597",
+        "employee_id": "E0097",
+        "merchant": "Copper Kettle Taproom",
+        "expense_date": "2026-10-15",
+        "amount_cents": 11007,
+        "currency": "USD",
+        "category": "Meals"
+      }
+    ],
+    "over_policy_limit": [
+      {
+        "line_id": "L-002106",
+        "claim_id": "C-00904",
+        "employee_id": "E0075",
+        "merchant": "Meridian Suites",
+        "expense_date": "2026-08-12",
+        "amount_cents": 36234,
+        "currency": "USD",
+        "category": "Lodging",
+        "rule": "Lodging"
+      },
+      {
+        "line_id": "L-004252",
+        "claim_id": "C-01855",
+        "employee_id": "E0089",
+        "merchant": "Meridian Suites",
+        "expense_date": "2026-09-02",
+        "amount_cents": 40225,
+        "currency": "USD",
+        "category": "Lodging",
+        "rule": "Lodging"
+      },
+      {
+        "line_id": "L-005412",
+        "claim_id": "C-02365",
+        "employee_id": "E0007",
+        "merchant": "Basil & Rye",
+        "expense_date": "2026-09-18",
+        "amount_cents": 9157,
+        "currency": "USD",
+        "category": "Meals",
+        "rule": "Meals"
+      },
+      {
+        "line_id": "L-005737",
+        "claim_id": "C-02508",
+        "employee_id": "E0029",
+        "merchant": "Greenfield Kitchen",
+        "expense_date": "2026-09-17",
+        "amount_cents": 12939,
+        "currency": "USD",
+        "category": "Meals",
+        "rule": "Meals"
+      },
+      {
+        "line_id": "L-005866",
+        "claim_id": "C-02561",
+        "employee_id": "E0004",
+        "merchant": "Stayline Hotels",
+        "expense_date": "2026-09-22",
+        "amount_cents": 36649,
+        "currency": "USD",
+        "category": "Lodging",
+        "rule": "Lodging"
+      },
+      {
+        "line_id": "L-006708",
+        "claim_id": "C-02913",
+        "employee_id": "E0102",
+        "merchant": "Stayline Hotels",
+        "expense_date": "2026-10-01",
+        "amount_cents": 34282,
+        "currency": "USD",
+        "category": "Lodging",
+        "rule": "Lodging"
+      },
+      {
+        "line_id": "L-007001",
+        "claim_id": "C-03048",
+        "employee_id": "E0088",
+        "merchant": "Deskworks",
+        "expense_date": "2026-09-24",
+        "amount_cents": 980000,
+        "currency": "USD",
+        "category": "Office supplies",
+        "rule": "Office supplies"
+      },
+      {
+        "line_id": "L-007409",
+        "claim_id": "C-03224",
+        "employee_id": "E0005",
+        "merchant": "Greenfield Kitchen",
+        "expense_date": "2026-10-07",
+        "amount_cents": 13916,
+        "currency": "USD",
+        "category": "Meals",
+        "rule": "Meals"
+      },
+      {
+        "line_id": "L-007822",
+        "claim_id": "C-03405",
+        "employee_id": "E0031",
+        "merchant": "Corner Deli Co",
+        "expense_date": "2026-10-02",
+        "amount_cents": 12293,
+        "currency": "USD",
+        "category": "Meals",
+        "rule": "Meals"
+      },
+      {
+        "line_id": "L-007838",
+        "claim_id": "C-03412",
+        "employee_id": "E0059",
+        "merchant": "Lumen Cafe",
+        "expense_date": "2026-10-14",
+        "amount_cents": 12820,
+        "currency": "USD",
+        "category": "Meals",
+        "rule": "Meals"
+      }
+    ],
+    "missing_receipt_over_threshold": [
+      {
+        "line_id": "L-000135",
+        "claim_id": "C-00054",
+        "employee_id": "E0023",
+        "merchant": "Skyline Steakhouse",
+        "expense_date": "2026-07-30",
+        "amount_cents": 21184,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "line_id": "L-000355",
+        "claim_id": "C-00151",
+        "employee_id": "E0097",
+        "merchant": "Paper & Pine Supply",
+        "expense_date": "2026-08-03",
+        "amount_cents": 22205,
+        "currency": "USD",
+        "category": "Office supplies"
+      },
+      {
+        "line_id": "L-000538",
+        "claim_id": "C-00238",
+        "employee_id": "E0028",
+        "merchant": "Bluejet Airways",
+        "expense_date": "2026-07-30",
+        "amount_cents": 71500,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "line_id": "L-001631",
+        "claim_id": "C-00714",
+        "employee_id": "E0024",
+        "merchant": "Notably",
+        "expense_date": "2026-08-07",
+        "amount_cents": 13672,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-003713",
+        "claim_id": "C-01606",
+        "employee_id": "E0085",
+        "merchant": "Northstar Airlines",
+        "expense_date": "2026-08-31",
+        "amount_cents": 63215,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "line_id": "L-004046",
+        "claim_id": "C-01760",
+        "employee_id": "E0026",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-09-07",
+        "amount_cents": 42845,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "line_id": "L-005302",
+        "claim_id": "C-02311",
+        "employee_id": "E0039",
+        "merchant": "Diagramly",
+        "expense_date": "2026-09-22",
+        "amount_cents": 13651,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-005692",
+        "claim_id": "C-02489",
+        "employee_id": "E0061",
+        "merchant": "Ballpark Suites",
+        "expense_date": "2026-09-23",
+        "amount_cents": 30750,
+        "currency": "USD",
+        "category": "Client entertainment"
+      },
+      {
+        "line_id": "L-007242",
+        "claim_id": "C-03146",
+        "employee_id": "E0057",
+        "merchant": "Northstar Airlines",
+        "expense_date": "2026-09-29",
+        "amount_cents": 88283,
+        "currency": "USD",
+        "category": "Airfare"
+      },
+      {
+        "line_id": "L-008680",
+        "claim_id": "C-03787",
+        "employee_id": "E0093",
+        "merchant": "Skylark Air",
+        "expense_date": "2026-10-19",
+        "amount_cents": 54571,
+        "currency": "USD",
+        "category": "Airfare"
+      }
+    ],
+    "stale_over_60_days": [
+      {
+        "line_id": "L-000225",
+        "claim_id": "C-00098",
+        "employee_id": "E0078",
+        "merchant": "Swift Cab Co",
+        "expense_date": "2026-05-18",
+        "amount_cents": 3572,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "line_id": "L-003177",
+        "claim_id": "C-01353",
+        "employee_id": "E0079",
+        "merchant": "Notably",
+        "expense_date": "2026-06-24",
+        "amount_cents": 27476,
+        "currency": "USD",
+        "category": "Software"
+      },
+      {
+        "line_id": "L-005700",
+        "claim_id": "C-02491",
+        "employee_id": "E0026",
+        "merchant": "Rideo",
+        "expense_date": "2026-07-13",
+        "amount_cents": 6299,
+        "currency": "USD",
+        "category": "Ground transport"
+      },
+      {
+        "line_id": "L-006388",
+        "claim_id": "C-02788",
+        "employee_id": "E0034",
+        "merchant": "Notably",
+        "expense_date": "2026-07-31",
+        "amount_cents": 26013,
+        "currency": "USD",
+        "category": "Software"
+      }
+    ],
+    "leakage_column": "gl_account_hint"
+  },
+  "expense_claims": {
+    "self_approved": [
+      {
+        "claim_id": "C-01045",
+        "employee_id": "E0075",
+        "approver_id": "E0075",
+        "total_usd_cents": 29706,
+        "status": "paid"
+      },
+      {
+        "claim_id": "C-01201",
+        "employee_id": "E0075",
+        "approver_id": "E0075",
+        "total_usd_cents": 84647,
+        "status": "paid"
+      },
+      {
+        "claim_id": "C-01904",
+        "employee_id": "E0031",
+        "approver_id": "E0031",
+        "total_usd_cents": 145795,
+        "status": "paid"
+      },
+      {
+        "claim_id": "C-02145",
+        "employee_id": "E0065",
+        "approver_id": "E0065",
+        "total_usd_cents": 2803,
+        "status": "paid"
+      },
+      {
+        "claim_id": "C-02468",
+        "employee_id": "E0002",
+        "approver_id": "E0002",
+        "total_usd_cents": 45255,
+        "status": "paid"
+      }
+    ],
+    "approved_above_limit": [
+      {
+        "claim_id": "C-01395",
+        "employee_id": "E0027",
+        "approver_id": "E0003",
+        "approver_limit_cents": 250000,
+        "total_usd_cents": 303714,
+        "status": "paid"
+      },
+      {
+        "claim_id": "C-02645",
+        "employee_id": "E0019",
+        "approver_id": "E0004",
+        "approver_limit_cents": 250000,
+        "total_usd_cents": 306118,
+        "status": "paid"
+      },
+      {
+        "claim_id": "C-03040",
+        "employee_id": "E0013",
+        "approver_id": "E0004",
+        "approver_limit_cents": 250000,
+        "total_usd_cents": 350923,
+        "status": "paid"
+      },
+      {
+        "claim_id": "C-03115",
+        "employee_id": "E0020",
+        "approver_id": "E0005",
+        "approver_limit_cents": 250000,
+        "total_usd_cents": 259624,
+        "status": "paid"
+      },
+      {
+        "claim_id": "C-03439",
+        "employee_id": "E0058",
+        "approver_id": "E0034",
+        "approver_limit_cents": 250000,
+        "total_usd_cents": 273139,
+        "status": "paid"
+      }
+    ],
+    "status_counts": {
+      "draft": 110,
+      "submitted": 161,
+      "approved": 174,
+      "rejected": 140,
+      "paid": 3415
+    }
+  },
+  "gl_journal": {
+    "weekend_or_holiday": [
+      {
+        "je_id": "JE-000510",
+        "entity": "NW-US",
+        "posting_date": "2026-09-07",
+        "entry_date": "2026-09-07",
+        "source": "MANUAL",
+        "preparer_id": "E0067",
+        "approver_id": "E0065",
+        "total_debit_cents": 220815,
+        "accounts": [
+          "2100",
+          "6170"
+        ],
+        "description": "Accrue client event deposit"
+      },
+      {
+        "je_id": "JE-001774",
+        "entity": "NW-US",
+        "posting_date": "2026-09-19",
+        "entry_date": "2026-09-19",
+        "source": "MANUAL",
+        "preparer_id": "E0068",
+        "approver_id": "E0065",
+        "total_debit_cents": 137422,
+        "accounts": [
+          "2100",
+          "6130"
+        ],
+        "description": "Accrue car service invoice"
+      },
+      {
+        "je_id": "JE-003581",
+        "entity": "NW-US",
+        "posting_date": "2026-10-12",
+        "entry_date": "2026-10-12",
+        "source": "MANUAL",
+        "preparer_id": "E0068",
+        "approver_id": "E0065",
+        "total_debit_cents": 447690,
+        "accounts": [
+          "1400",
+          "2010"
+        ],
+        "description": "Record prepaid maintenance contract"
+      },
+      {
+        "je_id": "JE-004085",
+        "entity": "NW-US",
+        "posting_date": "2026-10-18",
+        "entry_date": "2026-10-18",
+        "source": "MANUAL",
+        "preparer_id": "E0069",
+        "approver_id": "E0065",
+        "total_debit_cents": 381240,
+        "accounts": [
+          "2010",
+          "2100"
+        ],
+        "description": "Reclass accrued vendor bill to AP"
+      }
+    ],
+    "preparer_never_posts": [
+      {
+        "je_id": "JE-001903",
+        "entity": "NW-US",
+        "posting_date": "2026-09-22",
+        "entry_date": "2026-09-22",
+        "source": "MANUAL",
+        "preparer_id": "E0033",
+        "approver_id": "E0065",
+        "total_debit_cents": 268411,
+        "accounts": [
+          "2100",
+          "6140"
+        ],
+        "description": "Accrue tooling subscription",
+        "preparer_department": "Engineering"
+      },
+      {
+        "je_id": "JE-003131",
+        "entity": "NW-US",
+        "posting_date": "2026-10-06",
+        "entry_date": "2026-10-06",
+        "source": "MANUAL",
+        "preparer_id": "E0001",
+        "approver_id": "E0065",
+        "total_debit_cents": 195037,
+        "accounts": [
+          "6100",
+          "6170"
+        ],
+        "description": "Reclass client dinner to entertainment",
+        "preparer_department": "Sales"
+      },
+      {
+        "je_id": "JE-004780",
+        "entity": "NW-US",
+        "posting_date": "2026-10-26",
+        "entry_date": "2026-10-26",
+        "source": "MANUAL",
+        "preparer_id": "E0079",
+        "approver_id": "E0065",
+        "total_debit_cents": 412066,
+        "accounts": [
+          "2100",
+          "6400"
+        ],
+        "description": "Accrue sponsorship booth",
+        "preparer_department": "Marketing"
+      }
+    ],
+    "post_close": [
+      {
+        "je_id": "JE-005272",
+        "entity": "NW-US",
+        "posting_date": "2026-10-30",
+        "entry_date": "2026-11-06",
+        "source": "MANUAL",
+        "preparer_id": "E0067",
+        "approver_id": "E0065",
+        "total_debit_cents": 318544,
+        "accounts": [
+          "1400",
+          "2010"
+        ],
+        "description": "Record prepaid conference booth"
+      },
+      {
+        "je_id": "JE-005273",
+        "entity": "NW-US",
+        "posting_date": "2026-10-30",
+        "entry_date": "2026-11-09",
+        "source": "MANUAL",
+        "preparer_id": "E0068",
+        "approver_id": "E0065",
+        "total_debit_cents": 274903,
+        "accounts": [
+          "2010",
+          "2100"
+        ],
+        "description": "Reclass October accrual to AP"
+      },
+      {
+        "je_id": "JE-005274",
+        "entity": "NW-US",
+        "posting_date": "2026-10-30",
+        "entry_date": "2026-11-12",
+        "source": "MANUAL",
+        "preparer_id": "E0069",
+        "approver_id": "E0065",
+        "total_debit_cents": 586210,
+        "accounts": [
+          "1200",
+          "4000"
+        ],
+        "description": "Late invoice adjustment, October billing"
+      }
+    ],
+    "round_amount_manual": [
+      {
+        "je_id": "JE-002404",
+        "entity": "NW-US",
+        "posting_date": "2026-09-25",
+        "entry_date": "2026-09-25",
+        "source": "MANUAL",
+        "preparer_id": "E0069",
+        "approver_id": "E0064",
+        "total_debit_cents": 2500000,
+        "accounts": [
+          "1400",
+          "2100"
+        ],
+        "description": "Prepaid deposit, event venue"
+      },
+      {
+        "je_id": "JE-004720",
+        "entity": "NW-US",
+        "posting_date": "2026-10-23",
+        "entry_date": "2026-10-23",
+        "source": "MANUAL",
+        "preparer_id": "E0067",
+        "approver_id": "E0064",
+        "total_debit_cents": 5000000,
+        "accounts": [
+          "2010",
+          "2100"
+        ],
+        "description": "Reclass accrued liabilities to AP"
+      },
+      {
+        "je_id": "JE-004833",
+        "entity": "NW-US",
+        "posting_date": "2026-10-27",
+        "entry_date": "2026-10-27",
+        "source": "MANUAL",
+        "preparer_id": "E0068",
+        "approver_id": "E0064",
+        "total_debit_cents": 10000000,
+        "accounts": [
+          "1400",
+          "2010"
+        ],
+        "description": "Prepay annual conference sponsorship"
+      }
+    ],
+    "just_under_approval_limit": [
+      {
+        "je_id": "JE-002464",
+        "entity": "NW-US",
+        "posting_date": "2026-09-28",
+        "entry_date": "2026-09-28",
+        "source": "MANUAL",
+        "preparer_id": "E0068",
+        "approver_id": "E0065",
+        "total_debit_cents": 999900,
+        "accounts": [
+          "2100",
+          "6310"
+        ],
+        "description": "Accrue outside counsel fees"
+      },
+      {
+        "je_id": "JE-003580",
+        "entity": "NW-US",
+        "posting_date": "2026-10-09",
+        "entry_date": "2026-10-09",
+        "source": "MANUAL",
+        "preparer_id": "E0067",
+        "approver_id": "E0065",
+        "total_debit_cents": 999500,
+        "accounts": [
+          "2100",
+          "6300"
+        ],
+        "description": "Accrue advisory retainer"
+      },
+      {
+        "je_id": "JE-004834",
+        "entity": "NW-US",
+        "posting_date": "2026-10-27",
+        "entry_date": "2026-10-27",
+        "source": "MANUAL",
+        "preparer_id": "E0069",
+        "approver_id": "E0065",
+        "total_debit_cents": 998750,
+        "accounts": [
+          "2100",
+          "6140"
+        ],
+        "description": "Accrue software true-up"
+      }
+    ],
+    "seldom_used_accounts": [
+      "1900",
+      "3900",
+      "6950",
+      "6990"
+    ],
+    "seldom_used_account_entries": [
+      {
+        "je_id": "JE-001973",
+        "entity": "NW-US",
+        "posting_date": "2026-09-23",
+        "entry_date": "2026-09-23",
+        "source": "MANUAL",
+        "preparer_id": "E0067",
+        "approver_id": "E0065",
+        "total_debit_cents": 61250,
+        "accounts": [
+          "2100",
+          "6950"
+        ],
+        "description": "State late filing penalty"
+      },
+      {
+        "je_id": "JE-003730",
+        "entity": "NW-US",
+        "posting_date": "2026-10-14",
+        "entry_date": "2026-10-14",
+        "source": "MANUAL",
+        "preparer_id": "E0069",
+        "approver_id": "E0065",
+        "total_debit_cents": 742118,
+        "accounts": [
+          "1200",
+          "1900"
+        ],
+        "description": "Park unidentified customer receipt"
+      },
+      {
+        "je_id": "JE-004227",
+        "entity": "NW-US",
+        "posting_date": "2026-10-20",
+        "entry_date": "2026-10-20",
+        "source": "MANUAL",
+        "preparer_id": "E0068",
+        "approver_id": "E0065",
+        "total_debit_cents": 383317,
+        "accounts": [
+          "3900",
+          "6990"
+        ],
+        "description": "Clean up opening balance difference"
+      }
+    ],
+    "self_approved_manual": [
+      {
+        "je_id": "JE-001232",
+        "entity": "NW-US",
+        "posting_date": "2026-09-15",
+        "entry_date": "2026-09-15",
+        "source": "MANUAL",
+        "preparer_id": "E0065",
+        "approver_id": "E0065",
+        "total_debit_cents": 431508,
+        "accounts": [
+          "2100",
+          "6300"
+        ],
+        "description": "Accrue tax advisory fees"
+      },
+      {
+        "je_id": "JE-004287",
+        "entity": "NW-US",
+        "posting_date": "2026-10-21",
+        "entry_date": "2026-10-21",
+        "source": "MANUAL",
+        "preparer_id": "E0064",
+        "approver_id": "E0064",
+        "total_debit_cents": 670294,
+        "accounts": [
+          "2100",
+          "6310"
+        ],
+        "description": "Release legal accrual"
+      }
+    ],
+    "duplicate_entries": [
+      {
+        "original_je_id": "JE-000662",
+        "duplicate_je_id": "JE-000663",
+        "description": "Pixelforge Software INV-PF-20931 annual license",
+        "total_debit_cents": 342960
+      },
+      {
+        "original_je_id": "JE-003979",
+        "duplicate_je_id": "JE-003980",
+        "description": "Reimbursement PO-002803 C-02932 NWR2610150176",
+        "total_debit_cents": 82695
+      }
+    ],
+    "intercompany_unmatched": [
+      {
+        "je_id": "JE-005211",
+        "entity": "NW-US",
+        "posting_date": "2026-10-29",
+        "entry_date": "2026-10-29",
+        "source": "MANUAL",
+        "preparer_id": "E0067",
+        "approver_id": "E0064",
+        "total_debit_cents": 1812494,
+        "accounts": [
+          "1310",
+          "4100"
+        ],
+        "description": "IC shared services recharge IC-2610-06 to NW-CA"
+      }
+    ],
+    "unused_accounts": [
+      "1020",
+      "1050",
+      "1500",
+      "2200",
+      "2400",
+      "2500",
+      "3000",
+      "3100",
+      "4990",
+      "6900"
+    ],
+    "je_count": 5274,
+    "line_count": 13014
+  },
+  "bank_rec_2026_10": {
+    "gl_1010_opening_2026_10_01": 500425732,
+    "gl_1010_closing": 536065074,
+    "bank_opening": 500425732,
+    "bank_closing": 533487608,
+    "deposits_in_transit": [
+      {
+        "je_id": "JE-005212",
+        "date": "2026-10-30",
+        "description": "Customer receipt RCPT-260145 Customer 0944",
+        "amount_cents": 720307
+      },
+      {
+        "je_id": "JE-005213",
+        "date": "2026-10-30",
+        "description": "Customer receipt RCPT-260146 Customer 0596",
+        "amount_cents": 2098367
+      }
+    ],
+    "outstanding_payments": [
+      {
+        "payout_id": "PO-003146",
+        "claim_id": "C-03339",
+        "check": "CHK 010246",
+        "paid_at": "2026-10-22",
+        "amount_cents": 4484,
+        "je_id": "JE-004646"
+      },
+      {
+        "payout_id": "PO-003206",
+        "claim_id": "C-03322",
+        "check": "CHK 010269",
+        "paid_at": "2026-10-29",
+        "amount_cents": 39472,
+        "je_id": "JE-005001"
+      },
+      {
+        "payout_id": "PO-003413",
+        "claim_id": "C-03741",
+        "check": "CHK 010281",
+        "paid_at": "2026-10-29",
+        "amount_cents": 115870,
+        "je_id": "JE-005208"
+      }
+    ],
+    "cleared_checks_not_outstanding": [
+      {
+        "payout_id": "PO-002357",
+        "check": "CHK 010231",
+        "issued": "2026-10-08",
+        "cleared": "2026-10-13",
+        "amount_cents": 117523
+      },
+      {
+        "payout_id": "PO-002729",
+        "check": "CHK 010243",
+        "issued": "2026-10-15",
+        "cleared": "2026-10-20",
+        "amount_cents": 11944
+      }
+    ],
+    "bank_fee_not_booked": {
+      "date": "2026-10-21",
+      "description": "WIRE SVC CHARGE",
+      "reference": "BKFEE-1021",
+      "amount_cents": -3500
+    },
+    "interest_not_booked": {
+      "date": "2026-10-30",
+      "description": "INTEREST CREDIT",
+      "reference": "INT-1030",
+      "amount_cents": 1287
+    },
+    "gl_duplicate_payment": {
+      "original_je_id": "JE-003979",
+      "duplicate_je_id": "JE-003980",
+      "payout_id": "PO-002803",
+      "amount_cents": 82695
+    },
+    "transposition": {
+      "je_id": "JE-004388",
+      "payout_id": "PO-002888",
+      "claim_id": "C-02965",
+      "gl_amount_cents": 124356,
+      "bank_amount_cents": 123456,
+      "difference_cents": 900
+    },
+    "adjusted_bank_balance": 536146456,
+    "adjusted_book_balance": 536146456,
+    "unreconciled_difference": 0
+  },
+  "accrual_2150": {
+    "as_of": "2026-10-31",
+    "approved_unpaid_claim_count": 174,
+    "expected_accrual_cents": 9073587,
+    "gl_2150_credit_balance_cents": 8989992,
+    "difference_cents": 83595,
+    "difference_explained_by": {
+      "gl_duplicate_payment_cents": 82695,
+      "transposition_cents": 900
+    },
+    "opening_2150_2026_09_01_cents": 10825840,
+    "approved_unpaid_claim_ids": [
+      "C-03436",
+      "C-03454",
+      "C-03455",
+      "C-03486",
+      "C-03497",
+      "C-03502",
+      "C-03506",
+      "C-03510",
+      "C-03513",
+      "C-03522",
+      "C-03527",
+      "C-03536",
+      "C-03542",
+      "C-03553",
+      "C-03554",
+      "C-03555",
+      "C-03557",
+      "C-03564",
+      "C-03566",
+      "C-03567",
+      "C-03568",
+      "C-03569",
+      "C-03573",
+      "C-03578",
+      "C-03581",
+      "C-03584",
+      "C-03587",
+      "C-03592",
+      "C-03594",
+      "C-03596",
+      "C-03597",
+      "C-03599",
+      "C-03601",
+      "C-03603",
+      "C-03605",
+      "C-03607",
+      "C-03608",
+      "C-03611",
+      "C-03614",
+      "C-03615",
+      "C-03616",
+      "C-03617",
+      "C-03618",
+      "C-03623",
+      "C-03624",
+      "C-03626",
+      "C-03627",
+      "C-03631",
+      "C-03632",
+      "C-03634",
+      "C-03635",
+      "C-03640",
+      "C-03643",
+      "C-03648",
+      "C-03649",
+      "C-03654",
+      "C-03655",
+      "C-03656",
+      "C-03658",
+      "C-03661",
+      "C-03663",
+      "C-03664",
+      "C-03666",
+      "C-03667",
+      "C-03668",
+      "C-03669",
+      "C-03670",
+      "C-03671",
+      "C-03672",
+      "C-03677",
+      "C-03683",
+      "C-03686",
+      "C-03687",
+      "C-03688",
+      "C-03691",
+      "C-03693",
+      "C-03695",
+      "C-03696",
+      "C-03697",
+      "C-03699",
+      "C-03700",
+      "C-03701",
+      "C-03702",
+      "C-03705",
+      "C-03707",
+      "C-03708",
+      "C-03710",
+      "C-03711",
+      "C-03713",
+      "C-03715",
+      "C-03716",
+      "C-03717",
+      "C-03718",
+      "C-03721",
+      "C-03722",
+      "C-03725",
+      "C-03726",
+      "C-03727",
+      "C-03728",
+      "C-03731",
+      "C-03732",
+      "C-03734",
+      "C-03735",
+      "C-03736",
+      "C-03737",
+      "C-03738",
+      "C-03743",
+      "C-03745",
+      "C-03748",
+      "C-03754",
+      "C-03755",
+      "C-03756",
+      "C-03758",
+      "C-03759",
+      "C-03760",
+      "C-03761",
+      "C-03762",
+      "C-03763",
+      "C-03766",
+      "C-03767",
+      "C-03770",
+      "C-03771",
+      "C-03773",
+      "C-03774",
+      "C-03775",
+      "C-03776",
+      "C-03778",
+      "C-03780",
+      "C-03786",
+      "C-03787",
+      "C-03788",
+      "C-03789",
+      "C-03790",
+      "C-03791",
+      "C-03792",
+      "C-03795",
+      "C-03796",
+      "C-03798",
+      "C-03799",
+      "C-03801",
+      "C-03802",
+      "C-03803",
+      "C-03805",
+      "C-03808",
+      "C-03809",
+      "C-03810",
+      "C-03812",
+      "C-03813",
+      "C-03816",
+      "C-03820",
+      "C-03823",
+      "C-03831",
+      "C-03835",
+      "C-03837",
+      "C-03840",
+      "C-03844",
+      "C-03846",
+      "C-03847",
+      "C-03849",
+      "C-03855",
+      "C-03857",
+      "C-03858",
+      "C-03859",
+      "C-03862",
+      "C-03866",
+      "C-03869",
+      "C-03871",
+      "C-03880",
+      "C-03885",
+      "C-03893",
+      "C-03894",
+      "C-03896",
+      "C-03900",
+      "C-03904"
+    ]
+  },
+  "budget_variance_2026_10": {
+    "level": "account (sum of all cost centers and both entities)",
+    "thresholds": {
+      "dollar_cents": 1000000,
+      "pct": 0.1
+    },
+    "counts": {
+      "both": 4,
+      "pct_only": 3,
+      "dollar_only": 2,
+      "under": 13
+    },
+    "accounts": [
+      {
+        "account": "6000",
+        "name": "Salaries and Wages",
+        "class": "dollar_only",
+        "budget_oct_cents": 115017832,
+        "actual_sep_cents": 115006333,
+        "actual_oct_cents": 118848950,
+        "var_vs_budget_cents": 3831118,
+        "var_vs_budget_pct": 3.3,
+        "var_vs_sep_cents": 3842617,
+        "var_vs_sep_pct": 3.3,
+        "explanation_status": "explained",
+        "explanation": "People note: merit increases effective Oct 1"
+      },
+      {
+        "account": "6010",
+        "name": "Payroll Taxes",
+        "class": "under",
+        "budget_oct_cents": 8772963,
+        "actual_sep_cents": 8807376,
+        "actual_oct_cents": 8620157,
+        "var_vs_budget_cents": -152806,
+        "var_vs_budget_pct": -1.7,
+        "var_vs_sep_cents": -187219,
+        "var_vs_sep_pct": -2.1,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6020",
+        "name": "Employee Benefits",
+        "class": "under",
+        "budget_oct_cents": 14008233,
+        "actual_sep_cents": 14009716,
+        "actual_oct_cents": 14214785,
+        "var_vs_budget_cents": 206552,
+        "var_vs_budget_pct": 1.5,
+        "var_vs_sep_cents": 205069,
+        "var_vs_sep_pct": 1.5,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6100",
+        "name": "Meals",
+        "class": "under",
+        "budget_oct_cents": 4500393,
+        "actual_sep_cents": 4525016,
+        "actual_oct_cents": 4443620,
+        "var_vs_budget_cents": -56773,
+        "var_vs_budget_pct": -1.3,
+        "var_vs_sep_cents": -81396,
+        "var_vs_sep_pct": -1.8,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6110",
+        "name": "Lodging",
+        "class": "under",
+        "budget_oct_cents": 14448436,
+        "actual_sep_cents": 14501932,
+        "actual_oct_cents": 14819789,
+        "var_vs_budget_cents": 371353,
+        "var_vs_budget_pct": 2.6,
+        "var_vs_sep_cents": 317857,
+        "var_vs_sep_pct": 2.2,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6120",
+        "name": "Airfare",
+        "class": "under",
+        "budget_oct_cents": 22890834,
+        "actual_sep_cents": 22904156,
+        "actual_oct_cents": 22778177,
+        "var_vs_budget_cents": -112657,
+        "var_vs_budget_pct": -0.5,
+        "var_vs_sep_cents": -125979,
+        "var_vs_sep_pct": -0.6,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6130",
+        "name": "Ground Transport",
+        "class": "under",
+        "budget_oct_cents": 4456168,
+        "actual_sep_cents": 4444620,
+        "actual_oct_cents": 4457006,
+        "var_vs_budget_cents": 838,
+        "var_vs_budget_pct": 0.0,
+        "var_vs_sep_cents": 12386,
+        "var_vs_sep_pct": 0.3,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6140",
+        "name": "Software Subscriptions",
+        "class": "under",
+        "budget_oct_cents": 12826051,
+        "actual_sep_cents": 12744172,
+        "actual_oct_cents": 12486928,
+        "var_vs_budget_cents": -339123,
+        "var_vs_budget_pct": -2.6,
+        "var_vs_sep_cents": -257244,
+        "var_vs_sep_pct": -2.0,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6150",
+        "name": "Office Supplies",
+        "class": "pct_only",
+        "budget_oct_cents": 5690999,
+        "actual_sep_cents": 5705636,
+        "actual_oct_cents": 6555636,
+        "var_vs_budget_cents": 864637,
+        "var_vs_budget_pct": 15.2,
+        "var_vs_sep_cents": 850000,
+        "var_vs_sep_pct": 14.9,
+        "explanation_status": "no_note",
+        "explanation": "No note. Driven by the $9,800.00 office supplies outlier line"
+      },
+      {
+        "account": "6160",
+        "name": "Training",
+        "class": "both",
+        "budget_oct_cents": 22112399,
+        "actual_sep_cents": 22079180,
+        "actual_oct_cents": 25293230,
+        "var_vs_budget_cents": 3180831,
+        "var_vs_budget_pct": 14.4,
+        "var_vs_sep_cents": 3214050,
+        "var_vs_sep_pct": 14.6,
+        "explanation_status": "explained",
+        "explanation": "Engineering note: fall training cohort ran in October, planned for Q1 2027"
+      },
+      {
+        "account": "6170",
+        "name": "Client Entertainment",
+        "class": "under",
+        "budget_oct_cents": 11819507,
+        "actual_sep_cents": 11824626,
+        "actual_oct_cents": 11853947,
+        "var_vs_budget_cents": 34440,
+        "var_vs_budget_pct": 0.3,
+        "var_vs_sep_cents": 29321,
+        "var_vs_sep_pct": 0.2,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6180",
+        "name": "Conferences and Events",
+        "class": "both",
+        "budget_oct_cents": 2504422,
+        "actual_sep_cents": 2505250,
+        "actual_oct_cents": 7367761,
+        "var_vs_budget_cents": 4863339,
+        "var_vs_budget_pct": 194.2,
+        "var_vs_sep_cents": 4862511,
+        "var_vs_sep_pct": 194.1,
+        "explanation_status": "explained",
+        "explanation": "Sales note: Q4 offsite moved from November to October"
+      },
+      {
+        "account": "6190",
+        "name": "Other Travel and Expense (Uncategorized)",
+        "class": "under",
+        "budget_oct_cents": 208030,
+        "actual_sep_cents": 208627,
+        "actual_oct_cents": 210568,
+        "var_vs_budget_cents": 2538,
+        "var_vs_budget_pct": 1.2,
+        "var_vs_sep_cents": 1941,
+        "var_vs_sep_pct": 0.9,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6200",
+        "name": "Rent",
+        "class": "under",
+        "budget_oct_cents": 11575219,
+        "actual_sep_cents": 11485995,
+        "actual_oct_cents": 11656143,
+        "var_vs_budget_cents": 80924,
+        "var_vs_budget_pct": 0.7,
+        "var_vs_sep_cents": 170148,
+        "var_vs_sep_pct": 1.5,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6210",
+        "name": "Utilities",
+        "class": "pct_only",
+        "budget_oct_cents": 740950,
+        "actual_sep_cents": 741002,
+        "actual_oct_cents": 906045,
+        "var_vs_budget_cents": 165095,
+        "var_vs_budget_pct": 22.3,
+        "var_vs_sep_cents": 165043,
+        "var_vs_sep_pct": 22.3,
+        "explanation_status": "no_note",
+        "explanation": "No note. Under the $10,000 threshold"
+      },
+      {
+        "account": "6300",
+        "name": "Professional Fees",
+        "class": "both",
+        "budget_oct_cents": 9402351,
+        "actual_sep_cents": 9414503,
+        "actual_oct_cents": 12159536,
+        "var_vs_budget_cents": 2757185,
+        "var_vs_budget_pct": 29.3,
+        "var_vs_sep_cents": 2745033,
+        "var_vs_sep_pct": 29.2,
+        "explanation_status": "owner_to_explain",
+        "explanation": "No note covers it. Finance owns 6300 and its note says nothing unusual"
+      },
+      {
+        "account": "6310",
+        "name": "Legal Fees",
+        "class": "under",
+        "budget_oct_cents": 2832359,
+        "actual_sep_cents": 2804602,
+        "actual_oct_cents": 2722043,
+        "var_vs_budget_cents": -110316,
+        "var_vs_budget_pct": -3.9,
+        "var_vs_sep_cents": -82559,
+        "var_vs_sep_pct": -2.9,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6400",
+        "name": "Marketing Programs",
+        "class": "both",
+        "budget_oct_cents": 12018569,
+        "actual_sep_cents": 12004167,
+        "actual_oct_cents": 15635144,
+        "var_vs_budget_cents": 3616575,
+        "var_vs_budget_pct": 30.1,
+        "var_vs_sep_cents": 3630977,
+        "var_vs_sep_pct": 30.2,
+        "explanation_status": "explained",
+        "explanation": "Marketing note: Q4 campaign launched three weeks early"
+      },
+      {
+        "account": "6500",
+        "name": "Depreciation",
+        "class": "under",
+        "budget_oct_cents": 2091335,
+        "actual_sep_cents": 2108147,
+        "actual_oct_cents": 2084162,
+        "var_vs_budget_cents": -7173,
+        "var_vs_budget_pct": -0.3,
+        "var_vs_sep_cents": -23985,
+        "var_vs_sep_pct": -1.1,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6600",
+        "name": "Bank and Merchant Fees",
+        "class": "under",
+        "budget_oct_cents": 4768186,
+        "actual_sep_cents": 4801896,
+        "actual_oct_cents": 4732248,
+        "var_vs_budget_cents": -35938,
+        "var_vs_budget_pct": -0.8,
+        "var_vs_sep_cents": -69648,
+        "var_vs_sep_pct": -1.5,
+        "explanation_status": "not_flagged",
+        "explanation": ""
+      },
+      {
+        "account": "6700",
+        "name": "Hosting and Cloud",
+        "class": "dollar_only",
+        "budget_oct_cents": 30914622,
+        "actual_sep_cents": 31001202,
+        "actual_oct_cents": 32913547,
+        "var_vs_budget_cents": 1998925,
+        "var_vs_budget_pct": 6.5,
+        "var_vs_sep_cents": 1912345,
+        "var_vs_sep_pct": 6.2,
+        "explanation_status": "no_note",
+        "explanation": "No note. Not required: under the 10% threshold"
+      },
+      {
+        "account": "6800",
+        "name": "Insurance",
+        "class": "pct_only",
+        "budget_oct_cents": 978272,
+        "actual_sep_cents": 979063,
+        "actual_oct_cents": 1193151,
+        "var_vs_budget_cents": 214879,
+        "var_vs_budget_pct": 22.0,
+        "var_vs_sep_cents": 214088,
+        "var_vs_sep_pct": 21.9,
+        "explanation_status": "no_note",
+        "explanation": "No note. Under the $10,000 threshold"
+      }
+    ]
+  },
+  "pm": {
+    "ticket_counts": {
+      "receipts": 21,
+      "approvals": 15,
+      "mobile": 9,
+      "currency": 7,
+      "policy": 7,
+      "other": 1
+    },
+    "ticket_sample_rate": "about 1 in 11 of October tickets"
+  }
+}

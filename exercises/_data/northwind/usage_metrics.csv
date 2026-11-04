@@ -1,0 +1,9 @@
+feature,area,monthly_active_users,support_tickets_per_month,avg_minutes_to_submit_claim
+Receipt photo capture with auto-fill,receipts,41200,168,9.4
+Corporate card auto-match,receipts,27900,61,6.1
+Approval reminders and escalation,approvals,12300,142,7.8
+Bulk approve for managers,approvals,4100,18,7.1
+Mobile offline drafts,mobile,19800,97,11.2
+Multi-currency conversion at entry,currency,6400,72,13.6
+Inline policy hints,policy,38500,83,8.7
+Mileage tracker,other,8900,12,5.2
