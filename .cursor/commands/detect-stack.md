@@ -207,10 +207,11 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
   ```
   ---
   description: <keep original description>
-  globs: workspaces/<role>/**
+  globs: <scan root>/**
   alwaysApply: false
   ---
   ```
+  Use the scan root as the glob, so the rules attach to the real code. Examples: `workspaces/<role>/**` by default, `services/billing/**` when the user passed that path. If the scan root is the repo root (`.`), use `globs: **` and warn: "These rules now apply to the whole repo, including other personas' workspaces."
   The `stack-` prefix keeps stack rules apart from the persona's own rules in the same folder (same as `/setup-stack`).
 - Templates and examples stay in `stacks/` (the student's code is already in the workspace). Do not copy anything into `workspaces/<role>/`.
 - **Never overwrite `.cursor/context.md`.** In the `## Persona: <role>` block set only:
@@ -242,7 +243,7 @@ List only files written under `.cursor/`. Files created under `stacks/{clean-nam
 **11. Confirm**
 ```
 ✅ Stack for <role>: <stack> (<shape>), detected from <scan root>
-   Rules: .cursor/rules/<role>/stack-*.mdc  (apply to workspaces/<role>/** only)
+   Rules: .cursor/rules/<role>/stack-*.mdc  (apply to <scan root>/**)
    Saved to library: stacks/<clean-name>/   (only if you chose Yes in step 6)
 
 Next: /architect <role> @exercises/<role>/<exercise>/README.md  (or a path to your own plan)

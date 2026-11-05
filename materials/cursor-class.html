@@ -852,7 +852,7 @@
           <li>Open the repo in Cursor: <code>cursor .</code>, then <kbd>Cmd</kbd>+<kbd>L</kbd> for chat.</li>
           <li>Run <code>/set-persona add &lt;role&gt;</code> with the persona that matches what you do in that repo.</li>
           <li>Run <code>/detect-stack &lt;role&gt; &lt;path&gt;</code>, where <code>&lt;path&gt;</code> is your code (for example <code>.</code> or <code>src/</code>). Let it scan. Read what it reports and answer its questions.</li>
-          <li>Open the <code>## Persona: &lt;role&gt;</code> block in <code>.cursor/context.md</code> and the generated <code>.cursor/rules/&lt;role&gt;/stack-*.mdc</code> rules. Do they correctly identify your framework, your testing tool, your conventions? If not, edit them: the files are yours. The rules are scoped by glob to <code>workspaces/&lt;role&gt;/**</code>; widen the <code>globs</code> line if you want them to attach to code elsewhere in the repo.</li>
+          <li>Open the <code>## Persona: &lt;role&gt;</code> block in <code>.cursor/context.md</code> and the generated <code>.cursor/rules/&lt;role&gt;/stack-*.mdc</code> rules. Do they correctly identify your framework, your testing tool, your conventions? If not, edit them: the files are yours. The rules are scoped by glob to the path you scanned (for example <code>services/billing/**</code>), so they attach to your real code.</li>
           <li>Ask Cursor a question about your real code: &ldquo;What does <code>UserService.create</code> do?&rdquo; or &ldquo;Where are tests for the auth flow?&rdquo; Confirm the answers reference your actual files, not generic guesses.</li>
         </ol>
 
