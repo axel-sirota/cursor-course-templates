@@ -93,9 +93,6 @@
     }
 
     .main-content { flex: 1; min-width: 0; padding: 2rem 0 4rem 2.5rem; }
-    #basics figure { text-align: center; margin: 0.75rem 0 1.25rem; }
-    #basics figure img { width: auto; max-width: min(100%, 560px); max-height: 300px; }
-
     @media (max-width: 900px) {
       .page-wrapper { flex-direction: column; }
       .sidebar { display: none; }
@@ -315,84 +312,84 @@
         <h3 id="basics-prompt">Prompt</h3>
         <p>The prompt is everything the model reads, not just what you type. Cursor adds the rules that apply, your open files, anything you <code>@</code> mention, and <code>.cursor/context.md</code>. Better inputs give better answers, so most of this class is about controlling what Cursor adds.</p>
         <figure>
-          <img src="diagrams/d10-prompt-assembly.svg" alt="Your typed message plus rules, context.md, open files and @ mentions combine into the full prompt sent to the model">
+          <img src="diagrams/d10-prompt-assembly.svg" style="width:558px;max-width:100%" alt="Your typed message plus rules, context.md, open files and @ mentions combine into the full prompt sent to the model">
         </figure>
         <p><strong>In this repo:</strong> <code>.cursor/context.md</code> is the project memory every command reads first.</p>
 
         <h3 id="basics-context-window">Context window</h3>
         <p>The context window is the model&rsquo;s working memory for one chat. It has a fixed size. Rules, files the agent reads, your messages, its replies and tool output all fill it. When it is full, something has to go.</p>
         <figure>
-          <img src="diagrams/d11-context-window.svg" alt="One chat holds rules and context.md, files read, your messages, agent replies and free space; when full, oldest details are squeezed out">
+          <img src="diagrams/d11-context-window.svg" style="width:336px;max-width:100%" alt="One chat holds rules and context.md, files read, your messages, agent replies and free space; when full, oldest details are squeezed out">
         </figure>
         <p><strong>In this repo:</strong> one session per chat. <code>/start-session</code> opens it, <code>/next-session</code> closes it.</p>
 
         <h3 id="basics-compaction">Compaction (summarization)</h3>
         <p>When a chat gets long, Cursor summarizes the older turns to make room. The summary keeps the gist and drops exact details: file names, numbers, small decisions. Anything you need tomorrow must live in a file, not in the chat.</p>
         <figure>
-          <img src="diagrams/d12-compaction.svg" alt="A long chat is summarized and loses details; the handoff doc written by /next-session and context.md stay on disk and seed the next chat">
+          <img src="diagrams/d12-compaction.svg" style="width:1045px;max-width:100%" alt="A long chat is summarized and loses details; the handoff doc written by /next-session and context.md stay on disk and seed the next chat">
         </figure>
         <p><strong>In this repo:</strong> <code>/next-session</code> writes <code>workspaces/&lt;role&gt;/plans/transitions/latest.md</code>, and <code>.cursor/context.md</code> persists between chats.</p>
 
         <h3 id="basics-rule">Rule</h3>
         <p>A rule is a standing instruction in a <code>.mdc</code> file that Cursor adds to the prompt for you. <code>alwaysApply: true</code> adds it to every chat. <code>globs</code> adds it only when matching files are in context.</p>
         <figure>
-          <img src="diagrams/d13-rules-scope.svg" alt="A rule with alwaysApply true reaches every chat; rules with globs workspaces/engineer/** or workspaces/pm/** apply only when those files are in context">
+          <img src="diagrams/d13-rules-scope.svg" style="width:528px;max-width:100%" alt="A rule with alwaysApply true reaches every chat; rules with globs workspaces/engineer/** or workspaces/pm/** apply only when those files are in context">
         </figure>
         <p><strong>In this repo:</strong> <code>/set-persona</code> copies <code>personas/&lt;role&gt;/rules/*.mdc</code> into <code>.cursor/rules/&lt;role&gt;/</code> and scopes each one to <code>globs: workspaces/&lt;role&gt;/**</code>.</p>
 
         <h3 id="basics-command">Command</h3>
         <p>A command is a saved prompt in a Markdown file. You type <code>/name</code> and Cursor sends that file&rsquo;s text as the prompt. Use one for any multi-step job you repeat.</p>
         <figure>
-          <img src="diagrams/d14-command.svg" alt="Typing /next-session loads .cursor/commands/next-session.md, its text becomes the prompt, and the agent runs the same steps every time">
+          <img src="diagrams/d14-command.svg" style="width:924px;max-width:100%" alt="Typing /next-session loads .cursor/commands/next-session.md, its text becomes the prompt, and the agent runs the same steps every time">
         </figure>
         <p><strong>In this repo:</strong> <code>.cursor/commands/</code> holds <code>set-persona.md</code>, <code>setup-stack.md</code>, <code>architect.md</code>, <code>start-session.md</code>, <code>next-session.md</code>, <code>detect-stack.md</code>, <code>undo.md</code> and more.</p>
 
         <h3 id="basics-skill">Skill</h3>
         <p>A skill is a folder with a <code>SKILL.md</code> file (instructions plus a short description) and any helper files. You call a command yourself. With a skill, the agent reads the descriptions and loads the skill only when your task needs it. Cursor reads skills from <code>.cursor/skills/&lt;name&gt;/SKILL.md</code>.</p>
         <figure>
-          <img src="diagrams/d15-skill-vs-command.svg" alt="Command: you type /name and the agent runs it. Skill: you ask a task, the agent checks skill descriptions and loads SKILL.md plus files if relevant">
+          <img src="diagrams/d15-skill-vs-command.svg" style="width:270px;max-width:100%" alt="Command: you type /name and the agent runs it. Skill: you ask a task, the agent checks skill descriptions and loads SKILL.md plus files if relevant">
         </figure>
         <p><strong>In this repo:</strong> no skills. Commands plus role-scoped rules do the same job here.</p>
 
         <h3 id="basics-why-commands">Why commands and skills</h3>
         <p>Typed prompts drift. Two people ask for the same thing in two ways and get two results. A command or skill is one file in git: the same steps every time, shared by the whole team, no retyping.</p>
         <figure>
-          <img src="diagrams/d16-adhoc-vs-command.svg" alt="Ad-hoc prompting: different wording on different days gives different steps and results. Saved command: anyone types /next-session, one shared file in git, same steps and output">
+          <img src="diagrams/d16-adhoc-vs-command.svg" style="width:656px;max-width:100%" alt="Ad-hoc prompting: different wording on different days gives different steps and results. Saved command: anyone types /next-session, one shared file in git, same steps and output">
         </figure>
         <p><strong>In this repo:</strong> every step of the class is a command in <code>.cursor/commands/</code>, so every student runs identical steps.</p>
 
         <h3 id="basics-hook">Hook</h3>
         <p>A hook is a script Cursor runs on an agent event. <code>beforeShellExecution</code> runs before a terminal command and can block it. <code>afterFileEdit</code> runs after the agent edits a file. <code>stop</code> runs when the agent finishes. Hooks are code, so they run every time, unlike an instruction the model can forget.</p>
         <figure>
-          <img src="diagrams/d17-hooks.svg" alt="beforeShellExecution runs block-destructive.sh and allows or blocks the command; afterFileEdit runs lint.sh and type-check.sh; stop runs test-runner.sh">
+          <img src="diagrams/d17-hooks.svg" style="width:750px;max-width:100%" alt="beforeShellExecution runs block-destructive.sh and allows or blocks the command; afterFileEdit runs lint.sh and type-check.sh; stop runs test-runner.sh">
         </figure>
         <p><strong>In this repo:</strong> <code>/set-persona</code> merges <code>personas/&lt;role&gt;/hooks.json</code> into <code>.cursor/hooks.json</code>, wrapping each script in <code>.cursor/scripts/_scope.sh</code> so it only fires for that role.</p>
 
         <h3 id="basics-agent">Agent and subagent</h3>
         <p>The agent is the model running in a loop: read, think, call a tool, check the result, repeat until done. A subagent is a helper the agent hands a side task to. It works in its own context window and returns a short summary, which keeps the main chat clean.</p>
         <figure>
-          <img src="diagrams/d18-agent-loop.svg" alt="Agent loop: goal, read, think, call a tool, check if done; if not, loop back; if yes, answer. A subagent with its own context window can take a side task and return a summary">
+          <img src="diagrams/d18-agent-loop.svg" style="width:1269px;max-width:100%" alt="Agent loop: goal, read, think, call a tool, check if done; if not, loop back; if yes, answer. A subagent with its own context window can take a side task and return a summary">
         </figure>
         <p><strong>In this repo:</strong> subagents live in <code>personas/&lt;role&gt;/agents/*.md</code> (for example <code>personas/engineer/agents/verifier.md</code>) and are copied to <code>.cursor/agents/</code>.</p>
 
         <h3 id="basics-mcp">MCP server</h3>
         <p>An MCP server is a plug that gives the agent new tools or data, like a browser, a database or current library docs. Cursor starts the servers listed in <code>.cursor/mcp.json</code> and offers their tools to the agent.</p>
         <figure>
-          <img src="diagrams/d19-mcp.svg" alt="The agent reads .cursor/mcp.json, which connects it to the playwright server, the context7 server and other servers">
+          <img src="diagrams/d19-mcp.svg" style="width:603px;max-width:100%" alt="The agent reads .cursor/mcp.json, which connects it to the playwright server, the context7 server and other servers">
         </figure>
         <p><strong>In this repo:</strong> <code>/set-persona</code> merges <code>personas/&lt;role&gt;/mcp.json</code> into <code>.cursor/mcp.json</code>. The engineer persona adds <code>playwright</code> and <code>context7</code>.</p>
 
         <h3 id="basics-persona-stack">Persona and stack</h3>
         <p>A persona is your role and everything that comes with it: rules, commands, subagents, hooks, MCP servers. A stack is your tools: language, framework and the rules for them. Two commands install them, and both write into your role&rsquo;s workspace.</p>
         <figure>
-          <img src="diagrams/d20-persona-stack.svg" alt="/set-persona add engineer installs the persona; /setup-stack engineer installs the stack; both feed workspaces/engineer/">
+          <img src="diagrams/d20-persona-stack.svg" style="width:847px;max-width:100%" alt="/set-persona add engineer installs the persona; /setup-stack engineer installs the stack; both feed workspaces/engineer/">
         </figure>
         <p><strong>In this repo:</strong> <code>personas/&lt;role&gt;/persona.yaml</code> defines each role. Stacks live in <code>stacks/</code>. Details in <a href="#personas-stacks">section 3</a>.</p>
 
         <h3 id="basics-whole-picture">The whole picture</h3>
         <p>You start with a prompt or a command. The agent loops, using rules and <code>context.md</code> for guidance and tools and MCP servers to act. Hooks fire around each step. The output ends with a handoff doc that seeds the next chat.</p>
         <figure>
-          <img src="diagrams/d21-whole-picture.svg" alt="You send a prompt or command to the agent loop; rules, context.md, tools and MCP servers feed it; hooks fire around it; it produces output and a /next-session handoff doc that seeds the next chat">
+          <img src="diagrams/d21-whole-picture.svg" style="width:1102px;max-width:100%" alt="You send a prompt or command to the agent loop; rules, context.md, tools and MCP servers feed it; hooks fire around it; it produces output and a /next-session handoff doc that seeds the next chat">
         </figure>
         <p><strong>In this repo:</strong> the SDD pipeline in <a href="#sdd-pipeline">section 2</a> runs this loop once per session.</p>
       </section>
