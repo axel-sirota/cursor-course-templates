@@ -295,7 +295,7 @@
         <h2>0. How to use this guide</h2>
         <p>This is a <strong>full-day, hands-on class</strong> on the AI-assisted development workflow. You bring your own laptop and pick the persona that matches your job: <strong>engineer, pm, designer, data-scientist or accountant</strong>. Each persona works on exercises built for that role, in its own language and tools (see <a href="#pick-track">Pick your track</a>). We do four labs:</p>
         <ul>
-          <li><strong>Lab 0: Command + rule.</strong> Write your own rule and a command that depends on it, then prove the rule does the work.</li>
+          <li><strong>Lab 0: Command + rule.</strong> Everyone writes one rule plus a writer command and a checker command that both depend on it, then tests and breaks them.</li>
           <li><strong>Lab 1: Onboarding.</strong> Run <code>/set-persona add &lt;role&gt;</code> and <code>/setup-stack &lt;role&gt;</code> in the course repo.</li>
           <li><strong>Lab 2: Architect + two sessions.</strong> Run <code>/architect &lt;role&gt;</code> on your track&rsquo;s first exercise in <code>exercises/&lt;role&gt;/</code>, then drive two <code>/start-session &lt;role&gt;</code> &rarr; <code>/next-session</code> cycles.</li>
           <li><strong>Lab 3: Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
@@ -399,73 +399,109 @@
 
       <!-- ===== Lab 0. Build a command that uses a rule ===== -->
       <section id="lab-0">
-        <h2>Lab 0: Build a command that uses a rule <span class="timebox">&#9201; 45 min</span></h2>
+        <h2>Lab 0: A command and a checker that share one rule <span class="timebox">&#9201; 75 min</span></h2>
 
         <div class="callout callout-lab">
           <div class="callout-title">Goal</div>
-          <p>Write one rule and one command yourself, from scratch. The command does a job from your role. The rule holds the format and the standards. The command must <strong>not</strong> repeat the format: it depends on the rule. By the end you can prove the rule is doing the work, change the output without touching the command, and explain when a glob rule does not fire. Rules and commands only: no agents, no hooks, no MCP.</p>
+          <p>Everyone builds the same thing. You write <strong>one rule</strong> and <strong>two commands</strong>: one that writes a document and one that checks it. Both commands read the same rule, so the rule is the only place the standard lives. Then you test your checker against a file with planted mistakes, break things on purpose, and fix a conflict between two rules. Rules and commands only: no agents, no hooks, no MCP, no personas.</p>
         </div>
 
-        <h3>Pick your job</h3>
-        <table>
-          <thead><tr><th>Role</th><th>Command</th><th>What it writes</th><th>Rule must enforce</th></tr></thead>
-          <tbody>
-            <tr><td>engineer</td><td><code>/lab0-adr &lt;decision&gt;</code></td><td>An architecture decision record</td><td>Sections Context, Decision, Options considered (at least 2), Consequences. Each option has one cost and one risk.</td></tr>
-            <tr><td>pm</td><td><code>/lab0-story &lt;feature&gt;</code></td><td>One user story</td><td>"As a / I want / So that", 3 to 5 Given/When/Then criteria, one out-of-scope line, no "should" or "easy".</td></tr>
-            <tr><td>designer</td><td><code>/lab0-component &lt;name&gt;</code></td><td>A component spec</td><td>States table (default, hover, focus, disabled, error), token names only (no hex), one accessibility line with contrast ratio.</td></tr>
-            <tr><td>data-scientist</td><td><code>/lab0-dict &lt;dataset&gt;</code></td><td>A data dictionary for a dataset you describe</td><td>A table with column, type, unit, null rule, example. Every numeric column has a unit. One "known issues" section.</td></tr>
-            <tr><td>accountant</td><td><code>/lab0-memo &lt;variance&gt;</code></td><td>A variance explanation memo</td><td>Amount and percent, a materiality line against $25,000, root cause, supporting document, owner. Amounts as <code>$1,234.56</code>.</td></tr>
-          </tbody>
-        </table>
-        <p>All roles: the rule also bans em dashes and caps the document at 250 words. Use made-up data, nothing from work.</p>
+        <h3>The job</h3>
+        <p>A <strong>decision brief</strong>: one page that helps a team pick between options. Everyone uses the same topic first:</p>
+        <p><em>&ldquo;Should the team move the weekly status report from email to a shared dashboard?&rdquo;</em></p>
+        <p>Make up any numbers you need. Nothing from work.</p>
 
-        <h3>Steps</h3>
+        <h3>Part A: Folders (5 min)</h3>
         <ol>
-          <li><strong>Practice folder.</strong> Create <code>lab0/</code> at the repo root with a one-line <code>lab0/README.md</code> ("Lab 0 output"). Your command writes into <code>lab0/out/</code>.</li>
-          <li><strong>Write the rule</strong> at <code>.cursor/rules/lab0/format.mdc</code>:
+          <li>At the repo root create <code>lab0/README.md</code> with one line: <code>Lab 0 output. Rules in .cursor/rules/lab0/.</code></li>
+          <li>Create the empty folders <code>lab0/out/</code> and <code>lab0/fixtures/</code>.</li>
+        </ol>
+
+        <h3>Part B: The rule (10 min)</h3>
+        <p>Create <code>.cursor/rules/lab0/brief.mdc</code>. Every line is one check with an ID, so a checker can cite it.</p>
 <pre><code>---
-description: Lab 0 output format for &lt;your job&gt;
+description: Decision brief standard for files in lab0/
 globs: lab0/**
 alwaysApply: false
 ---
-# Lab 0 format
-- Required sections: ...
-- Max 250 words. No em dashes.
-- ...your role's standards from the table...</code></pre></li>
-          <li><strong>Write the command</strong> at <code>.cursor/commands/lab0-&lt;name&gt;.md</code>. It must:
-            <ul>
-              <li>use <code>$ARGUMENTS</code> as the topic, and stop with a usage line if it is empty</li>
-              <li>write <code>lab0/out/&lt;slug&gt;.md</code>, and write <code>&lt;slug&gt;-v2.md</code> instead of overwriting if the file exists</li>
-              <li>end by listing which rule it followed</li>
-              <li>contain <strong>no</strong> format instructions: no section names, no word limit</li>
-            </ul>
-          </li>
-          <li><strong>Run it</strong> in a new chat: <code>/lab0-&lt;name&gt; &lt;a topic&gt;</code>. Check the output against your rule line by line.</li>
+# Decision brief standard
+- R1: First line is "# Decision: &lt;topic&gt;".
+- R2: Sections in this order: Problem, Options, Recommendation, Open questions.
+- R3: At least 2 options. Each option has one line starting "Cost:" and one starting "Risk:".
+- R4: The first sentence of Recommendation names exactly one option.
+- R5: Every number has a unit (hours, $, %, people, days).
+- R6: At most 250 words.
+- R7: No em dashes.</code></pre>
+
+        <h3>Part C: The writer command (10 min)</h3>
+        <p>Create <code>.cursor/commands/lab0-brief.md</code>. Start from this and fill it in:</p>
+<pre><code># /lab0-brief
+
+Topic: $ARGUMENTS
+
+1. If the topic is empty, print "Usage: /lab0-brief &lt;topic&gt;" and stop.
+2. Read lab0/README.md and .cursor/rules/lab0/brief.mdc.
+3. Write the brief to lab0/out/&lt;slug-of-topic&gt;.md.
+   If that file exists, use -v2, then -v3. Never overwrite.
+4. Print the path and the rule IDs you followed.</code></pre>
+        <p><strong>Hard constraint:</strong> the command must not mention any section name, word limit or formatting detail. If it does, you have two sources of truth.</p>
+        <p>Run it in a <strong>new chat</strong>: <code>/lab0-brief move the weekly status report from email to a shared dashboard</code>.</p>
+
+        <h3>Part D: The checker command (15 min)</h3>
+        <p>Create <code>.cursor/commands/lab0-check.md</code>. It takes a file path and must:</p>
+        <ul>
+          <li>read <code>.cursor/rules/lab0/brief.mdc</code> and check every R-line it finds there (no rule IDs written in the command)</li>
+          <li>print a table: Rule, PASS or FAIL, line number, evidence (the exact text)</li>
+          <li>end with &ldquo;N of M passed&rdquo;</li>
+          <li>never edit the file it checks</li>
+        </ul>
+        <p>Run <code>/lab0-check lab0/out/&lt;your file&gt;.md</code>. A good brief scores 7 of 7.</p>
+
+        <h3>Part E: Test the checker (10 min)</h3>
+        <ol>
+          <li>By hand, copy your good brief to <code>lab0/fixtures/bad.md</code> and plant exactly three mistakes: break R2 (swap two sections), R5 (a number with no unit) and R7 (add an em dash).</li>
+          <li>Write <code>lab0/fixtures/bad.expected.md</code> with one line: <code>FAIL: R2, R5, R7</code></li>
+          <li>Run <code>/lab0-check lab0/fixtures/bad.md</code>. It must report exactly those three FAILs. No more, no fewer.</li>
+          <li>If it misses one or invents one, fix the <strong>wording of the rule</strong> until the line is testable, not the checker. Rerun both files until the good one is 7 of 7 and the bad one is 4 of 7.</li>
         </ol>
 
-        <h3>The hard part: prove it</h3>
+        <h3>Part F: Two rules, one conflict (10 min)</h3>
         <ol>
-          <li><strong>Does the rule fire?</strong> A <code>globs</code> rule attaches only when a matching file is in the chat. A new file that does not exist yet may not count. If your first run ignored the format, that is why. Fix it in the command, not the rule: make the command read <code>lab0/README.md</code> first. Explain to your neighbour why that works.</li>
-          <li><strong>Remove the rule's power.</strong> Change <code>globs</code> to <code>nowhere/**</code>. Run the command in a new chat. The format should drift. Put it back. You have now proved the format comes from the rule.</li>
-          <li><strong>Change the output without touching the command.</strong> Add one required section to the rule. Run again in a new chat. The new section appears. One file changed, every future run changed.</li>
-          <li><strong>Edge cases.</strong> Run it with no topic (should stop with usage). Run the same topic twice (should create <code>-v2</code>).</li>
-          <li><strong>Swap.</strong> Give your rule and command to someone in another role. Can they run it with no explanation? If not, your command is missing a step.</li>
+          <li>Create <code>.cursor/rules/lab0/strict.mdc</code> with <code>alwaysApply: true</code> and one line: <code>Every document is at most 120 words.</code></li>
+          <li>Run <code>/lab0-brief</code> on a new topic in a new chat. Count the words. Which limit won?</li>
+          <li>Run <code>/lab0-check</code> on it. The checker reads only <code>brief.mdc</code>. Does it agree with what was written?</li>
+          <li>Fix it so there is one source of truth: move the limit into <code>brief.mdc</code> or delete <code>strict.mdc</code>. Write one sentence in <code>lab0/NOTES.md</code> on why the conflict happened.</li>
         </ol>
+
+        <h3>Part G: Prove the rule does the work (10 min)</h3>
+        <ol>
+          <li><strong>Turn the rule off.</strong> Change <code>globs</code> to <code>nowhere/**</code> and delete step 2 from the writer command. New chat, new topic. The format drifts. Put both back. Now explain to your neighbour why step 2 matters: a <code>globs</code> rule attaches only when a matching file is in the chat, and a file that does not exist yet does not count.</li>
+          <li><strong>Change the standard in one place.</strong> Add <code>R8: End with a line "Owner: &lt;name&gt;".</code> to the rule. Do not touch either command. Write a new brief: it has an Owner line. Check it: 8 of 8. Check your first brief again: it fails R8, because it was written before the rule existed.</li>
+          <li><strong>Edge cases.</strong> <code>/lab0-brief</code> with no topic stops with the usage line. The same topic twice creates <code>-v2</code>.</li>
+        </ol>
+
+        <h3>Part H: Swap (5 min)</h3>
+        <p>Give your neighbour your rule and both commands. They run them on a topic of their choice with no help from you. If they get stuck, your command is missing a step. Fix it.</p>
 
         <h3>Checkpoint</h3>
         <ul>
-          <li><code>ls .cursor/rules/lab0/format.mdc .cursor/commands/lab0-*.md</code> both exist</li>
-          <li><code>grep -n -i -E "words|section" .cursor/commands/lab0-*.md</code> finds nothing (format lives in the rule)</li>
-          <li><code>ls lab0/out/</code> shows at least one file and one <code>-v2</code> file</li>
-          <li><code>grep -c "&mdash;" lab0/out/*.md</code> and <code>grep -c "—" lab0/out/*.md</code> are 0; <code>wc -w lab0/out/*.md</code> is 250 or less each</li>
-          <li>You can say in one sentence why the <code>nowhere/**</code> run looked different</li>
+          <li><code>ls .cursor/rules/lab0/ .cursor/commands/lab0-*.md</code> shows <code>brief.mdc</code>, <code>lab0-brief.md</code>, <code>lab0-check.md</code> (and no <code>strict.mdc</code>, unless you merged it)</li>
+          <li><code>grep -n -E "R[0-9]|Problem|Options|250|words" .cursor/commands/lab0-*.md</code> finds nothing: the standard lives only in the rule</li>
+          <li><code>ls lab0/out/</code> shows at least one <code>-v2</code> file</li>
+          <li>The checker gives 4 of 7 on the original <code>bad.md</code> and passes everything on your newest brief</li>
+          <li><code>lab0/NOTES.md</code> explains the conflict in one sentence</li>
         </ul>
 
-        <div class="callout callout-tip">
-          <div class="callout-title">Stretch: turn it into a skill</div>
-          <p>Copy the command to <code>.cursor/skills/lab0-&lt;name&gt;/SKILL.md</code> with a <code>description</code> that says when to use it. Then ask in plain words ("write a memo for the October rent variance") without the slash. You called the command; the agent picks the skill. If your Cursor version has no skills support, skip this step.</p>
+        <div class="callout callout-info">
+          <div class="callout-title">The four ways a rule gets in</div>
+          <p><strong>Always</strong> (<code>alwaysApply: true</code>): every chat. <strong>Auto attached</strong> (<code>globs</code>): when a matching file is in the chat. <strong>Agent requested</strong> (only a <code>description</code>): the agent decides from the description. <strong>Manual</strong>: you type <code>@</code> and the rule name. In this lab you used the first two and saw how they can disagree.</p>
         </div>
-        <p>Cleanup is manual: delete <code>lab0/</code>, <code>.cursor/rules/lab0/</code> and <code>.cursor/commands/lab0-*.md</code>. <code>/undo</code> does not know about them, because no command installed them.</p>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Stretch: turn the writer into a skill</div>
+          <p>Copy the writer to <code>.cursor/skills/lab0-brief/SKILL.md</code> with a <code>description</code> that says when to use it. Then ask in plain words, without the slash: &ldquo;write a decision brief on moving standup to async&rdquo;. You call a command; the agent picks a skill. Skip this if your Cursor version has no skills support.</p>
+        </div>
+        <p>Cleanup is manual: delete <code>lab0/</code>, <code>.cursor/rules/lab0/</code> and <code>.cursor/commands/lab0-*.md</code>. <code>/undo</code> only removes what <code>/set-persona</code> and <code>/setup-stack</code> installed.</p>
       </section>
 
       <!-- ===== 1. What is Cursor? ===== -->
