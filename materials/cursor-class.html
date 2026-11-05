@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cursor Class:The 3-Hour Workflow Class</title>
+  <title>Cursor Class: The 3-Hour Workflow Class</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.indigo.min.css" />
 
@@ -80,8 +80,9 @@
       text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em;
       color: var(--pico-muted-color, #999);
     }
-    .sidebar ul { list-style: none; padding: 0; margin: 0; }
-    .sidebar li { margin-bottom: 0.35rem; }
+    .sidebar ul, .sidebar nav ul:first-of-type { list-style: none; padding: 0; margin: 0; }
+    .sidebar li { margin-bottom: 0.35rem; display: block; padding: 0; }
+    .sidebar nav li a { margin: 0; padding-left: 0.25rem; }
     .sidebar li.sub { padding-left: 1rem; font-size: 0.82rem; }
     .sidebar a {
       text-decoration: none; color: var(--pico-muted-color, #666);
@@ -221,15 +222,15 @@
       <li><a href="#sdd-pipeline">2. The SDD pipeline</a></li>
       <li><a href="#personas-stacks">3. Personas, stacks, and architecture shapes</a></li>
       <li><a href="#pick-track">Pick your track</a></li>
-      <li><a href="#lab-1">Lab 1:Onboarding</a></li>
+      <li><a href="#lab-1">Lab 1: Onboarding</a></li>
       <li><a href="#commands">4. The 6 commands you need</a></li>
-      <li><a href="#architect-deep">5. /architect:the gated 3-phase flow</a></li>
+      <li><a href="#architect-deep">5. /architect: the gated 3-phase flow</a></li>
       <li><a href="#session-loop">6. The session loop</a></li>
-      <li><a href="#lab-2">Lab 2:Architect + two sessions</a></li>
+      <li><a href="#lab-2">Lab 2: Architect + two sessions</a></li>
       <li><a href="#brownfield">7. Adapting to an existing repo</a></li>
-      <li><a href="#lab-3">Lab 3:Adapt to your real repo</a></li>
-      <li><a href="#undo">8. /undo:the safety valve</a></li>
-      <li><a href="#adapt-table">9. What you learned:adapt at work</a></li>
+      <li><a href="#lab-3">Lab 3: Adapt to your real repo</a></li>
+      <li><a href="#undo">8. /undo: the safety valve</a></li>
+      <li><a href="#adapt-table">9. What you learned: adapt at work</a></li>
     </ul>
   </details>
 
@@ -266,7 +267,7 @@
           <li class="sub"><a href="#shapes">Architecture shapes</a></li>
           <li class="sub"><a href="#pick-track">Pick your track</a></li>
           <li class="sub"><a href="#multi-persona">Several personas, one repo</a></li>
-          <li><a href="#lab-1">Lab 1:Onboarding</a></li>
+          <li><a href="#lab-1">Lab 1: Onboarding</a></li>
           <li><a href="#commands">4. The 6 commands</a></li>
           <li class="sub"><a href="#cmd-set-persona">/set-persona</a></li>
           <li class="sub"><a href="#cmd-setup-stack">/setup-stack</a></li>
@@ -277,10 +278,10 @@
           <li><a href="#architect-deep">5. /architect deep dive</a></li>
           <li><a href="#session-loop">6. The session loop</a></li>
           <li class="sub"><a href="#persona-spokes">Persona spokes</a></li>
-          <li><a href="#lab-2">Lab 2:Architect + 2 sessions</a></li>
+          <li><a href="#lab-2">Lab 2: Architect + 2 sessions</a></li>
           <li><a href="#brownfield">7. Adapting to existing repos</a></li>
-          <li><a href="#lab-3">Lab 3:Adapt your repo</a></li>
-          <li><a href="#undo">8. /undo:safety valve</a></li>
+          <li><a href="#lab-3">Lab 3: Adapt your repo</a></li>
+          <li><a href="#undo">8. /undo: safety valve</a></li>
           <li><a href="#adapt-table">9. Adapt at work</a></li>
         </ul>
       </nav>
@@ -295,7 +296,7 @@
         <ul>
           <li><strong>Lab 1: Onboarding.</strong> Run <code>/set-persona add &lt;role&gt;</code> and <code>/setup-stack &lt;role&gt;</code> in the course repo.</li>
           <li><strong>Lab 2: Architect + two sessions.</strong> Run <code>/architect &lt;role&gt;</code> on your track&rsquo;s first exercise in <code>exercises/&lt;role&gt;/</code>, then drive two <code>/start-session &lt;role&gt;</code> &rarr; <code>/next-session</code> cycles.</li>
-          <li><strong>Lab 3:Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
+          <li><strong>Lab 3: Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
         </ul>
         <p>This class teaches the <strong>workflow</strong>. <a href="#basics">Basic concepts</a> explains hooks, MCP servers, subagents and skills so you know what they are and where they live in this repo. We do not build them in the labs. Writing your own is an advanced topic for a later session.</p>
         <div class="callout callout-info">
@@ -418,7 +419,7 @@
       <!-- ===== 2. The SDD pipeline ===== -->
       <section id="sdd-pipeline">
         <h2>2. The SDD pipeline</h2>
-        <p>Everything in this class hangs on one diagram: the Spec-Driven Development (SDD) pipeline. Memorize it now:every command you learn is a station on this line.</p>
+        <p>Everything in this class hangs on one diagram: the Spec-Driven Development (SDD) pipeline. Memorize it now: every command you learn is a station on this line.</p>
 
         <figure>
           <img src="diagrams/d02-sdd-pipeline-spine.svg" alt="SDD pipeline spine per persona: /set-persona add role, /setup-stack role, /architect role, you reply approved, then /start-session and /next-session in a loop (back to /architect when a phase is done), with /undo as the safety valve">
@@ -430,14 +431,14 @@
         <p><strong>Every persona runs the full spine</strong>, including <code>/setup-stack</code>. Each role has at least one stack. Some stacks install nothing on your machine (the PM&rsquo;s <code>pm-prd-markdown</code>, the accountant&rsquo;s <code>sheets-accounting</code>); they still add the rules and templates for that role. Several personas can be active in one repo; you run the spine once per role.</p>
 
         <h3 id="pipeline-rules">Two enforcement rules</h3>
-        <p>The pipeline is enforced by two rules baked into every command. This is not advice:the commands literally stop if these rules are violated.</p>
+        <p>The pipeline is enforced by two rules baked into every command. This is not advice: the commands literally stop if these rules are violated.</p>
 
         <table class="pipeline-table">
           <thead>
             <tr>
               <th>Command</th>
-              <th>Rule A:persona gate</th>
-              <th>Rule B:next pointer</th>
+              <th>Rule A: persona gate</th>
+              <th>Rule B: next pointer</th>
               <th>What it produces</th>
             </tr>
           </thead>
@@ -598,7 +599,7 @@
 
       <!-- ===== LAB 1 ===== -->
       <section id="lab-1">
-        <h2>Lab 1:Onboarding <span class="timebox">&#9201; 25 min</span></h2>
+        <h2>Lab 1: Onboarding <span class="timebox">&#9201; 25 min</span></h2>
 
         <div class="callout callout-lab">
           <div class="callout-title">Goal</div>
@@ -655,9 +656,9 @@
         <p><strong>What it does:</strong> <code>/architect &lt;role&gt; exercises/&lt;role&gt;/01-.../README.md</code> (engineers start at <code>00-skeleton</code>) turns an exercise brief (or a one-line idea) into a full plan inside <code>workspaces/&lt;role&gt;/plans/</code>: <code>sessions/session-overview.md</code>, one session file per phase, an <code>interface-contract.md</code> (OpenAPI, proto, PRD outline, token set, close workbook steps, depending on shape), and a walking skeleton in the right places.</p>
         <p><strong>Gated 3-phase flow:</strong>
           <ol>
-            <li><strong>Design</strong>:produce all planning docs, no code.</li>
-            <li><strong>&#9940; Human review gate</strong>:you read the plan and approve before any code is written.</li>
-            <li><strong>Scaffold</strong>:only then does the skeleton get built.</li>
+            <li><strong>Design</strong>: produce all planning docs, no code.</li>
+            <li><strong>&#9940; Human review gate</strong>: you read the plan and approve before any code is written.</li>
+            <li><strong>Scaffold</strong>: only then does the skeleton get built.</li>
           </ol>
         </p>
         <p>This means <code>/architect</code> never ships code you haven&rsquo;t signed off on. We&rsquo;ll go deeper in Section 5.</p>
@@ -677,7 +678,7 @@
 
       <!-- ===== 5. /architect deep dive ===== -->
       <section id="architect-deep">
-        <h2>5. /architect:the gated 3-phase flow</h2>
+        <h2>5. /architect: the gated 3-phase flow</h2>
         <p>This is the most important command in the class. It is also the easiest to misuse, so it has guardrails.</p>
 
         <figure>
@@ -720,7 +721,7 @@
         </figure>
 
         <h3 id="persona-spokes">Persona spokes</h3>
-        <p>Inside one session, you use the spokes installed by <code>/set-persona</code>. These are <em>not</em> new spine commands:they are tools you call <strong>while inside</strong> a <code>/start-session</code> &rarr; <code>/next-session</code> cycle.</p>
+        <p>Inside one session, you use the spokes installed by <code>/set-persona</code>. These are <em>not</em> new spine commands: they are tools you call <strong>while inside</strong> a <code>/start-session</code> &rarr; <code>/next-session</code> cycle.</p>
 
         <table>
           <thead><tr><th>Persona</th><th>In-session spokes</th><th>What each does</th></tr></thead>
@@ -761,7 +762,7 @@
 
       <!-- ===== LAB 2 ===== -->
       <section id="lab-2">
-        <h2>Lab 2:Architect + two sessions <span class="timebox">&#9201; 60 min</span></h2>
+        <h2>Lab 2: Architect + two sessions <span class="timebox">&#9201; 60 min</span></h2>
 
         <div class="callout callout-lab">
           <div class="callout-title">Goal</div>
@@ -838,7 +839,7 @@
 
       <!-- ===== LAB 3 ===== -->
       <section id="lab-3">
-        <h2>Lab 3:Adapt to your real repo <span class="timebox">&#9201; 40 min</span></h2>
+        <h2>Lab 3: Adapt to your real repo <span class="timebox">&#9201; 40 min</span></h2>
 
         <div class="callout callout-lab">
           <div class="callout-title">Goal</div>
@@ -872,8 +873,8 @@
 
       <!-- ===== 8. /undo ===== -->
       <section id="undo">
-        <h2>8. /undo:the safety valve</h2>
-        <p>The pipeline writes files. Lots of files:rules, templates, manifests, context. If you want to switch personas, switch stacks, or just start over, you need a clean way to remove everything you installed.</p>
+        <h2>8. /undo: the safety valve</h2>
+        <p>The pipeline writes files. Lots of files: rules, templates, manifests, context. If you want to switch personas, switch stacks, or just start over, you need a clean way to remove everything you installed.</p>
         <p><code>/undo</code> reads the manifests that <code>/set-persona</code> and <code>/setup-stack</code> (or <code>/detect-stack</code>) wrote for one role and deletes exactly those files. Nothing more, nothing less. Other roles stay installed, and your work in <code>workspaces/&lt;role&gt;/</code> is never deleted.</p>
 
         <figure>
@@ -898,7 +899,7 @@
 
       <!-- ===== 9. Adapt at work ===== -->
       <section id="adapt-table">
-        <h2>9. What you learned:adapt it at work</h2>
+        <h2>9. What you learned: adapt it at work</h2>
         <p>You now know enough to take this workflow back to your real job. Here&rsquo;s the one-page conversion table.</p>
 
         <table class="adapt-table">
@@ -920,7 +921,7 @@
             </tr>
             <tr>
               <td>Drive sessions with persona spokes</td>
-              <td>Inside a session, use the spokes for your role:don&rsquo;t freestyle. Engineer: <code>/engineer-tasks</code> then <code>/engineer-implement</code>. The spokes are what give the AI structure within a session.</td>
+              <td>Inside a session, use the spokes for your role: don&rsquo;t freestyle. Engineer: <code>/engineer-tasks</code> then <code>/engineer-implement</code>. The spokes are what give the AI structure within a session.</td>
             </tr>
             <tr>
               <td>End each session with <code>/next-session</code></td>
