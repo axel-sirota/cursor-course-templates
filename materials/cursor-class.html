@@ -216,6 +216,7 @@
     <summary>Table of Contents</summary>
     <ul>
       <li><a href="#how-to-use">0. How to use this guide</a></li>
+      <li><a href="#basics">0.5 Basic concepts</a></li>
       <li><a href="#what-is">1. What is Cursor?</a></li>
       <li><a href="#sdd-pipeline">2. The SDD pipeline</a></li>
       <li><a href="#personas-stacks">3. Personas, stacks, and architecture shapes</a></li>
@@ -240,6 +241,19 @@
       <nav>
         <ul>
           <li><a href="#how-to-use">0. How to use this guide</a></li>
+          <li><a href="#basics">0.5 Basic concepts</a></li>
+          <li class="sub"><a href="#basics-prompt">Prompt</a></li>
+          <li class="sub"><a href="#basics-context-window">Context window</a></li>
+          <li class="sub"><a href="#basics-compaction">Compaction</a></li>
+          <li class="sub"><a href="#basics-rule">Rule</a></li>
+          <li class="sub"><a href="#basics-command">Command</a></li>
+          <li class="sub"><a href="#basics-skill">Skill</a></li>
+          <li class="sub"><a href="#basics-why-commands">Why commands and skills</a></li>
+          <li class="sub"><a href="#basics-hook">Hook</a></li>
+          <li class="sub"><a href="#basics-agent">Agent and subagent</a></li>
+          <li class="sub"><a href="#basics-mcp">MCP server</a></li>
+          <li class="sub"><a href="#basics-persona-stack">Persona and stack</a></li>
+          <li class="sub"><a href="#basics-whole-picture">The whole picture</a></li>
           <li><a href="#what-is">1. What is Cursor?</a></li>
           <li class="sub"><a href="#what-is-pain">The pain it solves</a></li>
           <li class="sub"><a href="#what-is-not">What it is not</a></li>
@@ -283,11 +297,101 @@
           <li><strong>Lab 2: Architect + two sessions.</strong> Run <code>/architect &lt;role&gt;</code> on your track&rsquo;s first exercise in <code>exercises/&lt;role&gt;/</code>, then drive two <code>/start-session &lt;role&gt;</code> &rarr; <code>/next-session</code> cycles.</li>
           <li><strong>Lab 3 &mdash; Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
         </ul>
-        <p>This class teaches the <strong>workflow only</strong>. It does <em>not</em> cover hooks, MCP servers, sub-agents, or automation. Those are advanced topics for a later session.</p>
+        <p>This class teaches the <strong>workflow</strong>. <a href="#basics">Basic concepts</a> explains hooks, MCP servers, subagents and skills so you know what they are and where they live in this repo. We do not build them in the labs. Writing your own is an advanced topic for a later session.</p>
         <div class="callout callout-info">
           <div class="callout-title">How to follow along</div>
           <p>Each section has a short concept, a small diagram, and either a demo block (instructor runs it) or a lab block (you run it). When you see <span class="timebox">&#9201; Lab</span>, stop reading and do it on your laptop.</p>
         </div>
+      </section>
+
+      <!-- ===== 0.5 Basic concepts ===== -->
+      <section id="basics">
+        <h2>0.5 Basic concepts</h2>
+        <p>The core terms you will hear all class. Come back here whenever a term is unclear. Each one has a plain explanation, a small diagram, and the real path in this repo.</p>
+
+        <h3 id="basics-prompt">Prompt</h3>
+        <p>The prompt is everything the model reads, not just what you type. Cursor adds the rules that apply, your open files, anything you <code>@</code> mention, and <code>.cursor/context.md</code>. Better inputs give better answers, so most of this class is about controlling what Cursor adds.</p>
+        <figure>
+          <img src="diagrams/d10-prompt-assembly.svg" alt="Your typed message plus rules, context.md, open files and @ mentions combine into the full prompt sent to the model">
+        </figure>
+        <p><strong>In this repo:</strong> <code>.cursor/context.md</code> is the project memory every command reads first.</p>
+
+        <h3 id="basics-context-window">Context window</h3>
+        <p>The context window is the model&rsquo;s working memory for one chat. It has a fixed size. Rules, files the agent reads, your messages, its replies and tool output all fill it. When it is full, something has to go.</p>
+        <figure>
+          <img src="diagrams/d11-context-window.svg" alt="One chat holds rules and context.md, files read, your messages, agent replies and free space; when full, oldest details are squeezed out">
+        </figure>
+        <p><strong>In this repo:</strong> one session per chat. <code>/start-session</code> opens it, <code>/next-session</code> closes it.</p>
+
+        <h3 id="basics-compaction">Compaction (summarization)</h3>
+        <p>When a chat gets long, Cursor summarizes the older turns to make room. The summary keeps the gist and drops exact details: file names, numbers, small decisions. Anything you need tomorrow must live in a file, not in the chat.</p>
+        <figure>
+          <img src="diagrams/d12-compaction.svg" alt="A long chat is summarized and loses details; the handoff doc written by /next-session and context.md stay on disk and seed the next chat">
+        </figure>
+        <p><strong>In this repo:</strong> <code>/next-session</code> writes <code>workspaces/&lt;role&gt;/plans/transitions/latest.md</code>, and <code>.cursor/context.md</code> persists between chats.</p>
+
+        <h3 id="basics-rule">Rule</h3>
+        <p>A rule is a standing instruction in a <code>.mdc</code> file that Cursor adds to the prompt for you. <code>alwaysApply: true</code> adds it to every chat. <code>globs</code> adds it only when matching files are in context.</p>
+        <figure>
+          <img src="diagrams/d13-rules-scope.svg" alt="A rule with alwaysApply true reaches every chat; rules with globs workspaces/engineer/** or workspaces/pm/** apply only when those files are in context">
+        </figure>
+        <p><strong>In this repo:</strong> <code>/set-persona</code> copies <code>personas/&lt;role&gt;/rules/*.mdc</code> into <code>.cursor/rules/&lt;role&gt;/</code> and scopes each one to <code>globs: workspaces/&lt;role&gt;/**</code>.</p>
+
+        <h3 id="basics-command">Command</h3>
+        <p>A command is a saved prompt in a Markdown file. You type <code>/name</code> and Cursor sends that file&rsquo;s text as the prompt. Use one for any multi-step job you repeat.</p>
+        <figure>
+          <img src="diagrams/d14-command.svg" alt="Typing /next-session loads .cursor/commands/next-session.md, its text becomes the prompt, and the agent runs the same steps every time">
+        </figure>
+        <p><strong>In this repo:</strong> <code>.cursor/commands/</code> holds <code>set-persona.md</code>, <code>setup-stack.md</code>, <code>architect.md</code>, <code>start-session.md</code>, <code>next-session.md</code>, <code>detect-stack.md</code>, <code>undo.md</code> and more.</p>
+
+        <h3 id="basics-skill">Skill</h3>
+        <p>A skill is a folder with a <code>SKILL.md</code> file (instructions plus a short description) and any helper files. You call a command yourself. With a skill, the agent reads the descriptions and loads the skill only when your task needs it. Cursor reads skills from <code>.cursor/skills/&lt;name&gt;/SKILL.md</code>.</p>
+        <figure>
+          <img src="diagrams/d15-skill-vs-command.svg" alt="Command: you type /name and the agent runs it. Skill: you ask a task, the agent checks skill descriptions and loads SKILL.md plus files if relevant">
+        </figure>
+        <p><strong>In this repo:</strong> no skills. Commands plus role-scoped rules do the same job here.</p>
+
+        <h3 id="basics-why-commands">Why commands and skills</h3>
+        <p>Typed prompts drift. Two people ask for the same thing in two ways and get two results. A command or skill is one file in git: the same steps every time, shared by the whole team, no retyping.</p>
+        <figure>
+          <img src="diagrams/d16-adhoc-vs-command.svg" alt="Ad-hoc prompting: different wording on different days gives different steps and results. Saved command: anyone types /next-session, one shared file in git, same steps and output">
+        </figure>
+        <p><strong>In this repo:</strong> every step of the class is a command in <code>.cursor/commands/</code>, so every student runs identical steps.</p>
+
+        <h3 id="basics-hook">Hook</h3>
+        <p>A hook is a script Cursor runs on an agent event. <code>beforeShellExecution</code> runs before a terminal command and can block it. <code>afterFileEdit</code> runs after the agent edits a file. <code>stop</code> runs when the agent finishes. Hooks are code, so they run every time, unlike an instruction the model can forget.</p>
+        <figure>
+          <img src="diagrams/d17-hooks.svg" alt="beforeShellExecution runs block-destructive.sh and allows or blocks the command; afterFileEdit runs lint.sh and type-check.sh; stop runs test-runner.sh">
+        </figure>
+        <p><strong>In this repo:</strong> <code>/set-persona</code> merges <code>personas/&lt;role&gt;/hooks.json</code> into <code>.cursor/hooks.json</code>, wrapping each script in <code>.cursor/scripts/_scope.sh</code> so it only fires for that role.</p>
+
+        <h3 id="basics-agent">Agent and subagent</h3>
+        <p>The agent is the model running in a loop: read, think, call a tool, check the result, repeat until done. A subagent is a helper the agent hands a side task to. It works in its own context window and returns a short summary, which keeps the main chat clean.</p>
+        <figure>
+          <img src="diagrams/d18-agent-loop.svg" alt="Agent loop: goal, read, think, call a tool, check if done; if not, loop back; if yes, answer. A subagent with its own context window can take a side task and return a summary">
+        </figure>
+        <p><strong>In this repo:</strong> subagents live in <code>personas/&lt;role&gt;/agents/*.md</code> (for example <code>personas/engineer/agents/verifier.md</code>) and are copied to <code>.cursor/agents/</code>.</p>
+
+        <h3 id="basics-mcp">MCP server</h3>
+        <p>An MCP server is a plug that gives the agent new tools or data, like a browser, a database or current library docs. Cursor starts the servers listed in <code>.cursor/mcp.json</code> and offers their tools to the agent.</p>
+        <figure>
+          <img src="diagrams/d19-mcp.svg" alt="The agent reads .cursor/mcp.json, which connects it to the playwright server, the context7 server and other servers">
+        </figure>
+        <p><strong>In this repo:</strong> <code>/set-persona</code> merges <code>personas/&lt;role&gt;/mcp.json</code> into <code>.cursor/mcp.json</code>. The engineer persona adds <code>playwright</code> and <code>context7</code>.</p>
+
+        <h3 id="basics-persona-stack">Persona and stack</h3>
+        <p>A persona is your role and everything that comes with it: rules, commands, subagents, hooks, MCP servers. A stack is your tools: language, framework and the rules for them. Two commands install them, and both write into your role&rsquo;s workspace.</p>
+        <figure>
+          <img src="diagrams/d20-persona-stack.svg" alt="/set-persona add engineer installs the persona; /setup-stack engineer installs the stack; both feed workspaces/engineer/">
+        </figure>
+        <p><strong>In this repo:</strong> <code>personas/&lt;role&gt;/persona.yaml</code> defines each role. Stacks live in <code>stacks/</code>. Details in <a href="#personas-stacks">section 3</a>.</p>
+
+        <h3 id="basics-whole-picture">The whole picture</h3>
+        <p>You start with a prompt or a command. The agent loops, using rules and <code>context.md</code> for guidance and tools and MCP servers to act. Hooks fire around each step. The output ends with a handoff doc that seeds the next chat.</p>
+        <figure>
+          <img src="diagrams/d21-whole-picture.svg" alt="You send a prompt or command to the agent loop; rules, context.md, tools and MCP servers feed it; hooks fire around it; it produces output and a /next-session handoff doc that seeds the next chat">
+        </figure>
+        <p><strong>In this repo:</strong> the SDD pipeline in <a href="#sdd-pipeline">section 2</a> runs this loop once per session.</p>
       </section>
 
       <!-- ===== 1. What is Cursor? ===== -->
@@ -299,11 +403,11 @@
         <p>Cursor is an AI-native IDE (a fork of VS Code) that fixes this by giving the AI a <strong>project context</strong> (a file called <code>.cursor/context.md</code>) and a <strong>workflow of slash commands</strong> that move you through stages: pick a role, pick a stack, design the work, execute it in sessions, review, adapt.</p>
 
         <figure>
-          <img src="diagrams/d01-without-vs-with-workflow.svg" alt="Without a workflow vs With Cursor &mdash; two-column flow showing chaotic AI chat on the left and stateful pipeline on the right">
+          <img src="diagrams/d01-without-vs-with-workflow.svg" alt="Without a workflow vs With Cursor: two-column flow showing chaotic AI chat on the left and stateful pipeline on the right">
         </figure>
 
         <h3 id="what-is-not">What it is not (in this class)</h3>
-        <p>Cursor has many advanced features &mdash; hooks, MCP servers, sub-agents, automation, <code>@</code> context symbols. <strong>We do not teach any of those today.</strong> The workflow alone is enough value for one class, and the workflow is the foundation on which the advanced features rest. Build the foundation first.</p>
+        <p>Cursor has advanced features: hooks, MCP servers, subagents, skills, automation. <a href="#basics">Basic concepts</a> explains what each one is, and your persona installs some of them for you. <strong>We do not build or customize any of them in the labs.</strong> The workflow is the foundation the advanced features rest on. Build the foundation first.</p>
 
         <div class="callout callout-tip">
           <div class="callout-title">One sentence summary</div>
@@ -317,7 +421,7 @@
         <p>Everything in this class hangs on one diagram: the Spec-Driven Development (SDD) pipeline. Memorize it now &mdash; every command you learn is a station on this line.</p>
 
         <figure>
-          <img src="diagrams/d02-sdd-pipeline-spine-v2.svg" alt="SDD pipeline spine per persona: /set-persona add role, /setup-stack role, /architect role, then /start-session and /next-session in a loop, with /undo as the safety valve">
+          <img src="diagrams/d02-sdd-pipeline-spine.svg" alt="SDD pipeline spine per persona: /set-persona add role, /setup-stack role, /architect role, you reply approved, then /start-session and /next-session in a loop (back to /architect when a phase is done), with /undo as the safety valve">
         </figure>
 
         <h3 id="pipeline-spine">The spine</h3>
@@ -383,7 +487,7 @@
         <p>The pipeline is parametric. The same five commands work for very different jobs because three knobs configure them: <strong>persona</strong> (who you are), <strong>stack</strong> (what tech you use), and <strong>architecture shape</strong> (what the output looks like).</p>
 
         <figure>
-          <img src="diagrams/d03-persona-stack-shape-v2.svg" alt="Three lanes: Persona, Stack, Architecture Shape, showing how the same pipeline produces a different output for each of the five roles">
+          <img src="diagrams/d03-persona-stack-shape.svg" alt="Three lanes: Persona, Stack, Architecture Shape. engineer, pm, designer, data-scientist and accountant each map to their stacks and to the shape /architect produces">
         </figure>
 
         <h3 id="personas">The 5 personas</h3>
@@ -498,7 +602,7 @@
 
         <div class="callout callout-lab">
           <div class="callout-title">Goal</div>
-          <p>Pick the persona and stack that match your real job (see <a href="#pick-track">Pick your track</a>). Run them in the course repo. End with your role listed in <code>.cursor/context.md</code>, a stack installed for it, and an empty <code>workspaces/&lt;role&gt;/</code> ready for Lab 2.</p>
+          <p>Pick the persona and stack that match your real job (see <a href="#pick-track">Pick your track</a>). Run them in the course repo. End with your role listed in <code>.cursor/context.md</code>, a stack installed for it, and a <code>workspaces/&lt;role&gt;/</code> folder (empty <code>plans/</code>, plus the stack&rsquo;s templates and examples) ready for Lab 2.</p>
         </div>
 
         <h3>Steps</h3>
@@ -534,7 +638,7 @@
         <p>Six commands. Five on the spine + <code>/detect-stack</code> for brownfield. That&rsquo;s the whole class. Everything else is optional or persona-specific.</p>
 
         <figure>
-          <img src="diagrams/d04-six-commands-overview-v2.svg" alt="The 6 commands radiating from .cursor/context.md: the 5 spine commands, each taking a role, plus /detect-stack as brownfield entry">
+          <img src="diagrams/d04-six-commands-overview.svg" alt="The 6 commands all writing to .cursor/context.md: the 5 spine commands, each taking a role, plus /detect-stack role as the brownfield entry instead of /setup-stack">
         </figure>
 
         <h3 id="cmd-set-persona">/set-persona</h3>
@@ -564,10 +668,10 @@
 
         <h3 id="cmd-next-session">/next-session</h3>
         <p><strong>What it does:</strong> wraps up today. Runs the persona&rsquo;s quality gate from <code>persona.yaml</code> (test suite for engineer, token-validator for designer, gap-detector for PM, experiment tracker and <code>/ds-validate</code> for data-scientist, tie-out-checker and controls-checker for accountant). Writes a transition doc to <code>workspaces/&lt;role&gt;/plans/transitions/</code>, including the exact spokes to call next time.</p>
-        <p><strong>It points you back to <code>/start-session</code>.</strong> The loop is closed.</p>
+        <p><strong>It points you back to <code>/start-session &lt;role&gt;</code></strong> (or to <code>/architect &lt;role&gt;</code> when the last phase just finished). The loop is closed.</p>
 
         <h3 id="cmd-detect-stack">/detect-stack</h3>
-        <p><strong>What it does:</strong> the brownfield entry point. Scans your existing repo, figures out the language and framework, matches against the stack library, and generates a context file that mirrors what&rsquo;s actually there &mdash; not what you wish were there.</p>
+        <p><strong>What it does:</strong> the brownfield entry point. <code>/detect-stack &lt;role&gt; &lt;path&gt;</code> scans your existing code (default path: <code>workspaces/&lt;role&gt;/</code>), figures out the language, framework, tests and style, and matches it against the stack library. It writes <code>Stack</code> + <code>Architecture Shape</code> into the <code>## Persona: &lt;role&gt;</code> block, puts stack rules in <code>.cursor/rules/&lt;role&gt;/stack-*.mdc</code> that mirror what is actually there, and writes the same <code>.cursor/stacks/&lt;role&gt;.manifest.json</code> as <code>/setup-stack</code>, so <code>/undo stack &lt;role&gt;</code> works.</p>
         <p><strong>When to use:</strong> instead of <code>/setup-stack</code>, when you already have code and you want the AI to learn <em>your</em> patterns rather than impose a template.</p>
       </section>
 
@@ -577,14 +681,14 @@
         <p>This is the most important command in the class. It is also the easiest to misuse, so it has guardrails.</p>
 
         <figure>
-          <img src="diagrams/d05-architect-gated-flow.svg" alt="/architect gated 3-phase flow: Design &rarr; Human review gate &rarr; Scaffold, with a reject-and-revise loop back to Design">
+          <img src="diagrams/d05-architect-gated-flow.svg" alt="/architect role with an exercise brief: Design (no code) &rarr; Human review gate where you reply approved &rarr; Scaffold and skeleton check &rarr; /start-session role, with a push-back-and-revise loop back to Design">
         </figure>
 
         <h3>Why three phases?</h3>
         <p>The old failure mode of AI architects: ask &ldquo;build me a task tracker,&rdquo; receive 40 files of code in 30 seconds, discover three days later that the data model is wrong. By that point, refactoring is more expensive than starting over.</p>
         <p>Gating the design phase forces a moment where you, the human, read what the AI plans to build <em>before</em> it builds it. Catching a bad design in a markdown file is free; catching it in code is not.</p>
 
-        <h3>Phase 1 &mdash; Design</h3>
+        <h3>Phase 1: Design</h3>
         <p>The AI produces, inside <code>workspaces/&lt;role&gt;/</code>:</p>
         <ul>
           <li><code>plans/sessions/session-overview.md</code>: the phase breakdown and session list</li>
@@ -594,10 +698,10 @@
         </ul>
         <p>It also runs a <strong>self-audit</strong> step: re-reads its own output, diffs the manifest, checks that every promised file actually exists, and lists the architectural risks it sees. You see this audit before the gate.</p>
 
-        <h3>Phase 2 &mdash; Human review gate</h3>
-        <p>Nothing else happens until you say yes. Read the plan, push back if anything is wrong, ask for revisions. <strong>The AI cannot proceed to scaffold without your approval.</strong></p>
+        <h3>Phase 2: Human review gate</h3>
+        <p>Nothing else happens until you reply &ldquo;approved&rdquo; (or &ldquo;looks good&rdquo;, &ldquo;proceed&rdquo;). Read the plan, push back if anything is wrong, ask for revisions. <strong>The AI cannot proceed to scaffold without your approval.</strong></p>
 
-        <h3>Phase 3 &mdash; Scaffold</h3>
+        <h3>Phase 3: Scaffold</h3>
         <p>After approval, the AI writes the walking skeleton: the minimum that matches the interface contract, with stubs and no final content. Then it runs the shape&rsquo;s skeleton check: every stub route answers (engineer), every PRD heading is present (pm), the token JSON validates (designer), the notebook runs top to bottom (data-scientist), the tie-out stubs run (accountant). The first <code>/start-session</code> fills the stubs in.</p>
 
         <div class="callout callout-info">
@@ -612,7 +716,7 @@
         <p>Once <code>/architect</code> has produced a plan, you live in a loop:</p>
 
         <figure>
-          <img src="diagrams/d06-session-loop.svg" alt="Session loop: /start-session &rarr; persona spokes &rarr; /next-session, looping back tomorrow. Spine is universal; spokes are per-persona">
+          <img src="diagrams/d06-session-loop.svg" alt="Session loop: /start-session role &rarr; persona spokes &rarr; /next-session (quality gate + transition doc), looping back tomorrow, or to /architect role when a phase is done. Spine is universal; spokes are per-persona">
         </figure>
 
         <h3 id="persona-spokes">Persona spokes</h3>
@@ -711,13 +815,13 @@
         <p>Real engineers spend more time on existing codebases than greenfield ones. The workflow has a separate entry point for that: <code>/detect-stack</code>.</p>
 
         <figure>
-          <img src="diagrams/d07-greenfield-vs-brownfield.svg" alt="Greenfield vs brownfield: two parallel pipelines that diverge only at step 2 (/setup-stack vs /detect-stack), then converge at /architect">
+          <img src="diagrams/d07-greenfield-vs-brownfield.svg" alt="Greenfield vs brownfield: two parallel pipelines per role that diverge only at step 2 (/setup-stack role vs /detect-stack role path), then continue the same way at /architect role">
         </figure>
 
         <h3>What changes</h3>
         <ul>
-          <li><code>/setup-stack</code> &rarr; <code>/detect-stack</code>. The AI reads your code and infers the stack instead of you picking from a list.</li>
-          <li>The detected stack may match an existing library entry (great: you get the prebuilt rules) or it may be custom (you get a fresh stack scaffolded under <code>stacks/{name}/</code>, a clean lowercase-hyphenated name with no <code>detected-</code> prefix).</li>
+          <li><code>/setup-stack &lt;role&gt;</code> &rarr; <code>/detect-stack &lt;role&gt; &lt;path&gt;</code>. The AI reads your code and infers the stack instead of you picking from a list. Without a path it scans <code>workspaces/&lt;role&gt;/</code>.</li>
+          <li>The detected stack may match an existing library entry (great: you get the prebuilt rules) or it may be custom. For a custom stack it generates rules for your role and asks whether to also save it as a reusable stack under <code>stacks/{name}/</code> (a clean lowercase-hyphenated name with no <code>detected-</code> prefix).</li>
           <li>Everything downstream is the same. <code>/architect</code> still produces session files, the session loop still applies, persona spokes still work.</li>
         </ul>
 
@@ -747,21 +851,22 @@
           <li>Copy the course&rsquo;s <code>.cursor/</code>, <code>personas/</code> and <code>stacks/</code> folders into that repo (the commands read all three). Don&rsquo;t commit them yet: you may want to <code>.gitignore</code> them or move them to a branch.</li>
           <li>Open the repo in Cursor: <code>cursor .</code>, then <kbd>Cmd</kbd>+<kbd>L</kbd> for chat.</li>
           <li>Run <code>/set-persona add &lt;role&gt;</code> with the persona that matches what you do in that repo.</li>
-          <li>Run <code>/detect-stack</code>. Let it scan. Read what it reports.</li>
-          <li>Open the generated context file. Does it correctly identify your framework, your testing tool, your conventions? If not, edit it &mdash; the file is yours.</li>
+          <li>Run <code>/detect-stack &lt;role&gt; &lt;path&gt;</code>, where <code>&lt;path&gt;</code> is your code (for example <code>.</code> or <code>src/</code>). Let it scan. Read what it reports and answer its questions.</li>
+          <li>Open the <code>## Persona: &lt;role&gt;</code> block in <code>.cursor/context.md</code> and the generated <code>.cursor/rules/&lt;role&gt;/stack-*.mdc</code> rules. Do they correctly identify your framework, your testing tool, your conventions? If not, edit them: the files are yours. The rules are scoped by glob to <code>workspaces/&lt;role&gt;/**</code>; widen the <code>globs</code> line if you want them to attach to code elsewhere in the repo.</li>
           <li>Ask Cursor a question about your real code: &ldquo;What does <code>UserService.create</code> do?&rdquo; or &ldquo;Where are tests for the auth flow?&rdquo; Confirm the answers reference your actual files, not generic guesses.</li>
         </ol>
 
         <h3>Checkpoint</h3>
         <ul>
           <li>✅ <code>/detect-stack</code> ran without errors and identified at least the language and framework</li>
-          <li>✅ The generated context file references real files / patterns from your repo</li>
+          <li>✅ The persona block and the generated <code>stack-*.mdc</code> rules reference real files / patterns from your repo</li>
+          <li>✅ <code>.cursor/stacks/&lt;role&gt;.manifest.json</code> exists, so <code>/undo stack &lt;role&gt;</code> can reverse it</li>
           <li>✅ Cursor can answer a specific question about real code in your repo</li>
         </ul>
 
         <div class="callout callout-tip">
           <div class="callout-title">If the detection is wrong</div>
-          <p>Don&rsquo;t fight it &mdash; just edit the generated context file. <code>/detect-stack</code> is a starting point, not a verdict. The file is markdown; rewriting it takes five minutes.</p>
+          <p>Don&rsquo;t fight it. Edit the persona block and the generated rules, or run <code>/undo stack &lt;role&gt;</code> and detect again. <code>/detect-stack</code> is a starting point, not a verdict. The files are markdown; rewriting them takes five minutes.</p>
         </div>
       </section>
 
@@ -769,10 +874,10 @@
       <section id="undo">
         <h2>8. /undo &mdash; the safety valve</h2>
         <p>The pipeline writes files. Lots of files &mdash; rules, templates, manifests, context. If you want to switch personas, switch stacks, or just start over, you need a clean way to remove everything you installed.</p>
-        <p><code>/undo</code> reads the manifests that <code>/set-persona</code> and <code>/setup-stack</code> wrote for one role and deletes exactly those files. Nothing more, nothing less. Other roles stay installed, and your work in <code>workspaces/&lt;role&gt;/</code> is never deleted.</p>
+        <p><code>/undo</code> reads the manifests that <code>/set-persona</code> and <code>/setup-stack</code> (or <code>/detect-stack</code>) wrote for one role and deletes exactly those files. Nothing more, nothing less. Other roles stay installed, and your work in <code>workspaces/&lt;role&gt;/</code> is never deleted.</p>
 
         <figure>
-          <img src="diagrams/d08-undo-manifest-flow-v2.svg" alt="Undo flow: /set-persona and /setup-stack each write a per-role manifest; /undo reads the manifests and removes exactly those files, leaving other roles and workspaces in place">
+          <img src="diagrams/d08-undo-manifest-flow.svg" alt="Undo flow: /set-persona writes .cursor/personas/role.manifest.json and /setup-stack (or /detect-stack) writes .cursor/stacks/role.manifest.json; /undo persona, stack or all reads them and removes exactly those files, leaving other roles and your workspaces in place">
         </figure>
 
         <h3>Three modes</h3>
@@ -807,7 +912,7 @@
             </tr>
             <tr>
               <td>Pick a stack (or detect one)</td>
-              <td>Make the AI&rsquo;s assumptions match your codebase. Greenfield: pick from the library or scaffold a new stack from <code>stacks/blank/</code>. Brownfield: <code>/detect-stack</code> and then edit the generated context to match reality.</td>
+              <td>Make the AI&rsquo;s assumptions match your codebase. Greenfield: pick from the library or scaffold a new stack from <code>stacks/blank/</code>. Brownfield: <code>/detect-stack &lt;role&gt; &lt;path&gt;</code> and then edit the persona block and generated rules to match reality.</td>
             </tr>
             <tr>
               <td>Run <code>/architect</code> with a human gate</td>
@@ -819,7 +924,7 @@
             </tr>
             <tr>
               <td>End each session with <code>/next-session</code></td>
-              <td>Always close the loop. The transition doc is what makes tomorrow productive instead of confused. Paste it as the goal for the next <code>/start-session</code>.</td>
+              <td>Always close the loop. The transition doc is what makes tomorrow productive instead of confused. The next <code>/start-session &lt;role&gt;</code> reads it and proposes its &ldquo;Next step&rdquo; as the goal.</td>
             </tr>
             <tr>
               <td>Use <code>/undo</code> when things drift</td>
@@ -830,7 +935,7 @@
 
         <div class="callout callout-tip">
           <div class="callout-title">First thing to do Monday</div>
-          <p>Pick one real repo at work. Copy <code>.cursor/</code>, <code>personas/</code> and <code>stacks/</code> into it. Run <code>/set-persona add &lt;role&gt;</code> + <code>/detect-stack</code>. Ask Cursor one question about your actual code. If the answer is grounded in real files, you&rsquo;ve adopted the workflow. The rest follows from there.</p>
+          <p>Pick one real repo at work. Copy <code>.cursor/</code>, <code>personas/</code> and <code>stacks/</code> into it. Run <code>/set-persona add &lt;role&gt;</code> + <code>/detect-stack &lt;role&gt; &lt;path&gt;</code>. Ask Cursor one question about your actual code. If the answer is grounded in real files, you&rsquo;ve adopted the workflow. The rest follows from there.</p>
         </div>
       </section>
 

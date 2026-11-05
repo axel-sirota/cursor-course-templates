@@ -18,15 +18,19 @@ Loads one persona's context before any work happens. The session loop is always:
 
 ### 1. Pick the persona
 
-- Read `## Active Personas` from `.cursor/context.md`. Empty → **STOP**: "⚠️ No persona configured. Run **/set-persona** first."
-- Role from the argument (must be active), else the only active persona, else ask "Which persona is this session for? {list}".
-- Write the role to `.cursor/.active-session` (one line, nothing else). Hooks use it to decide whose `stop` checks run.
+- Read `## Active Personas` from `.cursor/context.md`. Empty → **STOP**: "⚠️ No persona configured. Run `/set-persona add <role>` first, then `/setup-stack <role>` and `/architect <role>`." (use the role the student typed, or `<role>` if none)
+- Role from the argument, else the only active persona, else ask "Which persona is this session for? {list}". Role given but not active → **STOP**: "`<role>` is not active. Run `/set-persona add <role>` first."
 
 ### 2. Check the pipeline order
 
+Run these checks in order and stop at the first failure. Write nothing until all pass.
+
 From the `## Persona: <role>` block:
-- Stack unset → **STOP**: "Run `/setup-stack <role>` first."
-- `workspaces/<role>/plans/sessions/session-overview.md` missing → **STOP**: "Run `/architect <role>` first. A session needs a plan."
+- Stack unset → **STOP**: "`<role>` has no stack yet. Run `/setup-stack <role>` first, then `/architect <role> @exercises/<role>/<exercise>/README.md`."
+- `workspaces/<role>/plans/sessions/session-overview.md` or `workspaces/<role>/plans/.architect-manifest.json` missing → **STOP**: "No plan for `<role>` yet. Run `/architect <role> @exercises/<role>/<exercise>/README.md` first. A session needs a plan."
+- `.architect-manifest.json` has no `approved_at` → **STOP**: "The `<role>` plan is not approved yet. Review `workspaces/<role>/plans/` and reply \"approved\" to the `/architect` review gate. If that chat is gone, run `/architect <role>` and pick `review` to see the gate again."
+
+Then write the role to `.cursor/.active-session` (one line, nothing else). Hooks use it to decide whose `stop` checks run.
 
 ### 3. Load context
 
@@ -55,7 +59,9 @@ Ask: "What is the goal for this session?" Propose the next unchecked tasks from 
 
 ### 6. Ready
 
-"Ready. Rules for <role> are active for files in workspaces/<role>/. Use the in-session commands above to make progress, and run `/next-session` when you stop."
+"Ready. Rules for <role> are active for files in workspaces/<role>/. Use the in-session commands above to make progress, and run `/next-session <role>` when you stop."
+
+Next: work the session with the in-session commands, then `/next-session <role>`.
 
 ## Rules for the whole session
 

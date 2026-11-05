@@ -1,0 +1,16 @@
+flowchart LR
+  Y["You"] --> P["Prompt or<br/>/command"]
+  P --> L["Agent loop<br/>read, think, act, check"]
+  R["Rules +<br/>context.md"] --> L
+  M["Tools +<br/>MCP servers"] <--> L
+  H{{"Hooks fire<br/>around each step"}} -.-> L
+  L --> O["Output<br/>code, docs, tests"]
+  O --> D["/next-session<br/>handoff doc"]
+  D -.->|next chat| P
+
+  classDef you fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef core fill:#ff8f00,stroke:#bf360c,color:#fff;
+  classDef support fill:#00897b,stroke:#004d40,color:#fff;
+  class Y,P you;
+  class L,O,D core;
+  class R,M,H support;

@@ -1,0 +1,22 @@
+flowchart LR
+  U["What you type<br/>'add a /health endpoint'"]
+  R[".cursor/rules/*.mdc<br/>(rules that apply)"]
+  C[".cursor/context.md<br/>(project memory)"]
+  F["Open files"]
+  M["@ mentions<br/>@file, @folder"]
+  P(["Full prompt"])
+  LLM["Model"]
+
+  U --> P
+  R --> P
+  C --> P
+  F --> P
+  M --> P
+  P --> LLM
+
+  classDef you fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef added fill:#00897b,stroke:#004d40,color:#fff;
+  classDef out fill:#ff8f00,stroke:#bf360c,color:#fff;
+  class U you;
+  class R,C,F,M added;
+  class P,LLM out;

@@ -16,7 +16,7 @@ This command analyzes an existing codebase (Brownfield) to generate a custom con
 
 **0. Pick the persona**
 - Read `## Active Personas` from `.cursor/context.md`.
-  - Empty or `(none)` → "⚠️ No persona configured. Run `/set-persona` first." Stop.
+  - Empty or `(none)` → "⚠️ No persona configured. Run `/set-persona add <role>` first, then `/detect-stack <role>`." Stop.
 - If `<role>` was given, it must be in the active list. Otherwise: "`<role>` is not active. Run `/set-persona add <role>` first." Stop.
 - If no role was given: one active persona → use it. Several → ask "Which persona is this stack for? {list}".
 - If `## Persona: <role>` already has a Stack set → "`<role>` already uses `{stack}`. Run `/undo stack <role>` first to switch." Stop.
@@ -245,7 +245,7 @@ List only files written under `.cursor/`. Files created under `stacks/{clean-nam
    Rules: .cursor/rules/<role>/stack-*.mdc  (apply to workspaces/<role>/** only)
    Saved to library: stacks/<clean-name>/   (only if you chose Yes in step 6)
 
-Next: /architect <role>
+Next: /architect <role> @exercises/<role>/<exercise>/README.md  (or a path to your own plan)
 ```
 - Ask: "Does this configuration look correct?"
 
@@ -257,7 +257,7 @@ Next: /architect <role>
 
 | Situation | Message |
 |---|---|
-| No active persona | "⚠️ No persona configured. Run `/set-persona` first." |
+| No active persona | "⚠️ No persona configured. Run `/set-persona add <role>` first, then `/detect-stack <role>`." |
 | Role not active | "`<role>` is not active. Run `/set-persona add <role>` first." |
 | Stack already set | "`<role>` already uses `<stack>`. Run `/undo stack <role>` first." |
 

@@ -1,19 +1,23 @@
 flowchart LR
-  SP["/set-persona"] --> SS["/setup-stack<br/><i>(engineer / ds / devops only)</i>"]
-  SS --> AR["/architect"]
-  AR --> ST["/start-session"]
+  SP["/set-persona add &lt;role&gt;"] --> SS["/setup-stack &lt;role&gt;<br/><i>every persona</i>"]
+  SS --> AR["/architect &lt;role&gt;<br/><i>exercises/&lt;role&gt;/...</i>"]
+  AR --> GATE{{"you reply<br/>approved"}}
+  GATE --> ST["/start-session &lt;role&gt;"]
   ST --> NS["/next-session"]
   NS -->|next day| ST
+  NS -.->|phase done| AR
 
-  SP -.->|designer / pm<br/>skip stack| AR
+  SP -.->|add another role| SP
 
-  UN(["/undo persona | stack | all"])
+  UN(["/undo persona | stack &lt;role&gt; | all"])
   SP -. safety valve .-> UN
   SS -. safety valve .-> UN
 
   classDef spine fill:#7c4dff,stroke:#4527a0,color:#fff,font-weight:bold;
   classDef loop fill:#00897b,stroke:#004d40,color:#fff,font-weight:bold;
+  classDef gate fill:#fff3e0,stroke:#e65100,color:#000;
   classDef undo fill:#e65100,stroke:#bf360c,color:#fff;
   class SP,SS,AR spine;
   class ST,NS loop;
+  class GATE gate;
   class UN undo;

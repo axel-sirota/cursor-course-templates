@@ -1,7 +1,7 @@
 # Project Context
 
 > **A persona is required.** Run `/set-persona` to add one (you can add several).
-> Per persona: `/setup-stack <role>` → `/architect <role>` → `/start-session <role>` → `/next-session`.
+> Per persona: `/setup-stack <role>` → `/architect <role> @exercises/<role>/<exercise>/README.md` → reply "approved" → `/start-session <role>` → `/next-session <role>`.
 > `/set-persona list` shows what is active. `/undo` reverses installs.
 
 ## Active Personas

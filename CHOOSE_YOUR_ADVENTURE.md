@@ -33,6 +33,8 @@ All engineer stacks are graded by the same Hurl acceptance tests over HTTP, so t
 /architect <persona> @exercises/<persona>/<first exercise folder>/README.md   # engineer: 00-skeleton, others: 01-...
    ...review the plan, reply "approved"...
 /start-session <persona>
+   ...work with your persona's in-session commands...
+/next-session <persona>             # then /start-session <persona> next time
 ```
 
 The folder names are in `exercises/<persona>/README.md`. Prerequisites per stack are in `QUICKSTART.md`.
@@ -47,8 +49,8 @@ Several personas can be active in one repo. Each has its own workspace, rules an
 | Add the second role | `/set-persona add pm` |
 | See both | `/set-persona list` |
 | Stack for each | `/setup-stack engineer`, `/setup-stack pm` |
-| Plan each | `/architect engineer ...`, `/architect pm ...` |
-| Work one at a time | `/start-session pm` → `/next-session` → `/start-session engineer` |
+| Plan each, reply "approved" to each | `/architect engineer @exercises/engineer/00-skeleton/README.md`, `/architect pm @exercises/pm/01-notes-to-prd/README.md` |
+| Work one at a time | `/start-session pm` → `/next-session pm` → `/start-session engineer` |
 | Drop one | `/set-persona remove pm` |
 
 Good pairs to try:

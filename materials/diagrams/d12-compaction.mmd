@@ -1,0 +1,13 @@
+flowchart LR
+  L["Long chat<br/>turns 1 to 80"] --> S["Cursor summarizes<br/>turns 1 to 70"]
+  S --> K["Short summary<br/>+ turns 71 to 80"]
+  K --> G["Exact details lost:<br/>names, numbers, decisions"]
+  H["/next-session writes<br/>plans/transitions/latest.md"] --> N["Next chat starts<br/>from the files"]
+  CM[".cursor/context.md<br/>stays on disk"] --> N
+
+  classDef chat fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef loss fill:#ff8f00,stroke:#bf360c,color:#fff;
+  classDef disk fill:#00897b,stroke:#004d40,color:#fff;
+  class L,S,K chat;
+  class G loss;
+  class H,CM,N disk;

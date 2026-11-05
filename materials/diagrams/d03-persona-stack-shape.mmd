@@ -2,28 +2,28 @@ flowchart LR
   subgraph P["Persona (who you are)"]
     direction TB
     P1[engineer]
-    P2[designer]
-    P3[pm]
+    P2[pm]
+    P3[designer]
     P4[data-scientist]
-    P5[devops]
+    P5[accountant]
   end
 
-  subgraph S["Stack (your tech)"]
+  subgraph S["Stack (your tools, picked with /setup-stack)"]
     direction TB
-    S1[python-fastapi<br/>go-gin<br/>node-express<br/>...]
-    S2["(none — Figma)"]
-    S3["(none — PRDs)"]
-    S4[python-datascience<br/>python-spark<br/>r-tidyverse<br/>...]
-    S5[devops-terraform<br/>devops-ansible<br/>devops-k8s-helm]
+    S1["python-fastapi, go-gin, go-grpc<br/>java-spring, node-express, node-nestjs"]
+    S2["pm-prd-markdown"]
+    S3["designer-react-tokens"]
+    S4["python-datascience, python-mlops<br/>python-spark, python-dbt-snowflake<br/>r-tidyverse"]
+    S5["sheets-accounting<br/>python-accounting"]
   end
 
   subgraph A["Architecture Shape (what /architect produces)"]
     direction TB
-    A1[REST API / gRPC]
-    A2[Component tree]
-    A3[PRD]
-    A4[Notebook / Pipeline]
-    A5[IaC Playbook / Modules]
+    A1["REST API / gRPC Service"]
+    A2["PRD Workspace"]
+    A3["Design System"]
+    A4["Notebook / Pipeline / Analytics Model"]
+    A5["Close Workbook"]
   end
 
   P1 --> S1 --> A1

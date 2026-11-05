@@ -1,0 +1,20 @@
+flowchart TB
+  subgraph W["One chat = one context window (fixed size)"]
+    direction LR
+    A["Rules +<br/>context.md"]
+    B["Files read<br/>by the agent"]
+    C["Your messages"]
+    D["Agent replies +<br/>tool output"]
+    E["Free space"]
+  end
+  X["Window full"] --> Y["Oldest details<br/>get squeezed out"]
+  W --> X
+
+  classDef fixed fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef grows fill:#00897b,stroke:#004d40,color:#fff;
+  classDef free fill:#eceff1,stroke:#90a4ae,color:#263238;
+  classDef warn fill:#ff8f00,stroke:#bf360c,color:#fff;
+  class A fixed;
+  class B,C,D grows;
+  class E free;
+  class X,Y warn;

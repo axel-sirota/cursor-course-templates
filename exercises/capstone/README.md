@@ -16,7 +16,7 @@ Time: 90 to 120 minutes. Run it as a team (one role per person) or alone with se
 /set-persona list
 ```
 
-Skip the roles nobody in your group plays. Run `/setup-stack <role>` for any role that has no stack yet.
+Leave out the roles nobody in your group plays. Every role you add needs `/setup-stack <role>` (if it has no stack yet), then `/architect <role> @exercises/capstone/README.md` and an "approved" reply, before `/start-session <role>`. Each role's step ends with `/next-session <role>`.
 
 ## Steps
 

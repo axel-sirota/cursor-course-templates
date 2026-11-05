@@ -1,0 +1,12 @@
+flowchart LR
+  SP["/set-persona add engineer"] --> P["Persona = your role<br/>rules, commands, subagents,<br/>hooks, MCP servers"]
+  SS["/setup-stack engineer"] --> S["Stack = your tools<br/>language, framework,<br/>stack rules"]
+  P --> W["workspaces/engineer/"]
+  S --> W
+
+  classDef cmd fill:#ff8f00,stroke:#bf360c,color:#fff;
+  classDef persona fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef stack fill:#00897b,stroke:#004d40,color:#fff;
+  class SP,SS cmd;
+  class P persona;
+  class S,W stack;

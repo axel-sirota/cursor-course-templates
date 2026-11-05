@@ -12,7 +12,7 @@ Loads the project brain. With no argument, summarises every active persona; with
 
 ## What it reads
 
-1. `.cursor/context.md` → `## Active Personas` and each `## Persona: <role>` block. Empty → "⚠️ No persona configured. Run `/set-persona` first." Stop.
+1. `.cursor/context.md` → `## Active Personas` and each `## Persona: <role>` block. Empty → "⚠️ No persona configured. Run `/set-persona add <role>` first." Stop.
 2. `METHODOLOGY.md` (phase + TDD principles).
 3. For each persona:
    - `personas/<role>/persona.yaml`
@@ -32,7 +32,8 @@ Next step per persona, by the first thing that is missing:
 | Missing | Next step |
 |---|---|
 | Stack | `/setup-stack <role>` |
-| `plans/sessions/session-overview.md` | `/architect <role>` |
+| `plans/sessions/session-overview.md` | `/architect <role> @exercises/<role>/<exercise>/README.md` |
+| `approved_at` in `plans/.architect-manifest.json` | Reply "approved" to the `/architect <role>` review gate |
 | nothing | `/start-session <role>` (name the next unchecked task) |
 
-If a session is open (`.cursor/.active-session`), say which persona owns it.
+If a session is open (`.cursor/.active-session`), say which persona owns it and that the next step for that persona is `/next-session <role>`.

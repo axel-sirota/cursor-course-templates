@@ -1,0 +1,12 @@
+flowchart LR
+  A["Agent"] --> J[".cursor/mcp.json"]
+  J --> P["playwright server<br/>drive a browser"]
+  J --> C["context7 server<br/>current library docs"]
+  J --> O["other servers<br/>GitHub, DB, Figma"]
+
+  classDef agent fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef cfg fill:#ff8f00,stroke:#bf360c,color:#fff;
+  classDef srv fill:#00897b,stroke:#004d40,color:#fff;
+  class A agent;
+  class J cfg;
+  class P,C,O srv;

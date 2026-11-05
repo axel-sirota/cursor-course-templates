@@ -8,12 +8,15 @@ All exercises use synthetic data. No company systems, tools or documents are nee
 
 ```
 /set-persona add <role>   install the persona pack (repeat to add more roles)
-/setup-stack <role>       pick the stack for that role
-/architect <role>         plan: interface contract + session files, then a skeleton after you approve
-/start-session <role>     load rules and plan, agree the goal
+/setup-stack <role>       pick the stack for that role (required for every role)
+/architect <role> @exercises/<role>/<exercise>/README.md
+                          plan: interface contract + session files; reply "approved", then it builds a skeleton
+/start-session <role>     load rules and plan, agree the goal (refuses without an approved plan)
   ...in-session commands for that role...
-/next-session             quality gate + handoff doc
+/next-session <role>      quality gate + handoff doc; next time, back to /start-session <role>
 ```
+
+Each command refuses and names the exact command to run if an earlier step is missing.
 
 `/read` shows every active persona and its next step. `/undo` reverses any install.
 
@@ -25,7 +28,7 @@ All exercises use synthetic data. No company systems, tools or documents are nee
 | pm | pm-prd-markdown | PRD Workspace |
 | designer | designer-react-tokens | Design System |
 | data-scientist | python-datascience, python-mlops, python-spark, python-dbt-snowflake, r-tidyverse | Experiment Notebook / Data Pipeline / Analytics Model / Statistical Computing |
-| accountant | python-accounting | Close Workbook |
+| accountant | sheets-accounting, python-accounting | Close Workbook |
 
 ## How several personas share one repo
 

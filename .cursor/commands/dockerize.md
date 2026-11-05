@@ -30,7 +30,7 @@ For these stacks, respond:
 
 **1. Context Check**
 - Use the persona's **Stack** from Step 0
-- If no stack configured: "⚠️ Run @setup-stack first"
+- If no stack configured: "⚠️ `<role>` has no stack yet. Run `/setup-stack <role>` first."
 
 **2. Detect Existing Docker Config**
 - Check for existing `Dockerfile`, `docker-compose.yml`

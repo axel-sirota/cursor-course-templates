@@ -1,12 +1,12 @@
 flowchart TB
-  CTX(["CLAUDE.md /<br/>.cursor/context.md<br/>(project brain)"])
+  CTX([".cursor/context.md<br/>(project brain)<br/><i>Active Personas + one block per role</i>"])
 
-  SP["/set-persona<br/><i>writes persona</i>"]
-  SS["/setup-stack<br/><i>writes stack</i>"]
-  AR["/architect<br/><i>writes plan</i>"]
-  ST["/start-session<br/><i>loads + executes</i>"]
+  SP["/set-persona add &lt;role&gt;<br/><i>adds a persona block</i>"]
+  SS["/setup-stack &lt;role&gt;<br/><i>writes that role's stack</i>"]
+  AR["/architect &lt;role&gt;<br/><i>writes that role's plan</i>"]
+  ST["/start-session &lt;role&gt;<br/><i>loads + executes</i>"]
   NS["/next-session<br/><i>wraps + hands off</i>"]
-  DS["/detect-stack<br/><i>brownfield entry</i>"]
+  DS["/detect-stack &lt;role&gt;<br/><i>brownfield entry,<br/>instead of /setup-stack</i>"]
 
   SP --> CTX
   SS --> CTX

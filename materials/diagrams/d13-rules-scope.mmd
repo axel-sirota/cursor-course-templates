@@ -1,0 +1,11 @@
+flowchart LR
+  R1["rule A<br/>alwaysApply: true"] --> ALL["Every chat"]
+  R2["rule B<br/>globs: workspaces/engineer/**"] --> E["Only when engineer<br/>files are in context"]
+  R3["rule C<br/>globs: workspaces/pm/**"] --> P["Only when pm<br/>files are in context"]
+
+  classDef rule fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef always fill:#ff8f00,stroke:#bf360c,color:#fff;
+  classDef scoped fill:#00897b,stroke:#004d40,color:#fff;
+  class R1,R2,R3 rule;
+  class ALL always;
+  class E,P scoped;

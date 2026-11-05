@@ -1,0 +1,11 @@
+flowchart LR
+  T["You type<br/>/next-session"] --> F[".cursor/commands/<br/>next-session.md"]
+  F --> P["Its text becomes<br/>the prompt"]
+  P --> A["Agent runs the<br/>same steps every time"]
+
+  classDef you fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef file fill:#00897b,stroke:#004d40,color:#fff;
+  classDef run fill:#ff8f00,stroke:#bf360c,color:#fff;
+  class T you;
+  class F,P file;
+  class A run;

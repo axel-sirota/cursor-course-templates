@@ -1,0 +1,13 @@
+flowchart LR
+  A["Agent wants to<br/>run a shell command"] --> H1{{"beforeShellExecution<br/>block-destructive.sh"}}
+  H1 -->|allowed| R["Command runs"]
+  H1 -->|denied| X["Blocked"]
+  E["Agent edits a file"] --> H2{{"afterFileEdit<br/>lint.sh, type-check.sh"}}
+  D["Agent finishes"] --> H3{{"stop<br/>test-runner.sh"}}
+
+  classDef agent fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef hook fill:#00897b,stroke:#004d40,color:#fff;
+  classDef result fill:#ff8f00,stroke:#bf360c,color:#fff;
+  class A,E,D agent;
+  class H1,H2,H3 hook;
+  class R,X result;

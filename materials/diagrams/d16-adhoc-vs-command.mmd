@@ -1,0 +1,16 @@
+flowchart LR
+  subgraph A["Ad-hoc prompting"]
+    direction TB
+    A1["Monday: you type it one way"] --> A3["Different steps,<br/>different result"]
+    A2["Tuesday: a teammate types it<br/>another way"] --> A3
+  end
+  subgraph B["Saved command"]
+    direction TB
+    B1["Anyone types /next-session"] --> B2["One shared file<br/>in git"]
+    B2 --> B3["Same steps,<br/>same output"]
+  end
+
+  classDef bad fill:#ff8f00,stroke:#bf360c,color:#fff;
+  classDef good fill:#00897b,stroke:#004d40,color:#fff;
+  class A1,A2,A3 bad;
+  class B1,B2,B3 good;

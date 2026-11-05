@@ -197,6 +197,6 @@ Read `.cursor/context.md` and print one table:
 
 ## Notes
 
-- Persona is mandatory. Every other pipeline command stops with "Run /set-persona first" when `## Active Personas` is empty.
+- Persona is mandatory. Every other pipeline command stops with "Run `/set-persona add <role>` first" when `## Active Personas` is empty.
 - Never hardcode persona names here. Read `personas/` and `persona.yaml`.
 - Removing a persona never deletes `workspaces/<role>/`.

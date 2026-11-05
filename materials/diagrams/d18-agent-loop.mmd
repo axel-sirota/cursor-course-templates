@@ -1,0 +1,16 @@
+flowchart LR
+  G["Your goal"] --> R["Read<br/>files, context"]
+  R --> T["Think<br/>plan next step"]
+  T --> C["Call a tool<br/>edit, shell, search"]
+  C --> K{"Check:<br/>done?"}
+  K -->|no| R
+  K -->|yes| O["Answer"]
+  T -.->|"big side task"| S["Subagent<br/>own context window"]
+  S -.->|summary| T
+
+  classDef you fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef loop fill:#00897b,stroke:#004d40,color:#fff;
+  classDef out fill:#ff8f00,stroke:#bf360c,color:#fff;
+  class G you;
+  class R,T,C,K loop;
+  class O,S out;

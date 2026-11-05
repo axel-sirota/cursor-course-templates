@@ -16,7 +16,7 @@ Installs a stack for ONE persona. Every persona has stacks; the list comes from 
 ### Step 1: Pick the persona
 
 - Read `## Active Personas` from `.cursor/context.md`.
-  - Empty or `(none)` → "⚠️ No persona configured. Run `/set-persona` first." Stop.
+  - Empty or `(none)` → "⚠️ No persona configured. Run `/set-persona add <role>` first, then `/setup-stack <role>`." (use the role the student typed, or `<role>` if none) Stop.
 - If `<role>` was given, it must be in the active list. Otherwise: "`<role>` is not active. Run `/set-persona add <role>` first." Stop.
 - If no role was given: one active persona → use it. Several → ask "Which persona is this stack for? {list}".
 - If `## Persona: <role>` already has a Stack set → "`<role>` already uses `{stack}`. Run `/undo stack <role>` first to switch." Stop.
@@ -103,7 +103,7 @@ Do not touch other persona blocks.
    Templates: workspaces/<role>/templates/
    Examples:  workspaces/<role>/examples/
 
-Next: /architect <role>
+Next: /architect <role> @exercises/<role>/<exercise>/README.md
 ```
 
 Never recommend `/start-session` straight after `/setup-stack`. `/architect` must produce the plan first.
@@ -112,7 +112,7 @@ Never recommend `/start-session` straight after `/setup-stack`. `/architect` mus
 
 | Situation | Message |
 |---|---|
-| No active persona | "⚠️ No persona configured. Run `/set-persona` first." |
+| No active persona | "⚠️ No persona configured. Run `/set-persona add <role>` first, then `/setup-stack <role>`." |
 | Role not active | "`<role>` is not active. Run `/set-persona add <role>` first." |
 | Stack already set | "`<role>` already uses `<stack>`. Run `/undo stack <role>` first." |
 | Stack not in persona.yaml | "That stack is not available for <role>. Pick from the list, type `new`, or `cancel`." |

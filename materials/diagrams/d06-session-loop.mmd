@@ -1,24 +1,28 @@
 flowchart LR
-  ST(["/start-session<br/><i>load + ask goal</i>"])
+  ST(["/start-session &lt;role&gt;<br/><i>load + ask goal</i>"])
 
   subgraph SPOKES["In-session spokes (persona-specific)"]
     direction TB
-    SK1[/"decompose"/]
-    SK2[/"implement / extract / experiment"/]
-    SK3[/"review / validate"/]
+    SK1[/"decompose / extract / explore"/]
+    SK2[/"implement / compose / experiment / reconcile"/]
+    SK3[/"review / validate / handoff"/]
     SK1 --> SK2 --> SK3
   end
 
-  NS(["/next-session<br/><i>wrap + hand off</i>"])
+  NS(["/next-session<br/><i>quality gate + transition doc</i>"])
+  AR["/architect &lt;role&gt;<br/><i>next phase</i>"]
 
   ST --> SPOKES --> NS
   NS -.->|tomorrow| ST
+  NS -.->|phase done| AR
 
   NOTE["spine = universal<br/>spokes = per persona"]
 
   classDef spine fill:#00897b,stroke:#004d40,color:#fff,font-weight:bold;
+  classDef arch fill:#7c4dff,stroke:#4527a0,color:#fff;
   classDef spoke fill:#ff8f00,stroke:#bf360c,color:#fff;
   classDef note fill:#fffde7,stroke:#f9a825,color:#000,font-style:italic;
   class ST,NS spine;
+  class AR arch;
   class SK1,SK2,SK3 spoke;
   class NOTE note;

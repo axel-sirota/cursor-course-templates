@@ -83,7 +83,7 @@ If you have a plan document (`plan.md`, `requirements.md`, etc.), or only a sent
 - Mock endpoints for all features, in the shape of `exercises/engineer/contract/openapi.yaml`
 - Directory structure for your stack, under `workspaces/engineer/`
 
-**Other roles:** run `/architect <role> @exercises/<role>/01-.../README.md` on your first exercise folder (the list is in `exercises/<role>/README.md`). Exception: pm exercise 02 (fix a flawed PRD) starts at `/start-session pm`, because the PRD already exists.
+**Other roles:** run `/architect <role> @exercises/<role>/01-.../README.md` on your first exercise folder (the list is in `exercises/<role>/README.md`). No exceptions: every exercise needs an approved plan before `/start-session` will run, including pm exercise 02 (fix a flawed PRD).
 
 ### Step 5: Start Implementing
 
@@ -330,6 +330,7 @@ This tells the AI:
 
 ```
 /architect engineer "the new feature"
+# read workspaces/engineer/plans/, reply "approved"
 /start-session engineer
 ```
 
@@ -537,7 +538,7 @@ git commit -m "feat: ..."
 /next-session
 ```
 
-Exercise 02 (fix a flawed PRD) skips step 2: the PRD already exists, so start at `/start-session pm`.
+Exercise 02 (fix a flawed PRD) still runs `/architect pm @exercises/pm/02-fix-the-flawed-prd/README.md` and needs "approved". The PRD already exists, so answer "skip" if the skeleton step asks about files in `prds/` or `stories/`.
 
 ### Data Scientist Session Flow
 
@@ -662,6 +663,7 @@ cursor .
 
 # 4. Start on NEW feature
 /architect engineer "Build /api/v2/users endpoint"
+→ Read workspaces/engineer/plans/, reply "approved"
 /start-session engineer
 → AI respects existing code, applies standards to new code only
 
@@ -681,6 +683,9 @@ git commit -m "Add /api/v2/users endpoint"
 |---------|----------|
 | **"No persona configured"** | Run `/set-persona add <role>` first |
 | **"Run /setup-stack <role> first"** | Every persona needs a stack, pm and designer included |
+| **"No plan for `<role>` yet"** | Run `/architect <role> @exercises/<role>/<exercise>/README.md` |
+| **"The `<role>` plan is not approved yet"** | Reply "approved" to the `/architect` review gate, or run `/architect <role>` and pick `review` |
+| **"No open session for `<role>`"** | Run `/start-session <role>` before `/next-session <role>` |
 | **AI ignores my rules** | Rules live in `.cursor/rules/<role>/` and apply to `workspaces/<role>/**` only. Check your files are inside your workspace |
 | **Wrong persona picked up** | Pass the role explicitly: `/start-session <role>`. `/set-persona list` shows what is active |
 | **Too many linter errors** | Set `Strictness: Low` in your stack's `context.md` |
@@ -806,22 +811,22 @@ docker compose down
 
 **"I am in class"**
 ```
-/set-persona add <role> → /setup-stack <role> → /architect <role> @exercises/<role>/<first folder>/README.md → "approved" → /start-session <role>
+/set-persona add <role> → /setup-stack <role> → /architect <role> @exercises/<role>/<first folder>/README.md → "approved" → /start-session <role> → work → /next-session <role>
 ```
 
 **"I want to build the Blog API in Go (or Java, or TypeScript)"**
 ```
-/set-persona add engineer → /setup-stack engineer → go-gin → /architect engineer @exercises/engineer/00-skeleton/README.md → /start-session engineer
+/set-persona add engineer → /setup-stack engineer → go-gin → /architect engineer @exercises/engineer/00-skeleton/README.md → "approved" → /start-session engineer
 ```
 
 **"I want to start a Ruby project"**
 ```
-Create stacks/ruby-rails/ → add it to personas/engineer/persona.yaml → /setup-stack engineer → select ruby-rails → /architect engineer @plan.md
+Create stacks/ruby-rails/ → add it to personas/engineer/persona.yaml → /setup-stack engineer → select ruby-rails → /architect engineer @plan.md → "approved" → /start-session engineer
 ```
 
 **"I have an existing Flask project"**
 ```
-Copy .cursor/, personas/, stacks/ → /set-persona add engineer → /detect-stack engineer → Yes to save stack → /start-session engineer
+Copy .cursor/, personas/, stacks/ → /set-persona add engineer → /detect-stack engineer → Yes to save stack → /architect engineer @plan.md → "approved" → /start-session engineer
 ```
 
 **That's it! You're ready to build with AI assistance.**
@@ -947,7 +952,7 @@ Exercises: 01-brand-to-tokens, 02-claim-components, 03-my-claims-screen (`exerci
 ### PM Workflow
 
 ```
-Draft:     /architect pm @exercises/pm/<exercise>/README.md  (review gate; skip for exercise 02)
+Draft:     /architect pm @exercises/pm/<exercise>/README.md  (review gate, every exercise)
 Start:     /start-session pm
 Decompose: /pm-decompose
 Validate:  /pm-validate  (Three Amigos critique)

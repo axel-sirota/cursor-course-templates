@@ -1,14 +1,14 @@
 flowchart LR
-  subgraph G["Greenfield (empty folder)"]
+  subgraph G["Greenfield (empty workspace)"]
     direction LR
-    G1["/set-persona"] --> G2["/setup-stack<br/><i>pick from library</i>"]
-    G2 --> G3["/architect"] --> G4["/start-session<br/>&harr; /next-session"]
+    G1["/set-persona add &lt;role&gt;"] --> G2["/setup-stack &lt;role&gt;<br/><i>pick from library</i>"]
+    G2 --> G3["/architect &lt;role&gt;"] --> G4["/start-session &lt;role&gt;<br/>&harr; /next-session"]
   end
 
-  subgraph B["Brownfield (existing repo)"]
+  subgraph B["Brownfield (existing code)"]
     direction LR
-    B1["/set-persona"] --> B2["/detect-stack<br/><i>scan &amp; infer</i>"]
-    B2 --> B3["/architect"] --> B4["/start-session<br/>&harr; /next-session"]
+    B1["/set-persona add &lt;role&gt;"] --> B2["/detect-stack &lt;role&gt; &lt;path&gt;<br/><i>scan &amp; infer</i>"]
+    B2 --> B3["/architect &lt;role&gt;"] --> B4["/start-session &lt;role&gt;<br/>&harr; /next-session"]
   end
 
   G ~~~ B

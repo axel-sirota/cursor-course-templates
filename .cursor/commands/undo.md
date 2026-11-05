@@ -38,7 +38,7 @@ For each active persona: undo stack, then undo persona. Then print:
 
 ```
 ✅ Full undo complete. Active Personas: (none)
-Next: /set-persona
+Next: /set-persona add <role>
 ```
 
 ## Error Handling

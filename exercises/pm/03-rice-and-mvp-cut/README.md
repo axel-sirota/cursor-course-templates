@@ -44,12 +44,13 @@ cp exercises/_data/northwind/usage_metrics.csv workspaces/pm/research/   # skip 
 ## Commands to use
 
 ```
+/architect pm @exercises/pm/03-rice-and-mvp-cut/README.md   # pick "archive" for the previous plan, reply "approved"
 /start-session pm
 # score, cut and write with Cursor chat in research/ and docs/
-/next-session
+/next-session pm
 ```
 
-Optional, for the stretch: `/architect pm exercises/pm/03-rice-and-mvp-cut/README.md` to plan a PRD for the MVP, then `/pm-validate`.
+`/start-session` refuses to run without an approved plan, so `/architect` comes first here too. For the stretch, plan a PRD for the MVP inside that plan, then run `/pm-validate`.
 
 ## How it is checked
 

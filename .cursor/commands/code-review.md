@@ -13,7 +13,7 @@ Perform a systematic review of one persona's workspace against that persona's ru
 ## Persona Detection (run first)
 
 - Role: the argument, else `.cursor/.active-session`, else the only active persona in `.cursor/context.md` → `## Active Personas`, else ask.
-- No active persona → "⚠️ No persona configured. Run `/set-persona` first." Stop.
+- No active persona → "⚠️ No persona configured. Run `/set-persona add <role>` first." Stop.
 - Review scope is `workspaces/<role>/` only. Rules are `.cursor/rules/<role>/*.mdc`. Stack is in the `## Persona: <role>` block.
 
 ## Persona Focus (from persona.yaml)

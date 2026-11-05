@@ -62,7 +62,7 @@ flowchart LR
 | `/set-persona add <role>` | Installs the persona's commands, agents, rules, hooks and MCP servers | `.cursor/`, `workspaces/<role>/` |
 | `/setup-stack <role>` | Installs the stack rules, templates and examples | `.cursor/rules/<role>/`, `workspaces/<role>/` |
 | `/architect <role> <exercise README>` | Writes the interface contract and session files, then stops for your review. Builds the skeleton only after you say "approved" | `workspaces/<role>/plans/` |
-| `/start-session <role>` | Loads rules and plan, agrees the session goal | `.cursor/.active-session` |
+| `/start-session <role>` | Loads rules and the approved plan, agrees the session goal. Refuses until you have replied "approved" to `/architect` | `.cursor/.active-session` |
 | in-session commands | The persona's own commands (table below) | `workspaces/<role>/` |
 | `/next-session` | Runs the quality gate, writes the handoff | `workspaces/<role>/plans/transitions/latest.md` |
 
@@ -160,11 +160,13 @@ You are done with the quickstart when `workspaces/<role>/plans/sessions/session-
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| "No persona configured. Run /set-persona first." | No persona is active | `/set-persona add <role>` |
+| "No persona configured. Run `/set-persona add <role>` first." | No persona is active | `/set-persona add <role>` |
 | "`<role>` is not active." | You ran a command for a role you have not added | `/set-persona add <role>`, or `/set-persona list` to see what is active |
-| "Run `/setup-stack <role>` first." | Stack not set for that role | `/setup-stack <role>` |
-| "Run `/architect <role>` first. A session needs a plan." | No `session-overview.md` yet | `/architect <role> @<exercise README>` |
+| "`<role>` has no stack yet. Run `/setup-stack <role>` first." | Stack not set for that role (every role needs one) | `/setup-stack <role>` |
+| "No plan for `<role>` yet." | No `session-overview.md` yet | `/architect <role> @<exercise README>` |
 | `/architect` stopped and built nothing | That is the review gate | Read `workspaces/<role>/plans/`, then reply "approved" |
+| "The `<role>` plan is not approved yet." | You ran `/start-session` before replying "approved" | Reply "approved" to the review gate, or `/architect <role>` and pick `review` |
+| "No open session for `<role>`." | You ran `/next-session` without `/start-session` | `/start-session <role>`, work, then `/next-session <role>` |
 | "`<role>` already uses `<stack>`." | You want a different stack | `/undo stack <role>`, then `/setup-stack <role>` |
 | Persona commands missing from the `/` menu | Cursor has not reloaded `.cursor/commands/` | Reload the window (Cmd/Ctrl+Shift+P, "Reload Window") |
 | MCP server shows an error | Node.js missing or `npx` blocked | Install Node 20+, then restart Cursor. MCP servers are optional for exercise 01 |

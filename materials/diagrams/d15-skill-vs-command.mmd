@@ -1,0 +1,15 @@
+flowchart LR
+  subgraph C["Command: you decide"]
+    direction TB
+    C1["You type /name"] --> C2["Agent runs it"]
+  end
+  subgraph S["Skill: the agent decides"]
+    direction TB
+    S1["You ask a task"] --> S2["Agent reads each<br/>skill description"]
+    S2 --> S3["Loads SKILL.md +<br/>files if relevant"]
+  end
+
+  classDef cmd fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef skill fill:#00897b,stroke:#004d40,color:#fff;
+  class C1,C2 cmd;
+  class S1,S2,S3 skill;

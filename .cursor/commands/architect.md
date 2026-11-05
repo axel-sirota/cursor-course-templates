@@ -35,9 +35,9 @@ You may NOT print the final ✅ summary until you have verified all of these exi
 
 ## Step 1: Persona + Context Detection
 
-1. Read `## Active Personas` from `.cursor/context.md`. Empty → **STOP**: "⚠️ No persona configured. Run **/set-persona** first, then come back to `/architect`."
-2. Pick the role: the argument if given (must be active); else the only active persona; else ask "Which persona is this plan for? {list}".
-3. Read the `## Persona: <role>` block: `Stack`, `Architecture Shape`, `Active Phase`. Stack unset → **STOP**: "Run `/setup-stack <role>` first." Never assume a shape.
+1. Read `## Active Personas` from `.cursor/context.md`. Empty → **STOP**: "⚠️ No persona configured. Run `/set-persona add <role>`, then `/setup-stack <role>`, then come back to `/architect <role>`." (use the role the student typed, or `<role>` if none)
+2. Pick the role: the argument if given; else the only active persona; else ask "Which persona is this plan for? {list}". Role given but not in the active list → **STOP**: "`<role>` is not active. Run `/set-persona add <role>`, then `/setup-stack <role>`, then `/architect <role>`."
+3. Read the `## Persona: <role>` block: `Stack`, `Architecture Shape`, `Active Phase`. Stack unset or `(unset...)` → **STOP**: "`<role>` has no stack yet. Run `/setup-stack <role>` first, then `/architect <role>`." Never assume a shape.
 4. Read `personas/<role>/persona.yaml` (workspace, in-session commands) and every rule in `.cursor/rules/<role>/`. Those rules apply to everything you write in `{ws}/`.
 
 ### Architecture Shape dispatch
@@ -72,8 +72,10 @@ Check if the user provided a plan:
 **Earlier plan in the workspace.** Before Phase 1, if `{ws}/plans/sessions/` already has files (from an earlier exercise), ask:
 
 ```
-Archive the current plan to {ws}/plans/archive/<name>/ and start a new one? (archive / cancel)
+Archive the current plan to {ws}/plans/archive/<name>/ and start a new one? (archive / review / cancel)
 ```
+
+- **review** (offer only when `.architect-manifest.json` has no `approved_at`) → skip to Phase 2 and print the review gate for the existing plan.
 
 - `<name>`: the previous plan's name (from `{ws}/plans/.architect-manifest.json` or the exercise folder), else the date (`YYYY-MM-DD`).
 - **archive** → move `{ws}/plans/sessions/`, `{ws}/plans/interface-contract.md` and `{ws}/plans/.architect-manifest.json` into `{ws}/plans/archive/<name>/`, then continue.
@@ -216,6 +218,8 @@ When you are satisfied, say "approved", "looks good" or "proceed".
 
 Wait for explicit approval ("approved", "looks good", "proceed", "yes", "lgtm", "build it" or equivalent). If changes are requested, make them, re-print the gate, wait again.
 
+On approval, add `"approved_at": "<ISO 8601>"` to `{ws}/plans/.architect-manifest.json`. `/start-session` refuses to run without it.
+
 ---
 
 ## ══════════════════════════════════════
@@ -250,7 +254,7 @@ Design docs:
 Skeleton:
   [key files created]
 
-Next: /start-session <role> to begin session-2-phase-1.
+Next: /start-session <role> to begin session-2-phase-1. When you stop work, run /next-session <role>.
 ```
 
 In the `## Persona: <role>` block of `.cursor/context.md`, set `Active Phase: Phase 1`.
@@ -260,11 +264,11 @@ In the `## Persona: <role>` block of `.cursor/context.md`, set `Active Phase: Ph
 ## Usage Examples
 
 ```
-/architect engineer "Blog API (exercises/engineer/00-skeleton/README.md)"
-/architect pm exercises/pm/01-notes-to-prd/README.md
-/architect designer "Budget overview screen"
-/architect data-scientist "Categorise transactions"
-/architect accountant "October bank reconciliation and flux"
+/architect engineer @exercises/engineer/00-skeleton/README.md
+/architect pm @exercises/pm/01-notes-to-prd/README.md
+/architect designer @exercises/designer/01-brand-to-tokens/README.md
+/architect data-scientist @exercises/data-scientist/01-eda-data-quality/README.md
+/architect accountant @exercises/accountant/01-october-bank-rec/README.md
 ```
 
 ## Key Rules

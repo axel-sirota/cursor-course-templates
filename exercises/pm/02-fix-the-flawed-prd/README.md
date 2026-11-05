@@ -51,6 +51,7 @@ Open `inputs/glossary.md` and paste its `##` entries into `workspaces/pm/glossar
 ## Commands to use
 
 ```
+/architect pm @exercises/pm/02-fix-the-flawed-prd/README.md   # pick "archive" for the exercise 01 plan, reply "approved"
 /start-session pm
 /pm-validate prds/expense-fast-track.md      # before your fixes: compare with your own list
 /pm-validate prds/expense-fast-track.md      # after your fixes: must say "Ready to decompose? Yes"
@@ -59,7 +60,7 @@ Open `inputs/glossary.md` and paste its `##` entries into `workspaces/pm/glossar
 /next-session
 ```
 
-You do not need `/architect` for this exercise. The PRD already exists.
+You still run `/architect` first: `/start-session` needs an approved plan. The PRD already exists, so the plan is about finding and fixing defects. If the skeleton step asks about an existing file in `prds/` or `stories/`, answer "skip" so the flawed PRD stays as shipped.
 
 ## How it is checked
 
