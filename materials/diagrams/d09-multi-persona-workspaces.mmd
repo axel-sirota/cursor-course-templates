@@ -1,66 +1,15 @@
-flowchart TB
-  CTX(["One repo, one .cursor/context.md<br/><i>Active Personas: engineer, pm, designer, data-scientist, accountant</i>"])
+flowchart LR
+  H1["PERSONA<br/>one repo, all listed in<br/>.cursor/context.md"]:::ctx --> H2["STACK"]:::head --> H3["RULES<br/>attach only to own workspace"]:::head --> H4["WORKSPACE<br/>your files live here"]:::head
 
-  subgraph ENG["engineer"]
-    direction TB
-    E1["Stack: your language<br/>(Spring, Gin, gRPC, Express, NestJS, FastAPI)"]
-    E2[".cursor/rules/engineer/<br/>globs: workspaces/engineer/**"]
-    E3["workspaces/engineer/<br/>Blog API"]
-    E1 --> E2 --> E3
-  end
-
-  subgraph PM["pm"]
-    direction TB
-    P1["Stack: pm-prd-markdown<br/>(nothing to install)"]
-    P2[".cursor/rules/pm/<br/>globs: workspaces/pm/**"]
-    P3["workspaces/pm/<br/>PRDs + stories"]
-    P1 --> P2 --> P3
-  end
-
-  subgraph DES["designer"]
-    direction TB
-    D1["Stack: designer-react-tokens<br/>(no Figma needed)"]
-    D2[".cursor/rules/designer/<br/>globs: workspaces/designer/**"]
-    D3["workspaces/designer/<br/>tokens + components"]
-    D1 --> D2 --> D3
-  end
-
-  subgraph DS["data-scientist"]
-    direction TB
-    S1["Stack: Python, Spark, dbt or R"]
-    S2[".cursor/rules/data-scientist/<br/>globs: workspaces/data-scientist/**"]
-    S3["workspaces/data-scientist/<br/>notebooks + experiments"]
-    S1 --> S2 --> S3
-  end
-
-  subgraph ACC["accountant"]
-    direction TB
-    A1["Stack: sheets-accounting<br/>(spreadsheet, no code)<br/>or python-accounting"]
-    A2[".cursor/rules/accountant/<br/>globs: workspaces/accountant/**"]
-    A3["workspaces/accountant/<br/>workpapers + close memo"]
-    A1 --> A2 --> A3
-  end
-
-  SCOPE[[".cursor/scripts/_scope.sh<br/>edit hooks fire only for that role's files;<br/>stop hooks only for the open session"]]
-
-  CTX --> ENG
-  CTX --> PM
-  CTX --> DES
-  CTX --> DS
-  CTX --> ACC
-  ENG --> SCOPE
-  PM --> SCOPE
-  DES --> SCOPE
-  DS --> SCOPE
-  ACC --> SCOPE
+  E0[engineer]:::persona --> E1["java-spring, go-gin, go-grpc<br/>node-express, node-nestjs, python-fastapi"]:::stack --> E2[".cursor/rules/engineer/"]:::rules --> E3["workspaces/engineer/<br/>Blog API"]:::ws
+  P0[pm]:::persona --> P1["pm-prd-markdown"]:::stack --> P2[".cursor/rules/pm/"]:::rules --> P3["workspaces/pm/<br/>PRDs + stories"]:::ws
+  D0[designer]:::persona --> D1["designer-react-tokens"]:::stack --> D2[".cursor/rules/designer/"]:::rules --> D3["workspaces/designer/<br/>tokens + components"]:::ws
+  S0[data-scientist]:::persona --> S1["python, spark, dbt or R"]:::stack --> S2[".cursor/rules/data-scientist/"]:::rules --> S3["workspaces/data-scientist/<br/>notebooks + experiments"]:::ws
+  A0[accountant]:::persona --> A1["sheets-accounting<br/>or python-accounting"]:::stack --> A2[".cursor/rules/accountant/"]:::rules --> A3["workspaces/accountant/<br/>workpapers + close memo"]:::ws
 
   classDef ctx fill:#ede7f6,stroke:#4527a0,color:#000,font-weight:bold;
+  classDef head fill:#eceff1,stroke:#455a64,color:#263238,font-weight:bold;
+  classDef persona fill:#7c4dff,stroke:#4527a0,color:#fff;
   classDef stack fill:#00897b,stroke:#004d40,color:#fff;
-  classDef rules fill:#7c4dff,stroke:#4527a0,color:#fff;
+  classDef rules fill:#5c6bc0,stroke:#283593,color:#fff;
   classDef ws fill:#ff8f00,stroke:#bf360c,color:#fff;
-  classDef scope fill:#e65100,stroke:#bf360c,color:#fff;
-  class CTX ctx;
-  class E1,P1,D1,S1,A1 stack;
-  class E2,P2,D2,S2,A2 rules;
-  class E3,P3,D3,S3,A3 ws;
-  class SCOPE scope;

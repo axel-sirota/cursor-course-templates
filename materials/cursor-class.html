@@ -752,7 +752,7 @@ Topic: $ARGUMENTS
 
         <h3 id="multi-persona">Several personas, one repo</h3>
         <figure>
-          <img src="diagrams/d09-multi-persona-workspaces.svg" alt="One repo with five active personas. Each persona has its own stack, its own rules folder scoped by glob to its own workspace, and its own workspaces folder. One scope script decides which hooks fire.">
+          <img src="diagrams/d09-multi-persona-workspaces.svg" alt="One repo with five active personas. Each persona has its own stack, its own rules folder scoped by glob to its own workspace, and its own workspaces folder, one row per persona.">
         </figure>
         <p>You can wear more than one hat in the same repo. Each persona gets its own workspace, rules and hooks, so a PM&rsquo;s rules never fire on engineering code.</p>
         <pre><code>/set-persona add engineer      # first role
