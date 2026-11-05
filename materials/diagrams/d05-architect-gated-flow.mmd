@@ -1,36 +1,15 @@
-flowchart TB
-  IDEA["/architect &lt;role&gt;<br/>exercises/&lt;role&gt;/01-.../README.md<br/><i>or a one-line idea</i>"]
+flowchart LR
+  IDEA["/architect &lt;role&gt;<br/>+ exercise README"]:::idea
+  P1["Phase 1: Design<br/>no code<br/>• read persona, stack, shape<br/>• write plans/sessions/*.md<br/>• self-audit"]:::phase
+  GATE{{"⛔ Phase 2<br/>Human review<br/>reply approved"}}:::gate
+  P3["Phase 3: Scaffold<br/>• walking skeleton<br/>• skeleton check"]:::phase
+  NEXT(["/start-session &lt;role&gt;"]):::loop
 
-  subgraph P1["Phase 1: Design (no code)"]
-    direction TB
-    D1["Read persona + stack + shape"]
-    D2["Write workspaces/&lt;role&gt;/plans/<br/>sessions/*.md + interface-contract.md"]
-    D3["Self-audit:<br/>manifest diff, coverage diff,<br/>risks"]
-    D1 --> D2 --> D3
-  end
-
-  GATE{{"⛔ Phase 2: Human review gate<br/>read the plan, reply approved"}}
-
-  subgraph P3["Phase 3: Scaffold"]
-    direction TB
-    S1["Walking skeleton with stubs"]
-    S2["Skeleton check for the shape<br/>(routes answer, PRD headings,<br/>tokens validate, notebook runs, tie-outs run)"]
-    S1 --> S2
-  end
-
-  NEXT(["/start-session &lt;role&gt;"])
-
-  IDEA --> P1
-  P1 --> GATE
-  GATE -->|approved| P3
-  GATE -->|push back and revise| P1
-  P3 --> NEXT
+  IDEA --> P1 --> GATE
+  GATE -->|approved| P3 --> NEXT
+  GATE -.->|revise| P1
 
   classDef phase fill:#7c4dff,stroke:#4527a0,color:#fff;
   classDef gate fill:#e65100,stroke:#bf360c,color:#fff,font-weight:bold;
   classDef idea fill:#ede7f6,stroke:#4527a0,color:#000;
   classDef loop fill:#00897b,stroke:#004d40,color:#fff,font-weight:bold;
-  class P1,P3 phase;
-  class GATE gate;
-  class IDEA idea;
-  class NEXT loop;
