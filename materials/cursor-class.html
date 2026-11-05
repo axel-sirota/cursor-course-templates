@@ -958,7 +958,7 @@ Topic: $ARGUMENTS
         <p>Real engineers spend more time on existing codebases than greenfield ones. The workflow has a separate entry point for that: <code>/detect-stack</code>.</p>
 
         <figure>
-          <img src="diagrams/d07-greenfield-vs-brownfield.svg" alt="Greenfield vs brownfield: two parallel pipelines per role that diverge only at step 2 (/setup-stack role vs /detect-stack role path), then continue the same way at /architect role">
+          <img src="diagrams/d07-greenfield-vs-brownfield.svg" alt="One pipeline that splits at step 2: /setup-stack role for a new project, /detect-stack role path for existing code, then both rejoin at /architect role and /start-session role">
         </figure>
 
         <h3>What changes</h3>

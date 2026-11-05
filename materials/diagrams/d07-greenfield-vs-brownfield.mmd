@@ -1,23 +1,14 @@
 flowchart LR
-  subgraph G["Greenfield (empty workspace)"]
-    direction LR
-    G1["/set-persona add &lt;role&gt;"] --> G2["/setup-stack &lt;role&gt;<br/><i>pick from library</i>"]
-    G2 --> G3["/architect &lt;role&gt;"] --> G4["/start-session &lt;role&gt;<br/>&harr; /next-session"]
-  end
+  A["/set-persona add &lt;role&gt;"]:::spine
+  G["/setup-stack &lt;role&gt;<br/><i>greenfield: pick from library</i>"]:::green
+  B["/detect-stack &lt;role&gt; &lt;path&gt;<br/><i>brownfield: scan your code</i>"]:::brown
+  C["/architect &lt;role&gt;"]:::spine
+  D["/start-session &lt;role&gt;<br/>&harr; /next-session"]:::spine
 
-  subgraph B["Brownfield (existing code)"]
-    direction LR
-    B1["/set-persona add &lt;role&gt;"] --> B2["/detect-stack &lt;role&gt; &lt;path&gt;<br/><i>scan &amp; infer</i>"]
-    B2 --> B3["/architect &lt;role&gt;"] --> B4["/start-session &lt;role&gt;<br/>&harr; /next-session"]
-  end
+  A -->|new project| G --> C
+  A -->|existing code| B --> C
+  C --> D
 
-  G ~~~ B
-
-  classDef green fill:#e8f5e9,stroke:#2e7d32,color:#000;
-  classDef brown fill:#efebe9,stroke:#5d4037,color:#000;
   classDef spine fill:#7c4dff,stroke:#4527a0,color:#fff;
-  classDef diff fill:#ff8f00,stroke:#bf360c,color:#fff,font-weight:bold;
-  class G green;
-  class B brown;
-  class G1,G3,G4,B1,B3,B4 spine;
-  class G2,B2 diff;
+  classDef green fill:#2e7d32,stroke:#1b5e20,color:#fff,font-weight:bold;
+  classDef brown fill:#ff8f00,stroke:#bf360c,color:#fff,font-weight:bold;
