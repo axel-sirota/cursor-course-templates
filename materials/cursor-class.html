@@ -220,9 +220,9 @@
       <li><a href="#lab-0">Lab 0: Command + rule</a></li>
       <li><a href="#what-is">1. What is Cursor?</a></li>
       <li><a href="#sdd-pipeline">2. The SDD pipeline</a></li>
+      <li><a href="#lab-1">Lab 1: Persona and stack</a></li>
       <li><a href="#personas-stacks">3. Personas, stacks, and architecture shapes</a></li>
       <li><a href="#pick-track">Pick your track</a></li>
-      <li><a href="#lab-1">Lab 1: Onboarding</a></li>
       <li><a href="#commands">4. The 6 commands you need</a></li>
       <li><a href="#architect-deep">5. /architect: the gated 3-phase flow</a></li>
       <li><a href="#session-loop">6. The session loop</a></li>
@@ -260,6 +260,7 @@
           <li class="sub"><a href="#what-is-pain">The pain it solves</a></li>
           <li class="sub"><a href="#what-is-not">What it is not</a></li>
           <li><a href="#sdd-pipeline">2. The SDD pipeline</a></li>
+          <li><a href="#lab-1">Lab 1: Persona and stack</a></li>
           <li class="sub"><a href="#pipeline-spine">The spine</a></li>
           <li class="sub"><a href="#pipeline-rules">Two enforcement rules</a></li>
           <li><a href="#personas-stacks">3. Personas, stacks, shapes</a></li>
@@ -268,7 +269,6 @@
           <li class="sub"><a href="#shapes">Architecture shapes</a></li>
           <li class="sub"><a href="#pick-track">Pick your track</a></li>
           <li class="sub"><a href="#multi-persona">Several personas, one repo</a></li>
-          <li><a href="#lab-1">Lab 1: Onboarding</a></li>
           <li><a href="#commands">4. The 6 commands</a></li>
           <li class="sub"><a href="#cmd-set-persona">/set-persona</a></li>
           <li class="sub"><a href="#cmd-setup-stack">/setup-stack</a></li>
@@ -296,7 +296,7 @@
         <p>This is a <strong>full-day, hands-on class</strong> on the AI-assisted development workflow. You bring your own laptop and pick the persona that matches your job: <strong>engineer, pm, designer, data-scientist or accountant</strong>. Each persona works on exercises built for that role, in its own language and tools (see <a href="#pick-track">Pick your track</a>). We do four labs:</p>
         <ul>
           <li><strong>Lab 0: Command + rule.</strong> Everyone writes one rule plus a writer command and a checker command that both depend on it, then tests and breaks them.</li>
-          <li><strong>Lab 1: Onboarding.</strong> Run <code>/set-persona add &lt;role&gt;</code> and <code>/setup-stack &lt;role&gt;</code> in the course repo.</li>
+          <li><strong>Lab 1: Persona and stack.</strong> Right after the SDD pipeline. Run <code>/set-persona add &lt;role&gt;</code> and <code>/setup-stack &lt;role&gt;</code> in the course repo.</li>
           <li><strong>Lab 2: Architect + two sessions.</strong> Run <code>/architect &lt;role&gt;</code> on your track&rsquo;s first exercise in <code>exercises/&lt;role&gt;/</code>, then drive two <code>/start-session &lt;role&gt;</code> &rarr; <code>/next-session</code> cycles.</li>
           <li><strong>Lab 3: Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
         </ul>
@@ -591,6 +591,72 @@ Topic: $ARGUMENTS
         </div>
       </section>
 
+      <!-- ===== Lab 1. Persona and stack, hands on ===== -->
+      <section id="lab-1">
+        <h2>Lab 1: Persona and stack, hands on <span class="timebox">&#9201; 40 min</span></h2>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Goal</div>
+          <p>Run the first two stations of the pipeline, <code>/set-persona</code> and <code>/setup-stack</code>, for the role that matches your job. Then open every file they wrote, so nothing is magic. The worked example below is an <strong>engineer on java-spring</strong>. Your files have different names but sit in the same places.</p>
+        </div>
+
+        <h3>Part A: Install (10 min)</h3>
+        <ol>
+          <li>Open the course folder in Cursor: <code>cursor .</code> (or <kbd>File &rarr; Open Folder</kbd>). Open chat with <kbd>Cmd</kbd>+<kbd>L</kbd>.</li>
+          <li>Pick your role. Default stack in brackets, full list in <a href="#pick-track">Pick your track</a>:
+            <table>
+              <thead><tr><th>If you mostly...</th><th>Role</th></tr></thead>
+              <tbody>
+                <tr><td>write code (Java, Go, Node, Python)</td><td><code>engineer</code> [your language]</td></tr>
+                <tr><td>write specs and stories</td><td><code>pm</code> [pm-prd-markdown]</td></tr>
+                <tr><td>design screens and components</td><td><code>designer</code> [designer-react-tokens]</td></tr>
+                <tr><td>work in notebooks or SQL</td><td><code>data-scientist</code> [python-datascience]</td></tr>
+                <tr><td>close the books</td><td><code>accountant</code> [sheets-accounting]</td></tr>
+              </tbody>
+            </table>
+          </li>
+          <li>Run <code>/set-persona add &lt;role&gt;</code>. Read the summary it prints.</li>
+          <li>Run <code>/setup-stack &lt;role&gt;</code>. Press Enter for the default, or pick your language.</li>
+        </ol>
+
+        <h3>Part B: Look inside (15 min)</h3>
+        <p>Open each of these. The example shows what an engineer on java-spring sees.</p>
+        <table>
+          <thead><tr><th>Open</th><th>Example (engineer, java-spring)</th><th>What it is for</th></tr></thead>
+          <tbody>
+            <tr><td><code>.cursor/context.md</code></td><td><code>## Active Personas</code> engineer<br><code>## Persona: engineer</code><br>Workspace: workspaces/engineer<br>Stack: java-spring<br>Architecture Shape: REST API, Spring Boot layered...<br>Active Phase: Phase 0 (Skeleton)</td><td>The project memory every command reads first</td></tr>
+            <tr><td><code>.cursor/rules/&lt;role&gt;/</code></td><td><code>000-engineer-workflow.mdc</code> from the persona, plus <code>stack-000-spring-workflow.mdc</code> to <code>stack-500-docker-java.mdc</code> from the stack</td><td>Persona rules plus stack rules, all with <code>globs: workspaces/engineer/**</code></td></tr>
+            <tr><td><code>.cursor/commands/</code></td><td>New: <code>engineer-tasks.md</code>, <code>engineer-implement.md</code></td><td>Role commands you use inside a session</td></tr>
+            <tr><td><code>.cursor/hooks.json</code></td><td>Entries like <code>.cursor/scripts/_scope.sh engineer .cursor/scripts/engineer/lint.sh</code></td><td>Hooks for this role only (not part of today&rsquo;s labs)</td></tr>
+            <tr><td><code>workspaces/&lt;role&gt;/</code></td><td><code>plans/</code>, <code>templates/</code>, <code>examples/users-resource/</code>, <code>docs/vibe/</code></td><td>Where all your work for this role goes</td></tr>
+            <tr><td><code>.cursor/personas/&lt;role&gt;.manifest.json</code> and <code>.cursor/stacks/&lt;role&gt;.manifest.json</code></td><td>A list of every file written</td><td>What <code>/undo</code> reads to remove them</td></tr>
+          </tbody>
+        </table>
+        <p>Answer for yourself: which of these did <code>/set-persona</code> write, and which did <code>/setup-stack</code> write? (Hint: compare the two manifests.)</p>
+
+        <h3>Part C: See the rules and gates work (15 min)</h3>
+        <ol>
+          <li><strong>Scoped rules.</strong> Open a file under <code>workspaces/&lt;role&gt;/examples/</code> and ask in chat: &ldquo;Which rules apply to this file?&rdquo; Then open the root <code>README.md</code> and ask again. Your role&rsquo;s rules should only show up for the workspace file.</li>
+          <li><strong>A gate.</strong> Run <code>/architect</code> for a role you did <strong>not</strong> add (engineers try <code>pm</code>, everyone else tries <code>engineer</code>). It stops and tells you the exact command to run first.</li>
+          <li><strong>Another gate.</strong> Run <code>/setup-stack &lt;role&gt;</code> again for your role. It refuses, because the role already has a stack, and names <code>/undo stack &lt;role&gt;</code>.</li>
+          <li><strong>Undo and redo.</strong> Run <code>/undo stack &lt;role&gt;</code>. Check that <code>.cursor/stacks/&lt;role&gt;.manifest.json</code> and the <code>stack-*.mdc</code> rules are gone, while the persona rules stay. Run <code>/setup-stack &lt;role&gt;</code> again.</li>
+        </ol>
+
+        <h3>Checkpoint</h3>
+        <ul>
+          <li><code>grep -A1 "Active Personas" .cursor/context.md</code> shows your role</li>
+          <li><code>grep -A4 "Persona: &lt;role&gt;" .cursor/context.md</code> shows your stack and shape</li>
+          <li><code>ls .cursor/personas/&lt;role&gt;.manifest.json .cursor/stacks/&lt;role&gt;.manifest.json</code> both exist</li>
+          <li><code>ls .cursor/rules/&lt;role&gt;/</code> shows persona rules plus <code>stack-*.mdc</code> rules</li>
+          <li>You saw one gate message and can say which command it told you to run</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">If you mess up</div>
+          <p>Run <code>/undo all</code>. It reads the manifests and removes every file that <code>/set-persona</code> and <code>/setup-stack</code> wrote. Your <code>workspaces/</code> work is kept. Then start again from Part A.</p>
+        </div>
+      </section>
+
       <!-- ===== 3. Personas, stacks, shapes ===== -->
       <section id="personas-stacks">
         <h2>3. Personas, stacks, and architecture shapes</h2>
@@ -704,42 +770,6 @@ Topic: $ARGUMENTS
             <tr><td>Project state</td><td><code>.cursor/context.md</code></td><td><code>## Active Personas</code>, then one block per persona: stack, shape, phase</td></tr>
           </tbody>
         </table>
-      </section>
-
-      <!-- ===== LAB 1 ===== -->
-      <section id="lab-1">
-        <h2>Lab 1: Onboarding <span class="timebox">&#9201; 25 min</span></h2>
-
-        <div class="callout callout-lab">
-          <div class="callout-title">Goal</div>
-          <p>Pick the persona and stack that match your real job (see <a href="#pick-track">Pick your track</a>). Run them in the course repo. End with your role listed in <code>.cursor/context.md</code>, a stack installed for it, and a <code>workspaces/&lt;role&gt;/</code> folder (empty <code>plans/</code>, plus the stack&rsquo;s templates and examples) ready for Lab 2.</p>
-        </div>
-
-        <h3>Steps</h3>
-        <ol>
-          <li>Open a terminal in your copy of the course repo (the folder with <code>personas/</code>, <code>stacks/</code> and <code>exercises/</code>). The commands read those folders, so work inside this repo.</li>
-          <li>Open the folder in Cursor: <code>cursor .</code> (or use <kbd>File &rarr; Open Folder</kbd>).</li>
-          <li>Open the chat panel with <kbd>Cmd</kbd>+<kbd>L</kbd> so you can type slash commands.</li>
-          <li>Run <code>/set-persona add &lt;role&gt;</code> with the persona for your job: <code>engineer</code>, <code>pm</code>, <code>designer</code>, <code>data-scientist</code> or <code>accountant</code>. Plain <code>/set-persona</code> shows the menu.</li>
-          <li>Run <code>/setup-stack &lt;role&gt;</code>. Everyone runs it. Pick the stack from your track (Enter takes the default), or <code>new</code> if your language isn&rsquo;t listed. Engineers: pick the language you use at work.</li>
-          <li>If <code>workspaces/&lt;role&gt;/</code> already has files, <code>/setup-stack</code> will detect them and ask: <strong>overwrite</strong>, <strong>skip templates</strong>, or <strong>merge per-file</strong>. Pick &ldquo;skip templates&rdquo; if you just want rules; pick &ldquo;merge&rdquo; if you want to see each conflict.</li>
-          <li>Optional: add a second role with <code>/set-persona add &lt;other-role&gt;</code> and check both with <code>/set-persona list</code>.</li>
-          <li>Open <code>.cursor/context.md</code>. Confirm <code>## Active Personas</code> lists your role and the <code>## Persona: &lt;role&gt;</code> block has <code>Stack</code> and <code>Architecture Shape</code> filled in.</li>
-        </ol>
-
-        <h3>Checkpoint</h3>
-        <ul>
-          <li><code>grep "Active Personas" -A1 .cursor/context.md</code> shows your role</li>
-          <li><code>grep -A3 "Persona: &lt;role&gt;" .cursor/context.md</code> shows your stack and shape</li>
-          <li><code>ls .cursor/personas/&lt;role&gt;.manifest.json .cursor/stacks/&lt;role&gt;.manifest.json</code> both exist</li>
-          <li><code>ls .cursor/rules/&lt;role&gt;/</code> shows persona rules plus <code>stack-*.mdc</code> rules</li>
-          <li>Open any file under <code>workspaces/&lt;role&gt;/</code> and Cursor attaches that role&rsquo;s rules (they are scoped by glob to that folder)</li>
-        </ul>
-
-        <div class="callout callout-tip">
-          <div class="callout-title">If you mess up</div>
-          <p>Run <code>/undo all</code>. It reads the manifests and removes every file that <code>/set-persona</code> and <code>/setup-stack</code> wrote. Then start over.</p>
-        </div>
       </section>
 
       <!-- ===== 4. The 6 commands ===== -->
