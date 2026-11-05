@@ -1,40 +1,13 @@
 flowchart LR
-  subgraph P["Persona (who you are)"]
-    direction TB
-    P1[engineer]
-    P2[pm]
-    P3[designer]
-    P4[data-scientist]
-    P5[accountant]
-  end
+  H1["PERSONA<br/>who you are<br/>/set-persona"]:::head --> H2["STACK<br/>your tools<br/>/setup-stack"]:::head --> H3["ARCHITECTURE SHAPE<br/>what /architect plans"]:::head
 
-  subgraph S["Stack (your tools, picked with /setup-stack)"]
-    direction TB
-    S1["python-fastapi, go-gin, go-grpc<br/>java-spring, node-express, node-nestjs"]
-    S2["pm-prd-markdown"]
-    S3["designer-react-tokens"]
-    S4["python-datascience, python-mlops<br/>python-spark, python-dbt-snowflake<br/>r-tidyverse"]
-    S5["sheets-accounting<br/>python-accounting"]
-  end
+  P1[engineer]:::persona --> S1["java-spring, go-gin, go-grpc<br/>node-express, node-nestjs, python-fastapi"]:::stack --> A1["REST API / gRPC Service"]:::shape
+  P2[pm]:::persona --> S2["pm-prd-markdown"]:::stack --> A2["PRD Workspace"]:::shape
+  P3[designer]:::persona --> S3["designer-react-tokens"]:::stack --> A3["Design System"]:::shape
+  P4[data-scientist]:::persona --> S4["python-datascience, python-mlops<br/>python-spark, python-dbt-snowflake, r-tidyverse"]:::stack --> A4["Notebook / Pipeline / Analytics Model"]:::shape
+  P5[accountant]:::persona --> S5["sheets-accounting<br/>python-accounting"]:::stack --> A5["Close Workbook"]:::shape
 
-  subgraph A["Architecture Shape (what /architect produces)"]
-    direction TB
-    A1["REST API / gRPC Service"]
-    A2["PRD Workspace"]
-    A3["Design System"]
-    A4["Notebook / Pipeline / Analytics Model"]
-    A5["Close Workbook"]
-  end
-
-  P1 --> S1 --> A1
-  P2 --> S2 --> A2
-  P3 --> S3 --> A3
-  P4 --> S4 --> A4
-  P5 --> S5 --> A5
-
+  classDef head fill:#eceff1,stroke:#455a64,color:#263238,font-weight:bold;
   classDef persona fill:#7c4dff,stroke:#4527a0,color:#fff;
   classDef stack fill:#00897b,stroke:#004d40,color:#fff;
   classDef shape fill:#ff8f00,stroke:#bf360c,color:#fff;
-  class P1,P2,P3,P4,P5 persona;
-  class S1,S2,S3,S4,S5 stack;
-  class A1,A2,A3,A4,A5 shape;
