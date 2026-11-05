@@ -207,7 +207,7 @@
     <div class="badge-row">
       <span class="badge badge-indigo">Workflow class</span>
       <span class="badge badge-teal">Full day</span>
-      <span class="badge badge-amber">3 hands-on labs</span>
+      <span class="badge badge-amber">4 hands-on labs</span>
     </div>
   </header>
 
@@ -217,6 +217,7 @@
     <ul>
       <li><a href="#how-to-use">0. How to use this guide</a></li>
       <li><a href="#basics">0.5 Basic concepts</a></li>
+      <li><a href="#lab-0">Lab 0: Command + rule</a></li>
       <li><a href="#what-is">1. What is Cursor?</a></li>
       <li><a href="#sdd-pipeline">2. The SDD pipeline</a></li>
       <li><a href="#personas-stacks">3. Personas, stacks, and architecture shapes</a></li>
@@ -254,6 +255,7 @@
           <li class="sub"><a href="#basics-mcp">MCP server</a></li>
           <li class="sub"><a href="#basics-persona-stack">Persona and stack</a></li>
           <li class="sub"><a href="#basics-whole-picture">The whole picture</a></li>
+          <li><a href="#lab-0">Lab 0: Command + rule</a></li>
           <li><a href="#what-is">1. What is Cursor?</a></li>
           <li class="sub"><a href="#what-is-pain">The pain it solves</a></li>
           <li class="sub"><a href="#what-is-not">What it is not</a></li>
@@ -291,8 +293,9 @@
       <!-- ===== 0. How to use this guide ===== -->
       <section id="how-to-use">
         <h2>0. How to use this guide</h2>
-        <p>This is a <strong>full-day, hands-on class</strong> on the AI-assisted development workflow. You bring your own laptop and pick the persona that matches your job: <strong>engineer, pm, designer, data-scientist or accountant</strong>. Each persona works on exercises built for that role, in its own language and tools (see <a href="#pick-track">Pick your track</a>). We do three labs:</p>
+        <p>This is a <strong>full-day, hands-on class</strong> on the AI-assisted development workflow. You bring your own laptop and pick the persona that matches your job: <strong>engineer, pm, designer, data-scientist or accountant</strong>. Each persona works on exercises built for that role, in its own language and tools (see <a href="#pick-track">Pick your track</a>). We do four labs:</p>
         <ul>
+          <li><strong>Lab 0: Command + rule.</strong> Write your own rule and a command that depends on it, then prove the rule does the work.</li>
           <li><strong>Lab 1: Onboarding.</strong> Run <code>/set-persona add &lt;role&gt;</code> and <code>/setup-stack &lt;role&gt;</code> in the course repo.</li>
           <li><strong>Lab 2: Architect + two sessions.</strong> Run <code>/architect &lt;role&gt;</code> on your track&rsquo;s first exercise in <code>exercises/&lt;role&gt;/</code>, then drive two <code>/start-session &lt;role&gt;</code> &rarr; <code>/next-session</code> cycles.</li>
           <li><strong>Lab 3: Adapt to your real repo.</strong> Run <code>/detect-stack</code> on an existing codebase you already have at work.</li>
@@ -392,6 +395,77 @@
           <img src="diagrams/d21-whole-picture.svg" style="width:1102px;max-width:100%" alt="You send a prompt or command to the agent loop; rules, context.md, tools and MCP servers feed it; hooks fire around it; it produces output and a /next-session handoff doc that seeds the next chat">
         </figure>
         <p><strong>In this repo:</strong> the SDD pipeline in <a href="#sdd-pipeline">section 2</a> runs this loop once per session.</p>
+      </section>
+
+      <!-- ===== Lab 0. Build a command that uses a rule ===== -->
+      <section id="lab-0">
+        <h2>Lab 0: Build a command that uses a rule <span class="timebox">&#9201; 45 min</span></h2>
+
+        <div class="callout callout-lab">
+          <div class="callout-title">Goal</div>
+          <p>Write one rule and one command yourself, from scratch. The command does a job from your role. The rule holds the format and the standards. The command must <strong>not</strong> repeat the format: it depends on the rule. By the end you can prove the rule is doing the work, change the output without touching the command, and explain when a glob rule does not fire. Rules and commands only: no agents, no hooks, no MCP.</p>
+        </div>
+
+        <h3>Pick your job</h3>
+        <table>
+          <thead><tr><th>Role</th><th>Command</th><th>What it writes</th><th>Rule must enforce</th></tr></thead>
+          <tbody>
+            <tr><td>engineer</td><td><code>/lab0-adr &lt;decision&gt;</code></td><td>An architecture decision record</td><td>Sections Context, Decision, Options considered (at least 2), Consequences. Each option has one cost and one risk.</td></tr>
+            <tr><td>pm</td><td><code>/lab0-story &lt;feature&gt;</code></td><td>One user story</td><td>"As a / I want / So that", 3 to 5 Given/When/Then criteria, one out-of-scope line, no "should" or "easy".</td></tr>
+            <tr><td>designer</td><td><code>/lab0-component &lt;name&gt;</code></td><td>A component spec</td><td>States table (default, hover, focus, disabled, error), token names only (no hex), one accessibility line with contrast ratio.</td></tr>
+            <tr><td>data-scientist</td><td><code>/lab0-dict &lt;dataset&gt;</code></td><td>A data dictionary for a dataset you describe</td><td>A table with column, type, unit, null rule, example. Every numeric column has a unit. One "known issues" section.</td></tr>
+            <tr><td>accountant</td><td><code>/lab0-memo &lt;variance&gt;</code></td><td>A variance explanation memo</td><td>Amount and percent, a materiality line against $25,000, root cause, supporting document, owner. Amounts as <code>$1,234.56</code>.</td></tr>
+          </tbody>
+        </table>
+        <p>All roles: the rule also bans em dashes and caps the document at 250 words. Use made-up data, nothing from work.</p>
+
+        <h3>Steps</h3>
+        <ol>
+          <li><strong>Practice folder.</strong> Create <code>lab0/</code> at the repo root with a one-line <code>lab0/README.md</code> ("Lab 0 output"). Your command writes into <code>lab0/out/</code>.</li>
+          <li><strong>Write the rule</strong> at <code>.cursor/rules/lab0/format.mdc</code>:
+<pre><code>---
+description: Lab 0 output format for &lt;your job&gt;
+globs: lab0/**
+alwaysApply: false
+---
+# Lab 0 format
+- Required sections: ...
+- Max 250 words. No em dashes.
+- ...your role's standards from the table...</code></pre></li>
+          <li><strong>Write the command</strong> at <code>.cursor/commands/lab0-&lt;name&gt;.md</code>. It must:
+            <ul>
+              <li>use <code>$ARGUMENTS</code> as the topic, and stop with a usage line if it is empty</li>
+              <li>write <code>lab0/out/&lt;slug&gt;.md</code>, and write <code>&lt;slug&gt;-v2.md</code> instead of overwriting if the file exists</li>
+              <li>end by listing which rule it followed</li>
+              <li>contain <strong>no</strong> format instructions: no section names, no word limit</li>
+            </ul>
+          </li>
+          <li><strong>Run it</strong> in a new chat: <code>/lab0-&lt;name&gt; &lt;a topic&gt;</code>. Check the output against your rule line by line.</li>
+        </ol>
+
+        <h3>The hard part: prove it</h3>
+        <ol>
+          <li><strong>Does the rule fire?</strong> A <code>globs</code> rule attaches only when a matching file is in the chat. A new file that does not exist yet may not count. If your first run ignored the format, that is why. Fix it in the command, not the rule: make the command read <code>lab0/README.md</code> first. Explain to your neighbour why that works.</li>
+          <li><strong>Remove the rule's power.</strong> Change <code>globs</code> to <code>nowhere/**</code>. Run the command in a new chat. The format should drift. Put it back. You have now proved the format comes from the rule.</li>
+          <li><strong>Change the output without touching the command.</strong> Add one required section to the rule. Run again in a new chat. The new section appears. One file changed, every future run changed.</li>
+          <li><strong>Edge cases.</strong> Run it with no topic (should stop with usage). Run the same topic twice (should create <code>-v2</code>).</li>
+          <li><strong>Swap.</strong> Give your rule and command to someone in another role. Can they run it with no explanation? If not, your command is missing a step.</li>
+        </ol>
+
+        <h3>Checkpoint</h3>
+        <ul>
+          <li><code>ls .cursor/rules/lab0/format.mdc .cursor/commands/lab0-*.md</code> both exist</li>
+          <li><code>grep -n -i -E "words|section" .cursor/commands/lab0-*.md</code> finds nothing (format lives in the rule)</li>
+          <li><code>ls lab0/out/</code> shows at least one file and one <code>-v2</code> file</li>
+          <li><code>grep -c "&mdash;" lab0/out/*.md</code> and <code>grep -c "—" lab0/out/*.md</code> are 0; <code>wc -w lab0/out/*.md</code> is 250 or less each</li>
+          <li>You can say in one sentence why the <code>nowhere/**</code> run looked different</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">Stretch: turn it into a skill</div>
+          <p>Copy the command to <code>.cursor/skills/lab0-&lt;name&gt;/SKILL.md</code> with a <code>description</code> that says when to use it. Then ask in plain words ("write a memo for the October rent variance") without the slash. You called the command; the agent picks the skill. If your Cursor version has no skills support, skip this step.</p>
+        </div>
+        <p>Cleanup is manual: delete <code>lab0/</code>, <code>.cursor/rules/lab0/</code> and <code>.cursor/commands/lab0-*.md</code>. <code>/undo</code> does not know about them, because no command installed them.</p>
       </section>
 
       <!-- ===== 1. What is Cursor? ===== -->
